@@ -1,0 +1,43 @@
+{
+  "name": "cms-dashboard",
+  "version": "1.0.0",
+  "description": "Module CMS Dashboard réutilisable pour React",
+  "main": "index.ts",
+  "types": "index.ts",
+  "keywords": [
+    "cms",
+    "dashboard",
+    "admin",
+    "react",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-router-dom": ">=6.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "zustand": "^4.4.0",
+    "lucide-react": "^0.300.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "index.ts",
+    "config.ts",
+    "router.tsx",
+    "types/",
+    "store/",
+    "lib/",
+    "hooks/",
+    "components/",
+    "layouts/",
+    "pages/"
+  ],
+  "author": "Epitaphe",
+  "license": "MIT"
+}

@@ -1,0 +1,96 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "Montserrat",
+      "count": 60
+    },
+    {
+      "family": "Muli",
+      "count": 9
+    },
+    {
+      "family": "Arial",
+      "count": 5
+    }
+  ],
+  "colors": {
+    "primary": "#75D69C",
+    "accent": "#5472D2",
+    "background": "#FFFFFF",
+    "textPrimary": "#666666",
+    "link": "#5472D2"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Montserrat",
+      "heading": "Montserrat"
+    },
+    "fontStacks": {
+      "body": [
+        "Montserrat"
+      ],
+      "heading": [
+        "Montserrat"
+      ],
+      "paragraph": [
+        "Montserrat"
+      ]
+    },
+    "fontSizes": {
+      "h1": "48px",
+      "h2": "48px",
+      "body": "18px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "5px"
+  },
+  "components": {
+    "input": {
+      "background": "#FFFFFF",
+      "textColor": "#333333",
+      "borderColor": "#CCCCCC",
+      "borderRadius": "2px",
+      "borderRadiusCorners": {
+        "topLeft": "2px",
+        "topRight": "2px",
+        "bottomRight": "2px",
+        "bottomLeft": "2px"
+      },
+      "shadow": "none"
+    }
+  },
+  "images": {
+    "logo": "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png",
+    "favicon": "https://epitaphe.ma/wp-content/uploads/2025/12/epitaphe360-150x150.webp",
+    "ogImage": null
+  },
+  "__framework_hints": [
+    "WordPress 6.9"
+  ],
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Strong indicators: header logo linking to homepage, header location, visible, highest logo on page, src contains logo, class contains logo, reasonable size. Score: 112 (clear winner by 62 points)",
+    "confidence": 0.9
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "LLM failed"
+    },
+    "secondary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "LLM failed"
+    },
+    "confidence": 0
+  },
+  "confidence": {
+    "buttons": 0,
+    "colors": 0,
+    "overall": 0
+  }
+}

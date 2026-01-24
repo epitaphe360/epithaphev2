@@ -1,0 +1,9 @@
+// Build configuration to suppress TypeScript warnings for unused variables
+{
+  "ts-node": {
+    "compilerOptions": {
+      "noUnusedLocals": false,
+      "noUnusedParameters": false
+    }
+  }
+}

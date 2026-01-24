@@ -344,3 +344,106 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+
+// ========================================
+// NEWSLETTER SUBSCRIPTIONS
+// ========================================
+
+export const newsletterSubscriptions = pgTable("newsletter_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  status: varchar("status", { length: 20 }).notNull().default('ACTIVE'), // ACTIVE, UNSUBSCRIBED, BOUNCED
+  source: varchar("source", { length: 50 }).default('WEBSITE'), // WEBSITE, IMPORT, API
+  tags: text("tags").array(),
+  metadata: json("metadata"), // Additional custom data
+  confirmedAt: timestamp("confirmed_at"),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertNewsletterSubscriptionSchema = createInsertSchema(newsletterSubscriptions).omit({
+  id: true,
+  status: true,
+  confirmedAt: true,
+  unsubscribedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertNewsletterSubscription = z.infer<typeof insertNewsletterSubscriptionSchema>;
+export type NewsletterSubscription = typeof newsletterSubscriptions.$inferSelect;
+
+// ========================================
+// PROJECT BRIEFS (Configurateur)
+// ========================================
+
+export const projectBriefs = pgTable("project_briefs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+
+  // Contact Info
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  company: text("company"),
+  position: text("position"),
+
+  // Project Details
+  projectType: varchar("project_type", { length: 100 }), // Site vitrine, E-commerce, Application web, etc.
+  projectName: text("project_name"),
+  projectDescription: text("project_description"),
+
+  // Budget & Timeline
+  budget: varchar("budget", { length: 50 }), // Range: <5k, 5-10k, 10-25k, 25-50k, >50k
+  timeline: varchar("timeline", { length: 50 }), // Range: <1 month, 1-3 months, 3-6 months, >6 months
+
+  // Features & Requirements
+  features: text("features").array(), // Array of selected features
+  requirements: text("requirements"), // Additional requirements text
+
+  // Design Preferences
+  designStyle: varchar("design_style", { length: 50 }), // Modern, Classic, Minimal, Bold, etc.
+  referenceUrls: text("reference_urls").array(), // Inspiration websites
+
+  // Technical Requirements
+  technologies: text("technologies").array(), // Preferred technologies
+  integrations: text("integrations").array(), // Required integrations (CRM, ERP, etc.)
+
+  // Additional Data
+  metadata: json("metadata"), // Any additional JSON data from configurator
+
+  // Status
+  status: varchar("status", { length: 20 }).notNull().default('NEW'), // NEW, CONTACTED, IN_PROGRESS, QUOTED, WON, LOST
+  priority: varchar("priority", { length: 20 }).default('MEDIUM'), // LOW, MEDIUM, HIGH, URGENT
+
+  // Assignment
+  assignedTo: varchar("assigned_to").references(() => users.id),
+
+  // Notes
+  internalNotes: text("internal_notes"),
+
+  // Tracking
+  source: varchar("source", { length: 50 }).default('CONFIGURATOR'), // CONFIGURATOR, WEBSITE, REFERRAL
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertProjectBriefSchema = createInsertSchema(projectBriefs).omit({
+  id: true,
+  status: true,
+  priority: true,
+  assignedTo: true,
+  internalNotes: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProjectBrief = z.infer<typeof insertProjectBriefSchema>;
+export type ProjectBrief = typeof projectBriefs.$inferSelect;

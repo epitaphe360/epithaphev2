@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactMessageSchema } from "@shared/schema";
 import { registerAdminRoutes } from "./admin-routes";
+import { registerPublicApiRoutes } from "./public-api-routes";
 import { db } from "./db";
 import { pages, articles, events, categories, media } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -97,6 +98,9 @@ export async function registerRoutes(
 
   // Register CMS admin routes
   registerAdminRoutes(app);
+
+  // Register public API routes (newsletter, project-brief, sitemap, robots, rss)
+  registerPublicApiRoutes(app);
 
   return httpServer;
 }

@@ -76,8 +76,11 @@ const baseOrigins = corsEnv
 // Add the Railway backend domain to allowed origins (same-origin requests)
 const allowedOrigins = [
   ...baseOrigins,
-  'https://epitaphe-backend-production.up.railway.app'
+  'https://epitaphe-backend-production.up.railway.app',
 ];
+
+// Pattern pour accepter tous les sous-domaines Vercel (previews incluses)
+const vercelPattern = /^https:\/\/[a-zA-Z0-9-]+-epitaphe360\.vercel\.app$/;
 
 console.log('🌐 CORS allowed origins:', allowedOrigins);
 
@@ -85,6 +88,9 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like direct browser access, Postman, curl)
     if (!origin) return callback(null, true);
+
+    // Accept Vercel preview deployments
+    if (vercelPattern.test(origin)) return callback(null, true);
 
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);

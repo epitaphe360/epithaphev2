@@ -23,9 +23,10 @@ export function MagentaCursor() {
   const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only on pointer-fine devices (no touch)
+    // Only on pointer-fine devices (no touch) + respect prefers-reduced-motion
     const mq = window.matchMedia("(pointer: fine)");
-    if (!mq.matches) return;
+    const mqReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!mq.matches || mqReduced.matches) return;
 
     const onMove = (e: MouseEvent) => {
       dotX.set(e.clientX);
@@ -107,10 +108,13 @@ export function MagentaCursor() {
         aria-hidden
       />
 
-      {/* Hide native cursor site-wide on pointer-fine devices */}
+      {/* Hide native cursor site-wide on pointer-fine devices, restore on reduced-motion */}
       <style>{`
         @media (pointer: fine) {
           *, *::before, *::after { cursor: none !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { cursor: auto !important; }
         }
       `}</style>
     </>

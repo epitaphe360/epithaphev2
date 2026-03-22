@@ -32,9 +32,12 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+        manualChunks(id) {
+          if (id.includes('three') || id.includes('@react-three')) return 'threejs';
+          if (id.includes('grapesjs')) return 'grapesjs';
+          if (id.includes('cms-dashboard')) return 'admin';
+          if (id.includes('@radix-ui')) return 'ui';
+          if (id.includes('node_modules')) return 'vendor';
         }
       }
     }

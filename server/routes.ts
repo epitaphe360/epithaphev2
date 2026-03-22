@@ -24,8 +24,8 @@ export async function registerRoutes(
         sendContactNotificationToAdmin({
           name: validatedData.name ?? "",
           email: validatedData.email,
-          subject: (validatedData as any).subject ?? "Contact",
-          message: (validatedData as any).message ?? "",
+          subject: "Contact",
+          message: validatedData.message,
         }),
       ]).catch((e) => console.error("[email] contact:", e));
       res.status(201).json({ success: true, id: message.id });

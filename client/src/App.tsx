@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -57,41 +58,41 @@ import StandViewerPage from "@/pages/outils/stand-viewer";
 import { HelmetProvider } from "react-helmet-async";
 // ── WhatsApp ──────────────────────────────────────────────────────────────────
 import { WhatsAppButton } from "@/components/whatsapp-button";
-// CMS Dashboard imports
-import { DashboardLayout } from "../../cms-dashboard/layouts/DashboardLayout";
-import { NewLoginPage } from "../../cms-dashboard/pages/NewLoginPage";
-import { DashboardPage } from "../../cms-dashboard/pages/DashboardPage";
-import MenuManagement from "../../cms-dashboard/pages/menu/MenuManagement";
-import BlogManagement from "../../cms-dashboard/pages/blog/BlogManagement";
-import PageManagement from "../../cms-dashboard/pages/website/PageManagement";
-import SolutionManagement from "../../cms-dashboard/pages/solutions/SolutionManagement";
-import { ArticlesList } from "../../cms-dashboard/pages/articles";
-import { ArticleForm } from "../../cms-dashboard/pages/articles";
-import { EventsList } from "../../cms-dashboard/pages/events";
-import { EventForm } from "../../cms-dashboard/pages/events";
-import { PagesList } from "../../cms-dashboard/pages/pages";
-import { PageForm } from "../../cms-dashboard/pages/pages";
-import { MediaLibrary } from "../../cms-dashboard/pages/MediaLibrary";
-import { CategoriesList } from "../../cms-dashboard/pages/categories";
-import { UsersList } from "../../cms-dashboard/pages/users";
-import { GeneralSettings, SEOSettings, IntegrationSettings } from "../../cms-dashboard/pages/settings";
-import { VisualEditorManagement } from "../../cms-dashboard/pages/plasmic";
-import GrapesJSEditor from "../../cms-dashboard/pages/plasmic/GrapesJSEditor";
-// Nouveaux modules
-import { ServicesList } from "../../cms-dashboard/pages/services";
-import { ReferencesList } from "../../cms-dashboard/pages/references";
-import { CaseStudiesList } from "../../cms-dashboard/pages/case-studies";
-import { TestimonialsList } from "../../cms-dashboard/pages/testimonials";
-import { TeamList } from "../../cms-dashboard/pages/team";
-import { LeadsList } from "../../cms-dashboard/pages/leads";
-import { NewsletterList } from "../../cms-dashboard/pages/newsletter";
-import { ContactsList } from "../../cms-dashboard/pages/contacts";
-// ── Phase 2 — Admin CMS QR Codes ─────────────────────────────────────────────
-import { QRCodesList }      from "../../cms-dashboard/pages/qr-codes/QRCodesList";
-import { PushBroadcastPage } from "../../cms-dashboard/pages/push/PushBroadcastPage";
-import { ResourcesList as AdminResourcesList } from "../../cms-dashboard/pages/resources/ResourcesList";
+// CMS Dashboard — lazy loaded (non chargé sur les pages publiques)
 import { useAuthStore } from "../../cms-dashboard/store/authStore";
 import type { ReactNode } from "react";
+const DashboardLayout    = lazy(() => import("../../cms-dashboard/layouts/DashboardLayout").then(m => ({ default: m.DashboardLayout })));
+const NewLoginPage       = lazy(() => import("../../cms-dashboard/pages/NewLoginPage").then(m => ({ default: m.NewLoginPage })));
+const DashboardPage      = lazy(() => import("../../cms-dashboard/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const MenuManagement     = lazy(() => import("../../cms-dashboard/pages/menu/MenuManagement"));
+const BlogManagement     = lazy(() => import("../../cms-dashboard/pages/blog/BlogManagement"));
+const PageManagement     = lazy(() => import("../../cms-dashboard/pages/website/PageManagement"));
+const SolutionManagement = lazy(() => import("../../cms-dashboard/pages/solutions/SolutionManagement"));
+const ArticlesList       = lazy(() => import("../../cms-dashboard/pages/articles").then(m => ({ default: m.ArticlesList })));
+const ArticleForm        = lazy(() => import("../../cms-dashboard/pages/articles").then(m => ({ default: m.ArticleForm })));
+const EventsList         = lazy(() => import("../../cms-dashboard/pages/events").then(m => ({ default: m.EventsList })));
+const EventForm          = lazy(() => import("../../cms-dashboard/pages/events").then(m => ({ default: m.EventForm })));
+const PagesList          = lazy(() => import("../../cms-dashboard/pages/pages").then(m => ({ default: m.PagesList })));
+const PageForm           = lazy(() => import("../../cms-dashboard/pages/pages").then(m => ({ default: m.PageForm })));
+const MediaLibrary       = lazy(() => import("../../cms-dashboard/pages/MediaLibrary").then(m => ({ default: m.MediaLibrary })));
+const CategoriesList     = lazy(() => import("../../cms-dashboard/pages/categories").then(m => ({ default: m.CategoriesList })));
+const UsersList          = lazy(() => import("../../cms-dashboard/pages/users").then(m => ({ default: m.UsersList })));
+const GeneralSettings    = lazy(() => import("../../cms-dashboard/pages/settings").then(m => ({ default: m.GeneralSettings })));
+const SEOSettings        = lazy(() => import("../../cms-dashboard/pages/settings").then(m => ({ default: m.SEOSettings })));
+const IntegrationSettings = lazy(() => import("../../cms-dashboard/pages/settings").then(m => ({ default: m.IntegrationSettings })));
+const VisualEditorManagement = lazy(() => import("../../cms-dashboard/pages/plasmic").then(m => ({ default: m.VisualEditorManagement })));
+const GrapesJSEditor     = lazy(() => import("../../cms-dashboard/pages/plasmic/GrapesJSEditor"));
+const ServicesList       = lazy(() => import("../../cms-dashboard/pages/services").then(m => ({ default: m.ServicesList })));
+const ReferencesList     = lazy(() => import("../../cms-dashboard/pages/references").then(m => ({ default: m.ReferencesList })));
+const CaseStudiesList    = lazy(() => import("../../cms-dashboard/pages/case-studies").then(m => ({ default: m.CaseStudiesList })));
+const TestimonialsList   = lazy(() => import("../../cms-dashboard/pages/testimonials").then(m => ({ default: m.TestimonialsList })));
+const TeamList           = lazy(() => import("../../cms-dashboard/pages/team").then(m => ({ default: m.TeamList })));
+const LeadsList          = lazy(() => import("../../cms-dashboard/pages/leads").then(m => ({ default: m.LeadsList })));
+const NewsletterList     = lazy(() => import("../../cms-dashboard/pages/newsletter").then(m => ({ default: m.NewsletterList })));
+const ContactsList       = lazy(() => import("../../cms-dashboard/pages/contacts").then(m => ({ default: m.ContactsList })));
+const QRCodesList        = lazy(() => import("../../cms-dashboard/pages/qr-codes/QRCodesList").then(m => ({ default: m.QRCodesList })));
+const PushBroadcastPage  = lazy(() => import("../../cms-dashboard/pages/push/PushBroadcastPage").then(m => ({ default: m.PushBroadcastPage })));
+const AdminResourcesList = lazy(() => import("../../cms-dashboard/pages/resources/ResourcesList").then(m => ({ default: m.ResourcesList })));
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -461,7 +462,14 @@ function App() {
               {/* Phase 2 — Composants globaux */}
               <PushPermissionBanner />
               <PwaInstallPrompt />
-              <Router />
+              <Suspense fallback={
+                <div style={{ minHeight: '100vh', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #EC4899', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
+                  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                </div>
+              }>
+                <Router />
+              </Suspense>
             </TooltipProvider>
           </QueryClientProvider>
         </ThemeProvider>

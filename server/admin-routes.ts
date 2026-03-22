@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import rateLimit from "express-rate-limit";
 import { db } from "./db";
 import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
@@ -78,6 +79,15 @@ function validatePagination(limit: string | undefined, offset: string | undefine
   return { limit: limitNum, offset: offsetNum };
 }
 
+// Rate limiter dédié au login — max 10 tentatives / 15 min
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export function registerAdminRoutes(app: Express) {
 
   // ========================================
@@ -85,7 +95,7 @@ export function registerAdminRoutes(app: Express) {
   // ========================================
 
   // Login
-  app.post('/api/admin/login', async (req, res) => {
+  app.post('/api/admin/login', loginLimiter, async (req, res) => {
     try {
       const { email, password } = req.body;
 

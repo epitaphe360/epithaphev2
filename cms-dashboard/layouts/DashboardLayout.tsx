@@ -32,6 +32,8 @@ import {
   Phone,
   ChevronRight,
   Sparkles,
+  QrCode,
+  Bell,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -74,6 +76,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Leads',         href: '/admin/leads',              icon: Target,          group: 'crm' },
     { name: 'Newsletter',    href: '/admin/newsletter',         icon: Mail,            group: 'crm' },
     { name: 'Contacts',      href: '/admin/contacts',           icon: Phone,           group: 'crm' },
+    { name: 'QR Codes',      href: '/admin/qr-codes',           icon: QrCode,          group: 'crm' },
+    { name: 'Push',           href: '/admin/push',               icon: Bell,            group: 'crm' },
     { name: 'Catégories',    href: '/admin/categories',         icon: FolderTree,      group: 'settings' },
     { name: 'Médias',        href: '/admin/media',              icon: Image,           group: 'settings' },
     { name: 'Utilisateurs',  href: '/admin/users',              icon: User,            group: 'settings' },

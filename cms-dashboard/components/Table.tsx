@@ -77,14 +77,14 @@ export function Table<T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#EC4899]" />
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
         <p className="text-lg">{emptyMessage}</p>
       </div>
     );
@@ -94,15 +94,15 @@ export function Table<T extends Record<string, any>>({
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead className={stickyHeader ? 'sticky top-0 z-10' : ''}>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <tr className="bg-[#0D0F1E] border-b border-[#1E293B]">
             {columns.map((column) => (
               <th
                 key={String(column.key)}
                 className={`
-                  px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider
+                  px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider
                   ${column.align === 'center' ? 'text-center' : ''}
                   ${column.align === 'right' ? 'text-right' : 'text-left'}
-                  ${column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''}
+                  ${column.sortable ? 'cursor-pointer hover:bg-[#1E293B]' : ''}
                 `}
                 style={{ width: column.width }}
                 onClick={() => handleSort(column)}
@@ -122,13 +122,13 @@ export function Table<T extends Record<string, any>>({
             {actions && <th className="px-4 py-3 w-12"></th>}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-[#1E293B]">
           {data.map((item, index) => (
             <tr
               key={getRowKey(item, index)}
               className={`
-                ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
-                ${striped && index % 2 === 1 ? 'bg-gray-50' : 'bg-white'}
+                ${onRowClick ? 'cursor-pointer hover:bg-[#0D0F1E]' : ''}
+                ${striped && index % 2 === 1 ? 'bg-[#0A0C19]' : 'bg-transparent'}
               `}
               onClick={() => onRowClick?.(item)}
             >
@@ -136,7 +136,7 @@ export function Table<T extends Record<string, any>>({
                 <td
                   key={String(column.key)}
                   className={`
-                    px-4 py-4 text-sm text-gray-900
+                    px-4 py-4 text-sm text-slate-200
                     ${column.align === 'center' ? 'text-center' : ''}
                     ${column.align === 'right' ? 'text-right' : ''}
                   `}
@@ -147,7 +147,7 @@ export function Table<T extends Record<string, any>>({
                 </td>
               ))}
               {actions && (
-                <td className="px-4 py-4 text-sm text-gray-900 text-right">
+                <td className="px-4 py-4 text-sm text-slate-200 text-right">
                   {typeof actions === 'function' ? actions(item) : (
                     <div className="flex justify-end gap-2">
                       {actions.filter(a => !a.condition || a.condition(item)).map((action, i) => {
@@ -257,3 +257,4 @@ export const Pagination: React.FC<PaginationProps> = ({
 };
 
 export default Table;
+

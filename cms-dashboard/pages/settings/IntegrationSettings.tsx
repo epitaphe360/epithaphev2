@@ -73,26 +73,26 @@ export const IntegrationSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Paramètres d'Intégration</h1>
-        <p className="text-gray-600">Connectez votre site aux services externes</p>
+        <h1 className="text-2xl font-bold text-white">Paramètres d'Intégration</h1>
+        <p className="text-slate-400">Connectez votre site aux services externes</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* SMTP Settings */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Mail className="w-5 h-5" />
               Configuration SMTP
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Pour l'envoi d'emails (formulaires de contact, notifications, etc.)
             </p>
           </div>
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Hôte SMTP
                 </label>
                 <Input
@@ -103,7 +103,7 @@ export const IntegrationSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Port
                 </label>
                 <Input
@@ -117,7 +117,7 @@ export const IntegrationSettings: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Nom d'utilisateur
                 </label>
                 <Input
@@ -128,7 +128,7 @@ export const IntegrationSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Mot de passe
                 </label>
                 <Input
@@ -143,7 +143,7 @@ export const IntegrationSettings: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Email d'expédition
                 </label>
                 <Input
@@ -155,7 +155,7 @@ export const IntegrationSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Nom d'expédition
                 </label>
                 <Input
@@ -171,15 +171,15 @@ export const IntegrationSettings: React.FC = () => {
 
         {/* Social Media */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Share2 className="w-5 h-5" />
               Réseaux sociaux
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Facebook
               </label>
               <Input
@@ -192,7 +192,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Twitter (X)
               </label>
               <Input
@@ -205,7 +205,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Instagram
               </label>
               <Input
@@ -218,7 +218,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 LinkedIn
               </label>
               <Input
@@ -231,7 +231,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 YouTube
               </label>
               <Input
@@ -247,14 +247,14 @@ export const IntegrationSettings: React.FC = () => {
 
         {/* External Services */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white">
               Services externes
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Disqus Shortname (Commentaires)
               </label>
               <Input
@@ -266,7 +266,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Mailchimp API Key (Newsletter)
               </label>
               <Input
@@ -278,7 +278,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Stripe Public Key (Paiements)
               </label>
               <Input
@@ -293,14 +293,14 @@ export const IntegrationSettings: React.FC = () => {
 
         {/* Custom Scripts */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Code className="w-5 h-5" />
               Scripts personnalisés
             </h2>
           </div>
           <div className="p-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-200 mb-2">
               Scripts HTML personnalisés (Head)
             </label>
             <Textarea
@@ -311,7 +311,7 @@ export const IntegrationSettings: React.FC = () => {
               rows={8}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Ces scripts seront ajoutés dans le &lt;head&gt; de chaque page
             </p>
           </div>
@@ -330,3 +330,5 @@ export const IntegrationSettings: React.FC = () => {
 };
 
 export default IntegrationSettings;
+
+

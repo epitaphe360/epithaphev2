@@ -158,10 +158,10 @@ export const getDashboardRoutes = (
           path: 'settings/integrations',
           element: <IntegrationSettings />,
         },
-        // ── Blog ────────────────────────────────────────────────────────────
+        // ── Blog → redirige vers Articles (doublon éliminé)
         {
           path: 'blog',
-          element: <BlogManagement />,
+          element: <Navigate to={`${basePath}/articles`} replace />,
         },
         // ── Resources ───────────────────────────────────────────────────────
         {

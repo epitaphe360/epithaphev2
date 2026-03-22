@@ -76,22 +76,22 @@ export const SEOSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Paramètres SEO</h1>
-        <p className="text-gray-600">Optimisez votre site pour les moteurs de recherche</p>
+        <h1 className="text-2xl font-bold text-white">Paramètres SEO</h1>
+        <p className="text-slate-400">Optimisez votre site pour les moteurs de recherche</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Meta Tags */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Search className="w-5 h-5" />
               Balises Meta par défaut
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Titre Meta
               </label>
               <Input
@@ -101,13 +101,13 @@ export const SEOSettings: React.FC = () => {
                 placeholder="Mon Site - Slogan accrocheur"
                 maxLength={60}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 {formData.metaTitle.length}/60 caractères (recommandé)
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Description Meta
               </label>
               <Textarea
@@ -118,13 +118,13 @@ export const SEOSettings: React.FC = () => {
                 rows={3}
                 maxLength={160}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 {formData.metaDescription.length}/160 caractères (recommandé)
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Mots-clés Meta
               </label>
               <Input
@@ -133,13 +133,13 @@ export const SEOSettings: React.FC = () => {
                 onChange={handleChange}
                 placeholder="mot-clé1, mot-clé2, mot-clé3"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Séparez les mots-clés par des virgules
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Image Open Graph
               </label>
               {formData.ogImage ? (
@@ -153,7 +153,7 @@ export const SEOSettings: React.FC = () => {
                   accept="image/*"
                 />
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Format recommandé : JPG/PNG, 1200x630px
               </p>
             </div>
@@ -162,14 +162,14 @@ export const SEOSettings: React.FC = () => {
 
         {/* Analytics */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white">
               Outils d'analyse
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Google Analytics ID
               </label>
               <Input
@@ -181,7 +181,7 @@ export const SEOSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Google Search Console ID
               </label>
               <Input
@@ -196,14 +196,14 @@ export const SEOSettings: React.FC = () => {
 
         {/* Advanced */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white">
               Paramètres avancés
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Contenu robots.txt
               </label>
               <Textarea
@@ -223,9 +223,9 @@ export const SEOSettings: React.FC = () => {
                 name="sitemapEnabled"
                 checked={formData.sitemapEnabled}
                 onChange={handleChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-[#EC4899] border-[#334155] rounded focus:ring-[#EC4899]"
               />
-              <label htmlFor="sitemapEnabled" className="ml-2 text-sm text-gray-700">
+              <label htmlFor="sitemapEnabled" className="ml-2 text-sm text-slate-200">
                 Activer la génération automatique du sitemap
               </label>
             </div>
@@ -245,3 +245,5 @@ export const SEOSettings: React.FC = () => {
 };
 
 export default SEOSettings;
+
+

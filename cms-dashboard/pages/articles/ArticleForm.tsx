@@ -23,6 +23,7 @@ export const ArticleForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [autoSaveAt, setAutoSaveAt] = useState<string | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<ArticleTemplate>('STANDARD');
   const [templateData, setTemplateData] = useState<any>({});
@@ -46,6 +47,25 @@ export const ArticleForm: React.FC = () => {
       loadArticle();
     }
   }, [id]);
+
+  // Auto-sauvegarde brouillon toutes les 60s si statut DRAFT
+  useEffect(() => {
+    if (formData.status !== 'DRAFT' || !formData.title) return;
+    const timer = setInterval(async () => {
+      try {
+        const api = getApi();
+        const dataToSave = { ...formData, template: selectedTemplate, templateData };
+        if (isEditing) {
+          await api.articles.update(id!, dataToSave);
+        } else if (formData.title) {
+          await api.articles.create(dataToSave);
+        }
+        const now = new Date();
+        setAutoSaveAt(`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`);
+      } catch {}
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [formData, selectedTemplate, templateData, isEditing, id]);
 
   const loadCategories = async () => {
     try {
@@ -478,6 +498,14 @@ export const ArticleForm: React.FC = () => {
                 value={formData.content}
                 onChange={(content) => setFormData((prev) => ({ ...prev, content }))}
               />
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-slate-500">
+                  {formData.content.replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length} mots
+                </p>
+                {autoSaveAt && formData.status === 'DRAFT' && (
+                  <p className="text-xs text-[#EC4899]/70">Brouillon sauvegardé à {autoSaveAt}</p>
+                )}
+              </div>
             </CardContent>
           </Card>
 

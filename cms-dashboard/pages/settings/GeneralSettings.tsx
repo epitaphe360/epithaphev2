@@ -85,22 +85,22 @@ export const GeneralSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Paramètres Généraux</h1>
-        <p className="text-gray-600">Configuration de base de votre site web</p>
+        <h1 className="text-2xl font-bold text-white">Paramètres Généraux</h1>
+        <p className="text-slate-400">Configuration de base de votre site web</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Site Identity */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Globe className="w-5 h-5" />
               Identité du site
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Nom du site *
               </label>
               <Input
@@ -113,7 +113,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Description du site
               </label>
               <Textarea
@@ -126,7 +126,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 URL du site *
               </label>
               <Input
@@ -143,14 +143,14 @@ export const GeneralSettings: React.FC = () => {
 
         {/* Contact Info */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white">
               Informations de contact
             </h2>
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Email de contact
               </label>
               <Input
@@ -163,7 +163,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Téléphone de contact
               </label>
               <Input
@@ -179,15 +179,15 @@ export const GeneralSettings: React.FC = () => {
 
         {/* Branding */}
         <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <ImageIcon className="w-5 h-5" />
               Image de marque
             </h2>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Logo du site
               </label>
               {formData.logo ? (
@@ -201,13 +201,13 @@ export const GeneralSettings: React.FC = () => {
                   accept="image/*"
                 />
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Format recommandé : PNG transparent, 200x60px
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Favicon
               </label>
               {formData.favicon ? (
@@ -221,13 +221,13 @@ export const GeneralSettings: React.FC = () => {
                   accept="image/*"
                 />
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Format recommandé : ICO ou PNG, 32x32px
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Texte de copyright
               </label>
               <Input
@@ -253,3 +253,5 @@ export const GeneralSettings: React.FC = () => {
 };
 
 export default GeneralSettings;
+
+

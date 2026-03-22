@@ -128,7 +128,7 @@ export const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [selectedPeriod]);
 
   const loadDashboardData = async () => {
     try {
@@ -194,8 +194,8 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#020617]">
         <div className="flex flex-col items-center">
-          <div className="w-16 h-16 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-          <p className="mt-4 text-blue-500/50 text-xs font-bold uppercase tracking-widest animate-pulse">Chargement de l'interface</p>
+          <div className="w-16 h-16 border-2 border-[#EC4899]/20 border-t-[#EC4899] rounded-full animate-spin"></div>
+          <p className="mt-4 text-[#EC4899]/50 text-xs font-bold uppercase tracking-widest animate-pulse">Chargement de l'interface</p>
         </div>
       </div>
     );
@@ -249,31 +249,31 @@ export const DashboardPage: React.FC = () => {
           title="Trafic Total" 
           value={formatNumber(stats?.views || 0)} 
           subtext="+12.5k vs mois dernier" 
-          trend={12.5} 
+          trend={stats && stats.views > 0 ? 12.5 : null} 
           icon={Eye} 
           delay={0}
         />
         <StatCard 
           title="Visiteurs Uniques" 
           value={formatNumber(stats?.visitors || 0)} 
-          subtext="Nouveaux prospects" 
-          trend={8.2} 
+          subtext="Depuis les leads + contacts" 
+          trend={stats && stats.visitors > 0 ? 8.2 : null} 
           icon={Users} 
           delay={0.1}
         />
         <StatCard 
           title="Engagement" 
-          value={`${stats?.avgSessionDuration}`} 
-          subtext="Durée moyenne" 
-          trend={-2.4} 
+          value={stats?.avgSessionDuration || '—'} 
+          subtext="Durée moyenne session" 
+          trend={null} 
           icon={Clock} 
           delay={0.2}
         />
         <StatCard 
           title="Conversion" 
-          value={`${stats?.conversionRate}%`} 
+          value={`${stats?.conversionRate || 0}%`} 
           subtext="Objectif : 5.0%" 
-          trend={5.4} 
+          trend={stats && stats.conversionRate > 0 ? 5.4 : null} 
           icon={Target} 
           delay={0.3}
         />
@@ -328,7 +328,7 @@ export const DashboardPage: React.FC = () => {
                 <Area 
                   type="monotone" 
                   dataKey="views" 
-                  stroke="#3b82f6" 
+                  stroke="#EC4899" 
                   strokeWidth={2.5}
                   fillOpacity={1} 
                   fill="url(#colorViews)" 
@@ -401,7 +401,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           
           <Link href="/admin/articles/new">
-            <button className="w-full py-3.5 bg-blue-600 hover:bg-[#EC4899] text-white rounded-2xl font-bold tracking-wide transition-all shadow-lg shadow-blue-900/40 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+            <button className="w-full py-3.5 bg-[#EC4899] hover:bg-[#db2777] text-white rounded-2xl font-bold tracking-wide transition-all shadow-lg shadow-[#EC4899]/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
               <Plus className="w-5 h-5" />
               NOUVEAU POST
             </button>

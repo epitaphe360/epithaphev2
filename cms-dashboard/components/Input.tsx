@@ -22,18 +22,18 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
     const inputClasses = `
       w-full px-4 py-2 border rounded-lg
       transition-colors duration-200
-      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-      disabled:bg-gray-100 disabled:cursor-not-allowed
+      focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent
+      disabled:bg-[#0D0F1E] disabled:cursor-not-allowed
       ${icon && iconPosition === 'left' ? 'pl-10' : ''}
       ${icon && iconPosition === 'right' ? 'pr-10' : ''}
-      ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
+      ${error ? 'border-red-500 focus:ring-red-500' : 'border-[#334155]'}
       ${className}
     `;
 
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-slate-300 mb-1">
             {label}
             {props.required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -67,13 +67,13 @@ export const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputPro
           )}
         </div>
         {error && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+          <p className="mt-1 text-sm text-red-400 flex items-center gap-1">
             <AlertCircle className="w-4 h-4" />
             {error}
           </p>
         )}
         {finalHint && !error && (
-          <p className="mt-1 text-sm text-gray-500">{finalHint}</p>
+          <p className="mt-1 text-sm text-slate-500">{finalHint}</p>
         )}
       </div>
     );
@@ -98,7 +98,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         />
         <button
           type="button"
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white"
           onClick={() => setShowPassword(!showPassword)}
           tabIndex={-1}
         >
@@ -151,7 +151,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-slate-300 mb-1">
             {label}
             {props.required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -161,22 +161,22 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={`
             w-full px-4 py-2 border rounded-lg
             transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-            disabled:bg-gray-100 disabled:cursor-not-allowed
+            focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent
+            disabled:bg-[#0D0F1E] disabled:cursor-not-allowed
             resize-y min-h-[100px]
-            ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
+            ${error ? 'border-red-500 focus:ring-red-500' : 'border-[#334155]'}
             ${className}
           `}
           {...props}
         />
         {error && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+          <p className="mt-1 text-sm text-red-400 flex items-center gap-1">
             <AlertCircle className="w-4 h-4" />
             {error}
           </p>
         )}
         {hint && !error && (
-          <p className="mt-1 text-sm text-gray-500">{hint}</p>
+          <p className="mt-1 text-sm text-slate-500">{hint}</p>
         )}
       </div>
     );
@@ -203,7 +203,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-slate-300 mb-1">
             {label}
             {props.required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -213,9 +213,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           className={`
             w-full px-4 py-2 border rounded-lg
             transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-            disabled:bg-gray-100 disabled:cursor-not-allowed
-            ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
+            focus:outline-none focus:ring-2 focus:ring-[#EC4899] focus:border-transparent
+            disabled:bg-[#0D0F1E] disabled:cursor-not-allowed
+            ${error ? 'border-red-500 focus:ring-red-500' : 'border-[#334155]'}
             ${className}
           `}
           {...props}
@@ -228,7 +228,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+          <p className="mt-1 text-sm text-red-400 flex items-center gap-1">
             <AlertCircle className="w-4 h-4" />
             {error}
           </p>
@@ -241,3 +241,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 Select.displayName = 'Select';
 
 export default Input;
+

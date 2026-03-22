@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
 
 export function HeroSection() {
   const [showCursor, setShowCursor] = useState(true);
+  const { settings } = useSettings("hero", {
+    hero_title: "Epitaphe 360",
+    hero_tagline: "Inspirez. Connectez. Marquez Durablement.",
+    hero_description_line1: "Nous sommes une agence de communication 360°",
+    hero_description_line2: "globalement créative",
+    hero_subtitle: "Vous voulez impacter? Nous savons comment!",
+    hero_description: "Basée à Casablanca au Maroc, notre agence de communication Epitaphe360 accompagne depuis 20 ans, grandes entreprises, multinationales et PME dans la complexité de leurs défis : là où créativité et pragmatisme se croisent. Nous comprenons vos contraintes, en tant que CEO, Directeurs marketing ou de communication… : des délais serrés, des attentes élevées, un besoin constant d'innovation. C'est pour cela que nous avons choisi de faire autrement.",
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,7 +48,7 @@ export function HeroSection() {
             data-testid="text-hero-title"
           >
             <span className="inline-block bg-primary text-primary-foreground px-4 py-2">
-              Epitaphe 360
+              {settings.hero_title}
             </span>
           </h1>
         </div>
@@ -50,23 +59,17 @@ export function HeroSection() {
             data-testid="text-hero-tagline"
           >
             <span className="inline-block bg-primary text-primary-foreground px-3 py-1 mb-2">
-              Inspirez.
-            </span>{" "}
-            <span className="inline-block bg-primary text-primary-foreground px-3 py-1 mb-2">
-              Connectez.
-            </span>{" "}
-            <span className="inline-block bg-primary text-primary-foreground px-3 py-1">
-              Marquez Durablement.
+              {settings.hero_tagline}
             </span>
           </p>
         </div>
 
         <div className="mb-8">
           <p className="text-lg md:text-xl text-muted-foreground mb-2">
-            Nous sommes une agence de communication 360°
+            {settings.hero_description_line1}
           </p>
           <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
-            globalement <span className="text-primary">créative</span>
+            {settings.hero_description_line2}
             <span className={`inline-block w-0.5 h-8 md:h-10 bg-primary ml-1 align-middle ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
           </p>
         </div>
@@ -76,13 +79,13 @@ export function HeroSection() {
             className="text-lg md:text-xl font-semibold text-foreground"
             data-testid="text-hero-subtitle"
           >
-            Vous voulez impacter? Nous savons comment!
+            {settings.hero_subtitle}
           </p>
           <p
             className="text-base md:text-lg text-muted-foreground leading-relaxed"
             data-testid="text-hero-description"
           >
-            Basée à Casablanca au Maroc, notre agence de communication Epitaphe360 accompagne depuis 20 ans, grandes entreprises, multinationales et PME dans la complexité de leurs défis : là où créativité et pragmatisme se croisent. Nous comprenons vos contraintes, en tant que CEO, Directeurs marketing ou de communication… : des délais serrés, des attentes élevées, un besoin constant d'innovation. C'est pour cela que nous avons choisi de faire autrement.
+            {settings.hero_description}
           </p>
         </div>
       </div>

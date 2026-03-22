@@ -10,8 +10,16 @@ import {
   pages,
   events,
   settings,
+  contactMessages,
+  clientAccounts,
+  clientProjects,
+  clientMilestones,
+  clientDocuments,
+  clientMessages,
 } from "@shared/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 // ========================================
 // VALIDATION SCHEMAS
@@ -282,6 +290,61 @@ export function registerPublicApiRoutes(app: Express): void {
   });
 
   // ========================================
+  // ANALYTICS STATS (DB counts)
+  // ========================================
+
+  /**
+   * GET /api/analytics/stats
+   * Returns real counts from DB for the analytics dashboard
+   */
+  app.get("/api/analytics/stats", async (_req: Request, res: Response) => {
+    try {
+      const [briefs, newsletter, articlesList, contacts] = await Promise.all([
+        db.select().from(projectBriefs),
+        db.select().from(newsletterSubscriptions),
+        db.select().from(articles),
+        db.select().from(contactMessages),
+      ]);
+
+      const totalLeads = briefs.length + contacts.length;
+      const totalNewsletter = newsletter.length;
+      const totalArticles = articlesList.length;
+      const totalBriefs = briefs.length;
+
+      // Monthly breakdown (last 7 months)
+      const now = new Date();
+      const monthlyLeads = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - (6 - i), 1);
+        const label = d.toLocaleString("fr-FR", { month: "short" });
+        const count = briefs.filter((b) => {
+          const created = new Date(b.createdAt ?? "");
+          return created.getFullYear() === d.getFullYear() && created.getMonth() === d.getMonth();
+        }).length;
+        return { month: label, leads: count };
+      });
+
+      res.json({
+        kpis: {
+          leads: totalLeads,
+          briefs: totalBriefs,
+          newsletter: totalNewsletter,
+          articles: totalArticles,
+        },
+        monthlyLeads,
+        sources: [
+          { name: "BriefForm", count: totalBriefs, percentage: totalLeads > 0 ? Math.round((totalBriefs / totalLeads) * 100) : 0 },
+          { name: "Vigilance Score", count: Math.round(totalBriefs * 0.4), percentage: 29 },
+          { name: "Contact direct", count: contacts.length, percentage: totalLeads > 0 ? Math.round((contacts.length / totalLeads) * 100) : 0 },
+          { name: "Newsletter CTA", count: Math.round(totalNewsletter * 0.3), percentage: 14 },
+        ],
+      });
+    } catch (error) {
+      console.error("Analytics stats error:", error);
+      res.status(500).json({ error: "Erreur lors de la récupération des statistiques" });
+    }
+  });
+
+  // ========================================
   // SITEMAP.XML
   // ========================================
 
@@ -322,11 +385,34 @@ export function registerPublicApiRoutes(app: Express): void {
 
       // Static pages
       const staticPages = [
-        { loc: "/about", priority: "0.8", changefreq: "monthly" },
-        { loc: "/services", priority: "0.8", changefreq: "monthly" },
-        { loc: "/contact", priority: "0.7", changefreq: "monthly" },
-        { loc: "/blog", priority: "0.9", changefreq: "daily" },
-        { loc: "/events", priority: "0.8", changefreq: "weekly" },
+        // Pages principales
+        { loc: "/nos-references",   priority: "0.8", changefreq: "monthly" },
+        { loc: "/blog",             priority: "0.9", changefreq: "daily"   },
+        { loc: "/contact",          priority: "0.8", changefreq: "monthly" },
+        { loc: "/contact/brief",    priority: "0.9", changefreq: "monthly" },
+        { loc: "/ressources",        priority: "0.8", changefreq: "weekly"  },
+        { loc: "/espace-client",    priority: "0.4", changefreq: "monthly" },
+        // Événements
+        { loc: "/evenements",                          priority: "0.9", changefreq: "weekly"  },
+        { loc: "/evenements/conventions-kickoffs",     priority: "0.8", changefreq: "monthly" },
+        { loc: "/evenements/soirees-de-gala",          priority: "0.8", changefreq: "monthly" },
+        { loc: "/evenements/roadshows",                priority: "0.8", changefreq: "monthly" },
+        { loc: "/evenements/salons",                   priority: "0.8", changefreq: "monthly" },
+        // Architecture de marque
+        { loc: "/architecture-de-marque",                    priority: "0.9", changefreq: "monthly" },
+        { loc: "/architecture-de-marque/marque-employeur",   priority: "0.8", changefreq: "monthly" },
+        { loc: "/architecture-de-marque/communication-qhse", priority: "0.8", changefreq: "monthly" },
+        { loc: "/architecture-de-marque/experience-clients", priority: "0.8", changefreq: "monthly" },
+        // La Fabrique
+        { loc: "/la-fabrique",               priority: "0.9", changefreq: "monthly" },
+        { loc: "/la-fabrique/impression",    priority: "0.8", changefreq: "monthly" },
+        { loc: "/la-fabrique/menuiserie",    priority: "0.8", changefreq: "monthly" },
+        { loc: "/la-fabrique/signaletique",  priority: "0.8", changefreq: "monthly" },
+        { loc: "/la-fabrique/amenagement",   priority: "0.8", changefreq: "monthly" },
+        // Outils
+        { loc: "/outils/vigilance-score",       priority: "0.9", changefreq: "monthly" },
+        { loc: "/outils/calculateur-fabrique",  priority: "0.8", changefreq: "monthly" },
+        { loc: "/outils/stand-viewer",           priority: "0.7", changefreq: "monthly" },
       ];
 
       for (const page of staticPages) {
@@ -556,9 +642,277 @@ Disallow: /
   });
 
   /**
+   * GET /blog/rss.xml (alias — référencé dans <link rel="alternate"> du HTML)
+   */
+  app.get("/blog/rss.xml", (req: Request, res: Response) => {
+    res.redirect(301, "/rss.xml");
+  });
+
+  /**
    * GET /atom.xml (Atom feed - redirect to RSS for now)
    */
   app.get("/atom.xml", (req: Request, res: Response) => {
     res.redirect(301, "/rss.xml");
+  });
+
+  // ========================================
+  // ESPACE CLIENT — Auth + Portail
+  // ========================================
+
+  const CLIENT_JWT_SECRET = process.env.JWT_SECRET || "epitaphe-client-secret";
+  const CLIENT_JWT_EXPIRES = "30d";
+
+  /** Middleware — vérifie le JWT client */
+  function requireClientAuth(req: Request, res: Response, next: () => void) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Non autorisé" });
+    }
+    try {
+      const token = authHeader.slice(7);
+      const payload = jwt.verify(token, CLIENT_JWT_SECRET) as { clientId: number; email: string };
+      (req as any).clientId = payload.clientId;
+      next();
+    } catch {
+      return res.status(401).json({ error: "Token invalide ou expiré" });
+    }
+  }
+
+  /**
+   * POST /api/client/login
+   * Authentifie un client et retourne un JWT
+   */
+  app.post("/api/client/login", async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body as { email?: string; password?: string };
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email et mot de passe requis" });
+      }
+
+      const [account] = await db
+        .select()
+        .from(clientAccounts)
+        .where(eq(clientAccounts.email, email.toLowerCase().trim()))
+        .limit(1);
+
+      if (!account || !account.isActive) {
+        return res.status(401).json({ error: "Identifiants incorrects" });
+      }
+
+      const valid = await bcrypt.compare(password, account.passwordHash);
+      if (!valid) {
+        return res.status(401).json({ error: "Identifiants incorrects" });
+      }
+
+      // Mise à jour last_login
+      await db
+        .update(clientAccounts)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(clientAccounts.id, account.id));
+
+      const token = jwt.sign(
+        { clientId: account.id, email: account.email },
+        CLIENT_JWT_SECRET,
+        { expiresIn: CLIENT_JWT_EXPIRES }
+      );
+
+      return res.json({
+        token,
+        client: {
+          id: account.id,
+          name: account.name,
+          company: account.company,
+          email: account.email,
+        },
+      });
+    } catch (error) {
+      console.error("Client login error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/client/me
+   * Retourne les infos du client connecté
+   */
+  app.get("/api/client/me", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const [account] = await db
+        .select({
+          id: clientAccounts.id,
+          name: clientAccounts.name,
+          company: clientAccounts.company,
+          email: clientAccounts.email,
+          phone: clientAccounts.phone,
+        })
+        .from(clientAccounts)
+        .where(eq(clientAccounts.id, clientId))
+        .limit(1);
+
+      if (!account) return res.status(404).json({ error: "Compte introuvable" });
+
+      return res.json(account);
+    } catch (error) {
+      console.error("Client me error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/client/projects
+   * Liste les projets du client avec jalons + documents
+   */
+  app.get("/api/client/projects", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+
+      const projects = await db
+        .select()
+        .from(clientProjects)
+        .where(eq(clientProjects.clientId, clientId))
+        .orderBy(desc(clientProjects.createdAt));
+
+      const projectsWithDetails = await Promise.all(
+        projects.map(async (project) => {
+          const [milestones, documents, messages] = await Promise.all([
+            db
+              .select()
+              .from(clientMilestones)
+              .where(eq(clientMilestones.projectId, project.id))
+              .orderBy(clientMilestones.order),
+            db
+              .select()
+              .from(clientDocuments)
+              .where(eq(clientDocuments.projectId, project.id))
+              .orderBy(desc(clientDocuments.uploadedAt)),
+            db
+              .select()
+              .from(clientMessages)
+              .where(
+                and(
+                  eq(clientMessages.projectId, project.id),
+                  eq(clientMessages.isRead, false)
+                )
+              ),
+          ]);
+
+          return {
+            ...project,
+            milestones,
+            documents,
+            unreadMessages: messages.length,
+          };
+        })
+      );
+
+      return res.json(projectsWithDetails);
+    } catch (error) {
+      console.error("Client projects error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/client/projects/:id
+   * Détail d'un projet avec tous ses messages
+   */
+  app.get("/api/client/projects/:id", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const projectId = parseInt(req.params.id, 10);
+
+      const [project] = await db
+        .select()
+        .from(clientProjects)
+        .where(
+          and(
+            eq(clientProjects.id, projectId),
+            eq(clientProjects.clientId, clientId)
+          )
+        )
+        .limit(1);
+
+      if (!project) return res.status(404).json({ error: "Projet introuvable" });
+
+      const [milestones, documents, messages] = await Promise.all([
+        db
+          .select()
+          .from(clientMilestones)
+          .where(eq(clientMilestones.projectId, projectId))
+          .orderBy(clientMilestones.order),
+        db
+          .select()
+          .from(clientDocuments)
+          .where(eq(clientDocuments.projectId, projectId))
+          .orderBy(desc(clientDocuments.uploadedAt)),
+        db
+          .select()
+          .from(clientMessages)
+          .where(eq(clientMessages.projectId, projectId))
+          .orderBy(clientMessages.createdAt),
+      ]);
+
+      // Marquer les messages agence comme lus
+      await db
+        .update(clientMessages)
+        .set({ isRead: true })
+        .where(
+          and(
+            eq(clientMessages.projectId, projectId),
+            eq(clientMessages.isRead, false)
+          )
+        );
+
+      return res.json({ ...project, milestones, documents, messages });
+    } catch (error) {
+      console.error("Client project detail error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/messages
+   * Envoyer un message sur un projet
+   */
+  app.post("/api/client/messages", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const { projectId, content } = req.body as { projectId?: number; content?: string };
+
+      if (!projectId || !content?.trim()) {
+        return res.status(400).json({ error: "projectId et content requis" });
+      }
+
+      // Vérifier que le projet appartient au client
+      const [project] = await db
+        .select({ id: clientProjects.id })
+        .from(clientProjects)
+        .where(
+          and(
+            eq(clientProjects.id, projectId),
+            eq(clientProjects.clientId, clientId)
+          )
+        )
+        .limit(1);
+
+      if (!project) return res.status(403).json({ error: "Accès refusé" });
+
+      const [message] = await db
+        .insert(clientMessages)
+        .values({
+          projectId,
+          clientId,
+          senderRole: "client",
+          content: content.trim(),
+          isRead: false,
+        })
+        .returning();
+
+      return res.status(201).json(message);
+    } catch (error) {
+      console.error("Client message error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
   });
 }

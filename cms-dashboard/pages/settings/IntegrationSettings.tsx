@@ -42,8 +42,9 @@ export const IntegrationSettings: React.FC = () => {
   const loadSettings = async () => {
     try {
       const api = getApi();
-      const response = await api.get('/settings/integrations');
-      setFormData(response.data);
+      const response = await api.get('/admin/settings/integrations');
+      const d = response.data?.data || {};
+      setFormData((prev) => ({ ...prev, ...d }));
     } catch (error) {
       console.error('Error loading integration settings:', error);
     }
@@ -57,10 +58,9 @@ export const IntegrationSettings: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const api = getApi();
-      await api.put('/settings/integrations', formData);
+      await api.put('/admin/settings', { group: 'integrations', data: formData });
       toast.success('Succès', 'Paramètres d\'intégration enregistrés');
     } catch (error) {
       toast.error('Erreur', 'Impossible d\'enregistrer les paramètres');

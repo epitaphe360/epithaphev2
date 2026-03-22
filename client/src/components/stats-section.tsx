@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef } from "react";
+import { useSettings } from "@/hooks/useSettings";
 
-const stats = [
+type StatItem = { value: number; label: string; suffix: string };
+
+const FALLBACK_STATS: StatItem[] = [
   { value: 20, label: "Ans d'expérience", suffix: "" },
   { value: 360, label: "Vision globale", suffix: "°" },
   { value: 500, label: "Projets réalisés", suffix: "+" },
@@ -49,6 +52,21 @@ function AnimatedCounter({
 export function StatsSection() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSettings("stats", {
+    stats_title: "Pourquoi faire appel à Epitaphe 360",
+  });
+
+  const stats: StatItem[] = (() => {
+    try {
+      const raw = settings.stats_items;
+      if (Array.isArray(raw) && raw.length > 0) return raw as StatItem[];
+      if (typeof raw === "string") {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed as StatItem[];
+      }
+    } catch {}
+    return FALLBACK_STATS;
+  })();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -86,7 +104,7 @@ export function StatsSection() {
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4"
             data-testid="text-stats-title"
           >
-            Pourquoi faire appel à Epitaphe 360
+            {settings.stats_title}
           </h2>
         </div>
 

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { PageMeta } from "@/components/seo/page-meta";
 import { Navigation } from "@/components/navigation";
 import { HeroSection } from "@/components/hero-section";
 import { ServicesSection } from "@/components/services-section";
@@ -25,6 +26,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background" data-testid="page-home">
+      <PageMeta
+        title="Epitaphe 360 — Agence Événementielle & Architecture de Marque"
+        description="Agence événementielle au Maroc spécialisée en événements d'entreprise, architecture de marque et fabrication. Conventions, galas, signalétique, stand 3D."
+        canonicalPath="/"
+        schemaType="WebPage"
+      />
       <Navigation />
       <main>
         <HeroSection />

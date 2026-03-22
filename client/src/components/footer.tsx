@@ -1,5 +1,6 @@
 import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSettings } from "@/hooks/useSettings";
 
 const footerLinks = {
   services: [
@@ -17,6 +18,16 @@ const footerLinks = {
 };
 
 export function Footer() {
+  const { settings } = useSettings("footer", {
+    footer_address: "Casablanca, Maroc",
+    footer_phone: "+212 5 22 XX XX XX",
+    footer_email: "contact@epitaphe.ma",
+    footer_description: "Agence de communication 360° à Casablanca. Inspirez. Connectez. Marquez Durablement.",
+    footer_linkedin: "",
+    footer_facebook: "",
+    footer_instagram: "",
+  });
+
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -41,34 +52,42 @@ export function Footer() {
               />
             </div>
             <p className="text-background/70 text-sm leading-relaxed mb-6">
-              Agence de communication 360° à Casablanca. Inspirez. Connectez. Marquez
-              Durablement.
+              {settings.footer_description}
             </p>
             <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-background/70 hover:text-primary hover:bg-background/10"
-                data-testid="link-linkedin"
-              >
-                <Linkedin className="w-5 h-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-background/70 hover:text-primary hover:bg-background/10"
-                data-testid="link-facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-background/70 hover:text-primary hover:bg-background/10"
-                data-testid="link-instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </Button>
+              {settings.footer_linkedin ? (
+                <a href={settings.footer_linkedin} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="text-background/70 hover:text-primary hover:bg-background/10" data-testid="link-linkedin">
+                    <Linkedin className="w-5 h-5" />
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="ghost" size="icon" className="text-background/70 hover:text-primary hover:bg-background/10" data-testid="link-linkedin">
+                  <Linkedin className="w-5 h-5" />
+                </Button>
+              )}
+              {settings.footer_facebook ? (
+                <a href={settings.footer_facebook} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="text-background/70 hover:text-primary hover:bg-background/10" data-testid="link-facebook">
+                    <Facebook className="w-5 h-5" />
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="ghost" size="icon" className="text-background/70 hover:text-primary hover:bg-background/10" data-testid="link-facebook">
+                  <Facebook className="w-5 h-5" />
+                </Button>
+              )}
+              {settings.footer_instagram ? (
+                <a href={settings.footer_instagram} target="_blank" rel="noopener noreferrer">
+                  <Button variant="ghost" size="icon" className="text-background/70 hover:text-primary hover:bg-background/10" data-testid="link-instagram">
+                    <Instagram className="w-5 h-5" />
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="ghost" size="icon" className="text-background/70 hover:text-primary hover:bg-background/10" data-testid="link-instagram">
+                  <Instagram className="w-5 h-5" />
+                </Button>
+              )}
             </div>
           </div>
 
@@ -112,17 +131,17 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-background/70">
-                  Casablanca, Maroc
+                  {settings.footer_address}
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                <span className="text-sm text-background/70">+212 5 22 XX XX XX</span>
+                <span className="text-sm text-background/70">{settings.footer_phone}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary flex-shrink-0" />
                 <span className="text-sm text-background/70">
-                  contact@epitaphe.ma
+                  {settings.footer_email}
                 </span>
               </li>
             </ul>

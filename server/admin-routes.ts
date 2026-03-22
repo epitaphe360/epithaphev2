@@ -2,7 +2,11 @@ import type { Express } from "express";
 import { db } from "./db";
 import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
-  insertArticleSchema, insertEventSchema, insertPageSchema
+  services, clientReferences, caseStudies, testimonials, teamMembers,
+  projectBriefs, newsletterSubscriptions, contactMessages,
+  insertArticleSchema, insertEventSchema, insertPageSchema,
+  insertServiceSchema, insertClientReferenceSchema, insertCaseStudySchema,
+  insertTestimonialSchema, insertTeamMemberSchema,
 } from "@shared/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, type AuthRequest } from "./lib/auth";
@@ -796,6 +800,853 @@ export function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error('Get audit logs error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des logs' });
+    }
+  });
+
+  // ========================================
+  // DASHBOARD STATS
+  // ========================================
+
+  app.get('/api/admin/stats', requireAuth, async (req, res) => {
+    try {
+      const [
+        [articlesCount],
+        [eventsCount],
+        [pagesCount],
+        [leadsCount],
+        [newLeadsCount],
+        [refsCount],
+        [caseStudiesCount],
+        [testimonialsCount],
+        [teamMembersCount],
+        [servicesCount],
+        [newsletterCount],
+        [contactsCount],
+        recentLeads,
+        recentArticles,
+      ] = await Promise.all([
+        db.select({ count: sql<number>`count(*)::int` }).from(articles),
+        db.select({ count: sql<number>`count(*)::int` }).from(events),
+        db.select({ count: sql<number>`count(*)::int` }).from(pages),
+        db.select({ count: sql<number>`count(*)::int` }).from(projectBriefs),
+        db.select({ count: sql<number>`count(*)::int` }).from(projectBriefs).where(eq(projectBriefs.status, 'NEW')),
+        db.select({ count: sql<number>`count(*)::int` }).from(clientReferences),
+        db.select({ count: sql<number>`count(*)::int` }).from(caseStudies),
+        db.select({ count: sql<number>`count(*)::int` }).from(testimonials).where(eq(testimonials.isPublished, true)),
+        db.select({ count: sql<number>`count(*)::int` }).from(teamMembers),
+        db.select({ count: sql<number>`count(*)::int` }).from(services),
+        db.select({ count: sql<number>`count(*)::int` }).from(newsletterSubscriptions).where(eq(newsletterSubscriptions.status, 'ACTIVE')),
+        db.select({ count: sql<number>`count(*)::int` }).from(contactMessages),
+        db.select().from(projectBriefs).orderBy(desc(projectBriefs.createdAt)).limit(5),
+        db.select().from(articles).orderBy(desc(articles.createdAt)).limit(5),
+      ]);
+
+      res.json({
+        articles:      articlesCount?.count    ?? 0,
+        events:        eventsCount?.count       ?? 0,
+        pages:         pagesCount?.count        ?? 0,
+        leads:         leadsCount?.count        ?? 0,
+        newLeads:      newLeadsCount?.count     ?? 0,
+        references:    refsCount?.count         ?? 0,
+        caseStudies:   caseStudiesCount?.count  ?? 0,
+        testimonials:  testimonialsCount?.count ?? 0,
+        teamMembers:   teamMembersCount?.count  ?? 0,
+        services:      servicesCount?.count     ?? 0,
+        newsletter:    newsletterCount?.count   ?? 0,
+        contacts:      contactsCount?.count     ?? 0,
+        recentLeads,
+        recentArticles,
+      });
+    } catch (error) {
+      console.error('Stats error:', error);
+      res.status(500).json({ error: 'Erreur lors de la récupération des statistiques' });
+    }
+  });
+
+  // ========================================
+  // SERVICES CRUD
+  // ========================================
+
+  app.get('/api/admin/services', requireAuth, async (req, res) => {
+    try {
+      const { status, hub, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(services.status, status as string));
+      if (hub) conditions.push(eq(services.hub, hub as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(services.title, `%${s}%`), like(services.accroche, `%${s}%`)));
+      }
+
+      let query = db.select().from(services);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(services.order, desc(services.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(services),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur services' });
+    }
+  });
+
+  app.get('/api/admin/services/:id', requireAuth, async (req, res) => {
+    try {
+      const [service] = await db.select().from(services).where(eq(services.id, req.params.id)).limit(1);
+      if (!service) return res.status(404).json({ error: 'Service non trouvé' });
+      res.json(service);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur service' });
+    }
+  });
+
+  app.post('/api/admin/services', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertServiceSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [service] = await db.insert(services).values(parsed.data).returning();
+      res.status(201).json(service);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création service' });
+    }
+  });
+
+  app.put('/api/admin/services/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [service] = await db.update(services).set({ ...updateData, updatedAt: new Date() })
+        .where(eq(services.id, req.params.id)).returning();
+      if (!service) return res.status(404).json({ error: 'Service non trouvé' });
+      res.json(service);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour service' });
+    }
+  });
+
+  app.delete('/api/admin/services/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(services).where(eq(services.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression service' });
+    }
+  });
+
+  // ========================================
+  // CLIENT REFERENCES CRUD
+  // ========================================
+
+  app.get('/api/admin/references', requireAuth, async (req, res) => {
+    try {
+      const { search, sector, featured, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(clientReferences.name, `%${s}%`), like(clientReferences.description, `%${s}%`)));
+      }
+      if (featured === 'true') conditions.push(eq(clientReferences.isFeatured, true));
+
+      let query = db.select().from(clientReferences);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(clientReferences.order, desc(clientReferences.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(clientReferences),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur références' });
+    }
+  });
+
+  app.get('/api/admin/references/:id', requireAuth, async (req, res) => {
+    try {
+      const [ref] = await db.select().from(clientReferences).where(eq(clientReferences.id, req.params.id)).limit(1);
+      if (!ref) return res.status(404).json({ error: 'Référence non trouvée' });
+      res.json(ref);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur référence' });
+    }
+  });
+
+  app.post('/api/admin/references', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertClientReferenceSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [ref] = await db.insert(clientReferences).values(parsed.data).returning();
+      res.status(201).json(ref);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création référence' });
+    }
+  });
+
+  app.put('/api/admin/references/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [ref] = await db.update(clientReferences).set({ ...updateData, updatedAt: new Date() })
+        .where(eq(clientReferences.id, req.params.id)).returning();
+      if (!ref) return res.status(404).json({ error: 'Référence non trouvée' });
+      res.json(ref);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour référence' });
+    }
+  });
+
+  app.delete('/api/admin/references/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(clientReferences).where(eq(clientReferences.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression référence' });
+    }
+  });
+
+  // ========================================
+  // CASE STUDIES CRUD
+  // ========================================
+
+  app.get('/api/admin/case-studies', requireAuth, async (req, res) => {
+    try {
+      const { status, search, featured, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(caseStudies.status, status as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(caseStudies.title, `%${s}%`), like(caseStudies.clientName, `%${s}%`)));
+      }
+      if (featured === 'true') conditions.push(eq(caseStudies.isFeatured, true));
+
+      let query = db.select().from(caseStudies);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(caseStudies.publishedAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(caseStudies),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur études de cas' });
+    }
+  });
+
+  app.get('/api/admin/case-studies/:id', requireAuth, async (req, res) => {
+    try {
+      const [cs] = await db.select().from(caseStudies).where(eq(caseStudies.id, req.params.id)).limit(1);
+      if (!cs) return res.status(404).json({ error: 'Étude de cas non trouvée' });
+      res.json(cs);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur étude de cas' });
+    }
+  });
+
+  app.post('/api/admin/case-studies', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertCaseStudySchema.safeParse(req.body);
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [cs] = await db.insert(caseStudies).values(parsed.data).returning();
+      res.status(201).json(cs);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création étude de cas' });
+    }
+  });
+
+  app.put('/api/admin/case-studies/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [cs] = await db.update(caseStudies).set({ ...updateData, updatedAt: new Date() })
+        .where(eq(caseStudies.id, req.params.id)).returning();
+      if (!cs) return res.status(404).json({ error: 'Étude de cas non trouvée' });
+      res.json(cs);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour étude de cas' });
+    }
+  });
+
+  app.delete('/api/admin/case-studies/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(caseStudies).where(eq(caseStudies.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression étude de cas' });
+    }
+  });
+
+  // ========================================
+  // TESTIMONIALS CRUD
+  // ========================================
+
+  app.get('/api/admin/testimonials', requireAuth, async (req, res) => {
+    try {
+      const { search, published, featured, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (published !== undefined) conditions.push(eq(testimonials.isPublished, published === 'true'));
+      if (featured === 'true') conditions.push(eq(testimonials.isFeatured, true));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(testimonials.quote, `%${s}%`), like(testimonials.authorName, `%${s}%`), like(testimonials.companyName, `%${s}%`)));
+      }
+
+      let query = db.select().from(testimonials);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(testimonials.order, desc(testimonials.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(testimonials),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur témoignages' });
+    }
+  });
+
+  app.get('/api/admin/testimonials/:id', requireAuth, async (req, res) => {
+    try {
+      const [testimonial] = await db.select().from(testimonials).where(eq(testimonials.id, req.params.id)).limit(1);
+      if (!testimonial) return res.status(404).json({ error: 'Témoignage non trouvé' });
+      res.json(testimonial);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur témoignage' });
+    }
+  });
+
+  app.post('/api/admin/testimonials', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertTestimonialSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [testimonial] = await db.insert(testimonials).values(parsed.data).returning();
+      res.status(201).json(testimonial);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création témoignage' });
+    }
+  });
+
+  app.put('/api/admin/testimonials/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [testimonial] = await db.update(testimonials).set({ ...updateData, updatedAt: new Date() })
+        .where(eq(testimonials.id, req.params.id)).returning();
+      if (!testimonial) return res.status(404).json({ error: 'Témoignage non trouvé' });
+      res.json(testimonial);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour témoignage' });
+    }
+  });
+
+  app.delete('/api/admin/testimonials/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(testimonials).where(eq(testimonials.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression témoignage' });
+    }
+  });
+
+  // ========================================
+  // TEAM MEMBERS CRUD
+  // ========================================
+
+  app.get('/api/admin/team', requireAuth, async (req, res) => {
+    try {
+      const { search, department, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (department) conditions.push(eq(teamMembers.department, department as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(teamMembers.name, `%${s}%`), like(teamMembers.position, `%${s}%`)));
+      }
+
+      let query = db.select().from(teamMembers);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(teamMembers.order, teamMembers.name).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(teamMembers),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur équipe' });
+    }
+  });
+
+  app.get('/api/admin/team/:id', requireAuth, async (req, res) => {
+    try {
+      const [member] = await db.select().from(teamMembers).where(eq(teamMembers.id, req.params.id)).limit(1);
+      if (!member) return res.status(404).json({ error: 'Membre non trouvé' });
+      res.json(member);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur membre équipe' });
+    }
+  });
+
+  app.post('/api/admin/team', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertTeamMemberSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [member] = await db.insert(teamMembers).values(parsed.data).returning();
+      res.status(201).json(member);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création membre' });
+    }
+  });
+
+  app.put('/api/admin/team/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [member] = await db.update(teamMembers).set({ ...updateData, updatedAt: new Date() })
+        .where(eq(teamMembers.id, req.params.id)).returning();
+      if (!member) return res.status(404).json({ error: 'Membre non trouvé' });
+      res.json(member);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour membre' });
+    }
+  });
+
+  app.delete('/api/admin/team/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(teamMembers).where(eq(teamMembers.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression membre' });
+    }
+  });
+
+  // ========================================
+  // SETTINGS CRUD (clé/valeur par groupe)
+  // ========================================
+
+  app.get('/api/admin/settings', requireAuth, async (req, res) => {
+    try {
+      const { group } = req.query;
+      let query = db.select().from(settings);
+      if (group) query = query.where(eq(settings.group, group as string)) as typeof query;
+      const result = await query;
+      // Return as a key-value object for convenience
+      const obj: Record<string, any> = {};
+      for (const row of result) {
+        obj[row.key] = row.value;
+      }
+      res.json({ data: result, object: obj });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lecture paramètres' });
+    }
+  });
+
+  app.get('/api/admin/settings/:group', requireAuth, async (req, res) => {
+    try {
+      const result = await db.select().from(settings).where(eq(settings.group, req.params.group));
+      const obj: Record<string, any> = {};
+      for (const row of result) {
+        obj[row.key] = row.value;
+      }
+      res.json({ data: obj });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lecture paramètres groupe' });
+    }
+  });
+
+  app.put('/api/admin/settings', requireAuth, async (req, res) => {
+    try {
+      const { group, data: formData } = req.body;
+      if (!group || !formData || typeof formData !== 'object') {
+        return res.status(400).json({ error: 'group et data requis' });
+      }
+      const upserts = Object.entries(formData).map(([key, value]) =>
+        db.insert(settings)
+          .values({ key, value, group, isPublic: true })
+          .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } })
+      );
+      await Promise.all(upserts);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour paramètres' });
+    }
+  });
+
+  // Alias settings/general → groupe "general"
+  app.get('/api/admin/settings/general', requireAuth, async (req, res) => {
+    try {
+      const result = await db.select().from(settings).where(eq(settings.group, 'general'));
+      const obj: Record<string, any> = {};
+      for (const row of result) { obj[row.key] = row.value; }
+      res.json({ data: obj });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur paramètres généraux' });
+    }
+  });
+
+  app.post('/api/admin/settings/general', requireAuth, async (req, res) => {
+    try {
+      const formData = req.body;
+      const upserts = Object.entries(formData).map(([key, value]) =>
+        db.insert(settings)
+          .values({ key, value, group: 'general', isPublic: key !== 'favicon' })
+          .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } })
+      );
+      await Promise.all(upserts);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur sauvegarde paramètres généraux' });
+    }
+  });
+
+  // ========================================
+  // SOLUTIONS CRUD (alias → services table)
+  // ========================================
+  // SolutionManagement.tsx appelle /api/admin/solutions → on redirige vers services
+
+  app.get('/api/admin/solutions', requireAuth, async (req, res) => {
+    try {
+      const { status, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(services.status, status as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(services.title, `%${s}%`), like(services.accroche, `%${s}%`)));
+      }
+      let query = db.select().from(services);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(services.order, desc(services.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(services),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur solutions' });
+    }
+  });
+
+  app.get('/api/admin/solutions/categories', requireAuth, async (req, res) => {
+    try {
+      const result = await db.selectDistinctOn([services.hub], { hub: services.hub }).from(services);
+      const cats = result.map(r => ({ slug: r.hub, label: r.hub }));
+      res.json({ data: cats });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur catégories solutions' });
+    }
+  });
+
+  app.get('/api/admin/solutions/:id', requireAuth, async (req, res) => {
+    try {
+      const [svc] = await db.select().from(services).where(eq(services.id, req.params.id)).limit(1);
+      if (!svc) return res.status(404).json({ error: 'Solution non trouvée' });
+      res.json(svc);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lecture solution' });
+    }
+  });
+
+  app.post('/api/admin/solutions', requireAuth, async (req, res) => {
+    try {
+      const [svc] = await db.insert(services).values(req.body).returning();
+      res.status(201).json(svc);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création solution' });
+    }
+  });
+
+  app.put('/api/admin/solutions/:id', requireAuth, async (req, res) => {
+    try {
+      const [svc] = await db.update(services).set({ ...req.body, updatedAt: new Date() })
+        .where(eq(services.id, req.params.id)).returning();
+      if (!svc) return res.status(404).json({ error: 'Solution non trouvée' });
+      res.json(svc);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour solution' });
+    }
+  });
+
+  app.put('/api/admin/solutions/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { isActive } = req.body;
+      const status = isActive ? 'PUBLISHED' : 'DRAFT';
+      const [svc] = await db.update(services).set({ status, updatedAt: new Date() })
+        .where(eq(services.id, req.params.id)).returning();
+      if (!svc) return res.status(404).json({ error: 'Solution non trouvée' });
+      res.json(svc);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur statut solution' });
+    }
+  });
+
+  app.delete('/api/admin/solutions/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(services).where(eq(services.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression solution' });
+    }
+  });
+
+  // ========================================
+  // NAVIGATION MENUS CRUD
+  // ========================================
+
+  app.get('/api/admin/navigations', requireAuth, async (req, res) => {
+    try {
+      const menus = await db.select().from(navigationMenus).orderBy(navigationMenus.name);
+      res.json(menus);
+    } catch (error) {
+      console.error('Erreur navigations:', error);
+      res.status(500).json({ error: 'Erreur chargement navigations' });
+    }
+  });
+
+  app.get('/api/admin/navigations/:id', requireAuth, async (req, res) => {
+    try {
+      const [menu] = await db.select().from(navigationMenus).where(eq(navigationMenus.id, req.params.id));
+      if (!menu) return res.status(404).json({ error: 'Menu non trouvé' });
+      res.json(menu);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur chargement menu' });
+    }
+  });
+
+  app.post('/api/admin/navigations', requireAuth, async (req, res) => {
+    try {
+      const { name, slug, location, items, isActive } = req.body;
+      const now = new Date();
+      const [menu] = await db.insert(navigationMenus).values({
+        name,
+        slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
+        location: location || 'header',
+        items: items || [],
+        isActive: isActive !== false,
+        createdAt: now,
+        updatedAt: now,
+      }).returning();
+      res.status(201).json(menu);
+    } catch (error) {
+      console.error('Erreur création navigation:', error);
+      res.status(500).json({ error: 'Erreur création navigation' });
+    }
+  });
+
+  app.put('/api/admin/navigations/:id', requireAuth, async (req, res) => {
+    try {
+      const { name, slug, location, items, isActive } = req.body;
+      const [menu] = await db.update(navigationMenus)
+        .set({
+          ...(name !== undefined && { name }),
+          ...(slug !== undefined && { slug }),
+          ...(location !== undefined && { location }),
+          ...(items !== undefined && { items }),
+          ...(isActive !== undefined && { isActive }),
+          updatedAt: new Date(),
+        })
+        .where(eq(navigationMenus.id, req.params.id))
+        .returning();
+      if (!menu) return res.status(404).json({ error: 'Menu non trouvé' });
+      res.json(menu);
+    } catch (error) {
+      console.error('Erreur mise à jour navigation:', error);
+      res.status(500).json({ error: 'Erreur mise à jour navigation' });
+    }
+  });
+
+  app.delete('/api/admin/navigations/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(navigationMenus).where(eq(navigationMenus.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression navigation' });
+    }
+  });
+
+  // ========================================
+  // PROJECT BRIEFS / LEADS CRUD
+  // ========================================
+
+  app.get('/api/admin/leads', requireAuth, async (req, res) => {
+    try {
+      const { status, priority, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(projectBriefs.status, status as string));
+      if (priority) conditions.push(eq(projectBriefs.priority, priority as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(
+          like(projectBriefs.firstName, `%${s}%`),
+          like(projectBriefs.lastName, `%${s}%`),
+          like(projectBriefs.email, `%${s}%`),
+          like(projectBriefs.company, `%${s}%`)
+        ));
+      }
+
+      let query = db.select().from(projectBriefs);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(projectBriefs.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(projectBriefs),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur leads' });
+    }
+  });
+
+  app.get('/api/admin/leads/:id', requireAuth, async (req, res) => {
+    try {
+      const [lead] = await db.select().from(projectBriefs).where(eq(projectBriefs.id, req.params.id)).limit(1);
+      if (!lead) return res.status(404).json({ error: 'Lead non trouvé' });
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lead' });
+    }
+  });
+
+  app.put('/api/admin/leads/:id', requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [lead] = await db.update(projectBriefs)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(projectBriefs.id, req.params.id)).returning();
+      if (!lead) return res.status(404).json({ error: 'Lead non trouvé' });
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour lead' });
+    }
+  });
+
+  app.delete('/api/admin/leads/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(projectBriefs).where(eq(projectBriefs.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression lead' });
+    }
+  });
+
+  // ========================================
+  // NEWSLETTER SUBSCRIPTIONS
+  // ========================================
+
+  app.get('/api/admin/newsletter', requireAuth, async (req, res) => {
+    try {
+      const { status, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(newsletterSubscriptions.status, status as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(
+          like(newsletterSubscriptions.email, `%${s}%`),
+          like(newsletterSubscriptions.firstName, `%${s}%`),
+          like(newsletterSubscriptions.lastName, `%${s}%`)
+        ));
+      }
+
+      let query = db.select().from(newsletterSubscriptions);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(newsletterSubscriptions.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(newsletterSubscriptions),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur newsletter' });
+    }
+  });
+
+  app.put('/api/admin/newsletter/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [sub] = await db.update(newsletterSubscriptions)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(newsletterSubscriptions.id, req.params.id)).returning();
+      if (!sub) return res.status(404).json({ error: 'Abonnement non trouvé' });
+      res.json(sub);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour abonnement' });
+    }
+  });
+
+  app.delete('/api/admin/newsletter/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(newsletterSubscriptions).where(eq(newsletterSubscriptions.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression abonnement' });
+    }
+  });
+
+  // ========================================
+  // CONTACT MESSAGES MANAGEMENT
+  // ========================================
+
+  app.get('/api/admin/contacts', requireAuth, async (req, res) => {
+    try {
+      const { status, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(contactMessages.status, status as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(
+          like(contactMessages.email, `%${s}%`),
+          like(contactMessages.firstName, `%${s}%`),
+          like(contactMessages.company, `%${s}%`)
+        ));
+      }
+
+      let query = db.select().from(contactMessages);
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(contactMessages.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(contactMessages),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur contacts' });
+    }
+  });
+
+  app.put('/api/admin/contacts/:id', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const [msg] = await db.update(contactMessages)
+        .set({ status })
+        .where(eq(contactMessages.id, req.params.id)).returning();
+      if (!msg) return res.status(404).json({ error: 'Message non trouvé' });
+      res.json(msg);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour message' });
+    }
+  });
+
+  app.delete('/api/admin/contacts/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(contactMessages).where(eq(contactMessages.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression message' });
     }
   });
 }

@@ -13,6 +13,7 @@ import { useToast } from '../../components/Toast';
 import { getApi } from '../../lib/api';
 import { Page, PageSection } from '../../types';
 import { PAGE_TEMPLATES, getTemplateById } from '../../types/page-templates';
+import ServicePageEditor, { type ServicePageSections } from './ServicePageEditor';
 
 interface PageFormData {
   title: string;
@@ -51,6 +52,10 @@ export const PageForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [serviceSections, setServiceSections] = useState<ServicePageSections>({
+    heroTitle: '', heroSubtitle: '', pitchTitle: '', pitchBody: '',
+    serviceBlocks: [], ctaTitle: '', ctaBody: '',
+  });
   
   const [formData, setFormData] = useState<PageFormData>({
     title: '',
@@ -73,15 +78,20 @@ export const PageForm: React.FC = () => {
     try {
       const api = getApi();
       const page = await api.pages.getById(id!);
+      const tpl = page.template || 'default';
       setFormData({
         title: page.title,
         slug: page.slug,
         metaTitle: page.metaTitle || '',
         metaDescription: page.metaDescription || '',
-        template: page.template || 'default',
+        template: tpl,
         status: page.status,
         sections: page.sections || [],
       });
+      // If SERVICE_PAGE, load sections into dedicated editor state
+      if (tpl === 'SERVICE_PAGE' && page.sections && !Array.isArray(page.sections)) {
+        setServiceSections(page.sections as unknown as ServicePageSections);
+      }
     } catch (error) {
       toast.error('Erreur', 'Impossible de charger la page');
       navigate('/admin/pages');
@@ -161,11 +171,15 @@ export const PageForm: React.FC = () => {
 
     try {
       const api = getApi();
+      // For SERVICE_PAGE templates, inject serviceSections as the sections payload
+      const payload = formData.template === 'SERVICE_PAGE'
+        ? { ...formData, sections: serviceSections as unknown as PageSection[] }
+        : formData;
       if (isEditing) {
-        await api.pages.update(id!, formData);
+        await api.pages.update(id!, payload);
         toast.success('Succès', 'Page mise à jour');
       } else {
-        await api.pages.create(formData);
+        await api.pages.create(payload);
         toast.success('Succès', 'Page créée');
       }
       navigate('/admin/pages');
@@ -240,10 +254,12 @@ export const PageForm: React.FC = () => {
                   <FileText className="w-4 h-4 mr-2" />
                   Modèle
                 </Button>
-                <Button variant="secondary" size="sm" onClick={addSection} type="button">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Section
-                </Button>
+                {formData.template !== 'SERVICE_PAGE' && (
+                  <Button variant="secondary" size="sm" onClick={addSection} type="button">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Section
+                  </Button>
+                )}
               </div>
 
               <Input
@@ -256,65 +272,72 @@ export const PageForm: React.FC = () => {
           </Card>
 
           {/* Sections */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Sections</CardTitle>
-              <Button variant="secondary" size="sm" onClick={addSection} type="button">
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter une section
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.sections.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Aucune section. Cliquez sur "Ajouter une section" pour commencer.
-                </div>
-              ) : (
-                formData.sections.map((section, index) => (
-                  <div
-                    key={section.id || index}
-                    className="border border-gray-200 rounded-lg p-4 space-y-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                        <span className="font-medium">Section {index + 1}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeSection(index)}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <Select
-                        label="Type"
-                        value={section.type}
-                        onChange={(e) => updateSection(index, { type: e.target.value })}
-                        options={sectionTypes}
-                      />
-                      <Input
-                        label="Titre"
-                        value={section.title || ''}
-                        onChange={(e) => updateSection(index, { title: e.target.value })}
-                        placeholder="Titre de la section"
-                      />
-                    </div>
-
-                    <RichTextEditor
-                      label="Contenu"
-                      value={section.content || ''}
-                      onChange={(content) => updateSection(index, { content })}
-                      minHeight="150px"
-                    />
+          {formData.template === 'SERVICE_PAGE' ? (
+            <ServicePageEditor
+              value={serviceSections}
+              onChange={setServiceSections}
+            />
+          ) : (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Sections</CardTitle>
+                <Button variant="secondary" size="sm" onClick={addSection} type="button">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une section
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {formData.sections.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    Aucune section. Cliquez sur "Ajouter une section" pour commencer.
                   </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
+                ) : (
+                  formData.sections.map((section, index) => (
+                    <div
+                      key={section.id || index}
+                      className="border border-gray-200 rounded-lg p-4 space-y-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                          <span className="font-medium">Section {index + 1}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeSection(index)}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <Select
+                          label="Type"
+                          value={section.type}
+                          onChange={(e) => updateSection(index, { type: e.target.value })}
+                          options={sectionTypes}
+                        />
+                        <Input
+                          label="Titre"
+                          value={section.title || ''}
+                          onChange={(e) => updateSection(index, { title: e.target.value })}
+                          placeholder="Titre de la section"
+                        />
+                      </div>
+
+                      <RichTextEditor
+                        label="Contenu"
+                        value={section.content || ''}
+                        onChange={(content) => updateSection(index, { content })}
+                        minHeight="150px"
+                      />
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* SEO */}
           <Card>
@@ -409,6 +432,7 @@ export const PageForm: React.FC = () => {
                   { value: 'full-width', label: 'Pleine largeur' },
                   { value: 'sidebar', label: 'Avec sidebar' },
                   { value: 'landing', label: 'Landing page' },
+                  { value: 'SERVICE_PAGE', label: '🎯 Page de service' },
                 ]}
               />
             </CardContent>

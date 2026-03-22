@@ -6,12 +6,25 @@ import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { getSolutionBySlug } from "@/data/solutionsData";
+import { useService } from "@/hooks/useService";
 
 export default function SolutionPage() {
   const { slug } = useParams();
-  const solution = slug ? getSolutionBySlug(slug) : null;
+  const fallbackSolution = slug ? getSolutionBySlug(slug) ?? null : null;
+  const { data: solution, loading } = useService(slug ?? "", fallbackSolution ?? {
+    slug: slug ?? "",
+    label: "",
+    description: "",
+    heroTitle: "",
+    heroSubtitle: "",
+    heroImage: "",
+    needs: [],
+    content: "",
+  });
 
-  if (!solution) {
+  // Attendre la fin du chargement DB avant d'afficher 404
+  // (le slug peut exister en DB mais pas dans les données hardcodées)
+  if (!loading && !fallbackSolution && !solution.label) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />

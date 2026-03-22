@@ -447,3 +447,279 @@ export const insertProjectBriefSchema = createInsertSchema(projectBriefs).omit({
 
 export type InsertProjectBrief = z.infer<typeof insertProjectBriefSchema>;
 export type ProjectBrief = typeof projectBriefs.$inferSelect;
+
+// ========================================
+// SERVICES (Hubs métiers)
+// ========================================
+
+export const services = pgTable("services", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  hub: varchar("hub", { length: 100 }).notNull().default('evenements'),
+  // hub values: evenements | architecture-de-marque | la-fabrique | qhse
+  accroche: text("accroche"),
+  heroImage: text("hero_image"),
+  heroVideo: text("hero_video"),
+  body: text("body"),                      // HTML/Markdown content
+  serviceBlocks: json("service_blocks"),   // [{ icon, title, description }]
+  advantageFabrique: json("advantage_fabrique"), // { text, link }
+  status: varchar("status", { length: 20 }).notNull().default('DRAFT'),
+  // SEO
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords"),
+  openGraphImage: text("open_graph_image"),
+  featured: boolean("featured").default(false),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertServiceSchema = createInsertSchema(services).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertService = z.infer<typeof insertServiceSchema>;
+export type Service = typeof services.$inferSelect;
+
+// ========================================
+// CLIENT REFERENCES
+// ========================================
+
+export const clientReferences = pgTable("client_references", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  logo: text("logo"),                       // URL de l'image logo
+  sectors: text("sectors").array(),         // ['Industrie', 'Santé', ...]
+  description: text("description"),
+  projectDescription: text("project_description"),
+  caseStudyUrl: text("case_study_url"),
+  website: text("website"),
+  isFeatured: boolean("is_featured").default(false),
+  order: integer("order").default(0),
+  isPublished: boolean("is_published").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertClientReferenceSchema = createInsertSchema(clientReferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertClientReference = z.infer<typeof insertClientReferenceSchema>;
+export type ClientReference = typeof clientReferences.$inferSelect;
+
+// ========================================
+// CASE STUDIES (Études de cas)
+// ========================================
+
+export const caseStudies = pgTable("case_studies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  clientId: varchar("client_id").references(() => clientReferences.id),
+  clientName: text("client_name"),   // Dénormalisé pour performance
+  problem: text("problem"),          // Problématique
+  solution: text("solution"),        // Solution Epitaphe
+  results: text("results"),          // Résultats obtenus
+  kpis: json("kpis"),               // [{ value: '+32%', label: 'NPS', icon: 'trending-up' }]
+  gallery: json("gallery"),          // [{ image, caption }]
+  relatedServiceSlugs: text("related_service_slugs").array(),
+  featuredImage: text("featured_image"),
+  status: varchar("status", { length: 20 }).notNull().default('DRAFT'),
+  isFeatured: boolean("is_featured").default(false),
+  // SEO
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  openGraphImage: text("open_graph_image"),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
+export type CaseStudy = typeof caseStudies.$inferSelect;
+
+// ========================================
+// TESTIMONIALS (Témoignages)
+// ========================================
+
+export const testimonials = pgTable("testimonials", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  quote: text("quote").notNull(),
+  authorName: text("author_name").notNull(),
+  authorTitle: text("author_title"),
+  companyName: text("company_name"),
+  companyLogo: text("company_logo"),
+  rating: integer("rating").default(5),          // 1-5
+  serviceSlug: text("service_slug"),              // Témoignage lié à un service
+  caseStudyId: varchar("case_study_id").references(() => caseStudies.id),
+  isPublished: boolean("is_published").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  date: timestamp("date"),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTestimonialSchema = createInsertSchema(testimonials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
+export type Testimonial = typeof testimonials.$inferSelect;
+
+// ========================================
+// TEAM MEMBERS (Équipe Agence)
+// ========================================
+
+export const teamMembers = pgTable("team_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  position: text("position").notNull(),
+  bio: text("bio"),
+  photo: text("photo"),                          // URL de la photo
+  email: text("email"),
+  socialLinks: json("social_links"),             // [{ platform: 'LinkedIn', url: '...' }]
+  isPublished: boolean("is_published").default(true),
+  order: integer("order").default(0),
+  department: varchar("department", { length: 100 }),
+  // Possible values: Direction | Création | Production | Commercial | QHSE
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+export type TeamMember = typeof teamMembers.$inferSelect;
+
+// ========================================
+// ESPACE CLIENT — Comptes clients
+// ========================================
+
+export const clientAccounts = pgTable("client_accounts", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: text("name").notNull(),
+  company: text("company"),
+  phone: text("phone"),
+  isActive: boolean("is_active").default(true),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertClientAccountSchema = createInsertSchema(clientAccounts).omit({
+  id: true,
+  lastLoginAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertClientAccount = z.infer<typeof insertClientAccountSchema>;
+export type ClientAccount = typeof clientAccounts.$inferSelect;
+
+// ========================================
+// ESPACE CLIENT — Projets clients
+// ========================================
+
+export const clientProjects = pgTable("client_projects", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").references(() => clientAccounts.id).notNull(),
+  title: text("title").notNull(),
+  type: text("type").default("Projet"), // Événement corporate, Signalétique, etc.
+  status: varchar("status", { length: 30 }).default("en_cours"), // en_cours | en_attente | termine | en_pause
+  progress: integer("progress").default(0),      // 0-100
+  managerName: text("manager_name"),
+  managerEmail: text("manager_email"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertClientProjectSchema = createInsertSchema(clientProjects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertClientProject = z.infer<typeof insertClientProjectSchema>;
+export type ClientProject = typeof clientProjects.$inferSelect;
+
+// ========================================
+// ESPACE CLIENT — Jalons / Milestones
+// ========================================
+
+export const clientMilestones = pgTable("client_milestones", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => clientProjects.id).notNull(),
+  label: text("label").notNull(),
+  dueDate: text("due_date"),          // Label texte affiché ex: "15 Mar"
+  status: varchar("status", { length: 20 }).default("pending"), // done | active | pending
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertClientMilestoneSchema = createInsertSchema(clientMilestones).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertClientMilestone = z.infer<typeof insertClientMilestoneSchema>;
+export type ClientMilestone = typeof clientMilestones.$inferSelect;
+
+// ========================================
+// ESPACE CLIENT — Documents / livrables
+// ========================================
+
+export const clientDocuments = pgTable("client_documents", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => clientProjects.id).notNull(),
+  name: text("name").notNull(),
+  fileType: varchar("file_type", { length: 20 }).default("PDF"),
+  fileSize: text("file_size"),         // "1.2 Mo"
+  url: text("url").notNull(),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+});
+
+export const insertClientDocumentSchema = createInsertSchema(clientDocuments).omit({
+  id: true,
+  uploadedAt: true,
+});
+export type InsertClientDocument = z.infer<typeof insertClientDocumentSchema>;
+export type ClientDocument = typeof clientDocuments.$inferSelect;
+
+// ========================================
+// ESPACE CLIENT — Messages client ↔ agence
+// ========================================
+
+export const clientMessages = pgTable("client_messages", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => clientProjects.id).notNull(),
+  clientId: integer("client_id").references(() => clientAccounts.id).notNull(),
+  senderRole: varchar("sender_role", { length: 20 }).default("client"), // client | agency
+  content: text("content").notNull(),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertClientMessageSchema = createInsertSchema(clientMessages).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertClientMessage = z.infer<typeof insertClientMessageSchema>;
+export type ClientMessage = typeof clientMessages.$inferSelect;

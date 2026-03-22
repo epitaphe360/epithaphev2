@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
+import { useSettings } from "@/hooks/useSettings";
 
-const benefits = [
+const FALLBACK_BENEFITS = [
   "Une maitrise totale : de l'idée à l'exécution, nous gérons vos projet de A à Z pour assurer cohérence, qualité et réactivité",
   "Une approche personnalisée : Nos solutions sont adaptées à vos besoins uniques, avec des formules sur-mesure.",
   "Un atelier interne. Rapidité, flexibilité et réactivité sont nos garanties.",
@@ -10,6 +11,22 @@ const benefits = [
 ];
 
 export function BenefitsSection() {
+  const { settings } = useSettings("benefits", {
+    benefits_title: "Une agence de communication 360, c'est:",
+    benefits_image: "https://epitaphe.ma/wp-content/uploads/2020/05/bg-agence-de-com-360-800x450.jpg",
+  });
+
+  const benefits: string[] = (() => {
+    try {
+      const raw = settings.benefits_items;
+      if (Array.isArray(raw) && raw.length > 0) return raw as string[];
+      if (typeof raw === "string") {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed as string[];
+      }
+    } catch {}
+    return FALLBACK_BENEFITS;
+  })();
   return (
     <section id="about" className="py-20 md:py-32" data-testid="section-benefits">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -17,7 +34,7 @@ export function BenefitsSection() {
           <div className="relative order-2 lg:order-1">
             <div className="aspect-[4/3] rounded-md overflow-hidden shadow-xl">
               <img
-                src="https://epitaphe.ma/wp-content/uploads/2020/05/bg-agence-de-com-360-800x450.jpg"
+                src={settings.benefits_image}
                 alt="Agence de communication 360"
                 className="w-full h-full object-cover"
               />
@@ -29,7 +46,7 @@ export function BenefitsSection() {
               className="text-3xl md:text-4xl font-bold text-foreground mb-8"
               data-testid="text-benefits-title"
             >
-              Une agence de communication 360, c'est:
+              {settings.benefits_title}
             </h2>
 
             <ul className="space-y-4">

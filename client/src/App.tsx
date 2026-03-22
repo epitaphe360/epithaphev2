@@ -12,6 +12,39 @@ import BlogPage from "@/pages/blog";
 import BlogArticlePage from "@/pages/blog-article";
 import SolutionPage from "@/pages/solution";
 import NotFound from "@/pages/not-found";
+// ── Module 2 : Pages publiques ───────────────────────────────────────────────
+import EvenementsHub from "@/pages/evenements/index";
+import ConventionsKickoffs from "@/pages/evenements/conventions-kickoffs";
+import SoireesDeGala from "@/pages/evenements/soirees-de-gala";
+import Roadshows from "@/pages/evenements/roadshows";
+import Salons from "@/pages/evenements/salons";
+import ArchitectureDeMarqueHub from "@/pages/architecture-de-marque/index";
+import MarqueEmployeur from "@/pages/architecture-de-marque/marque-employeur";
+import CommunicationQhse from "@/pages/architecture-de-marque/communication-qhse";
+import ExperienceClients from "@/pages/architecture-de-marque/experience-clients";
+import LaFabriqueHub from "@/pages/la-fabrique/index";
+import Impression from "@/pages/la-fabrique/impression";
+import Menuiserie from "@/pages/la-fabrique/menuiserie";
+import Signaletique from "@/pages/la-fabrique/signaletique";
+import Amenagement from "@/pages/la-fabrique/amenagement";
+// ── Module 4 : Lead Gen ──────────────────────────────────────────────────────
+import ContactPage from "@/pages/contact/index";
+import BriefPage from "@/pages/contact/brief";
+import VigilanceScore from "@/pages/outils/vigilance-score";
+import CalculateurFabrique from "@/pages/outils/calculateur-fabrique";
+// ── Module 5 : SEO / Ressources ──────────────────────────────────────────────
+import RessourcesPage from "@/pages/ressources/index";
+import { OrganizationSchema } from "@/components/seo/schema-org";
+// ── Espace Client ────────────────────────────────────────────────────────────
+import EspaceClientPage from "@/pages/espace-client/index";
+// ── Analytics ────────────────────────────────────────────────────────────────
+import AnalyticsPage from "@/pages/analytics/index";
+// ── StandViewer 3D ───────────────────────────────────────────────────────────
+import StandViewerPage from "@/pages/outils/stand-viewer";
+// ── React Helmet ─────────────────────────────────────────────────────────────
+import { HelmetProvider } from "react-helmet-async";
+// ── WhatsApp ──────────────────────────────────────────────────────────────────
+import { WhatsAppButton } from "@/components/whatsapp-button";
 // CMS Dashboard imports
 import { DashboardLayout } from "../../cms-dashboard/layouts/DashboardLayout";
 import { NewLoginPage } from "../../cms-dashboard/pages/NewLoginPage";
@@ -32,6 +65,15 @@ import { UsersList } from "../../cms-dashboard/pages/users";
 import { GeneralSettings, SEOSettings, IntegrationSettings } from "../../cms-dashboard/pages/settings";
 import { VisualEditorManagement } from "../../cms-dashboard/pages/plasmic";
 import GrapesJSEditor from "../../cms-dashboard/pages/plasmic/GrapesJSEditor";
+// Nouveaux modules
+import { ServicesList } from "../../cms-dashboard/pages/services";
+import { ReferencesList } from "../../cms-dashboard/pages/references";
+import { CaseStudiesList } from "../../cms-dashboard/pages/case-studies";
+import { TestimonialsList } from "../../cms-dashboard/pages/testimonials";
+import { TeamList } from "../../cms-dashboard/pages/team";
+import { LeadsList } from "../../cms-dashboard/pages/leads";
+import { NewsletterList } from "../../cms-dashboard/pages/newsletter";
+import { ContactsList } from "../../cms-dashboard/pages/contacts";
 import { useAuthStore } from "../../cms-dashboard/store/authStore";
 import type { ReactNode } from "react";
 
@@ -58,7 +100,45 @@ function Router() {
       <Route path="/blog/:slug" component={BlogArticlePage} />
       <Route path="/solutions/:slug" component={SolutionPage} />
       <Route path="/page/:slug" component={DynamicPage} />
-      
+
+      {/* ── Événements ───────────────────────────────────────── */}
+      <Route path="/evenements" component={EvenementsHub} />
+      <Route path="/evenements/conventions-kickoffs" component={ConventionsKickoffs} />
+      <Route path="/evenements/soirees-de-gala" component={SoireesDeGala} />
+      <Route path="/evenements/roadshows" component={Roadshows} />
+      <Route path="/evenements/salons" component={Salons} />
+
+      {/* ── Architecture de Marque ───────────────────────────── */}
+      <Route path="/architecture-de-marque" component={ArchitectureDeMarqueHub} />
+      <Route path="/architecture-de-marque/marque-employeur" component={MarqueEmployeur} />
+      <Route path="/architecture-de-marque/communication-qhse" component={CommunicationQhse} />
+      <Route path="/architecture-de-marque/experience-clients" component={ExperienceClients} />
+
+      {/* ── La Fabrique ──────────────────────────────────────── */}
+      <Route path="/la-fabrique" component={LaFabriqueHub} />
+      <Route path="/la-fabrique/impression" component={Impression} />
+      <Route path="/la-fabrique/menuiserie" component={Menuiserie} />
+      <Route path="/la-fabrique/signaletique" component={Signaletique} />
+      <Route path="/la-fabrique/amenagement" component={Amenagement} />
+
+      {/* ── Contact & Lead Gen ───────────────────────────────── */}
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/contact/brief" component={BriefPage} />
+
+      {/* ── Outils ───────────────────────────────────────────── */}
+      <Route path="/outils/vigilance-score" component={VigilanceScore} />
+      <Route path="/outils/calculateur-fabrique" component={CalculateurFabrique} />
+      <Route path="/outils/stand-viewer" component={StandViewerPage} />
+
+      {/* ── Ressources ───────────────────────────────────────── */}
+      <Route path="/ressources" component={RessourcesPage} />
+
+      {/* ── Espace Client ────────────────────────────────────── */}
+      <Route path="/espace-client" component={EspaceClientPage} />
+
+      {/* ── Analytics (public dashboard) ─────────────────────── */}
+      <Route path="/analytics" component={AnalyticsPage} />
+
       {/* CMS Admin Routes */}
       <Route path="/admin/login" component={NewLoginPage} />
       
@@ -241,6 +321,46 @@ function Router() {
           </ProtectedRoute>
         )}
       </Route>
+
+      {/* Services */}
+      <Route path="/admin/services">
+        {() => (<ProtectedRoute><DashboardLayout><ServicesList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Références Clients */}
+      <Route path="/admin/references">
+        {() => (<ProtectedRoute><DashboardLayout><ReferencesList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Études de Cas */}
+      <Route path="/admin/case-studies">
+        {() => (<ProtectedRoute><DashboardLayout><CaseStudiesList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Témoignages */}
+      <Route path="/admin/testimonials">
+        {() => (<ProtectedRoute><DashboardLayout><TestimonialsList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Équipe */}
+      <Route path="/admin/team">
+        {() => (<ProtectedRoute><DashboardLayout><TeamList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Leads */}
+      <Route path="/admin/leads">
+        {() => (<ProtectedRoute><DashboardLayout><LeadsList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Newsletter */}
+      <Route path="/admin/newsletter">
+        {() => (<ProtectedRoute><DashboardLayout><NewsletterList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Contacts */}
+      <Route path="/admin/contacts">
+        {() => (<ProtectedRoute><DashboardLayout><ContactsList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
       
       {/* Legacy routes */}
       <Route path="/admin/menus">
@@ -278,16 +398,20 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" storageKey="epitaphe-theme">
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="light" storageKey="epitaphe-theme">
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <OrganizationSchema />
+              <Toaster />
+              <WhatsAppButton />
+              <Router />
+            </TooltipProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 

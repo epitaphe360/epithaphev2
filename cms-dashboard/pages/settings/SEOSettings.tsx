@@ -44,8 +44,9 @@ export const SEOSettings: React.FC = () => {
   const loadSettings = async () => {
     try {
       const api = getApi();
-      const response = await api.get('/settings/seo');
-      setFormData(response.data);
+      const response = await api.get('/admin/settings/seo');
+      const d = response.data?.data || {};
+      setFormData((prev) => ({ ...prev, ...d }));
     } catch (error) {
       console.error('Error loading SEO settings:', error);
     }
@@ -60,10 +61,9 @@ export const SEOSettings: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const api = getApi();
-      await api.put('/settings/seo', formData);
+      await api.put('/admin/settings', { group: 'seo', data: formData });
       toast.success('Succès', 'Paramètres SEO enregistrés');
     } catch (error) {
       toast.error('Erreur', 'Impossible d\'enregistrer les paramètres');

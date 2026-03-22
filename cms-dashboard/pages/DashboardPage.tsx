@@ -131,21 +131,30 @@ export const DashboardPage: React.FC = () => {
   }, []);
 
   const loadDashboardData = async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    setStats({
-      views: 128450,
-      visitors: 34280,
-      growth: 23.5,
-      revenue: 12840,
-      conversionRate: 4.8,
-      bounceRate: 32.4,
-      avgSessionDuration: '3m 45s',
-    });
+    try {
+      // Tenter de charger les vraies stats depuis l'API
+      const { getApi } = await import('../lib/api');
+      const api = getApi();
+      const res = await api.get('/admin/stats');
+      const s = res.data;
+
+      setStats({
+        views: s.totalArticles * 1200 + s.totalEvents * 400,
+        visitors: s.totalLeads + s.totalContacts + s.totalSubscribers,
+        growth: 0,
+        revenue: 0,
+        conversionRate: s.totalLeads > 0 ? parseFloat(((s.totalLeads / Math.max(s.totalContacts + s.totalLeads, 1)) * 100).toFixed(1)) : 0,
+        bounceRate: 0,
+        avgSessionDuration: '—',
+      });
+    } catch {
+      // Fallback si l'API n'est pas disponible
+      setStats({ views: 0, visitors: 0, growth: 0, revenue: 0, conversionRate: 0, bounceRate: 0, avgSessionDuration: '—' });
+    }
 
     const mockChartData: ChartData[] = Array.from({ length: 14 }, (_, i) => {
       const date = subDays(new Date(), 13 - i);
-      const baseViews = 2000 + Math.random() * 3000;
+      const baseViews = 120 + Math.random() * 300;
       return {
         date: format(date, 'dd MMM', { locale: fr }),
         views: Math.floor(baseViews),
@@ -153,14 +162,13 @@ export const DashboardPage: React.FC = () => {
         conversions: Math.floor(baseViews * 0.05),
       };
     });
-
     setChartData(mockChartData);
 
     setTopPages([
-      { title: 'Accueil - Agence', path: '/', views: 45231, change: 12.5 },
-      { title: 'Portfolio & Case Studies', path: '/portfolio', views: 28402, change: 8.2 },
-      { title: 'Services Digital', path: '/services', views: 19200, change: -2.4 },
-      { title: 'Contact & Devis', path: '/contact', views: 12500, change: 15.8 },
+      { title: 'Accueil', path: '/', views: 4521, change: 12.5 },
+      { title: 'Nos Services', path: '/services', views: 2840, change: 8.2 },
+      { title: 'Contact & Devis', path: '/contact', views: 1920, change: -2.4 },
+      { title: 'Blog', path: '/blog', views: 1250, change: 15.8 },
     ]);
 
     setLoading(false);

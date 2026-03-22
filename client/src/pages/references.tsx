@@ -1,5 +1,6 @@
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { PageMeta } from "@/components/seo/page-meta";
 import { ContactSection } from "@/components/contact-section";
 import { StatsSection } from "@/components/stats-section";
 
@@ -97,6 +98,11 @@ const clientCategories = [
 export default function ReferencesPage() {
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Nos Références Clients — Epitaphe 360"
+        description="Plus de 500 entreprises nous font confiance : LafargeHolcim, OCP, Maroc Telecom, BMCE, Total… Découvrez nos références par secteur d'activité."
+        canonicalPath="/references"
+      />
       <Navigation />
       
       <section className="relative pt-20 min-h-[70vh] flex items-center justify-center overflow-hidden">

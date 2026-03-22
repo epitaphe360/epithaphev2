@@ -1,35 +1,31 @@
-const clients = [
-  {
-    name: "Qatar Airways",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/Logo_Qatar_Airways.png",
-  },
-  {
-    name: "HPS",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo_hps.png",
-  },
-  {
-    name: "CMMB",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-CMMB.png",
-  },
-  {
-    name: "DataProtect",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo_dataprotect.png",
-  },
-  {
-    name: "XCOM",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-xcom.png",
-  },
-  {
-    name: "Vinci Energies",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO_VINCI_ENERGIES.png",
-  },
-  {
-    name: "Schneider Electric",
-    logo: "https://epitaphe.ma/wp-content/uploads/2020/05/Logo_Schneider_Electric.png",
-  },
+import { useState, useEffect } from "react";
+
+type ClientRef = { name: string; logo: string };
+
+const FALLBACK_CLIENTS: ClientRef[] = [
+  { name: "Qatar Airways", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/Logo_Qatar_Airways.png" },
+  { name: "HPS", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo_hps.png" },
+  { name: "CMMB", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-CMMB.png" },
+  { name: "DataProtect", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo_dataprotect.png" },
+  { name: "XCOM", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-xcom.png" },
+  { name: "Vinci Energies", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO_VINCI_ENERGIES.png" },
+  { name: "Schneider Electric", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/Logo_Schneider_Electric.png" },
 ];
 
 export function ClientsSection() {
+  const [clients, setClients] = useState<ClientRef[]>(FALLBACK_CLIENTS);
+
+  useEffect(() => {
+    fetch("/api/references/public")
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        const items: any[] = json?.data ?? [];
+        if (items.length > 0) {
+          setClients(items.map((r: any) => ({ name: r.name ?? "", logo: r.logo ?? "" })).filter((c) => c.logo));
+        }
+      })
+      .catch(() => {/* garde le fallback */});
+  }, []);
   return (
     <section
       className="py-16 md:py-24 bg-secondary/30 overflow-hidden"

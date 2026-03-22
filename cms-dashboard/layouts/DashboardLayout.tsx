@@ -20,6 +20,13 @@ import {
   FolderTree,
   Users,
   Settings,
+  Briefcase,
+  Building2,
+  BookOpen,
+  MessageSquare,
+  Target,
+  Mail,
+  Phone,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -51,14 +58,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
   const mergedConfig = { ...defaultConfig, ...config };
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Articles', href: '/admin/articles', icon: FileText },
-    { name: 'Événements', href: '/admin/events', icon: Calendar },
-    { name: 'Pages', href: '/admin/pages', icon: FileEdit },
-    { name: 'Catégories', href: '/admin/categories', icon: FolderTree },
-    { name: 'Médias', href: '/admin/media', icon: Image },
-    { name: 'Utilisateurs', href: '/admin/users', icon: Users },
-    { name: 'Paramètres', href: '/admin/settings/general', icon: Settings },
+    { name: 'Dashboard',     href: '/admin',                    icon: LayoutDashboard },
+    { name: 'Articles',      href: '/admin/articles',           icon: FileText },
+    { name: 'Événements',    href: '/admin/events',             icon: Calendar },
+    { name: 'Pages',         href: '/admin/pages',              icon: FileEdit },
+    { name: 'Services',      href: '/admin/services',           icon: Briefcase },
+    { name: 'Références',    href: '/admin/references',         icon: Building2 },
+    { name: 'Études de cas', href: '/admin/case-studies',       icon: BookOpen },
+    { name: 'Témoignages',   href: '/admin/testimonials',       icon: MessageSquare },
+    { name: 'Équipe',        href: '/admin/team',               icon: Users },
+    { name: 'Leads',         href: '/admin/leads',              icon: Target },
+    { name: 'Newsletter',    href: '/admin/newsletter',         icon: Mail },
+    { name: 'Contacts',      href: '/admin/contacts',           icon: Phone },
+    { name: 'Catégories',    href: '/admin/categories',         icon: FolderTree },
+    { name: 'Médias',        href: '/admin/media',              icon: Image },
+    { name: 'Utilisateurs',  href: '/admin/users',              icon: User },
+    { name: 'Paramètres',    href: '/admin/settings/general',   icon: Settings },
   ];
 
   const isActive = (path: string) => {

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="96" fill="#d1295a"/>
+  <!-- Lettre E stylisée -->
+  <rect x="120" y="136" width="272" height="44" rx="22" fill="white"/>
+  <rect x="120" y="234" width="200" height="44" rx="22" fill="white"/>
+  <rect x="120" y="332" width="272" height="44" rx="22" fill="white"/>
+  <rect x="120" y="136" width="44" height="240" rx="22" fill="white"/>
+  <!-- Point décoratif 360 -->
+  <circle cx="384" cy="258" r="28" fill="white" fill-opacity="0.25"/>
+  <circle cx="384" cy="258" r="16" fill="white"/>
+</svg>

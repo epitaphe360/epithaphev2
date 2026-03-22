@@ -5,8 +5,8 @@ import { insertContactMessageSchema } from "@shared/schema";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerPublicApiRoutes } from "./public-api-routes";
 import { db } from "./db";
-import { pages, articles, events, categories, media } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { pages, articles, events, categories, media, services, settings, clientReferences } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./lib/auth";
 
 export async function registerRoutes(
@@ -93,6 +93,59 @@ export async function registerRoutes(
       res.json({ data: result, total: result.length });
     } catch (error) {
       res.status(500).json({ error: 'Erreur lors de la récupération des fichiers média' });
+    }
+  });
+
+  // Services (public)
+  app.get("/api/services", async (req, res) => {
+    try {
+      const result = await db.select().from(services).where(eq(services.status, 'PUBLISHED'));
+      res.json({ data: result, total: result.length });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lors de la récupération des services' });
+    }
+  });
+
+  app.get("/api/services/slug/:slug", async (req, res) => {
+    try {
+      const result = await db.select().from(services).where(eq(services.slug, req.params.slug)).limit(1);
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Service non trouvé' });
+      }
+      res.json(result[0]);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lors de la récupération du service' });
+    }
+  });
+
+  // Settings publics (isPublic = true)
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const { group } = req.query;
+      let query = db.select().from(settings).where(eq(settings.isPublic, true));
+      if (group) {
+        query = db.select().from(settings).where(
+          and(eq(settings.isPublic, true), eq(settings.group, group as string))
+        );
+      }
+      const result = await query;
+      const obj: Record<string, any> = {};
+      for (const row of result) { obj[row.key] = row.value; }
+      res.json(obj);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur paramètres' });
+    }
+  });
+
+  // Références clients publiques (logos visibles sur le site)
+  app.get("/api/references/public", async (req, res) => {
+    try {
+      const result = await db.select().from(clientReferences)
+        .where(eq(clientReferences.isPublished, true))
+        .orderBy(clientReferences.order);
+      res.json({ data: result, total: result.length });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur références' });
     }
   });
 

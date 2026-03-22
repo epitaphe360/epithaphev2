@@ -29,6 +29,10 @@ console.log('✅ Imports loaded successfully');
 const app = express();
 const httpServer = createServer(app);
 
+// REQUIRED for Railway (and any reverse proxy like Nginx, Heroku, etc.)
+// Without this, req.ip returns the proxy IP and rate limiting breaks
+app.set('trust proxy', 1);
+
 // Serve static assets FIRST before any other middleware
 // This prevents helmet, cors, rate-limit from interfering with static files
 import path from 'path';

@@ -42,23 +42,21 @@ export const NewLoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Identifiants incorrects');
 
-      if (email === 'admin@epitaph.ma' && password === 'admin123') {
-        const mockUser = {
-          id: '1',
-          name: 'Administrateur',
-          email: 'admin@epitaph.ma',
-          role: 'ADMIN' as const
-        };
-        const mockToken = 'mock-jwt-token-' + Date.now();
-
-        login(mockToken, mockUser);
-        setLocation('/admin');
-      } else {
-        throw new Error('Identifiants incorrects');
-      }
+      login(data.token, {
+        id: data.user.id,
+        name: data.user.name ?? data.user.email,
+        email: data.user.email,
+        role: (data.user.role ?? 'ADMIN') as 'ADMIN' | 'EDITOR',
+      });
+      setLocation('/admin');
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
     } finally {
@@ -186,15 +184,6 @@ export const NewLoginPage: React.FC = () => {
                     Le mot de passe doit contenir au moins 6 caractères
                   </p>
                 )}
-              </div>
-
-              {/* Demo Info */}
-              <div className="pt-2 pb-2">
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 backdrop-blur-sm">
-                  <p className="text-xs text-blue-300 text-center font-medium">
-                    🔑 Demo: <span className="font-mono">admin@epitaph.ma</span> / <span className="font-mono">admin123</span>
-                  </p>
-                </div>
               </div>
 
               {/* Submit Button */}

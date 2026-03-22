@@ -139,29 +139,20 @@ export const DashboardPage: React.FC = () => {
       const s = res.data;
 
       setStats({
-        views: s.totalArticles * 1200 + s.totalEvents * 400,
-        visitors: s.totalLeads + s.totalContacts + s.totalSubscribers,
+        views: (s.articles ?? 0) * 1200 + (s.events ?? 0) * 400,
+        visitors: (s.leads ?? 0) + (s.contacts ?? 0) + (s.newsletter ?? 0),
         growth: 0,
         revenue: 0,
-        conversionRate: s.totalLeads > 0 ? parseFloat(((s.totalLeads / Math.max(s.totalContacts + s.totalLeads, 1)) * 100).toFixed(1)) : 0,
+        conversionRate: (s.leads ?? 0) > 0 ? parseFloat((((s.leads ?? 0) / Math.max((s.contacts ?? 0) + (s.leads ?? 0), 1)) * 100).toFixed(1)) : 0,
         bounceRate: 0,
         avgSessionDuration: '—',
       });
 
-      // Graphique basé sur les vrais leads mensuels
-      const ml: { month: string; leads: number }[] = Array.isArray(s.monthlyLeads) ? s.monthlyLeads : [];
-      const chartData: ChartData[] = ml.length > 0
-        ? ml.map((m) => ({
-            date: m.month,
-            views: (m.leads ?? 0) * 80 + 120,
-            visitors: (m.leads ?? 0) * 50 + 60,
-            conversions: m.leads ?? 0,
-          }))
-        : Array.from({ length: 7 }, (_, i) => ({
-            date: format(subDays(new Date(), (6 - i) * 30), 'MMM', { locale: fr }),
-            views: 0, visitors: 0, conversions: 0,
-          }));
-      setChartData(chartData);
+      // Graphique : approximation depuis les leads récents (pas de vraies analytics serveur)
+      setChartData(Array.from({ length: 7 }, (_, i) => ({
+        date: format(subDays(new Date(), (6 - i) * 30), 'MMM', { locale: fr }),
+        views: 0, visitors: 0, conversions: 0,
+      })));
 
       // Top pages tirées des articles publiés
       const artRes = await api.get('/articles?status=PUBLISHED&limit=4');

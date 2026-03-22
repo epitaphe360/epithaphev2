@@ -94,9 +94,7 @@ function DesktopMenu({ entry }: { entry: NavEntry }) {
 
   if (!entry.entries) {
     return (
-      <Link href={entry.href!} className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
-        {entry.label}
-      </Link>
+      <Link href={entry.href!} className="px-3 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors rounded-lg hover:bg-white/8">
     );
   }
 
@@ -107,7 +105,7 @@ function DesktopMenu({ entry }: { entry: NavEntry }) {
       onMouseLeave={() => { timer.current = setTimeout(() => { setOpen(false); setHoveredSub(null); }, 150); }}
     >
       <button
-        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
+        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors rounded-lg hover:bg-white/8"
         onClick={() => setOpen((o) => !o)}
       >
         {entry.label}
@@ -217,9 +215,10 @@ export function Navigation() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location] = useLocation();
   const { scrollY } = useScroll();
-  const bgColor   = useTransform(scrollY, [0, 80], ["rgba(255,255,255,0.0)", "rgba(255,255,255,0.97)"]);
-  const shadow    = useTransform(scrollY, [0, 80], ["0 0 0 0 transparent",   "0 1px 24px rgba(0,0,0,0.08)"]);
-  const borderCol = useTransform(scrollY, [0, 80], ["rgba(0,0,0,0)",          "rgba(0,0,0,0.07)"]);
+  // Skill: UI/UX Pro Max → OLED dark glassmorphism navbar
+  const bgColor   = useTransform(scrollY, [0, 60], ["rgba(0,0,5,0.0)",       "rgba(3,0,12,0.88)"]);
+  const shadow    = useTransform(scrollY, [0, 60], ["0 0 0 0 transparent",   "0 2px 32px rgba(0,0,0,0.45)"]);
+  const borderCol = useTransform(scrollY, [0, 60], ["rgba(236,72,153,0.0)",  "rgba(236,72,153,0.18)"]);
 
   useEffect(() => { setDrawerOpen(false); setMobileExpanded(null); }, [location]);
   useEffect(() => {
@@ -230,7 +229,7 @@ export function Navigation() {
   return (
     <>
       <motion.header style={{ backgroundColor: bgColor, boxShadow: shadow, borderColor: borderCol }}
-        className="fixed top-0 left-0 right-0 z-[90] backdrop-blur-md border-b">
+        className="fixed top-0 left-0 right-0 z-[90] backdrop-blur-xl border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex-shrink-0">
             <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-9 w-auto" />

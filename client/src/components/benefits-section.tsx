@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
+import { AnimatedSection, AnimatedGrid, AnimatedItem } from "@/components/animated-section";
 
 const FALLBACK_BENEFITS = [
   "Une maitrise totale : de l'idée à l'exécution, nous gérons vos projet de A à Z pour assurer cohérence, qualité et réactivité",
@@ -31,7 +32,7 @@ export function BenefitsSection() {
     <section id="about" className="py-20 md:py-32" data-testid="section-benefits">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div className="relative order-2 lg:order-1">
+          <AnimatedSection variant="fadeRight" className="relative order-2 lg:order-1">
             <div className="aspect-[4/3] rounded-md overflow-hidden shadow-xl">
               <img
                 src={settings.benefits_image}
@@ -39,9 +40,9 @@ export function BenefitsSection() {
                 className="w-full h-full object-cover"
               />
             </div>
-          </div>
+          </AnimatedSection>
 
-          <div className="order-1 lg:order-2">
+          <AnimatedSection variant="fadeLeft" delay={0.1} className="order-1 lg:order-2">
             <h2
               className="text-3xl md:text-4xl font-bold text-foreground mb-8"
               data-testid="text-benefits-title"
@@ -49,10 +50,10 @@ export function BenefitsSection() {
               {settings.benefits_title}
             </h2>
 
-            <ul className="space-y-4">
+            <AnimatedGrid className="space-y-4" stagger={0.07} delay={0.15}>
               {benefits.map((benefit, index) => (
+                <AnimatedItem key={index} variant="fadeLeft">
                 <li
-                  key={index}
                   className="flex items-start gap-3"
                   data-testid={`benefit-item-${index}`}
                 >
@@ -63,9 +64,10 @@ export function BenefitsSection() {
                     {benefit}
                   </span>
                 </li>
+                </AnimatedItem>
               ))}
-            </ul>
-          </div>
+            </AnimatedGrid>
+          </AnimatedSection>
         </div>
       </div>
     </section>

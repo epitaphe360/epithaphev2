@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { AnimatePresence, motion } from "framer-motion";
+import { MagentaCursor } from "@/components/custom-cursor";
 import Home from "@/pages/home";
 import DynamicPage from "@/pages/dynamic-page";
 import ReferencesPage from "@/pages/references";
@@ -106,7 +108,18 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 function Router() {
+  const [location] = useLocation();
+  // Only animate public routes (not admin)
+  const isAdmin = location.startsWith("/admin");
   return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={isAdmin ? "admin" : location}
+        initial={isAdmin ? {} : { opacity: 0, y: 12 }}
+        animate={isAdmin ? {} : { opacity: 1, y: 0 }}
+        exit={isAdmin ? {} : { opacity: 0, y: -8 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      >
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/nos-references" component={ReferencesPage} />
@@ -429,6 +442,8 @@ function Router() {
       
       <Route component={NotFound} />
     </Switch>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -441,6 +456,7 @@ function App() {
             <TooltipProvider>
               <OrganizationSchema />
               <Toaster />
+              <MagentaCursor />
               <WhatsAppButton />
               {/* Phase 2 — Composants globaux */}
               <PushPermissionBanner />

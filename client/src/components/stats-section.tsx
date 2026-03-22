@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSettings } from "@/hooks/useSettings";
+import { AnimatedSection, AnimatedGrid, AnimatedItem } from "@/components/animated-section";
 
 type StatItem = { value: number; label: string; suffix: string };
 
@@ -99,19 +100,19 @@ export function StatsSection() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-16">
+        <AnimatedSection variant="fadeUp" className="text-center mb-16">
           <h2
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4"
             data-testid="text-stats-title"
           >
             {settings.stats_title}
           </h2>
-        </div>
+        </AnimatedSection>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+        <AnimatedGrid className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12" stagger={0.12}>
           {stats.map((stat, index) => (
+            <AnimatedItem key={index} variant="scale">
             <div
-              key={index}
               className="text-center p-6 rounded-md"
               data-testid={`stat-item-${index}`}
             >
@@ -124,8 +125,9 @@ export function StatsSection() {
                 {stat.label}
               </p>
             </div>
+            </AnimatedItem>
           ))}
-        </div>
+        </AnimatedGrid>
       </div>
     </section>
   );

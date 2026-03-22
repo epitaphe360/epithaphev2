@@ -9,6 +9,12 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        // Skill: UI/UX Pro Max → Cormorant Garamond (luxury serif headings) + Montserrat (body)
+        cormorant: ['Cormorant Garamond', 'Cormorant', 'Georgia', 'serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
+        sans: ['Montserrat', 'sans-serif'],
+      },
       borderRadius: {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */

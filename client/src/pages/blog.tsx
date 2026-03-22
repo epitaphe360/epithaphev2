@@ -2,9 +2,18 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const blogArticles = [
+interface ArticleItem {
+  slug: string;
+  title: string;
+  excerpt: string;
+  image: string;
+  categories: string[];
+}
+
+// Articles de secours affichés si la DB est vide
+const FALLBACK_ARTICLES: ArticleItem[] = [
   {
     slug: "eviter-le-chaos-dans-les-equipes-interfonctionnelles-en-marketing",
     title: "Pourquoi les équipes interfonctionnelles en marketing échouent (et comment éviter le chaos)",
@@ -71,15 +80,42 @@ const blogArticles = [
 ];
 
 export default function BlogPage() {
+  const [articles, setArticles] = useState<ArticleItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("Tous");
-  
+
+  useEffect(() => {
+    fetch("/api/articles?status=PUBLISHED&limit=50")
+      .then((r) => r.json())
+      .then((json) => {
+        const data: any[] = json.data ?? json ?? [];
+        if (data.length > 0) {
+          setArticles(
+            data.map((a: any) => ({
+              slug: a.slug,
+              title: a.title,
+              excerpt: a.excerpt ?? "",
+              image: a.featuredImage ?? a.featured_image ?? "https://epitaphe.ma/wp-content/uploads/2020/05/home-epitaphe360.jpg",
+              categories: a.tags ?? [],
+            }))
+          );
+        } else {
+          setArticles(FALLBACK_ARTICLES);
+        }
+      })
+      .catch(() => setArticles(FALLBACK_ARTICLES))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const displayArticles = loading ? FALLBACK_ARTICLES : articles;
+
   // Extraire toutes les catégories uniques
-  const allCategories = ["Tous", ...Array.from(new Set(blogArticles.flatMap(article => article.categories)))];
-  
+  const allCategories = ["Tous", ...Array.from(new Set(displayArticles.flatMap((a) => a.categories)))];
+
   // Filtrer les articles par catégorie
-  const filteredArticles = selectedCategory === "Tous" 
-    ? blogArticles 
-    : blogArticles.filter(article => article.categories.includes(selectedCategory));
+  const filteredArticles = selectedCategory === "Tous"
+    ? displayArticles
+    : displayArticles.filter((a) => a.categories.includes(selectedCategory));
 
   return (
     <div className="min-h-screen bg-background">

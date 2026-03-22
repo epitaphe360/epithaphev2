@@ -3,10 +3,11 @@ import { db } from "./db";
 import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
   services, clientReferences, caseStudies, testimonials, teamMembers,
-  projectBriefs, newsletterSubscriptions, contactMessages,
+  projectBriefs, newsletterSubscriptions, contactMessages, resources,
+  clientAccounts, clientProjects,
   insertArticleSchema, insertEventSchema, insertPageSchema,
   insertServiceSchema, insertClientReferenceSchema, insertCaseStudySchema,
-  insertTestimonialSchema, insertTeamMemberSchema,
+  insertTestimonialSchema, insertTeamMemberSchema, insertResourceSchema,
 } from "@shared/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, type AuthRequest } from "./lib/auth";
@@ -1647,6 +1648,147 @@ export function registerAdminRoutes(app: Express) {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Erreur suppression message' });
+    }
+  });
+
+  // ========================================
+  // RESOURCES MANAGEMENT
+  // ========================================
+
+  app.get('/api/admin/resources', requireAuth, async (req, res) => {
+    try {
+      const result = await db.select().from(resources).orderBy(resources.sortOrder, desc(resources.createdAt));
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur ressources' });
+    }
+  });
+
+  app.get('/api/admin/resources/:id', requireAuth, async (req, res) => {
+    try {
+      const [r] = await db.select().from(resources).where(eq(resources.id, parseInt(req.params.id, 10))).limit(1);
+      if (!r) return res.status(404).json({ error: 'Ressource non trouvée' });
+      res.json(r);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur ressource' });
+    }
+  });
+
+  app.post('/api/admin/resources', requireAuth, async (req, res) => {
+    try {
+      const data = insertResourceSchema.parse(req.body);
+      const [newR] = await db.insert(resources).values(data).returning();
+      res.status(201).json(newR);
+    } catch (error) {
+      if (error instanceof z.ZodError) return res.status(400).json({ error: 'Données invalides', details: error.errors });
+      res.status(500).json({ error: 'Erreur création ressource' });
+    }
+  });
+
+  app.put('/api/admin/resources/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [updated] = await db.update(resources)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(resources.id, parseInt(req.params.id, 10)))
+        .returning();
+      if (!updated) return res.status(404).json({ error: 'Ressource non trouvée' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour ressource' });
+    }
+  });
+
+  app.delete('/api/admin/resources/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(resources).where(eq(resources.id, parseInt(req.params.id, 10)));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression ressource' });
+    }
+  });
+
+  // ========================================
+  // CLIENT ACCOUNTS MANAGEMENT (Espace Client)
+  // ========================================
+
+  app.get('/api/admin/clients', requireAuth, async (req, res) => {
+    try {
+      const result = await db.select({
+        id: clientAccounts.id,
+        email: clientAccounts.email,
+        name: clientAccounts.name,
+        company: clientAccounts.company,
+        phone: clientAccounts.phone,
+        isActive: clientAccounts.isActive,
+        lastLoginAt: clientAccounts.lastLoginAt,
+        createdAt: clientAccounts.createdAt,
+      }).from(clientAccounts).orderBy(desc(clientAccounts.createdAt));
+      res.json({ data: result, total: result.length });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur comptes clients' });
+    }
+  });
+
+  app.get('/api/admin/clients/:id', requireAuth, async (req, res) => {
+    try {
+      const [client] = await db.select({
+        id: clientAccounts.id,
+        email: clientAccounts.email,
+        name: clientAccounts.name,
+        company: clientAccounts.company,
+        phone: clientAccounts.phone,
+        isActive: clientAccounts.isActive,
+        lastLoginAt: clientAccounts.lastLoginAt,
+        createdAt: clientAccounts.createdAt,
+      }).from(clientAccounts).where(eq(clientAccounts.id, parseInt(req.params.id, 10))).limit(1);
+      if (!client) return res.status(404).json({ error: 'Client non trouvé' });
+      // Récupérer aussi ses projets
+      const projects = await db.select().from(clientProjects)
+        .where(eq(clientProjects.clientId, parseInt(req.params.id, 10)))
+        .orderBy(desc(clientProjects.createdAt));
+      res.json({ ...client, projects });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur client' });
+    }
+  });
+
+  app.post('/api/admin/clients', requireAuth, async (req, res) => {
+    try {
+      const { email, password, name, company, phone } = req.body;
+      if (!email || !password || !name) return res.status(400).json({ error: 'email, password et name requis' });
+      const passwordHash = await hashPassword(password);
+      const [newClient] = await db.insert(clientAccounts)
+        .values({ email, passwordHash, name, company, phone })
+        .returning({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name, company: clientAccounts.company });
+      res.status(201).json(newClient);
+    } catch (error: any) {
+      if (error?.code === '23505') return res.status(409).json({ error: 'Email déjà utilisé' });
+      res.status(500).json({ error: 'Erreur création client' });
+    }
+  });
+
+  app.put('/api/admin/clients/:id', requireAuth, async (req, res) => {
+    try {
+      const { password, passwordHash: _, id: _id, createdAt: _c, ...updateData } = req.body;
+      if (password) updateData.passwordHash = await hashPassword(password);
+      const [updated] = await db.update(clientAccounts)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(clientAccounts.id, parseInt(req.params.id, 10)))
+        .returning({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name, isActive: clientAccounts.isActive });
+      if (!updated) return res.status(404).json({ error: 'Client non trouvé' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour client' });
+    }
+  });
+
+  app.delete('/api/admin/clients/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(clientAccounts).where(eq(clientAccounts.id, parseInt(req.params.id, 10)));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression client' });
     }
   });
 }

@@ -2,6 +2,11 @@ import type { Express, Request, Response } from "express";
 import { db } from "./db";
 import { z } from "zod";
 import {
+  sendNewsletterConfirmation,
+  sendBriefConfirmation,
+  sendBriefNotificationToAdmin,
+} from "./lib/email";
+import {
   newsletterSubscriptions,
   projectBriefs,
   insertNewsletterSubscriptionSchema,
@@ -161,7 +166,7 @@ export function registerPublicApiRoutes(app: Express): void {
         .returning();
 
       // TODO: Send welcome email via SMTP/Mailchimp
-      // await sendWelcomeEmail(newSubscription.email);
+      sendNewsletterConfirmation(newSubscription.email).catch((e) => console.error("[email] newsletter:", e));
 
       res.status(201).json({
         success: true,
@@ -266,11 +271,22 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // TODO: Send notification email to team
-      // await sendProjectBriefNotification(newBrief);
-
-      // TODO: Send confirmation email to client
-      // await sendProjectBriefConfirmation(newBrief.email, newBrief);
+      // Emails asynchrones — on ne bloque pas la réponse
+      Promise.all([
+        sendBriefNotificationToAdmin({
+          name: `${newBrief.firstName} ${newBrief.lastName}`,
+          email: newBrief.email,
+          company: (newBrief as any).company,
+          projectType: (newBrief as any).projectType ?? "Projet",
+          budget: (newBrief as any).budget,
+          message: (newBrief as any).description,
+        }),
+        sendBriefConfirmation(
+          newBrief.email,
+          `${newBrief.firstName} ${newBrief.lastName}`,
+          (newBrief as any).projectType ?? "Projet",
+        ),
+      ]).catch((e) => console.error("[email] brief:", e));
 
       res.status(201).json({
         success: true,

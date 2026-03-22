@@ -4,6 +4,7 @@ import { Briefcase, ShieldCheck, Users, ArrowRight, CheckCircle2 } from "lucide-
 import { PageMeta } from "@/components/seo/page-meta";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { ContextualCta } from "@/components/contextual-cta";
 import { RevealSection } from "@/components/reveal-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
@@ -165,6 +166,7 @@ export default function ArchitectureDeMarqueHub() {
           </div>
         </section>
       </main>
+      <ContextualCta pageKey="architecture-de-marque" />
       <Footer />
     </div>
   );

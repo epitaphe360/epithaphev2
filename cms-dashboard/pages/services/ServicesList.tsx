@@ -170,7 +170,7 @@ export function ServicesList() {
       />
       {showForm && (
         <ServiceForm
-          service={editItem}
+          service={editItem as any}
           onClose={handleFormClose}
         />
       )}

@@ -1,5 +1,6 @@
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { ContextualCta } from "@/components/contextual-cta";
 import { ServicePageTemplate, type ServicePageData } from "@/components/service-page-template";
 import { PageMeta } from "@/components/seo/page-meta";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -87,6 +88,7 @@ export default function SoireesDeGala() {
       <Navigation />
       <Breadcrumbs />
       <ServicePageTemplate data={data} />
+      <ContextualCta pageKey="evenements/soirees-de-gala" />
       <Footer />
     </div>
   );

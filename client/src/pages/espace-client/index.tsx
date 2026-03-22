@@ -7,8 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FolderOpen, Calendar, CheckCircle2, Clock, Download,
   MessageSquare, LogOut, ChevronRight, FileText, Bell,
-  User, Briefcase, BarChart2, AlertCircle, Lock, Loader2
+  User, Briefcase, BarChart2, AlertCircle, Lock, Loader2,
+  Fingerprint, BookOpen, Shield
 } from "lucide-react";
+import { useLocation } from "wouter";
+import { startAuthentication } from "@simplewebauthn/browser";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PageMeta } from "@/components/seo/page-meta";
@@ -99,7 +102,9 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo) => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, getValues } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
+  const [biometricLoading, setBiometricLoading] = useState(false);
+  const [biometricError, setBiometricError] = useState("");
 
   const submit = handleSubmit(async (data) => {
     try {
@@ -119,6 +124,48 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
       setError("password", { message: "Erreur de connexion, réessayez" });
     }
   });
+
+  const loginWithBiometrics = async () => {
+    const email = getValues("email");
+    if (!email) {
+      setBiometricError("Saisissez votre email puis cliquez sur Biométrie");
+      return;
+    }
+    setBiometricLoading(true);
+    setBiometricError("");
+    try {
+      // 1. Obtenir le challenge
+      const challengeRes = await fetch("/api/client/webauthn/auth-challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!challengeRes.ok) {
+        const err = await challengeRes.json().catch(() => ({}));
+        throw new Error((err as any).error ?? "Aucun appareil biométrique enregistré");
+      }
+      const options = await challengeRes.json();
+
+      // 2. Dialogue biométrique natif
+      const credential = await startAuthentication({ optionsJSON: options });
+
+      // 3. Vérifier côté serveur
+      const verifyRes = await fetch("/api/client/webauthn/auth-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, credential }),
+      });
+      const json = await verifyRes.json();
+      if (!verifyRes.ok) throw new Error(json.error ?? "Échec de la vérification");
+
+      localStorage.setItem(TOKEN_KEY, json.token);
+      onLogin(json.token, json.client);
+    } catch (e: any) {
+      setBiometricError(e.message ?? "Authentification biométrique échouée");
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center py-16 px-4">
@@ -147,6 +194,28 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
             Connexion
           </button>
         </form>
+
+        <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground">ou</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        <button
+          type="button"
+          onClick={loginWithBiometrics}
+          disabled={biometricLoading}
+          className="w-full border border-border rounded-xl py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          {biometricLoading
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <Fingerprint className="w-4 h-4 text-primary" />}
+          Se connecter avec Face ID / Empreinte
+        </button>
+        {biometricError && (
+          <p className="text-destructive text-xs text-center mt-2">{biometricError}</p>
+        )}
+
         <p className="text-xs text-muted-foreground text-center mt-5">
           Pas encore de compte ? Contactez votre chargé de compte.
         </p>
@@ -304,7 +373,7 @@ function ProjectDetail({ project, token, onBack }: { project: Project; token: st
 
 /* ─── Dashboard principal ────────────────────────────── */
 function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientInfo; token: string; onLogout: () => void }) {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [, navigate] = useLocation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -345,13 +414,7 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
         </button>
       </div>
 
-      {selectedProject ? (
-        <ProjectDetail
-          project={selectedProject}
-          token={token}
-          onBack={() => setSelectedProject(null)}
-        />
-      ) : loading ? (
+      {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -379,7 +442,33 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
             ))}
           </div>
 
-          <h2 className="text-lg font-bold text-foreground mb-4">Mes projets</h2>
+          {/* Navigation tiles */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+            {[
+              { label: "Mes Projets",   icon: <Briefcase className="w-6 h-6" />,  path: "/espace-client/projets",   desc: "Suivi en temps réel",   color: "text-blue-600",   bg: "bg-blue-50" },
+              { label: "Documents",     icon: <FileText className="w-6 h-6" />,    path: "/espace-client/documents", desc: "Coffre-fort sécurisé",  color: "text-purple-600", bg: "bg-purple-50" },
+              { label: "Ressources",    icon: <BookOpen className="w-6 h-6" />,    path: "/espace-client/ressources",desc: "Guides & modèles",       color: "text-green-600",  bg: "bg-green-50" },
+              { label: "Sécurité",      icon: <Shield className="w-6 h-6" />,      path: "/espace-client/securite",  desc: "Clés biométriques",     color: "text-orange-600", bg: "bg-orange-50" },
+            ].map((tile) => (
+              <motion.button key={tile.path} whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(0,0,0,.07)" }}
+                onClick={() => navigate(tile.path)}
+                className="bg-card border border-border rounded-2xl p-5 text-left transition-all hover:border-primary/30 flex flex-col items-start gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tile.bg} ${tile.color}`}>{tile.icon}</div>
+                <div>
+                  <p className="font-semibold text-foreground text-sm">{tile.label}</p>
+                  <p className="text-xs text-muted-foreground">{tile.desc}</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground">Mes projets récents</h2>
+            <button onClick={() => navigate("/espace-client/projets")}
+              className="text-sm text-primary hover:underline flex items-center gap-1">
+              Voir tout <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
           {projects.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <FolderOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -387,10 +476,10 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-5">
-              {projects.map((p) => {
+              {projects.slice(0, 4).map((p) => {
                 const st = STATUS_CONFIG[p.status];
                 return (
-                  <motion.button key={p.id} whileHover={{ y: -2 }} onClick={() => setSelectedProject(p)}
+                  <motion.button key={p.id} whileHover={{ y: -2 }} onClick={() => navigate(`/espace-client/projets/${p.id}`)}
                     className="bg-card border border-border rounded-2xl p-6 text-left hover:border-primary/40 transition-colors w-full">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>

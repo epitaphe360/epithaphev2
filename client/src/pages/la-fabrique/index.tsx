@@ -4,6 +4,7 @@ import { Printer, Hammer, Signpost, LayoutGrid, ArrowRight, CheckCircle2, Factor
 import { PageMeta } from "@/components/seo/page-meta";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { ContextualCta } from "@/components/contextual-cta";
 import { RevealSection } from "@/components/reveal-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useSettings } from "@/hooks/useSettings";
@@ -233,6 +234,7 @@ export default function LaFabriqueHub() {
           </div>
         </section>
       </main>
+      <ContextualCta pageKey="la-fabrique" />
       <Footer />
     </div>
   );

@@ -118,7 +118,7 @@ export function CaseStudiesList() {
       />
       {showForm && (
         <CaseStudyForm
-          caseStudy={editItem}
+          caseStudy={editItem as any}
           onClose={(saved) => { setShowForm(false); setEditItem(null); if (saved) refetch(); }}
         />
       )}

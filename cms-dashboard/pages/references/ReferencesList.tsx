@@ -140,7 +140,7 @@ export function ReferencesList() {
       />
       {showForm && (
         <ReferenceForm
-          reference={editItem}
+          reference={editItem as any}
           onClose={(saved) => { setShowForm(false); setEditItem(null); if (saved) refetch(); }}
         />
       )}

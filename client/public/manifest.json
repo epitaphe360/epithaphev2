@@ -1,12 +1,12 @@
 {
-  "name": "Epitaphe360 — Événements & Communication",
-  "short_name": "Epitaphe360",
+  "name": "Epitaphe360",
+  "short_name": "E360",
   "description": "Agence de communication événementielle, architecture de marque & La Fabrique — Maroc",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#d1295a",
+  "theme_color": "#C8A96E",
   "background_color": "#ffffff",
   "lang": "fr",
   "categories": ["business", "communication"],
@@ -35,6 +35,12 @@
       "name": "Déposer un brief",
       "short_name": "Brief",
       "url": "/contact/brief",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Espace Client",
+      "short_name": "Espace",
+      "url": "/espace-client",
       "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {

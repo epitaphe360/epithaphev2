@@ -265,7 +265,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {data.caseStudies.map((cs, i) => (
                 <RevealSection key={i} delay={i * 0.08}>
-                  <Link href={`/references/${cs.slug}`}>
+                  <Link href={`/nos-references/${cs.slug}`}>
                     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}
                       className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all duration-300">
                       {cs.image && (

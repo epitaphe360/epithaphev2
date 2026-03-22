@@ -26,13 +26,13 @@ interface Lead {
   createdAt: string;
 }
 
-const STATUS_MAP: Record<string, { label: string; variant: 'success' | 'warning' | 'default' | 'error' }> = {
+const STATUS_MAP: Record<string, { label: string; variant: 'success' | 'warning' | 'default' | 'danger' }> = {
   new:        { label: 'Nouveau',     variant: 'warning' },
   contacted:  { label: 'Contacté',   variant: 'default' },
   in_progress:{ label: 'En cours',   variant: 'default' },
   quoted:     { label: 'Devisé',     variant: 'default' },
   won:        { label: 'Gagné',      variant: 'success' },
-  lost:       { label: 'Perdu',      variant: 'error' },
+  lost:       { label: 'Perdu',      variant: 'danger' },
 };
 
 const PRIORITY_MAP: Record<string, { label: string; color: string }> = {

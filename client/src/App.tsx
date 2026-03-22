@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import Home from "@/pages/home";
 import DynamicPage from "@/pages/dynamic-page";
 import ReferencesPage from "@/pages/references";
+import ReferenceDetailPage from "@/pages/references/detail";
 import BlogPage from "@/pages/blog";
 import BlogArticlePage from "@/pages/blog-article";
 import SolutionPage from "@/pages/solution";
@@ -37,6 +38,15 @@ import RessourcesPage from "@/pages/ressources/index";
 import { OrganizationSchema } from "@/components/seo/schema-org";
 // ── Espace Client ────────────────────────────────────────────────────────────
 import EspaceClientPage from "@/pages/espace-client/index";
+// ── Espace Client — Phase 2 ───────────────────────────────────────────────────
+import ProjetsList     from "@/pages/espace-client/projets/index";
+import ProjetDetail    from "@/pages/espace-client/projets/detail";
+import DocumentsPage   from "@/pages/espace-client/documents";
+import EcRessources    from "@/pages/espace-client/ressources";
+import EcSecurite      from "@/pages/espace-client/securite";
+// ── Phase 2 — Composants globaux ──────────────────────────────────────────────
+import { PushPermissionBanner } from "@/components/push-permission-banner";
+import { PwaInstallPrompt }     from "@/components/pwa-install-prompt";
 // ── Analytics ────────────────────────────────────────────────────────────────
 import AnalyticsPage from "@/pages/analytics/index";
 // ── StandViewer 3D ───────────────────────────────────────────────────────────
@@ -74,6 +84,10 @@ import { TeamList } from "../../cms-dashboard/pages/team";
 import { LeadsList } from "../../cms-dashboard/pages/leads";
 import { NewsletterList } from "../../cms-dashboard/pages/newsletter";
 import { ContactsList } from "../../cms-dashboard/pages/contacts";
+// ── Phase 2 — Admin CMS QR Codes ─────────────────────────────────────────────
+import { QRCodesList }      from "../../cms-dashboard/pages/qr-codes/QRCodesList";
+import { PushBroadcastPage } from "../../cms-dashboard/pages/push/PushBroadcastPage";
+import { ResourcesList as AdminResourcesList } from "../../cms-dashboard/pages/resources/ResourcesList";
 import { useAuthStore } from "../../cms-dashboard/store/authStore";
 import type { ReactNode } from "react";
 
@@ -96,6 +110,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/nos-references" component={ReferencesPage} />
+      <Route path="/nos-references/:slug" component={ReferenceDetailPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/:slug" component={BlogArticlePage} />
       <Route path="/solutions/:slug" component={SolutionPage} />
@@ -135,6 +150,12 @@ function Router() {
 
       {/* ── Espace Client ────────────────────────────────────── */}
       <Route path="/espace-client" component={EspaceClientPage} />
+      {/* Phase 2 — Espace Client sous-pages */}
+      <Route path="/espace-client/projets" component={ProjetsList} />
+      <Route path="/espace-client/projets/:id" component={ProjetDetail} />
+      <Route path="/espace-client/documents" component={DocumentsPage} />
+      <Route path="/espace-client/ressources" component={EcRessources} />
+      <Route path="/espace-client/securite" component={EcSecurite} />
 
       {/* ── Analytics (public dashboard) ─────────────────────── */}
       <Route path="/analytics" component={AnalyticsPage} />
@@ -361,6 +382,21 @@ function Router() {
       <Route path="/admin/contacts">
         {() => (<ProtectedRoute><DashboardLayout><ContactsList /></DashboardLayout></ProtectedRoute>)}
       </Route>
+
+      {/* Phase 2 — QR Codes */}
+      <Route path="/admin/qr-codes">
+        {() => (<ProtectedRoute><DashboardLayout><QRCodesList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Phase 2 — Push Broadcast */}
+      <Route path="/admin/push">
+        {() => (<ProtectedRoute><DashboardLayout><PushBroadcastPage /></DashboardLayout></ProtectedRoute>)}
+      </Route>
+
+      {/* Phase 2 — Ressources Clients */}
+      <Route path="/admin/resources">
+        {() => (<ProtectedRoute><DashboardLayout><AdminResourcesList /></DashboardLayout></ProtectedRoute>)}
+      </Route>
       
       {/* Legacy routes */}
       <Route path="/admin/menus">
@@ -406,6 +442,9 @@ function App() {
               <OrganizationSchema />
               <Toaster />
               <WhatsAppButton />
+              {/* Phase 2 — Composants globaux */}
+              <PushPermissionBanner />
+              <PwaInstallPrompt />
               <Router />
             </TooltipProvider>
           </QueryClientProvider>

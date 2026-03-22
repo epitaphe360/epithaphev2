@@ -103,3 +103,51 @@ async function networkFirst(request, cacheName) {
     return new Response("Hors ligne — veuillez vérifier votre connexion.", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 }
+
+/* ── Push Notifications ──────────────────────────────────── */
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: "Epitaphe360", body: event.data.text(), url: "/" };
+  }
+
+  const options = {
+    body: payload.body ?? "",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/icon-96x96.png",
+    image: payload.image ?? undefined,
+    data: { url: payload.url ?? "/" },
+    vibrate: [200, 100, 200],
+    tag: payload.tag ?? "e360-notification",
+    renotify: true,
+    actions: payload.actions ?? [
+      { action: "open", title: "Ouvrir" },
+      { action: "dismiss", title: "Ignorer" },
+    ],
+  };
+
+  event.waitUntil(self.registration.showNotification(payload.title ?? "Epitaphe360", options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  if (event.action === "dismiss") return;
+
+  const targetUrl = event.notification.data?.url ?? "/";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      // Réutiliser onglet existant si possible
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
+    })
+  );
+});

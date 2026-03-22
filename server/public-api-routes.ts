@@ -16,6 +16,11 @@ import {
   clientMilestones,
   clientDocuments,
   clientMessages,
+  pushSubscriptions,
+  webauthnCredentials,
+  webauthnChallenges,
+  qrCodes,
+  resources,
 } from "@shared/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -912,6 +917,735 @@ Disallow: /
       return res.status(201).json(message);
     } catch (error) {
       console.error("Client message error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ── Lead Magnet (CDC 4.6) ───────────────────────────────────────────────────
+  const leadMagnetSchema = z.object({
+    email:        z.string().email("Email invalide"),
+    documentSlug: z.string().min(1),
+  });
+
+  app.post("/api/leads/lead-magnet", async (req: Request, res: Response) => {
+    try {
+      const { email, documentSlug } = leadMagnetSchema.parse(req.body);
+
+      // Upsert : si l'email existe déjà on met à jour la source
+      const existing = await db
+        .select({ id: newsletterSubscriptions.id })
+        .from(newsletterSubscriptions)
+        .where(eq(newsletterSubscriptions.email, email.toLowerCase()))
+        .limit(1);
+
+      if (existing.length === 0) {
+        await db.insert(newsletterSubscriptions).values({
+          email:    email.toLowerCase(),
+          source:   "LEAD_MAGNET",
+          metadata: { documentSlug },
+          tags:     ["lead-magnet", documentSlug],
+        });
+      }
+
+      // TODO: Déclencher l'envoi email via un service (Resend, Brevo, etc.)
+      // Pour l'instant, retour succès immédiat
+      return res.status(200).json({ success: true, documentSlug });
+    } catch (error: any) {
+      if (error?.name === "ZodError") {
+        return res.status(400).json({ error: "Données invalides", details: error.errors });
+      }
+      console.error("Lead magnet error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // PHASE 2 — PUSH NOTIFICATIONS
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/push/vapid-public-key
+   * Retourne la clé VAPID publique pour le client SW
+   */
+  app.get("/api/push/vapid-public-key", (_req: Request, res: Response) => {
+    const key = process.env.VAPID_PUBLIC_KEY;
+    if (!key) return res.status(503).json({ error: "Push notifications non configurées" });
+    return res.json({ publicKey: key });
+  });
+
+  /**
+   * POST /api/push/subscribe
+   * Enregistrer ou mettre à jour un abonnement push
+   */
+  app.post("/api/push/subscribe", async (req: Request, res: Response) => {
+    try {
+      const { endpoint, keys, categories } = req.body as {
+        endpoint?:   string;
+        keys?:       { p256dh?: string; auth?: string };
+        categories?: string[];
+      };
+
+      if (!endpoint || !keys?.p256dh || !keys.auth) {
+        return res.status(400).json({ error: "endpoint, keys.p256dh et keys.auth sont requis" });
+      }
+
+      // Récupérer clientId si connecté
+      const authHeader = req.headers.authorization;
+      let clientAccountId: number | null = null;
+      if (authHeader?.startsWith("Bearer ")) {
+        try {
+          const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET ?? "secret") as any;
+          if (payload.clientId) clientAccountId = payload.clientId;
+        } catch { /* anonyme */ }
+      }
+
+      // Upsert sur l'endpoint
+      const existing = await db
+        .select({ id: pushSubscriptions.id })
+        .from(pushSubscriptions)
+        .where(eq(pushSubscriptions.endpoint, endpoint))
+        .limit(1);
+
+      if (existing.length > 0) {
+        await db.update(pushSubscriptions)
+          .set({
+            keysP256dh:      keys.p256dh,
+            keysAuth:        keys.auth,
+            categories:      categories ?? [],
+            isActive:        true,
+            clientAccountId: clientAccountId ?? undefined,
+          })
+          .where(eq(pushSubscriptions.endpoint, endpoint));
+      } else {
+        await db.insert(pushSubscriptions).values({
+          endpoint,
+          keysP256dh:      keys.p256dh,
+          keysAuth:        keys.auth,
+          categories:      categories ?? [],
+          isActive:        true,
+          clientAccountId: clientAccountId ?? undefined,
+        });
+      }
+
+      return res.status(201).json({ success: true });
+    } catch (error) {
+      console.error("Push subscribe error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * DELETE /api/push/subscribe
+   * Révoquer un abonnement push (RGPD)
+   */
+  app.delete("/api/push/subscribe", async (req: Request, res: Response) => {
+    try {
+      const { endpoint } = req.body as { endpoint?: string };
+      if (!endpoint) return res.status(400).json({ error: "endpoint requis" });
+
+      await db.update(pushSubscriptions)
+        .set({ isActive: false })
+        .where(eq(pushSubscriptions.endpoint, endpoint));
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Push unsubscribe error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // PHASE 2 — WEBAUTHN / FIDO2
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * POST /api/client/webauthn/register-challenge
+   * Générer un challenge pour l'enregistrement biométrique
+   * (nécessite JWT client)
+   */
+  app.post("/api/client/webauthn/register-challenge", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const [account] = await db
+        .select()
+        .from(clientAccounts)
+        .where(eq(clientAccounts.id, clientId))
+        .limit(1);
+      if (!account) return res.status(404).json({ error: "Compte introuvable" });
+
+      // Credentials existants pour exclusion
+      const existingCreds = await db
+        .select({ credentialId: webauthnCredentials.credentialId })
+        .from(webauthnCredentials)
+        .where(eq(webauthnCredentials.clientAccountId, clientId));
+
+      const { createRegistrationChallenge } = await import("./lib/webauthn.js");
+      const options = await createRegistrationChallenge({
+        userId:    clientId,
+        userEmail: account.email,
+        userName:  account.name,
+        existingCredentialIds: existingCreds.map((c) => c.credentialId),
+      });
+
+      // Stocker le challenge (expire dans 5 min)
+      await db.delete(webauthnChallenges)
+        .where(and(eq(webauthnChallenges.clientAccountId, clientId), eq(webauthnChallenges.type, "register")));
+
+      await db.insert(webauthnChallenges).values({
+        clientAccountId: clientId,
+        challenge:       options.challenge,
+        type:            "register",
+        expiresAt:       new Date(Date.now() + 5 * 60 * 1000),
+      });
+
+      return res.json(options);
+    } catch (error) {
+      console.error("WebAuthn register challenge error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/webauthn/register-verify
+   * Vérifier et stocker le credential biométrique
+   */
+  app.post("/api/client/webauthn/register-verify", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const response = req.body;
+
+      // Récupérer le challenge stocké
+      const [stored] = await db
+        .select()
+        .from(webauthnChallenges)
+        .where(and(
+          eq(webauthnChallenges.clientAccountId, clientId),
+          eq(webauthnChallenges.type, "register")
+        ))
+        .limit(1);
+
+      if (!stored || stored.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Challenge expiré, recommencez" });
+      }
+
+      const { verifyRegistration } = await import("./lib/webauthn.js");
+      const result = await verifyRegistration({ response, challenge: stored.challenge });
+
+      // Supprimer le challenge utilisé
+      await db.delete(webauthnChallenges).where(eq(webauthnChallenges.id, stored.id));
+
+      // Stocker le credential
+      await db.insert(webauthnCredentials).values({
+        clientAccountId: clientId,
+        credentialId:    result.credentialId,
+        publicKey:       result.publicKey,
+        counter:         result.counter,
+        deviceName:      result.deviceName,
+        aaguid:          result.aaguid,
+      });
+
+      return res.json({ success: true, deviceName: result.deviceName });
+    } catch (error: any) {
+      console.error("WebAuthn register verify error:", error);
+      return res.status(400).json({ error: error.message ?? "Vérification échouée" });
+    }
+  });
+
+  /**
+   * POST /api/client/webauthn/auth-challenge
+   * Générer un challenge d'authentification biométrique
+   * (body: { email })
+   */
+  app.post("/api/client/webauthn/auth-challenge", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body as { email?: string };
+      if (!email) return res.status(400).json({ error: "email requis" });
+
+      const [account] = await db
+        .select()
+        .from(clientAccounts)
+        .where(eq(clientAccounts.email, email.toLowerCase()))
+        .limit(1);
+      if (!account) return res.status(404).json({ error: "Compte introuvable" });
+
+      const creds = await db
+        .select({ credentialId: webauthnCredentials.credentialId })
+        .from(webauthnCredentials)
+        .where(eq(webauthnCredentials.clientAccountId, account.id));
+
+      if (creds.length === 0) {
+        return res.status(400).json({ error: "Aucun appareil biométrique enregistré" });
+      }
+
+      const { createAuthChallenge } = await import("./lib/webauthn.js");
+      const options = await createAuthChallenge({
+        credentialIds: creds.map((c) => c.credentialId),
+      });
+
+      // Stocker le challenge
+      await db.delete(webauthnChallenges)
+        .where(and(eq(webauthnChallenges.clientAccountId, account.id), eq(webauthnChallenges.type, "authenticate")));
+
+      await db.insert(webauthnChallenges).values({
+        clientAccountId: account.id,
+        challenge:       options.challenge,
+        type:            "authenticate",
+        expiresAt:       new Date(Date.now() + 5 * 60 * 1000),
+      });
+
+      return res.json({ ...options, email });
+    } catch (error) {
+      console.error("WebAuthn auth challenge error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/webauthn/auth-verify
+   * Vérifier l'authentification biométrique → retourne JWT
+   */
+  app.post("/api/client/webauthn/auth-verify", async (req: Request, res: Response) => {
+    try {
+      const { email, response } = req.body as { email?: string; response?: any };
+      if (!email || !response) return res.status(400).json({ error: "email et response requis" });
+
+      const [account] = await db
+        .select()
+        .from(clientAccounts)
+        .where(eq(clientAccounts.email, email.toLowerCase()))
+        .limit(1);
+      if (!account) return res.status(404).json({ error: "Compte introuvable" });
+
+      const [stored] = await db
+        .select()
+        .from(webauthnChallenges)
+        .where(and(
+          eq(webauthnChallenges.clientAccountId, account.id),
+          eq(webauthnChallenges.type, "authenticate")
+        ))
+        .limit(1);
+
+      if (!stored || stored.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Challenge expiré" });
+      }
+
+      // Trouver le credential correspondant
+      const [cred] = await db
+        .select()
+        .from(webauthnCredentials)
+        .where(and(
+          eq(webauthnCredentials.clientAccountId, account.id),
+          eq(webauthnCredentials.credentialId, response.id)
+        ))
+        .limit(1);
+
+      if (!cred) return res.status(400).json({ error: "Credential non reconnu" });
+
+      const { verifyAuthentication } = await import("./lib/webauthn.js");
+      const result = await verifyAuthentication({
+        response,
+        challenge:    stored.challenge,
+        credentialId: cred.credentialId,
+        publicKey:    cred.publicKey,
+        counter:      cred.counter,
+      });
+
+      // Mettre à jour le compteur anti-replay
+      await db.update(webauthnCredentials)
+        .set({ counter: result.newCounter, lastUsedAt: new Date() })
+        .where(eq(webauthnCredentials.id, cred.id));
+
+      // Supprimer le challenge
+      await db.delete(webauthnChallenges).where(eq(webauthnChallenges.id, stored.id));
+
+      // Émettre un JWT
+      const token = jwt.sign(
+        { clientId: account.id, email: account.email },
+        process.env.JWT_SECRET ?? "secret",
+        { expiresIn: "7d" }
+      );
+
+      return res.json({
+        success: true,
+        token,
+        client: { id: account.id, name: account.name, company: account.company, email: account.email },
+      });
+    } catch (error: any) {
+      console.error("WebAuthn auth verify error:", error);
+      return res.status(400).json({ error: error.message ?? "Authentification échouée" });
+    }
+  });
+
+  /**
+   * GET /api/client/webauthn/credentials
+   * Liste les appareils biométriques du client connecté
+   */
+  app.get("/api/client/webauthn/credentials", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const creds = await db
+        .select({
+          id:          webauthnCredentials.id,
+          deviceName:  webauthnCredentials.deviceName,
+          createdAt:   webauthnCredentials.createdAt,
+          lastUsedAt:  webauthnCredentials.lastUsedAt,
+        })
+        .from(webauthnCredentials)
+        .where(eq(webauthnCredentials.clientAccountId, clientId));
+
+      return res.json(creds);
+    } catch (error) {
+      console.error("WebAuthn credentials list error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * DELETE /api/client/webauthn/credentials/:id
+   * Supprimer un appareil biométrique
+   */
+  app.delete("/api/client/webauthn/credentials/:id", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const credId = parseInt(req.params.id, 10);
+
+      await db.delete(webauthnCredentials)
+        .where(and(
+          eq(webauthnCredentials.id, credId),
+          eq(webauthnCredentials.clientAccountId, clientId)
+        ));
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("WebAuthn delete credential error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // PHASE 2 — QR CODES (public redirect)
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * GET /qr/:id
+   * Redirect QR code → URL cible + UTM + incrément scan count
+   */
+  app.get("/qr/:id", async (req: Request, res: Response) => {
+    try {
+      const [qr] = await db
+        .select()
+        .from(qrCodes)
+        .where(and(eq(qrCodes.id, req.params.id), eq(qrCodes.isActive, true)))
+        .limit(1);
+
+      if (!qr) return res.status(404).send("QR Code introuvable ou inactif");
+
+      // Incrémenter le compteur de scans (sans await pour ne pas ralentir le redirect)
+      db.update(qrCodes)
+        .set({ scanCount: (qr.scanCount ?? 0) + 1 })
+        .where(eq(qrCodes.id, qr.id))
+        .catch(console.error);
+
+      const { buildQRUrl } = await import("./lib/qr-generator.js");
+      const url = buildQRUrl({
+        targetPath:  qr.targetPath,
+        utmSource:   qr.utmSource,
+        utmMedium:   qr.utmMedium,
+        utmCampaign: qr.utmCampaign,
+        utmContent:  qr.utmContent ?? undefined,
+      });
+
+      return res.redirect(302, url);
+    } catch (error) {
+      console.error("QR code redirect error:", error);
+      return res.status(500).send("Erreur serveur");
+    }
+  });
+
+  // ── Admin QR Codes API ──────────────────────────────────────────────────────
+
+  /**
+   * GET /api/admin/qr-codes
+   * Liste tous les QR codes (admin seulement)
+   */
+  app.get("/api/admin/qr-codes", async (req: Request, res: Response) => {
+    try {
+      const list = await db.select({
+        id:          qrCodes.id,
+        label:       qrCodes.label,
+        targetPath:  qrCodes.targetPath,
+        utmSource:   qrCodes.utmSource,
+        utmMedium:   qrCodes.utmMedium,
+        utmCampaign: qrCodes.utmCampaign,
+        utmContent:  qrCodes.utmContent,
+        isActive:    qrCodes.isActive,
+        scanCount:   qrCodes.scanCount,
+        createdAt:   qrCodes.createdAt,
+      }).from(qrCodes).orderBy(desc(qrCodes.createdAt));
+
+      return res.json(list);
+    } catch (error) {
+      console.error("QR codes list error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/admin/qr-codes
+   * Créer un QR code et générer son SVG
+   */
+  app.post("/api/admin/qr-codes", async (req: Request, res: Response) => {
+    try {
+      const { label, targetPath, utmSource, utmMedium, utmCampaign, utmContent } = req.body as {
+        label?: string; targetPath?: string; utmSource?: string;
+        utmMedium?: string; utmCampaign?: string; utmContent?: string;
+      };
+
+      const { validateQRParams, generateQRSvg } = await import("./lib/qr-generator.js");
+      const err = validateQRParams({ targetPath, utmSource, utmMedium, utmCampaign });
+      if (err) return res.status(400).json({ error: err });
+      if (!label) return res.status(400).json({ error: "label requis" });
+
+      const svgData = await generateQRSvg({
+        targetPath: targetPath!,
+        utmSource:  utmSource!,
+        utmMedium:  utmMedium!,
+        utmCampaign: utmCampaign!,
+        utmContent,
+      });
+
+      const [created] = await db.insert(qrCodes).values({
+        label,
+        targetPath: targetPath!,
+        utmSource:  utmSource!,
+        utmMedium:  utmMedium!,
+        utmCampaign: utmCampaign!,
+        utmContent,
+        svgData,
+        isActive: true,
+      }).returning();
+
+      return res.status(201).json(created);
+    } catch (error) {
+      console.error("QR code create error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/admin/qr-codes/:id/svg
+   * Télécharger le SVG d'un QR code
+   */
+  app.get("/api/admin/qr-codes/:id/svg", async (req: Request, res: Response) => {
+    try {
+      const [qr] = await db.select({ svgData: qrCodes.svgData, label: qrCodes.label })
+        .from(qrCodes).where(eq(qrCodes.id, req.params.id)).limit(1);
+      if (!qr) return res.status(404).json({ error: "QR code introuvable" });
+      if (!qr.svgData) return res.status(404).json({ error: "SVG non généré" });
+
+      res.set({
+        "Content-Type":        "image/svg+xml",
+        "Content-Disposition": `attachment; filename="${qr.label.replace(/[^a-z0-9]/gi, "_")}.svg"`,
+      });
+      return res.send(qr.svgData);
+    } catch (error) {
+      console.error("QR SVG download error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/qr-codes/:id
+   * Désactiver un QR code
+   */
+  app.delete("/api/admin/qr-codes/:id", async (req: Request, res: Response) => {
+    try {
+      await db.update(qrCodes).set({ isActive: false }).where(eq(qrCodes.id, req.params.id));
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("QR code delete error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // PHASE 2 — PUSH BROADCAST (Admin)
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * POST /api/admin/push/broadcast
+   * Envoyer une notification push à tous les abonnés d'une ou plusieurs catégories.
+   * Body: { categories: string[], title: string, body: string, url?: string, icon?: string }
+   */
+  app.post("/api/admin/push/broadcast", async (req: Request, res: Response) => {
+    try {
+      const { categories, title, body, url, icon } = req.body as {
+        categories: string[];
+        title: string;
+        body: string;
+        url?: string;
+        icon?: string;
+      };
+
+      if (!categories?.length || !title || !body) {
+        return res.status(400).json({ error: "categories, title et body sont requis" });
+      }
+
+      const { broadcastByCategory } = await import("./lib/push.js");
+      const results = await broadcastByCategory(categories, { title, body, url, icon });
+      return res.json({ success: true, sent: results.sent, failed: results.failed });
+    } catch (error: any) {
+      console.error("Push broadcast error:", error);
+      return res.status(500).json({ error: error.message ?? "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/admin/push/subscribers
+   * Compter les abonnés par catégorie
+   */
+  app.get("/api/admin/push/subscribers", async (_req: Request, res: Response) => {
+    try {
+      const subs = await db.select({ categories: pushSubscriptions.categories }).from(pushSubscriptions);
+      const counts: Record<string, number> = {};
+      for (const sub of subs) {
+        for (const cat of (sub.categories ?? [])) {
+          counts[cat] = (counts[cat] ?? 0) + 1;
+        }
+      }
+      return res.json({ total: subs.length, byCategory: counts });
+    } catch (error) {
+      console.error("Push subscribers count error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // PHASE 2 — RESSOURCES (CDC 6.5)
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/resources/public
+   * Ressources accessibles à tous (access_level = 'public')
+   */
+  app.get("/api/resources/public", async (_req: Request, res: Response) => {
+    try {
+      const rows = await db
+        .select()
+        .from(resources)
+        .where(and(eq(resources.accessLevel, "public"), eq(resources.isPublished, true)))
+        .orderBy(resources.sortOrder, resources.createdAt);
+      return res.json(rows);
+    } catch (error) {
+      console.error("Resources public error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/client/resources
+   * Ressources client (access_level IN ['public', 'lead', 'client'])
+   * Requiert JWT client
+   */
+  app.get("/api/client/resources", requireClientAuth as any, async (_req: Request, res: Response) => {
+    try {
+      const rows = await db
+        .select()
+        .from(resources)
+        .where(eq(resources.isPublished, true))
+        .orderBy(resources.sortOrder, resources.createdAt);
+      return res.json(rows);
+    } catch (error) {
+      console.error("Resources client error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/resources/:id/download
+   * Incrémenter le compteur de téléchargement
+   */
+  app.post("/api/client/resources/:id/download", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const [resource] = await db.select().from(resources).where(eq(resources.id, id)).limit(1);
+      if (!resource) return res.status(404).json({ error: "Ressource introuvable" });
+
+      await db.update(resources)
+        .set({ downloadCount: (resource.downloadCount ?? 0) + 1 })
+        .where(eq(resources.id, id));
+
+      return res.json({ success: true, downloadUrl: resource.downloadUrl });
+    } catch (error) {
+      console.error("Resource download error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ── Admin Resources CRUD ────────────────────────────────────────────────────
+
+  /**
+   * GET /api/admin/resources
+   */
+  app.get("/api/admin/resources", async (_req: Request, res: Response) => {
+    try {
+      const rows = await db.select().from(resources).orderBy(resources.sortOrder, desc(resources.createdAt));
+      return res.json(rows);
+    } catch (error) {
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/admin/resources
+   */
+  app.post("/api/admin/resources", async (req: Request, res: Response) => {
+    try {
+      const { title, description, category, format, fileSize, downloadUrl, thumbnailUrl, accessLevel, tags, isNew, isPublished, sortOrder } = req.body;
+      if (!title || !category) return res.status(400).json({ error: "title et category requis" });
+
+      const [row] = await db.insert(resources).values({
+        title, description, category,
+        format: format ?? "PDF",
+        fileSize, downloadUrl, thumbnailUrl,
+        accessLevel: accessLevel ?? "client",
+        tags: tags ?? [],
+        isNew: isNew ?? false,
+        isPublished: isPublished ?? true,
+        sortOrder: sortOrder ?? 0,
+      }).returning();
+
+      return res.json(row);
+    } catch (error) {
+      console.error("Resource create error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * PATCH /api/admin/resources/:id
+   */
+  app.patch("/api/admin/resources/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const updates = { ...req.body, updatedAt: new Date() };
+      const [row] = await db.update(resources).set(updates).where(eq(resources.id, id)).returning();
+      if (!row) return res.status(404).json({ error: "Ressource introuvable" });
+      return res.json(row);
+    } catch (error) {
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * DELETE /api/admin/resources/:id
+   */
+  app.delete("/api/admin/resources/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await db.delete(resources).where(eq(resources.id, id));
+      return res.json({ success: true });
+    } catch (error) {
       return res.status(500).json({ error: "Erreur serveur" });
     }
   });

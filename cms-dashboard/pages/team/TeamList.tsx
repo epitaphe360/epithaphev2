@@ -101,7 +101,7 @@ export function TeamList() {
     <>
       <ListPage
         title="Équipe"
-        subtitle="Gérez les membres visibles pages \"À propos\" et \"Nos métiers\""
+        subtitle={"Gérez les membres visibles pages \"À propos\" et \"Nos métiers\""}
         columns={columns}
         items={items}
         total={total}
@@ -120,7 +120,7 @@ export function TeamList() {
       />
       {showForm && (
         <TeamForm
-          member={editItem}
+          member={editItem as any}
           onClose={(saved) => { setShowForm(false); setEditItem(null); if (saved) refetch(); }}
         />
       )}

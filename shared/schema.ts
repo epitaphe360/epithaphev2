@@ -723,3 +723,135 @@ export const insertClientMessageSchema = createInsertSchema(clientMessages).omit
 });
 export type InsertClientMessage = z.infer<typeof insertClientMessageSchema>;
 export type ClientMessage = typeof clientMessages.$inferSelect;
+
+// ============================================================
+// PHASE 2 — PUSH NOTIFICATIONS
+// ============================================================
+
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  clientAccountId: integer("client_account_id").references(() => clientAccounts.id),
+  endpoint: text("endpoint").notNull().unique(),
+  keysP256dh: text("keys_p256dh").notNull(),
+  keysAuth: text("keys_auth").notNull(),
+  // Catégories activées : project_update | new_case_study | event_invitation | report_ready | newsletter
+  categories: json("categories").$type<string[]>().default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+
+// ============================================================
+// PHASE 2 — WEBAUTHN / FIDO2 CREDENTIALS
+// ============================================================
+
+export const webauthnCredentials = pgTable("webauthn_credentials", {
+  id: serial("id").primaryKey(),
+  clientAccountId: integer("client_account_id").references(() => clientAccounts.id).notNull(),
+  credentialId: text("credential_id").notNull().unique(),          // base64url
+  publicKey: text("public_key").notNull(),                         // base64url encoded COSE key
+  counter: integer("counter").notNull().default(0),               // replay protection
+  deviceName: text("device_name").default("Appareil inconnu"),    // ex: "iPhone Face ID"
+  aaguid: text("aaguid"),                                         // authenticator AAGUID
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+});
+
+export const insertWebauthnCredentialSchema = createInsertSchema(webauthnCredentials).omit({
+  id: true,
+  createdAt: true,
+  lastUsedAt: true,
+});
+export type InsertWebauthnCredential = z.infer<typeof insertWebauthnCredentialSchema>;
+export type WebauthnCredential = typeof webauthnCredentials.$inferSelect;
+
+// ============================================================
+// PHASE 2 — QR CODES avec UTM Deep Linking
+// ============================================================
+
+export const qrCodes = pgTable("qr_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  label: text("label").notNull(),                                  // ex: "Salon Gitex 2025 - Stand B12"
+  targetPath: text("target_path").notNull(),                       // ex: "/evenements/salons"
+  utmSource: varchar("utm_source", { length: 100 }).notNull(),    // ex: "qrcode"
+  utmMedium: varchar("utm_medium", { length: 100 }).notNull(),    // ex: "print"
+  utmCampaign: varchar("utm_campaign", { length: 200 }).notNull(),// ex: "gitex-2025"
+  utmContent: varchar("utm_content", { length: 200 }),            // ex: "stand-b12"
+  svgData: text("svg_data"),                                       // SVG string généré
+  isActive: boolean("is_active").default(true),
+  scanCount: integer("scan_count").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertQrCodeSchema = createInsertSchema(qrCodes).omit({
+  id: true,
+  svgData: true,
+  scanCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertQrCode = z.infer<typeof insertQrCodeSchema>;
+export type QrCode = typeof qrCodes.$inferSelect;
+
+// ============================================================
+// PHASE 2 — WEBAUTHN CHALLENGES (sessions temporaires)
+// ============================================================
+
+export const webauthnChallenges = pgTable("webauthn_challenges", {
+  id: serial("id").primaryKey(),
+  clientAccountId: integer("client_account_id").references(() => clientAccounts.id).notNull(),
+  challenge: text("challenge").notNull(),
+  type: varchar("type", { length: 20 }).default("register"), // register | authenticate
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertWebauthnChallengeSchema = createInsertSchema(webauthnChallenges).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertWebauthnChallenge = z.infer<typeof insertWebauthnChallengeSchema>;
+export type WebauthnChallenge = typeof webauthnChallenges.$inferSelect;
+
+// ============================================================
+// PHASE 2 — RESSOURCES CLIENTS (CDC 6.5)
+// Base de connaissances : guides, modèles, études de cas
+// ============================================================
+
+export const resources = pgTable("resources", {
+  id:          serial("id").primaryKey(),
+  title:       text("title").notNull(),
+  description: text("description"),
+  category:    varchar("category", { length: 80 }).notNull().default("guide"),
+  // guide | modele | etude_de_cas | fiche_technique | video | webinaire
+  format:      varchar("format", { length: 30 }).default("PDF"),
+  // PDF | DOCX | XLS | VIDEO | LINK
+  fileSize:    varchar("file_size", { length: 20 }),
+  downloadUrl: text("download_url"),
+  thumbnailUrl:text("thumbnail_url"),
+  accessLevel: varchar("access_level", { length: 20 }).default("client"),
+  // public | lead | client
+  tags:        json("tags").$type<string[]>().default([]),
+  isNew:       boolean("is_new").default(false),
+  isPublished: boolean("is_published").default(true),
+  sortOrder:   integer("sort_order").default(0),
+  downloadCount: integer("download_count").default(0),
+  createdAt:   timestamp("created_at").defaultNow().notNull(),
+  updatedAt:   timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertResourceSchema = createInsertSchema(resources).omit({
+  id: true,
+  downloadCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertResource = z.infer<typeof insertResourceSchema>;
+export type Resource = typeof resources.$inferSelect;

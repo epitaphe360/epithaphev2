@@ -152,6 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
     comments: <MessageCircle className="w-5 h-5" />,
     users: <Users className="w-5 h-5" />,
     notifications: <Bell className="w-5 h-5" />,
+    qrcodes: <Zap className="w-5 h-5" />,
   };
 
   // Navigation enrichie
@@ -166,11 +167,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         { to: '/admin/articles', label: 'Articles' },
         { to: '/admin/pages', label: 'Pages' },
         { to: '/admin/events', label: 'Événements' },
+        { to: '/admin/case-studies', label: 'Études de cas' },
+        { to: '/admin/testimonials', label: 'Témoignages' },
+        { to: '/admin/references', label: 'Références clients' },
+        { to: '/admin/services', label: 'Services' },
+        { to: '/admin/team', label: 'Équipe' },
       ]
     },
     { href: '/admin/visual-editor', label: 'Éditeur Visuel', icon: 'plasmic' },
     { href: '/admin/media', label: 'Médias', icon: 'media', badge: 12 },
-    { href: '/admin/comments', label: 'Commentaires', icon: 'comments', badge: 3 },
+    { href: '/admin/qr-codes', label: 'QR Codes', icon: 'qrcodes' },
+    {
+      href: '/admin/outils-phase2',
+      label: 'Phase 2 — Outils',
+      icon: 'notifications',
+      children: [
+        { to: '/admin/push', label: 'Push Broadcast' },
+        { to: '/admin/resources', label: 'Ressources Clients' },
+      ]
+    },
+    {
+      href: '/admin/leads-zone',
+      label: 'Prospects & CRM',
+      icon: 'comments',
+      children: [
+        { to: '/admin/contacts', label: 'Contacts' },
+        { to: '/admin/leads', label: 'Leads' },
+        { to: '/admin/newsletter', label: 'Newsletter' },
+      ]
+    },
     { href: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
     { href: '/admin/users', label: 'Utilisateurs', icon: 'users' },
     { href: '/admin/settings', label: 'Paramètres', icon: 'settings' },

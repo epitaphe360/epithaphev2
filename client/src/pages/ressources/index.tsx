@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { LeadMagnetSection } from "@/components/lead-magnet-section";
 import { RevealSection } from "@/components/reveal-section";
 import { PageMeta } from "@/components/seo/page-meta";
 import { Link } from "wouter";
@@ -336,6 +337,18 @@ export default function RessourcesPage() {
             )}
           </div>
         </section>
+        {/* Lead Magnet — CDC 4.6 */}
+        <LeadMagnetSection
+          title="Guide complet : Réussir votre prochain événement d'entreprise"
+          description="10 étapes clés pour organiser un événement impactant, du briefing à l'évaluation post-événement. Téléchargé par +500 responsables marketing au Maroc."
+          documentSlug="guide-evenement-entreprise"
+          bulletPoints={[
+            "Checklist complète de 47 points de contrôle",
+            "Templates de brief et de rétroplanning",
+            "Exemples de dispositifs marquants (budgets inclus)",
+            "Erreurs les plus courantes et comment les éviter",
+          ]}
+        />
 
         {/* CTA newsletter */}
         <section className="py-16 bg-muted/40 border-t border-border">

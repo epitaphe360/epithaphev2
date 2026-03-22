@@ -119,7 +119,7 @@ export function TestimonialsList() {
       />
       {showForm && (
         <TestimonialForm
-          testimonial={editItem}
+          testimonial={editItem as any}
           onClose={(saved) => { setShowForm(false); setEditItem(null); if (saved) refetch(); }}
         />
       )}

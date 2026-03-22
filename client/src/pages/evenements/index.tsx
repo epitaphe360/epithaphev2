@@ -4,6 +4,7 @@ import { PageMeta } from "@/components/seo/page-meta";
 import { Calendar, Trophy, Truck, Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { ContextualCta } from "@/components/contextual-cta";
 import { RevealSection } from "@/components/reveal-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
@@ -81,7 +82,7 @@ export default function EvenementsHub() {
                     Déposer un brief <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </Link>
-                <Link href="/references">
+                <Link href="/nos-references">
                   <button className="px-6 py-3 rounded-xl border border-border text-foreground font-semibold text-sm hover:border-primary hover:text-primary transition-colors">
                     Voir nos références
                   </button>
@@ -162,6 +163,7 @@ export default function EvenementsHub() {
           </div>
         </section>
       </main>
+      <ContextualCta pageKey="evenements" />
       <Footer />
     </div>
   );

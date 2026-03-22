@@ -5,7 +5,7 @@ import { insertContactMessageSchema } from "@shared/schema";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerPublicApiRoutes } from "./public-api-routes";
 import { db } from "./db";
-import { pages, articles, events, categories, media, services, settings, clientReferences } from "@shared/schema";
+import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./lib/auth";
 
@@ -146,6 +146,37 @@ export async function registerRoutes(
       res.json({ data: result, total: result.length });
     } catch (error) {
       res.status(500).json({ error: 'Erreur références' });
+    }
+  });
+
+  // Études de cas publiques (liste)
+  app.get("/api/case-studies/public", async (req, res) => {
+    try {
+      const result = await db.select().from(caseStudies)
+        .where(eq(caseStudies.status, 'PUBLISHED'))
+        .orderBy(desc(caseStudies.publishedAt));
+      res.json({ data: result, total: result.length });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur études de cas' });
+    }
+  });
+
+  // Étude de cas par slug (detail)
+  app.get("/api/case-studies/:slug", async (req, res) => {
+    try {
+      const result = await db.select().from(caseStudies)
+        .where(eq(caseStudies.slug, req.params.slug))
+        .limit(1);
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Étude de cas non trouvée' });
+      }
+      // Récupérer le témoignage associé si existant
+      const testimonialResult = await db.select().from(testimonials)
+        .where(eq(testimonials.caseStudyId, result[0].id))
+        .limit(1);
+      res.json({ ...result[0], testimonial: testimonialResult[0] || null });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur étude de cas' });
     }
   });
 

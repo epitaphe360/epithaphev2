@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ZoomIn, Play } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, Play, Pause, Volume2, VolumeX } from "lucide-react";
 
 export interface GalleryItem {
   src: string;
@@ -19,8 +19,15 @@ interface LightboxGalleryProps {
 export function LightboxGallery({ items, columns = 3, className }: LightboxGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const open = (i: number) => setActiveIndex(i);
-  const close = () => setActiveIndex(null);
+  // Lecteur vidéo
+  const videoRef   = useRef<HTMLVideoElement>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoTime,     setVideoTime]     = useState(0);
+  const [videoPaused,   setVideoPaused]   = useState(false);
+  const [videoMuted,    setVideoMuted]    = useState(false);
+
+  const open = (i: number) => { setActiveIndex(i); setVideoTime(0); setVideoDuration(0); setVideoPaused(false); };
+  const close = () => { setActiveIndex(null); videoRef.current?.pause(); };
 
   const prev = useCallback(() => {
     if (activeIndex === null) return;
@@ -143,12 +150,71 @@ export function LightboxGallery({ items, columns = 3, className }: LightboxGalle
                 className="max-w-5xl max-h-[80vh] w-full px-16 flex flex-col items-center gap-3"
               >
                 {active.type === "video" ? (
-                  <video
-                    src={active.src}
-                    controls
-                    autoPlay
-                    className="max-h-[70vh] max-w-full rounded-xl"
-                  />
+                  <div className="w-full flex flex-col gap-2">
+                    <video
+                      ref={videoRef}
+                      src={active.src}
+                      autoPlay
+                      muted={videoMuted}
+                      className="max-h-[65vh] max-w-full rounded-xl mx-auto"
+                      onLoadedMetadata={(e) => setVideoDuration((e.target as HTMLVideoElement).duration)}
+                      onTimeUpdate={(e)     => setVideoTime((e.target as HTMLVideoElement).currentTime)}
+                      onPlay={() => setVideoPaused(false)}
+                      onPause={() => setVideoPaused(true)}
+                    />
+                    {/* Barre de progression vidéo */}
+                    {videoDuration > 0 && (
+                      <div className="flex items-center gap-3 px-2">
+                        {/* Play/Pause */}
+                        <button
+                          onClick={() => videoPaused ? videoRef.current?.play() : videoRef.current?.pause()}
+                          className="text-white/70 hover:text-white transition-colors flex-shrink-0"
+                        >
+                          {videoPaused
+                            ? <Play  className="w-4 h-4" />
+                            : <Pause className="w-4 h-4" />
+                          }
+                        </button>
+                        {/* Slider progress */}
+                        <div className="flex-1 group relative h-1.5 bg-white/20 rounded-full cursor-pointer"
+                          onClick={(e) => {
+                            if (!videoRef.current) return;
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const ratio = (e.clientX - rect.left) / rect.width;
+                            videoRef.current.currentTime = ratio * videoDuration;
+                          }}
+                        >
+                          <motion.div
+                            className="absolute left-0 top-0 h-full bg-primary rounded-full"
+                            style={{ width: `${(videoTime / videoDuration) * 100}%` }}
+                            animate={{ width: `${(videoTime / videoDuration) * 100}%` }}
+                            transition={{ duration: 0.1 }}
+                          />
+                          {/* Poignée */}
+                          <div
+                            className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                            style={{ left: `calc(${(videoTime / videoDuration) * 100}% - 7px)` }}
+                          />
+                        </div>
+                        {/* Temps */}
+                        <span className="text-white/60 text-xs tabular-nums flex-shrink-0">
+                          {Math.floor(videoTime / 60)}:{String(Math.floor(videoTime % 60)).padStart(2, "0")}
+                          {" / "}
+                          {Math.floor(videoDuration / 60)}:{String(Math.floor(videoDuration % 60)).padStart(2, "0")}
+                        </span>
+                        {/* Mute */}
+                        <button
+                          onClick={() => { setVideoMuted(m => !m); if (videoRef.current) videoRef.current.muted = !videoMuted; }}
+                          className="text-white/70 hover:text-white transition-colors flex-shrink-0"
+                        >
+                          {videoMuted
+                            ? <VolumeX className="w-4 h-4" />
+                            : <Volume2 className="w-4 h-4" />
+                          }
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <img
                     src={active.src}

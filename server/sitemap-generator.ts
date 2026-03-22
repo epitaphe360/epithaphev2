@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { articles, pages, events } from "@shared/schema";
+import { articles, pages, events, caseStudies } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 interface SitemapUrl {
@@ -90,6 +90,28 @@ export async function generateSitemap(baseUrl: string = "https://epitaphe360.com
     });
   } catch (error) {
     console.error("Error fetching events for sitemap:", error);
+  }
+
+  // Études de cas (publiées uniquement)
+  try {
+    const publishedCaseStudies = await db
+      .select({
+        slug: caseStudies.slug,
+        updatedAt: caseStudies.updatedAt,
+      })
+      .from(caseStudies)
+      .where(eq(caseStudies.status, "PUBLISHED"));
+
+    publishedCaseStudies.forEach((cs) => {
+      urls.push({
+        loc: `/nos-references/${cs.slug}`,
+        lastmod: cs.updatedAt.toISOString(),
+        changefreq: "monthly",
+        priority: 0.8,
+      });
+    });
+  } catch (error) {
+    console.error("Error fetching case studies for sitemap:", error);
   }
 
   // Construire le XML

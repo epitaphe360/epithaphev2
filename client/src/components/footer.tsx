@@ -19,12 +19,12 @@ const footerLinks = {
 
 export function Footer() {
   const { settings } = useSettings("footer", {
-    footer_address: "Casablanca, Maroc",
-    footer_phone: "+212 5 22 XX XX XX",
-    footer_email: "contact@epitaphe.ma",
-    footer_description: "Agence de communication 360° à Casablanca. Inspirez. Connectez. Marquez Durablement.",
+    footer_address: "Rez de chaussée Immeuble 7-9 Rue Bussang, Casablanca - Maroc",
+    footer_phone: "+212 662 744 741",
+    footer_email: "info@epitaphe.ma",
+    footer_description: "Agence de communication 360° à Casablanca. Basée au Maroc depuis plus de 20 ans, nous accompagnons les entreprises dans leur stratégie de communication globale.",
     footer_linkedin: "",
-    footer_facebook: "",
+    footer_facebook: "https://www.facebook.com/epitaphe360",
     footer_instagram: "",
   });
 

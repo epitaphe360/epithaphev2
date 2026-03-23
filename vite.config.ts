@@ -24,7 +24,11 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      // Force une seule instance React (évite useState null)
+      "react": path.resolve(import.meta.dirname, "node_modules/react"),
+      "react-dom": path.resolve(import.meta.dirname, "node_modules/react-dom"),
     },
+    dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
@@ -33,6 +37,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // ⚠️ React DOIT rester dans un seul chunk — ne jamais le mettre dans vendor
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-dom-client/') || id.includes('scheduler')) return undefined;
           if (id.includes('three') || id.includes('@react-three')) return 'threejs';
           if (id.includes('grapesjs')) return 'grapesjs';
           if (id.includes('cms-dashboard')) return 'admin';
@@ -44,6 +50,11 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      'react-dom/client',
       'three',
       '@react-three/fiber',
       '@react-three/drei',

@@ -27,6 +27,11 @@ const services = [
     title: "Communication interne",
     image: "https://epitaphe.ma/wp-content/uploads/2020/05/com-interne.jpg",
   },
+  {
+    id: "communication-digitale",
+    title: "Communication digitale",
+    image: "https://epitaphe.ma/wp-content/uploads/2020/04/digital-1.jpg",
+  },
 ];
 
 export function ServicesSection() {

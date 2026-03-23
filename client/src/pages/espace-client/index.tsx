@@ -306,7 +306,7 @@ function ProjectDetail({ project, token, onBack }: { project: Project; token: st
             ) : (
               <div className="space-y-3">
                 {project.milestones.map((m, i) => (
-                  <div key={i} className="flex items-center gap-4">
+                  <div key={m.label ?? i} className="flex items-center gap-4">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
                       m.status === "done" ? "bg-green-100 text-green-600" : m.status === "active" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                     }`}>
@@ -332,7 +332,7 @@ function ProjectDetail({ project, token, onBack }: { project: Project; token: st
             ) : (
               <div className="space-y-3">
                 {project.documents.map((doc, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
+                  <div key={doc.url ?? doc.name ?? i} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
                     <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>

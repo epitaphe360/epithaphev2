@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import { db } from "./db";
 import { z } from "zod";
 import {
@@ -90,7 +91,29 @@ function formatDateRFC822(date: Date | string | null): string {
 // PUBLIC API ROUTES
 // ========================================
 
+// Rate limiters pour les endpoints publics sensibles
+const clientLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 10,
+  message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const newsletterLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1h
+  max: 5,
+  message: { error: 'Trop de demandes. Réessayez plus tard.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export function registerPublicApiRoutes(app: Express): void {
+  // Vérifier JWT_SECRET au démarrage
+  if (!process.env.JWT_SECRET) {
+    throw new Error('[public-api-routes] JWT_SECRET est manquant dans .env — démarrage annulé.');
+  }
+
   // ========================================
   // NEWSLETTER SUBSCRIPTION
   // ========================================
@@ -99,7 +122,7 @@ export function registerPublicApiRoutes(app: Express): void {
    * POST /api/newsletter/subscribe
    * Subscribe to newsletter
    */
-  app.post("/api/newsletter/subscribe", async (req: Request, res: Response) => {
+  app.post("/api/newsletter/subscribe", newsletterLimiter, async (req: Request, res: Response) => {
     try {
       // Check if newsletter feature is enabled
       const isEnabled = process.env.ENABLE_NEWSLETTER !== "false";
@@ -165,7 +188,7 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // TODO: Send welcome email via SMTP/Mailchimp
+      // Email de bienvenue envoyé de façon asynchrone
       sendNewsletterConfirmation(newSubscription.email).catch((e) => console.error("[email] newsletter:", e));
 
       res.status(201).json({
@@ -680,7 +703,8 @@ Disallow: /
   // ESPACE CLIENT — Auth + Portail
   // ========================================
 
-  const CLIENT_JWT_SECRET = process.env.JWT_SECRET || "epitaphe-client-secret";
+  // JWT_SECRET validé au démarrage (cf. vérification en haut de registerPublicApiRoutes)
+  const CLIENT_JWT_SECRET = process.env.JWT_SECRET!;
   const CLIENT_JWT_EXPIRES = "30d";
 
   /** Middleware — vérifie le JWT client */
@@ -703,7 +727,7 @@ Disallow: /
    * POST /api/client/login
    * Authentifie un client et retourne un JWT
    */
-  app.post("/api/client/login", async (req: Request, res: Response) => {
+  app.post("/api/client/login", clientLoginLimiter, async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body as { email?: string; password?: string };
       if (!email || !password) {
@@ -1010,7 +1034,7 @@ Disallow: /
       let clientAccountId: number | null = null;
       if (authHeader?.startsWith("Bearer ")) {
         try {
-          const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET ?? "secret") as any;
+          const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as any;
           if (payload.clientId) clientAccountId = payload.clientId;
         } catch { /* anonyme */ }
       }
@@ -1277,7 +1301,7 @@ Disallow: /
       // Émettre un JWT
       const token = jwt.sign(
         { clientId: account.id, email: account.email },
-        process.env.JWT_SECRET ?? "secret",
+        process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 

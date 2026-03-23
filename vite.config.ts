@@ -37,12 +37,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // ⚠️ React DOIT rester dans un seul chunk — ne jamais le mettre dans vendor
-          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-dom-client/') || id.includes('scheduler')) return undefined;
-          if (id.includes('three') || id.includes('@react-three')) return 'threejs';
-          if (id.includes('grapesjs')) return 'grapesjs';
-          if (id.includes('cms-dashboard')) return 'admin';
-          if (id.includes('@radix-ui')) return 'ui';
+          // GrapesJS : 1MB+ isolé dans son chunk (dépendances internes propres)
+          if (id.includes('/node_modules/grapesjs')) return 'grapesjs';
+
+          // Tout le reste de node_modules → vendor (react, radix, three, zustand…)
+          // On évite ainsi tout cycle entre sous-chunks
           if (id.includes('node_modules')) return 'vendor';
         }
       }

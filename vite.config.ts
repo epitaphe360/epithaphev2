@@ -42,6 +42,18 @@ export default defineConfig({
       }
     }
   },
+  optimizeDeps: {
+    include: [
+      'three',
+      '@react-three/fiber',
+      '@react-three/drei',
+      'framer-motion',
+      'axios',
+      '@tanstack/react-query',
+      'wouter',
+      'react-helmet-async',
+    ],
+  },
   server: {
     port: 3000,
     fs: {

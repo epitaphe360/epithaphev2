@@ -5,10 +5,10 @@
  * Palette: #EC4899 magenta · #06B6D4 cyan · #000005 OLED bg
  */
 
-import { useRef } from "react";
+import { useRef, lazy, Suspense } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, ChevronDown, MapPin } from "lucide-react";
-import { WorldGlobe } from "@/components/world-globe";
+const WorldGlobe = lazy(() => import("@/components/world-globe").then(m => ({ default: m.WorldGlobe })));
 
 // ─── Ticker items ─────────────────────────────────────────────────────────────
 
@@ -325,7 +325,9 @@ export function HeroSection() {
               className="w-full aspect-square max-w-[580px]"
               style={{ filter: "drop-shadow(0 0 60px rgba(236,72,153,0.25))" }}
             >
-              <WorldGlobe />
+              <Suspense fallback={<div className="w-full aspect-square bg-[#000005] rounded-full animate-pulse" />}>
+                <WorldGlobe />
+              </Suspense>
             </div>
           </motion.div>
         </div>

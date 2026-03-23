@@ -105,8 +105,10 @@ app.use(cors({
 }));
 
 // Security headers with Helmet
+// Disable CSP in development (Vite HMR needs ws:, inline scripts, etc.)
+const isDev = process.env.NODE_ENV === "development";
 app.use(helmet({
-  contentSecurityPolicy: {
+  contentSecurityPolicy: isDev ? false : {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: [

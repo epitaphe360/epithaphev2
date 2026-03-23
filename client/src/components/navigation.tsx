@@ -5,6 +5,7 @@ import {
   Menu, X, ChevronDown, Calendar, Trophy, Truck, Store,
   Briefcase, ShieldCheck, Users, Printer, Hammer, Signpost, LayoutGrid,
   BookOpen, BarChart2, Calculator, Mail, LogIn, ArrowRight, ImageIcon,
+  FolderOpen, Lock, FileText, UserCircle, Palette, MonitorPlay, Layers,
 } from "lucide-react";
 
 /* === Types ==================================================== */
@@ -13,13 +14,14 @@ interface SubEntry {
   description: string;
   href: string;
   icon: React.ReactNode;
-  previewImage?: string;  // Image de prévisualisation au survol (CDC 1.2)
+  previewImage?: string;
 }
 interface NavEntry {
   label: string;
   href?: string;
   mega?: boolean;
-  previewImage?: string;  // Image par défaut pour le bloc mega
+  rightAlign?: boolean;
+  previewImage?: string;
   entries?: SubEntry[];
 }
 
@@ -30,17 +32,19 @@ const navConfig: NavEntry[] = [
   {
     label: "Événements",
     mega: true,
+    href: "/evenements",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg",
     entries: [
-      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",   href: "/evenements/conventions-kickoffs", icon: <Calendar className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
-      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",    href: "/evenements/soirees-de-gala",      icon: <Trophy   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
-      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",    href: "/evenements/roadshows",            icon: <Truck    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
-      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",href: "/evenements/salons",               icon: <Store    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
+      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: <Calendar className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
+      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: <Trophy   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
+      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows-tournees",    icon: <Truck    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
+      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons-expositions",    icon: <Store    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
     ],
   },
   {
     label: "Architecture de Marque",
     mega: true,
+    href: "/architecture-de-marque",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg",
     entries: [
       { label: "Marque Employeur",    description: "Attirez et retenez les meilleurs talents",    href: "/architecture-de-marque/marque-employeur",   icon: <Briefcase   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
@@ -51,25 +55,57 @@ const navConfig: NavEntry[] = [
   {
     label: "La Fabrique",
     mega: true,
+    href: "/la-fabrique",
+    rightAlign: true,
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg",
     entries: [
-      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",    href: "/la-fabrique/impression",   icon: <Printer   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
-      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",     href: "/la-fabrique/menuiserie",   icon: <Hammer    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
-      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel",href: "/la-fabrique/signaletique", icon: <Signpost  className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
-      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",       href: "/la-fabrique/amenagement",  icon: <LayoutGrid className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
+      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",     href: "/la-fabrique/impression",    icon: <Printer    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
+      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: <Hammer     className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
+      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: <Signpost   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
+      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: <LayoutGrid className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
     ],
   },
-  { label: "Références", href: "/nos-references" },
+  { label: "Références", href: "/references" },
   { label: "Blog",       href: "/blog" },
   {
-    label: "Outils",
+    label: "Ressources",
+    href: "/ressources",
     entries: [
-      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE", href: "/outils/vigilance-score",       icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",     href: "/outils/calculateur-fabrique",  icon: <Calculator  className="w-5 h-5" /> },
-      { label: "Bibliothèque",            description: "Guides, templates et livres blancs",      href: "/ressources",                   icon: <BookOpen    className="w-5 h-5" /> },
+      { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: <BookOpen  className="w-5 h-5" /> },
+      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/references",                  icon: <FileText  className="w-5 h-5" /> },
+      { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: <ImageIcon className="w-5 h-5" /> },
+    ],
+  },
+  {
+    label: "Outils",
+    rightAlign: true,
+    entries: [
+      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE",    href: "/outils/vigilance-score",      icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",        href: "/outils/calculateur-fabrique", icon: <Calculator  className="w-5 h-5" /> },
+      { label: "Déposer un brief",        description: "Formulaire stratégique multi-étapes",        href: "/contact/brief",               icon: <Mail        className="w-5 h-5" /> },
+    ],
+  },
+  {
+    label: "Espace Client",
+    rightAlign: true,
+    entries: [
+      { label: "Mes projets",     description: "Suivi temps réel de vos projets en cours",  href: "/espace-client/projets",    icon: <FolderOpen   className="w-5 h-5" /> },
+      { label: "Mes documents",   description: "Coffre-fort numérique & livrables signés",  href: "/espace-client/documents",  icon: <Lock         className="w-5 h-5" /> },
+      { label: "Mes ressources",  description: "Bibliothèque exclusive clients",            href: "/espace-client/ressources", icon: <BookOpen     className="w-5 h-5" /> },
+      { label: "Mon compte",      description: "Profil, notifications, accès biométrique",  href: "/espace-client",            icon: <UserCircle   className="w-5 h-5" /> },
     ],
   },
   { label: "Contact", href: "/contact" },
+  {
+    label: "🎨 Maquettes",
+    rightAlign: true,
+    entries: [
+      { label: "Sélecteur",          description: "Comparer les 3 variantes côte à côte",         href: "/design-preview", icon: <Palette     className="w-5 h-5" /> },
+      { label: "V1 — Cinematic Dark", description: "Noir · Orange #FF4D00 · Inter bold",           href: "/design/v1",      icon: <MonitorPlay className="w-5 h-5" /> },
+      { label: "V2 — Editorial Bold", description: "Crème · Rouge brique #C8401E · Condensed",     href: "/design/v2",      icon: <Layers      className="w-5 h-5" /> },
+      { label: "V3 — Liquid Luxury",  description: "Ivoire · Or #C09849 · Serif Georgia",          href: "/design/v3",      icon: <ImageIcon   className="w-5 h-5" /> },
+    ],
+  },
 ];
 
 /* === Framer Motion variants =================================== */
@@ -84,17 +120,39 @@ const drawerVariants = {
 };
 
 /* === Desktop dropdown ========================================= */
-function DesktopMenu({ entry }: { entry: NavEntry }) {
+function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlign?: boolean }) {
   const [open, setOpen] = useState(false);
   const [hoveredSub, setHoveredSub] = useState<SubEntry | null>(null);
+  const [resolvedRight, setResolvedRight] = useState(rightAlign);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [location] = useLocation();
 
-  // Image courante à afficher : sub survolé → entry par défaut
+  const isActive = entry.href
+    ? location === entry.href || location.startsWith(entry.href + "/")
+    : entry.entries?.some((s) => location === s.href || location.startsWith(s.href + "/"));
+
   const previewImg = (hoveredSub?.previewImage ?? entry.previewImage) ?? null;
+
+  // Détection débordement viewport après affichage
+  useEffect(() => {
+    if (open && panelRef.current) {
+      const rect = panelRef.current.getBoundingClientRect();
+      if (rect.right > window.innerWidth - 8) setResolvedRight(true);
+      else setResolvedRight(rightAlign);
+    } else if (!open) {
+      setResolvedRight(rightAlign);
+    }
+  }, [open, rightAlign]);
 
   if (!entry.entries) {
     return (
-      <Link href={entry.href!} className="px-3 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors rounded-lg hover:bg-white/8">
+      <Link
+        href={entry.href!}
+        className={`px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
+          isActive ? "text-white bg-white/10" : "text-white/75 hover:text-white hover:bg-white/[0.08]"
+        }`}
+      >
         {entry.label}
       </Link>
     );
@@ -104,11 +162,14 @@ function DesktopMenu({ entry }: { entry: NavEntry }) {
     <div
       className="relative"
       onMouseEnter={() => { if (timer.current) clearTimeout(timer.current); setOpen(true); }}
-      onMouseLeave={() => { timer.current = setTimeout(() => { setOpen(false); setHoveredSub(null); }, 150); }}
+      onMouseLeave={() => { timer.current = setTimeout(() => { setOpen(false); setHoveredSub(null); }, 200); }}
     >
       <button
-        className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors rounded-lg hover:bg-white/8"
-        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
+          isActive ? "text-white bg-white/10" : "text-white/75 hover:text-white hover:bg-white/[0.08]"
+        }`}
+        aria-expanded={open}
+        aria-haspopup="true"
       >
         {entry.label}
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -118,8 +179,13 @@ function DesktopMenu({ entry }: { entry: NavEntry }) {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={panelRef}
             variants={megaMenuVariants} initial="hidden" animate="visible" exit="exit"
-            className={`absolute top-full left-0 mt-2 bg-card border border-border rounded-2xl shadow-xl z-[100] overflow-hidden ${entry.mega ? "w-[760px] -left-20" : "w-72"}`}
+            className={`absolute top-full mt-2 bg-card border border-border rounded-2xl shadow-xl z-[100] overflow-hidden ${
+              entry.mega
+                ? `w-[min(760px,calc(100vw-1.5rem))] ${resolvedRight ? "right-0 left-auto" : "left-0"}`
+                : `w-72 ${resolvedRight ? "right-0 left-auto" : "left-0"}`
+            }`}
           >
             {entry.mega ? (
               /* ─── Mega menu : liens à gauche + preview à droite ─── */
@@ -144,13 +210,21 @@ function DesktopMenu({ entry }: { entry: NavEntry }) {
                       </div>
                     </Link>
                   ))}
-                  {/* Pied : voir tout */}
-                  <div className="pt-2 mt-1 border-t border-border flex items-center justify-between px-1">
-                    <p className="text-xs text-muted-foreground">Toutes nos expertises en {entry.label.toLowerCase()}</p>
-                    <span className="flex items-center gap-1 text-xs font-semibold text-primary">
-                      Voir tout <ArrowRight className="w-3 h-3" />
-                    </span>
-                  </div>
+                  {/* Pied : voir tout — lien fonctionnel */}
+                  {entry.href && (
+                    <div className="pt-2 mt-1 border-t border-border">
+                      <Link
+                        href={entry.href}
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-between px-1 py-1.5 rounded-lg hover:bg-primary/5 transition-colors group"
+                      >
+                        <p className="text-xs text-muted-foreground">Toutes nos expertises en {entry.label.toLowerCase()}</p>
+                        <span className="flex items-center gap-1 text-xs font-semibold text-primary group-hover:underline underline-offset-2">
+                          Voir tout <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        </span>
+                      </Link>
+                    </div>
+                  )}
                 </div>
                 {/* Colonne prévisualisation image */}
                 <div className="w-56 flex-shrink-0 bg-muted/40 border-l border-border overflow-hidden relative">
@@ -237,7 +311,9 @@ export function Navigation() {
             <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-9 w-auto" />
           </Link>
           <nav className="hidden lg:flex items-center gap-0.5">
-            {navConfig.map((entry) => <DesktopMenu key={entry.label} entry={entry} />)}
+            {navConfig.map((entry) => (
+              <DesktopMenu key={entry.label} entry={entry} rightAlign={entry.rightAlign} />
+            ))}
           </nav>
           <div className="hidden lg:flex items-center gap-2">
             <Link href="/contact/brief">
@@ -246,15 +322,17 @@ export function Navigation() {
                 <Mail className="w-4 h-4" /> Déposer un brief
               </motion.button>
             </Link>
-            <Link href="/admin/login">
+            <Link href="/espace-client">
               <button className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary px-3 py-2 rounded-xl transition-colors">
-                <LogIn className="w-4 h-4" /> Espace admin
+                <UserCircle className="w-4 h-4" /> Espace client
               </button>
             </Link>
           </div>
           <button onClick={() => setDrawerOpen((o) => !o)}
             className="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl text-foreground hover:bg-muted transition-colors"
-            aria-label="Menu">
+            aria-label={drawerOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={drawerOpen}
+            aria-controls="mobile-nav-drawer">
             <AnimatePresence mode="wait">
               {drawerOpen
                 ? <motion.span key="x"    initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}  transition={{ duration: 0.15 }}><X    className="w-5 h-5" /></motion.span>
@@ -268,30 +346,40 @@ export function Navigation() {
         {drawerOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[95] bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setDrawerOpen(false)} />
-            <motion.div variants={drawerVariants} initial="hidden" animate="visible" exit="hidden"
-              className="fixed top-0 right-0 bottom-0 z-[100] w-[85vw] max-w-sm bg-card border-l border-border flex flex-col lg:hidden overflow-y-auto">
+              className="fixed inset-0 z-[50] bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setDrawerOpen(false)} />
+            <motion.div
+              id="mobile-nav-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu de navigation"
+              variants={drawerVariants} initial="hidden" animate="visible" exit="hidden"
+              className="fixed top-0 right-0 bottom-0 z-[60] w-[85vw] max-w-sm bg-card border-l border-border flex flex-col lg:hidden overflow-y-auto">
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-8 w-auto" />
-                <button onClick={() => setDrawerOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground">
-                  <X className="w-4 h-4" />
+                <button onClick={() => setDrawerOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground" aria-label="Fermer le menu">
+                  <X className="w-4 h-4" aria-hidden />
                 </button>
               </div>
-              <nav className="flex-1 p-4 space-y-1">
+              <nav className="flex-1 p-4 space-y-1" aria-label="Navigation principale">
                 {navConfig.map((entry) => (
                   <div key={entry.label}>
                     {entry.entries ? (
                       <>
-                        <button onClick={() => setMobileExpanded(mobileExpanded === entry.label ? null : entry.label)}
+                        <button
+                          onClick={() => setMobileExpanded(mobileExpanded === entry.label ? null : entry.label)}
+                          aria-expanded={mobileExpanded === entry.label}
+                          aria-controls={`mobile-submenu-${entry.label.replace(/\s+/g, '-')}`}
                           className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors">
                           {entry.label}
                           <motion.span animate={{ rotate: mobileExpanded === entry.label ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                            <ChevronDown className="w-4 h-4 text-muted-foreground" aria-hidden />
                           </motion.span>
                         </button>
                         <AnimatePresence initial={false}>
                           {mobileExpanded === entry.label && (
-                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+                            <motion.div
+                              id={`mobile-submenu-${entry.label.replace(/\s+/g, '-')}`}
+                              initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                               <div className="pl-4 pt-1 space-y-1">
                                 {entry.entries.map((sub) => (
                                   <Link key={sub.href} href={sub.href} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
@@ -318,9 +406,9 @@ export function Navigation() {
                     <Mail className="w-4 h-4" /> Déposer un brief
                   </motion.button>
                 </Link>
-                <Link href="/admin/login">
+                <Link href="/espace-client">
                   <button className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary py-2 transition-colors">
-                    <LogIn className="w-4 h-4" /> Espace admin
+                    <UserCircle className="w-4 h-4" /> Espace client
                   </button>
                 </Link>
               </div>

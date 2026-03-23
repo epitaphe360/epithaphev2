@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Loader2, ArrowRight, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowRight, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export const NewLoginPage: React.FC = () => {
@@ -129,7 +129,7 @@ export const NewLoginPage: React.FC = () => {
                       onChange={(e) => setEmail(e.target.value)}
                       onFocus={() => setEmailFocused(true)}
                       onBlur={() => setEmailFocused(false)}
-                      placeholder="admin@epitaph.ma"
+                      placeholder="votre@email.com"
                       required
                       className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-white placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-[#EC4899]/50 focus:bg-white/10 transition-all duration-300"
                     />
@@ -209,6 +209,21 @@ export const NewLoginPage: React.FC = () => {
                 )}
               </button>
             </form>
+
+            {/* Accès rapide admin — DEV uniquement */}
+            {import.meta.env.DEV && (
+              <div className="mt-5 pt-5 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setEmail('admin@epitaph.ma')}
+                  className="w-full flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-[#EC4899] py-2 rounded-lg hover:bg-white/5 transition-all duration-200 group"
+                  title="Pré-remplir l'email administrateur (DEV)"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                  <span>Dév — Pré-remplir email admin</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Decorative Glow */}

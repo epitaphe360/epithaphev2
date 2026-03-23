@@ -1,8 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "framework": "vite",
 
-  "buildCommand": "vite build",
+  "buildCommand": "npm run build:client",
   "outputDirectory": "dist/public",
   "installCommand": "npm install --legacy-peer-deps",
 

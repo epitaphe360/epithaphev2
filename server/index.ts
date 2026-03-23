@@ -73,14 +73,19 @@ const baseOrigins = corsEnv
   ? corsEnv.split(',')
   : ['http://localhost:5000', 'http://localhost:5173'];
 
-// Add the Railway backend domain to allowed origins (same-origin requests)
+// Add SITE_URL dynamically (Railway injects this if configured)
+const siteUrl = process.env.SITE_URL
+  || (process.env.RAILWAY_PUBLIC_DOMAIN
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+    : null);
+
 const allowedOrigins = [
   ...baseOrigins,
-  'https://epitaphe-backend-production.up.railway.app',
+  ...(siteUrl ? [siteUrl] : []),
 ];
 
-// Pattern pour accepter tous les sous-domaines Vercel (previews incluses)
-const vercelPattern = /^https:\/\/[a-zA-Z0-9-]+-epitaphe360\.vercel\.app$/;
+// Accepte tous les sous-domaines *.vercel.app (previews, staging, prod)
+const vercelPattern = /^https:\/\/.+\.vercel\.app$/;
 
 console.log('🌐 CORS allowed origins:', allowedOrigins);
 

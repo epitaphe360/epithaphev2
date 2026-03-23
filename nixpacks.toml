@@ -1,0 +1,18 @@
+# nixpacks.toml — Railway Nixpacks fallback
+# Utilisé uniquement si railway.json (Docker) ne peut pas builder.
+# Priorité: Dockerfile (via railway.json) > nixpacks.toml
+
+[variables]
+NODE_ENV = "production"
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["npm ci --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node dist/index.cjs"

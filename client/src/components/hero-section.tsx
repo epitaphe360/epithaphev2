@@ -6,7 +6,7 @@
  */
 
 import { useRef, lazy, Suspense } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ArrowRight, ChevronDown, MapPin } from "lucide-react";
 const WorldGlobe = lazy(() => import("@/components/world-globe").then(m => ({ default: m.WorldGlobe })));
 
@@ -43,10 +43,15 @@ const fadeIn = {
   visible: { opacity: 1, transition: { duration: 1, ease: "easeOut" } },
 };
 
+const fadeUpReduced = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4 } },
+};
+
 // ─── Floating background particles ───────────────────────────────────────────
 
-function FloatingParticles() {
-  const particles = Array.from({ length: 28 });
+function FloatingParticles({ reduced }: { reduced: boolean }) {
+  const particles = Array.from({ length: 8 });
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
       {particles.map((_, i) => (
@@ -62,13 +67,14 @@ function FloatingParticles() {
             boxShadow: i % 2 === 0
               ? "0 0 8px 2px rgba(236,72,153,0.35)"
               : "0 0 8px 2px rgba(6,182,212,0.3)",
+            opacity: reduced ? 0.4 : undefined,
           }}
-          animate={{
+          animate={reduced ? undefined : {
             y:       [0, -22 - (i % 16), 0],
             opacity: [0.4, 1, 0.4],
             scale:   [1, 1.3, 1],
           }}
-          transition={{
+          transition={reduced ? undefined : {
             duration: 4 + (i % 4) * 1.2,
             repeat:   Infinity,
             delay:    (i % 7) * 0.55,
@@ -82,8 +88,8 @@ function FloatingParticles() {
 
 // ─── Infinite ticker ──────────────────────────────────────────────────────────
 
-function Ticker() {
-  const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
+function Ticker({ reduced }: { reduced: boolean }) {
+  const doubled = reduced ? TICKER_ITEMS : [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
     <div
       className="absolute bottom-0 left-0 right-0 h-10 overflow-hidden border-t"
@@ -91,8 +97,8 @@ function Ticker() {
     >
       <motion.div
         className="flex whitespace-nowrap h-full items-center"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+        animate={reduced ? undefined : { x: ["0%", "-50%"] }}
+        transition={reduced ? undefined : { duration: 28, repeat: Infinity, ease: "linear" }}
       >
         {doubled.map((item, i) => (
           <span
@@ -116,16 +122,19 @@ function Ticker() {
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion() ?? false;
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
-  // Parallax layers
-  const yText    = useTransform(scrollYProgress, [0, 1], ["0%",  "-18%"]);
-  const yGlobe   = useTransform(scrollYProgress, [0, 1], ["0%",   "12%"]);
+  // Parallax layers — disabled when prefers-reduced-motion
+  const yText    = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["0%",  "-18%"]);
+  const yGlobe   = useTransform(scrollYProgress, [0, 1], reduced ? ["0%", "0%"] : ["0%",   "12%"]);
   const opacityS = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
   const scrollToServices = () => {
-    document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" });
+    document.querySelector("#services")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   };
+
+  const itemVariants = reduced ? fadeUpReduced : fadeUp;
 
   return (
     <section
@@ -160,11 +169,11 @@ export function HeroSection() {
       />
 
       {/* ── Floating particles ── */}
-      <FloatingParticles />
+      <FloatingParticles reduced={reduced} />
 
       {/* ── Main layout ── */}
       <div className="relative z-10 flex-1 flex items-center">
-        <div className="w-full max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-8 pt-24 pb-20 min-h-screen items-center">
+<div className="w-full max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-8 pt-24 pb-20 items-center">
 
           {/* ── LEFT: Text content ── */}
           <motion.div
@@ -178,7 +187,7 @@ export function HeroSection() {
               className="space-y-6 md:space-y-8"
             >
               {/* Badge */}
-              <motion.div variants={fadeUp}>
+              <motion.div variants={itemVariants}>
                 <span
                   className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase border"
                   style={{
@@ -194,7 +203,7 @@ export function HeroSection() {
               </motion.div>
 
               {/* Main heading — Cormorant Garamond */}
-              <motion.div variants={fadeUp} className="space-y-1">
+              <motion.div variants={itemVariants} className="space-y-1">
                 <h1
                   className="font-cormorant leading-[0.9] tracking-tight"
                   style={{ fontSize: "clamp(4rem, 9vw, 8.5rem)", fontWeight: 700 }}
@@ -217,7 +226,7 @@ export function HeroSection() {
 
               {/* Tagline */}
               <motion.p
-                variants={fadeUp}
+                variants={itemVariants}
                 className="font-montserrat text-base sm:text-lg md:text-xl font-light leading-relaxed max-w-md"
                 style={{ color: "rgba(255,255,255,0.6)" }}
                 data-testid="text-hero-tagline"
@@ -232,11 +241,11 @@ export function HeroSection() {
               </motion.p>
 
               {/* CTAs */}
-              <motion.div variants={fadeUp} className="flex flex-wrap gap-3">
+              <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
                 {/* Primary CTA */}
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={reduced ? undefined : { scale: 1.03 }}
+                  whileTap={reduced ? undefined : { scale: 0.97 }}
                   onClick={scrollToServices}
                   className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-montserrat text-sm font-semibold tracking-wide text-white cursor-pointer transition-shadow"
                   style={{
@@ -244,10 +253,12 @@ export function HeroSection() {
                     boxShadow: "0 0 30px rgba(236,72,153,0.45), 0 4px 20px rgba(236,72,153,0.3)",
                   }}
                   onMouseEnter={(e) => {
+                    if (reduced) return;
                     (e.currentTarget as HTMLButtonElement).style.boxShadow =
                       "0 0 50px rgba(236,72,153,0.7), 0 4px 30px rgba(236,72,153,0.5)";
                   }}
                   onMouseLeave={(e) => {
+                    if (reduced) return;
                     (e.currentTarget as HTMLButtonElement).style.boxShadow =
                       "0 0 30px rgba(236,72,153,0.45), 0 4px 20px rgba(236,72,153,0.3)";
                   }}
@@ -259,8 +270,8 @@ export function HeroSection() {
                 {/* Ghost CTA */}
                 <motion.a
                   href="#contact"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={reduced ? undefined : { scale: 1.03 }}
+                  whileTap={reduced ? undefined : { scale: 0.97 }}
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-montserrat text-sm font-semibold tracking-wide transition-all cursor-pointer"
                   style={{
                     color: "rgba(255,255,255,0.85)",
@@ -306,9 +317,9 @@ export function HeroSection() {
           {/* ── RIGHT: 3D Globe ── */}
           <motion.div
             style={{ y: yGlobe }}
-            initial={{ opacity: 0, scale: 0.85 }}
+            initial={reduced ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            transition={reduced ? { duration: 0 } : { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="relative flex items-center justify-center"
             aria-hidden
           >
@@ -322,7 +333,7 @@ export function HeroSection() {
               }}
             />
             <div
-              className="w-full aspect-square max-w-[580px]"
+              className="w-full aspect-square max-w-[320px] lg:max-w-[580px] mx-auto"
               style={{ filter: "drop-shadow(0 0 60px rgba(236,72,153,0.25))" }}
             >
               <Suspense fallback={<div className="w-full aspect-square bg-[#000005] rounded-full animate-pulse" />}>
@@ -334,7 +345,7 @@ export function HeroSection() {
       </div>
 
       {/* ── Ticker strip ── */}
-      <Ticker />
+      <Ticker reduced={reduced} />
 
       {/* ── Scroll indicator ── */}
       <motion.button
@@ -351,7 +362,7 @@ export function HeroSection() {
           Scroll
         </span>
         <ChevronDown
-          className="w-5 h-5 animate-bounce"
+          className={reduced ? "w-5 h-5" : "w-5 h-5 animate-bounce"}
           style={{ color: "rgba(236,72,153,0.7)" }}
         />
       </motion.button>

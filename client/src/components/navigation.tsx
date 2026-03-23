@@ -95,6 +95,8 @@ function DesktopMenu({ entry }: { entry: NavEntry }) {
   if (!entry.entries) {
     return (
       <Link href={entry.href!} className="px-3 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors rounded-lg hover:bg-white/8">
+        {entry.label}
+      </Link>
     );
   }
 

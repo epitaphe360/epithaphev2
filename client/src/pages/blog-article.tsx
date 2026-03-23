@@ -425,7 +425,7 @@ export default function BlogArticlePage() {
                 );
               }
               return <p key={idx} className="text-muted-foreground leading-relaxed my-4">{paragraph}</p>;
-            })}
+            })
             )}
           </div>
         </div>

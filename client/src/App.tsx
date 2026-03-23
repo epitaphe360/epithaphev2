@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -99,11 +99,13 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [, setLocation] = useLocation();
 
-  if (!isAuthenticated) {
-    // Redirect to login page
-    setLocation("/admin/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [isAuthenticated, setLocation]);
+
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 }

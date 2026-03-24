@@ -6,6 +6,7 @@ import {
   Briefcase, ShieldCheck, Users, Printer, Hammer, Signpost, LayoutGrid,
   BookOpen, BarChart2, Calculator, Mail, LogIn, ArrowRight, ImageIcon,
   FolderOpen, Lock, FileText, UserCircle, Palette, MonitorPlay, Layers,
+  Settings,
 } from "lucide-react";
 
 /* === Types ==================================================== */
@@ -37,8 +38,8 @@ const navConfig: NavEntry[] = [
     entries: [
       { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: <Calendar className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
       { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: <Trophy   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
-      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows-tournees",    icon: <Truck    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
-      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons-expositions",    icon: <Store    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
+      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows",    icon: <Truck    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
+      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons",    icon: <Store    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
     ],
   },
   {
@@ -65,14 +66,14 @@ const navConfig: NavEntry[] = [
       { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: <LayoutGrid className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
     ],
   },
-  { label: "Références", href: "/references" },
+  { label: "Références", href: "/nos-references" },
   { label: "Blog",       href: "/blog" },
   {
     label: "Ressources",
     href: "/ressources",
     entries: [
       { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: <BookOpen  className="w-5 h-5" /> },
-      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/references",                  icon: <FileText  className="w-5 h-5" /> },
+      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/nos-references",              icon: <FileText  className="w-5 h-5" /> },
       { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: <ImageIcon className="w-5 h-5" /> },
     ],
   },
@@ -100,10 +101,9 @@ const navConfig: NavEntry[] = [
     label: "🎨 Maquettes",
     rightAlign: true,
     entries: [
-      { label: "Sélecteur",          description: "Comparer les 3 variantes côte à côte",         href: "/design-preview", icon: <Palette     className="w-5 h-5" /> },
-      { label: "V1 — Cinematic Dark", description: "Noir · Orange #FF4D00 · Inter bold",           href: "/design/v1",      icon: <MonitorPlay className="w-5 h-5" /> },
-      { label: "V2 — Editorial Bold", description: "Crème · Rouge brique #C8401E · Condensed",     href: "/design/v2",      icon: <Layers      className="w-5 h-5" /> },
-      { label: "V3 — Liquid Luxury",  description: "Ivoire · Or #C09849 · Serif Georgia",          href: "/design/v3",      icon: <ImageIcon   className="w-5 h-5" /> },
+      { label: "Sélecteur",               description: "Comparer les variantes côte à côte",            href: "/design-preview", icon: <Palette     className="w-5 h-5" /> },
+      { label: "V4 — Black Monolith",     description: "Noir cinématique · Typographie géante",         href: "/design-v4",      icon: <MonitorPlay className="w-5 h-5" /> },
+      { label: "V5 — Accueil principal",  description: "Page d'accueil actuelle du site",               href: "/",               icon: <Layers      className="w-5 h-5" /> },
     ],
   },
 ];
@@ -327,6 +327,11 @@ export function Navigation() {
                 <UserCircle className="w-4 h-4" /> Espace client
               </button>
             </Link>
+            <Link href="/admin">
+              <button className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary px-2 py-2 rounded-xl transition-colors" title="Tableau de bord admin">
+                <Settings className="w-4 h-4" />
+              </button>
+            </Link>
           </div>
           <button onClick={() => setDrawerOpen((o) => !o)}
             className="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl text-foreground hover:bg-muted transition-colors"
@@ -409,6 +414,11 @@ export function Navigation() {
                 <Link href="/espace-client">
                   <button className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary py-2 transition-colors">
                     <UserCircle className="w-4 h-4" /> Espace client
+                  </button>
+                </Link>
+                <Link href="/admin">
+                  <button className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary py-2 transition-colors">
+                    <Settings className="w-4 h-4" /> Tableau de bord
                   </button>
                 </Link>
               </div>

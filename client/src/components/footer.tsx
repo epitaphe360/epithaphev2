@@ -1,19 +1,20 @@
 import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/useSettings";
+import { Link } from "wouter";
 
 const footerLinks = {
   services: [
-    { label: "Digital", href: "#services" },
-    { label: "Publicité", href: "#services" },
-    { label: "Contenu", href: "#services" },
-    { label: "Événementiel", href: "#services" },
+    { label: "Événements", href: "/evenements" },
+    { label: "Architecture de Marque", href: "/architecture-de-marque" },
+    { label: "La Fabrique", href: "/la-fabrique" },
+    { label: "Outils", href: "/outils/vigilance-score" },
   ],
   company: [
-    { label: "À propos", href: "#about" },
-    { label: "Références", href: "#portfolio" },
-    { label: "Blog", href: "#blog" },
-    { label: "Contact", href: "#contact" },
+    { label: "Références", href: "/nos-references" },
+    { label: "Blog", href: "/blog" },
+    { label: "Ressources", href: "/ressources" },
+    { label: "Contact", href: "/contact" },
   ],
 };
 
@@ -27,13 +28,6 @@ export function Footer() {
     footer_facebook: "https://www.facebook.com/epitaphe360",
     footer_instagram: "",
   });
-
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   return (
     <footer
@@ -96,13 +90,13 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.services.map((link) => (
                 <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
+                  <Link
+                    href={link.href}
                     className="text-sm text-background/70 hover:text-primary transition-colors"
                     data-testid={`link-footer-${link.label.toLowerCase()}`}
                   >
                     {link.label}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -113,13 +107,13 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
+                  <Link
+                    href={link.href}
                     className="text-sm text-background/70 hover:text-primary transition-colors"
                     data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {link.label}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -154,18 +148,20 @@ export function Footer() {
               © {new Date().getFullYear()} Epitaphe 360. Tous droits réservés.
             </p>
             <div className="flex gap-6">
-              <button 
+              <Link 
+                href="/mentions-legales"
                 className="text-sm text-background/50 hover:text-primary transition-colors"
                 data-testid="link-mentions-legales"
               >
                 Mentions légales
-              </button>
-              <button 
+              </Link>
+              <Link 
+                href="/politique-confidentialite"
                 className="text-sm text-background/50 hover:text-primary transition-colors"
                 data-testid="link-politique-confidentialite"
               >
                 Politique de confidentialité
-              </button>
+              </Link>
             </div>
           </div>
         </div>

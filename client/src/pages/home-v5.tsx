@@ -168,13 +168,12 @@ export default function HomeV5() {
                   Démarrer un projet <ArrowRight size={20} />
                 </button>
               </Link>
-              <Link href="#expertises">
-                <button 
+              <button 
+                  onClick={() => document.querySelector('#expertises')?.scrollIntoView({ behavior: 'smooth' })}
                   className="px-8 py-4 text-[16px] font-bold text-white border-2 border-white flex items-center gap-2 hover:bg-white hover:text-black transition-colors"
                 >
                   Nos métiers
                 </button>
-              </Link>
             </div>
           </motion.div>
         </div>
@@ -388,8 +387,8 @@ export default function HomeV5() {
           <div className="flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
             <p>Epitaphe 360 © {new Date().getFullYear()}. Tous droits réservés.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <a href="#" className="hover:text-white">Mentions légales</a>
-              <a href="#" className="hover:text-white">Politique de confidentialité</a>
+              <Link href="/mentions-legales"><span className="hover:text-white">Mentions légales</span></Link>
+              <Link href="/politique-confidentialite"><span className="hover:text-white">Politique de confidentialité</span></Link>
             </div>
           </div>
         </div>

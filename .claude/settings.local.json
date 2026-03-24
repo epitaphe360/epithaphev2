@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find c:UserssamyeOneDriveDesktopdevellopementepitapheepithaphev2.githubworkflows -type f -name *.yml)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(npm install:*)"
+    ]
+  }
+}

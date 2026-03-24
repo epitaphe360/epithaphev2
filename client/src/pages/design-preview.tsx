@@ -9,36 +9,31 @@ import { Helmet } from "react-helmet-async";
 
 const VARIANTS = [
   {
-    id: "v1",
-    href: "/design/v1",
-    name: "Cinematic Dark",
-    sub: "Linear · Vercel · Raycast",
-    desc: "Fond charbon #080808 — typographie Inter précise — accent orange électrique #FF4D00 — grilles mathématiques — animations clip-path.",
-    preview: "bg-[#080808]",
-    tag: "Moderne & Tech",
-    tagColor: "#FF4D00",
+    id: "v4",
+    href: "/design-v4",
+    name: "Black Monolith",
+    sub: "Apple · Tesla · Porsche Digital",
+    desc: "Fond charbon #0a0a0a — typographie géante tracking serré — scroll horizontal projects — parallax cinématique — sections high-contrast noir/blanc.",
+    preview: "bg-[#0a0a0a]",
+    tag: "Cinéma & Prestige",
+    tagColor: "#FFFFFF",
     textColor: "#FFFFFF",
     sample: (
-      <div className="h-full flex flex-col p-4" style={{ background: "#080808", fontFamily: "Inter,system-ui,sans-serif" }}>
+      <div className="h-full flex flex-col p-4" style={{ background: "#0a0a0a", fontFamily: "Inter,system-ui,sans-serif" }}>
         <div className="flex items-center justify-between mb-4">
-          <div className="w-16 h-2 rounded" style={{ background: "#FF4D00" }} />
+          <div className="w-16 h-2 rounded bg-white" />
           <div className="flex gap-2">
             {[1,2,3].map(i => <div key={i} className="w-8 h-1.5 rounded bg-white/20" />)}
           </div>
         </div>
         <div className="flex-1">
-          <div className="mb-2 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full" style={{ background: "#FF4D00" }} />
-            <div className="w-20 h-1 rounded bg-white/20" />
-          </div>
-          <div className="w-full h-3 rounded mb-1.5" style={{ background: "#FFFFFF" }} />
-          <div className="w-3/4 h-3 rounded" style={{ background: "#FF4D00" }} />
-          <div className="mt-3 w-2/3 h-1.5 rounded bg-white/30" />
-          <div className="mt-1 w-1/2 h-1.5 rounded bg-white/20" />
-          <div className="mt-4 grid grid-cols-4 gap-1">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="rounded p-1.5" style={{ background: "#111" }}>
-                <div className="w-3 h-3 rounded mb-1" style={{ background: "rgba(255,77,0,0.2)" }} />
+          <div className="w-full h-4 rounded mb-1.5 bg-white" />
+          <div className="w-3/4 h-4 rounded mb-1.5 bg-white/60" />
+          <div className="w-1/2 h-2 rounded bg-white/20 mt-3" />
+          <div className="mt-4 grid grid-cols-3 gap-1">
+            {[1,2,3].map(i => (
+              <div key={i} className="rounded p-2 bg-white/5">
+                <div className="w-full h-8 rounded mb-1 bg-white/10" />
                 <div className="w-full h-1 rounded bg-white/20" />
               </div>
             ))}
@@ -48,77 +43,35 @@ const VARIANTS = [
     ),
   },
   {
-    id: "v2",
-    href: "/design/v2",
-    name: "Editorial Bold",
-    sub: "Pentagram · Huge · Collins",
-    desc: "Fond crème #F2EDE4 — typographie ultra-condensée pleine largeur — rouge-brique #C8401E — inversions dramatiques noir/crème — liste éditoriale.",
-    preview: "bg-[#F2EDE4]",
-    tag: "Éditorial & Puissant",
-    tagColor: "#C8401E",
-    textColor: "#0D0D0D",
+    id: "v5",
+    href: "/",
+    name: "Site Actuel",
+    sub: "Accueil principal en production",
+    desc: "La page d'accueil actuelle du site — design professionnel avec sections héros, expertises, références, et appels à l'action intégrés.",
+    preview: "bg-[#FFFFFF]",
+    tag: "Version Active",
+    tagColor: "#6366f1",
+    textColor: "#FFFFFF",
     sample: (
-      <div className="h-full flex flex-col p-4" style={{ background: "#F2EDE4", fontFamily: "Inter,system-ui,sans-serif" }}>
+      <div className="h-full flex flex-col p-4" style={{ background: "#FFFFFF", fontFamily: "Inter,system-ui,sans-serif" }}>
         <div className="flex items-center justify-between mb-4">
-          <div className="w-16 h-2 rounded bg-[#0D0D0D]" />
+          <div className="w-16 h-2 rounded bg-[#111]" />
           <div className="flex gap-2">
-            {[1,2,3].map(i => <div key={i} className="w-8 h-1.5 rounded bg-[#0D0D0D]/20" />)}
+            {[1,2,3].map(i => <div key={i} className="w-8 h-1.5 rounded bg-[#111]/20" />)}
           </div>
         </div>
         <div className="flex-1">
-          <div className="w-full h-1 rounded mb-0.5 bg-[#C8401E]/30" />
-          <div className="w-full h-4 rounded mb-0.5 bg-[#0D0D0D]" />
-          <div className="w-full h-4 rounded mb-0.5 bg-[#0D0D0D]" />
-          <div className="w-3/4 h-4 rounded mb-0.5" style={{ background: "#C8401E" }} />
-          <div className="w-1/2 h-4 rounded bg-[#0D0D0D]" />
-          <div className="mt-3 mb-1 w-full h-px bg-[#0D0D0D]/15" />
-          {[1,2,3,4].map(i => (
-            <div key={i} className="flex items-center justify-between py-1 border-b border-[#0D0D0D]/10">
-              <div className="flex items-center gap-2">
-                <span className="text-[8px] font-bold" style={{ color: "#C8401E" }}>{String(i).padStart(2,"0")}</span>
-                <div className="w-16 h-1.5 rounded bg-[#0D0D0D]/25" />
+          <div className="w-full h-4 rounded mb-1.5 bg-[#111]" />
+          <div className="w-3/4 h-4 rounded mb-1.5 bg-[#6366f1]" />
+          <div className="w-1/2 h-2 rounded bg-[#111]/20 mt-3" />
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="rounded p-2 border border-[#111]/10">
+                <div className="w-full h-6 rounded mb-1 bg-[#6366f1]/10" />
+                <div className="w-full h-1 rounded bg-[#111]/15" />
               </div>
-              <div className="w-2 h-2 rounded-full" style={{ background: "#C8401E" }} />
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "v3",
-    href: "/design/v3",
-    name: "Liquid Luxury",
-    sub: "Malka · Resn · Monograph",
-    desc: "Fond ivoire #FAF7F2 — typographie serif Didot élégante — or dégradé #C09849→#E8CF85 — images plein-bleed — grille asymétrique — sections alternées clair/nuit.",
-    preview: "bg-[#FAF7F2]",
-    tag: "Prestige & Raffinement",
-    tagColor: "#C09849",
-    textColor: "#1A1209",
-    sample: (
-      <div className="h-full flex flex-col p-4" style={{ background: "#120E08", fontFamily: "Georgia,serif" }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="w-16 h-1.5 rounded" style={{ background: "linear-gradient(90deg,#C09849,#E8CF85)" }} />
-          <div className="flex gap-2">
-            {[1,2,3].map(i => <div key={i} className="w-6 h-1.5 rounded bg-white/15" />)}
+            ))}
           </div>
-        </div>
-        {/* Hero image mockup */}
-        <div className="relative rounded overflow-hidden mb-3" style={{ height: "55px", background: "#1A1209" }}>
-          <div className="absolute inset-0 opacity-40" style={{ background: "linear-gradient(to right,rgba(192,152,73,0.3),transparent)" }} />
-          <div className="absolute bottom-2 left-2">
-            <div className="w-20 h-1.5 rounded mb-1 bg-white" />
-            <div className="w-14 h-1.5 rounded" style={{ background: "linear-gradient(90deg,#C09849,#E8CF85)" }} />
-          </div>
-        </div>
-        <div className="flex-1 grid grid-cols-2 gap-1">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="rounded overflow-hidden relative aspect-video" style={{ background: "#1E180E" }}>
-              <div className="absolute bottom-1 left-1">
-                <div className="w-8 h-1 rounded bg-white/40" />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     ),
@@ -145,7 +98,7 @@ export default function DesignPreview() {
 
       <div className="max-w-7xl mx-auto px-6 py-16">
         <p className="text-base mb-16 max-w-2xl" style={{ color: "rgba(255,255,255,0.5)" }}>
-          3 directions créatives, 3 identités distinctes. Naviguez sur chacune dans son intégralité, puis faites votre choix.
+          2 directions créatives disponibles. Naviguez sur chacune dans son intégralité, puis faites votre choix.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -197,7 +150,7 @@ export default function DesignPreview() {
         <div className="mt-16 p-6 rounded-2xl border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "#111" }}>
           <p className="text-xs tracking-widest uppercase mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Note</p>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-            Ces 3 variantes sont des prototypes haute-fidélité. La version choisie sera affinée, enrichie des vraies photos de l'agence, 
+          Ces variantes sont des prototypes haute-fidélité. La version choisie sera affinée, enrichie des vraies photos de l'agence, 
             et intégrée comme page d'accueil principale. Les fonctionnalités (formulaire, navigation, CMS) restent inchangées.
           </p>
         </div>

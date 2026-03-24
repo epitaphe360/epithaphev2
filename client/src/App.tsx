@@ -21,9 +21,9 @@ import { AdminRoutes } from "@/routes/admin-routes";
 // ── Public pages ──────────────────────────────────────────────────────────────
 import HomeV5 from "@/pages/home-v5";
 import HomeV4 from "@/pages/home-v4";
-import HomeV1 from "@/pages/home-v1";
-import HomeV2 from "@/pages/home-v2";
-import HomeV3 from "@/pages/home-v3";
+
+
+
 import DesignPreview from "@/pages/design-preview";
 import DynamicPage from "@/pages/dynamic-page";
 import ReferencesPage from "@/pages/references";
@@ -75,7 +75,9 @@ import EcSecurite    from "@/pages/espace-client/securite";
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 import AnalyticsPage from "@/pages/analytics/index";
-
+// ── Pages légales ─────────────────────────────────────────────────────────
+import MentionsLegales from "@/pages/mentions-legales";
+import PolitiqueConfidentialite from "@/pages/politique-confidentialite";
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Router() {
@@ -96,9 +98,9 @@ function Router() {
           <Route path="/" component={HomeV5} />
           <Route path="/design-v4" component={HomeV4} />
           <Route path="/design-preview" component={DesignPreview} />
-          <Route path="/design/v1" component={HomeV1} />
-          <Route path="/design/v2" component={HomeV2} />
-          <Route path="/design/v3" component={HomeV3} />
+          
+          
+          
 
           {/* ── Contenu ─────────────────────────────────────────── */}
           <Route path="/nos-references" component={ReferencesPage} />
@@ -150,6 +152,10 @@ function Router() {
 
           {/* ── Analytics ───────────────────────────────────────── */}
           <Route path="/analytics" component={AnalyticsPage} />
+
+          {/* ── Pages légales ───────────────────────────────────── */}
+          <Route path="/mentions-legales" component={MentionsLegales} />
+          <Route path="/politique-confidentialite" component={PolitiqueConfidentialite} />
 
           {/* ── Admin CMS (lazy-loaded) ──────────────────────────── */}
           <AdminRoutes />

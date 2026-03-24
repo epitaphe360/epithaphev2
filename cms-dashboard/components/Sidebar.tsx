@@ -198,7 +198,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
     },
     { href: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
     { href: '/admin/users', label: 'Utilisateurs', icon: 'users' },
-    { href: '/admin/settings', label: 'Paramètres', icon: 'settings' },
+    {
+      href: '/admin/settings/general',
+      label: 'Paramètres',
+      icon: 'settings',
+      children: [
+        { to: '/admin/settings/general', label: 'Général' },
+        { to: '/admin/settings/seo', label: 'SEO' },
+        { to: '/admin/settings/integrations', label: 'Intégrations' },
+      ]
+    },
   ];
 
   return (

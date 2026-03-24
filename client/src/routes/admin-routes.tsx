@@ -40,6 +40,7 @@ const ContactsList          = lazy(() => import("../../../cms-dashboard/pages/co
 const QRCodesList           = lazy(() => import("../../../cms-dashboard/pages/qr-codes/QRCodesList").then(m => ({ default: m.QRCodesList })));
 const PushBroadcastPage     = lazy(() => import("../../../cms-dashboard/pages/push/PushBroadcastPage").then(m => ({ default: m.PushBroadcastPage })));
 const AdminResourcesList    = lazy(() => import("../../../cms-dashboard/pages/resources/ResourcesList").then(m => ({ default: m.ResourcesList })));
+const AnalyticsDashboard    = lazy(() => import("../pages/analytics/index"));
 
 // ─── ProtectedRoute ───────────────────────────────────────────────────────────
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -198,6 +199,11 @@ export function AdminRoutes() {
         {() => <AdminPage><AdminResourcesList /></AdminPage>}
       </Route>
 
+      {/* Analytics */}
+      <Route path="/admin/analytics">
+        {() => <AdminPage><AnalyticsDashboard /></AdminPage>}
+      </Route>
+
       {/* Legacy routes */}
       <Route path="/admin/menus">
         {() => <AdminPage><MenuManagement /></AdminPage>}
@@ -207,6 +213,9 @@ export function AdminRoutes() {
       </Route>
       <Route path="/admin/solutions">
         {() => <AdminPage><SolutionManagement /></AdminPage>}
+      </Route>
+      <Route path="/admin/website">
+        {() => <AdminPage><PageManagement /></AdminPage>}
       </Route>
     </>
   );

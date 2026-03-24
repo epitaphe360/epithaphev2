@@ -19,7 +19,7 @@ import { PwaInstallPrompt }     from "@/components/pwa-install-prompt";
 import { AdminRoutes } from "@/routes/admin-routes";
 
 // ── Public pages ──────────────────────────────────────────────────────────────
-import Home from "@/pages/home";
+import HomeV4 from "@/pages/home-v4";
 import HomeV1 from "@/pages/home-v1";
 import HomeV2 from "@/pages/home-v2";
 import HomeV3 from "@/pages/home-v3";
@@ -92,7 +92,7 @@ function Router() {
       >
         <Switch>
           {/* ── Home & Design variants ──────────────────────────── */}
-          <Route path="/" component={Home} />
+          <Route path="/" component={HomeV4} />
           <Route path="/design-preview" component={DesignPreview} />
           <Route path="/design/v1" component={HomeV1} />
           <Route path="/design/v2" component={HomeV2} />

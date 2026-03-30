@@ -5,10 +5,11 @@ import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
   services, clientReferences, caseStudies, testimonials, teamMembers,
   projectBriefs, newsletterSubscriptions, contactMessages, resources,
-  clientAccounts, clientProjects,
+  clientAccounts, clientProjects, clientMilestones, clientDocuments, scoringResults,
   insertArticleSchema, insertEventSchema, insertPageSchema,
   insertServiceSchema, insertClientReferenceSchema, insertCaseStudySchema,
   insertTestimonialSchema, insertTeamMemberSchema, insertResourceSchema,
+  insertClientProjectSchema, insertClientMilestoneSchema, insertClientDocumentSchema,
 } from "@shared/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, type AuthRequest } from "./lib/auth";
@@ -1799,6 +1800,184 @@ export function registerAdminRoutes(app: Express) {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Erreur suppression client' });
+    }
+  });
+
+  // ========================================
+  // SCORING RESULTS (BMI 360™) — Admin
+  // ========================================
+
+  app.get('/api/admin/scoring', requireAuth, async (req, res) => {
+    try {
+      const { toolId, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+      let query = db.select().from(scoringResults);
+      if (toolId) query = query.where(eq(scoringResults.toolId, toolId as string)) as typeof query;
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(scoringResults.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(scoringResults),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération scoring' });
+    }
+  });
+
+  app.get('/api/admin/scoring/stats', requireAuth, async (req, res) => {
+    try {
+      const stats = await db.select({
+        toolId: scoringResults.toolId,
+        count: sql<number>`count(*)::int`,
+        avgScore: sql<number>`avg(${scoringResults.globalScore})::int`,
+        avgMaturity: sql<number>`avg(${scoringResults.maturityLevel})::numeric(3,1)`,
+      }).from(scoringResults)
+        .groupBy(scoringResults.toolId)
+        .orderBy(desc(sql`count(*)`));
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur stats scoring' });
+    }
+  });
+
+  app.delete('/api/admin/scoring/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(scoringResults).where(eq(scoringResults.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression résultat' });
+    }
+  });
+
+  // ========================================
+  // CLIENT PROJECTS — CRUD complet
+  // ========================================
+
+  app.get('/api/admin/client-projects', requireAuth, async (req, res) => {
+    try {
+      const { clientId, status, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+      let query = db.select().from(clientProjects);
+      const conditions: any[] = [];
+      if (clientId) conditions.push(eq(clientProjects.clientId, parseInt(clientId as string, 10)));
+      if (status) conditions.push(eq(clientProjects.status, status as string));
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(clientProjects.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(clientProjects),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur projets clients' });
+    }
+  });
+
+  app.get('/api/admin/client-projects/:id', requireAuth, async (req, res) => {
+    try {
+      const pid = parseInt(req.params.id, 10);
+      const [project] = await db.select().from(clientProjects).where(eq(clientProjects.id, pid)).limit(1);
+      if (!project) return res.status(404).json({ error: 'Projet non trouvé' });
+      const [milestones, documents] = await Promise.all([
+        db.select().from(clientMilestones).where(eq(clientMilestones.projectId, pid)).orderBy(clientMilestones.order),
+        db.select().from(clientDocuments).where(eq(clientDocuments.projectId, pid)).orderBy(clientDocuments.uploadedAt),
+      ]);
+      res.json({ ...project, milestones, documents });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur projet' });
+    }
+  });
+
+  app.post('/api/admin/client-projects', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertClientProjectSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [project] = await db.insert(clientProjects).values(parsed.data).returning();
+      res.status(201).json(project);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création projet' });
+    }
+  });
+
+  app.put('/api/admin/client-projects/:id', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [project] = await db.update(clientProjects)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(clientProjects.id, parseInt(req.params.id, 10)))
+        .returning();
+      if (!project) return res.status(404).json({ error: 'Projet non trouvé' });
+      res.json(project);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour projet' });
+    }
+  });
+
+  app.delete('/api/admin/client-projects/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const pid = parseInt(req.params.id, 10);
+      await Promise.all([
+        db.delete(clientMilestones).where(eq(clientMilestones.projectId, pid)),
+        db.delete(clientDocuments).where(eq(clientDocuments.projectId, pid)),
+      ]);
+      await db.delete(clientProjects).where(eq(clientProjects.id, pid));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression projet' });
+    }
+  });
+
+  // Milestones
+  app.post('/api/admin/client-projects/:id/milestones', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertClientMilestoneSchema.safeParse({ ...req.body, projectId: parseInt(req.params.id, 10) });
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [m] = await db.insert(clientMilestones).values(parsed.data).returning();
+      res.status(201).json(m);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur création jalon' });
+    }
+  });
+
+  app.put('/api/admin/client-projects/:id/milestones/:mid', requireAuth, async (req, res) => {
+    try {
+      const { id, createdAt, ...updateData } = req.body;
+      const [m] = await db.update(clientMilestones).set(updateData)
+        .where(eq(clientMilestones.id, parseInt(req.params.mid, 10))).returning();
+      if (!m) return res.status(404).json({ error: 'Jalon non trouvé' });
+      res.json(m);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour jalon' });
+    }
+  });
+
+  app.delete('/api/admin/client-projects/:id/milestones/:mid', requireAuth, async (req, res) => {
+    try {
+      await db.delete(clientMilestones).where(eq(clientMilestones.id, parseInt(req.params.mid, 10)));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression jalon' });
+    }
+  });
+
+  // Documents
+  app.post('/api/admin/client-projects/:id/documents', requireAuth, async (req, res) => {
+    try {
+      const parsed = insertClientDocumentSchema.safeParse({ ...req.body, projectId: parseInt(req.params.id, 10) });
+      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
+      const [doc] = await db.insert(clientDocuments).values(parsed.data).returning();
+      res.status(201).json(doc);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur ajout document' });
+    }
+  });
+
+  app.delete('/api/admin/client-projects/:id/documents/:did', requireAuth, async (req, res) => {
+    try {
+      await db.delete(clientDocuments).where(eq(clientDocuments.id, parseInt(req.params.did, 10)));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression document' });
     }
   });
 }

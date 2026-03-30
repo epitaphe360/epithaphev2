@@ -41,6 +41,9 @@ import { TeamForm } from './pages/team/TeamForm';
 import { TestimonialsList } from './pages/testimonials/TestimonialsList';
 import { TestimonialForm } from './pages/testimonials/TestimonialForm';
 import { PageManagement } from './pages/website/PageManagement';
+import { HomepageSettings } from './pages/homepage/HomepageSettings';
+import { ScoringResultsList } from './pages/scoring/ScoringResultsList';
+import { ClientProjectsAdmin } from './pages/clients/ClientProjectsAdmin';
 
 // Auth guard component
 interface ProtectedRouteProps {
@@ -277,6 +280,21 @@ export const getDashboardRoutes = (
         {
           path: 'qr-codes',
           element: <QRCodesList />,
+        },
+        // ── Homepage Settings ─────────────────────────────────────────────────
+        {
+          path: 'homepage',
+          element: <HomepageSettings />,
+        },
+        // ── Scoring BMI 360™ ─────────────────────────────────────────────────
+        {
+          path: 'scoring',
+          element: <ScoringResultsList />,
+        },
+        // ── Projets Clients ────────────────────────────────────────────────────
+        {
+          path: 'client-projects',
+          element: <ClientProjectsAdmin />,
         },
       ],
     },

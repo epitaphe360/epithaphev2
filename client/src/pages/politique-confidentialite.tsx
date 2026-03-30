@@ -1,8 +1,18 @@
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { Helmet } from "react-helmet-async";
 
 export default function PolitiqueConfidentialite() {
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/pages/slug/politique-confidentialite')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.content) setHtmlContent(d.content); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
@@ -12,8 +22,14 @@ export default function PolitiqueConfidentialite() {
       <Navigation />
       <main className="flex-1 pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          {htmlContent ? (
+            <div
+              className="prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+          ) : (
+          <>
           <h1 className="text-4xl font-bold mb-8">Politique de Confidentialité</h1>
-
           <section className="space-y-6 text-muted-foreground leading-relaxed">
             <div>
               <h2 className="text-xl font-semibold text-foreground mb-3">Introduction</h2>
@@ -94,6 +110,8 @@ export default function PolitiqueConfidentialite() {
               </p>
             </div>
           </section>
+          </>
+          )}
         </div>
       </main>
       <Footer />

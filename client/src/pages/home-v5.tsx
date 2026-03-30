@@ -79,7 +79,55 @@ const PORTFOLIO = [
   { client: "Ajial", type: "Scénographie", thumb: "https://epitaphe.ma/wp-content/uploads/2018/10/Ajial2-1.jpg" },
 ];
 
+type HomepageCfg = {
+  hero?: { title?: string; subtitle?: string; image?: string };
+  about?: { h2?: string; description?: string; bullets?: string[]; img1?: string; img2?: string };
+  stats?: Array<{ val: number; suffix: string; label: string }>;
+  services?: typeof SERVICES;
+  clients?: string[];
+  portfolio?: typeof PORTFOLIO;
+};
+
 export default function HomeV5() {
+  const [cfg, setCfg] = useState<HomepageCfg>({});
+
+  useEffect(() => {
+    fetch('/api/settings?group=homepage')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d?.homepage_config) return;
+        try {
+          const parsed = typeof d.homepage_config === 'string'
+            ? JSON.parse(d.homepage_config)
+            : d.homepage_config;
+          if (parsed && typeof parsed === 'object') setCfg(parsed);
+        } catch { /* garde les valeurs par défaut */ }
+      })
+      .catch(() => {});
+  }, []);
+
+  const heroImg = cfg.hero?.image ?? "https://epitaphe.ma/wp-content/uploads/2018/10/eventqatar.jpg";
+  const heroTitle = cfg.hero?.title ?? "Inspirez. Connectez. Marquez durablement.";
+  const heroSubtitle = cfg.hero?.subtitle ?? "Agence de communication 360° basée à Casablanca. Nous gérons vos projets de l'idée créative à la fabrication et l'exécution sur le terrain.";
+  const aboutH2 = cfg.about?.h2 ?? "Créativité & pragmatisme. L'agence des défis complexes.";
+  const aboutDesc = cfg.about?.description ?? "Depuis 20 ans, Epitaphe 360 accompagne les grandes entreprises, multinationales et PME. Nous comprenons vos contraintes de directeurs marketing ou communication : délais serrés, attentes élevées, besoin constant d'innovation.";
+  const aboutBullets = cfg.about?.bullets?.length ? cfg.about.bullets : [
+    "Une maîtrise totale de A à Z (conception & exécution)",
+    "Un atelier de fabrication interne (menuiserie, impression, signalétique)",
+    "Respect strict des délais et des budgets",
+    "Un seul interlocuteur pour tout votre projet",
+  ];
+  const aboutImg1 = cfg.about?.img1 ?? "https://epitaphe.ma/wp-content/uploads/2018/10/LIFE.jpg";
+  const aboutImg2 = cfg.about?.img2 ?? "https://epitaphe.ma/wp-content/uploads/2018/10/dell-rea.jpg";
+  const statsList = cfg.stats?.length ? cfg.stats.map(s => ({ val: s.val, suf: s.suffix, label: s.label })) : [
+    { val: 20, suf: "+", label: "Années d'expérience" },
+    { val: 200, suf: "+", label: "Projets réalisés" },
+    { val: 50, suf: "+", label: "Clients actifs" },
+    { val: 100, suf: "%", label: "Autonomie de production" },
+  ];
+  const servicesList = cfg.services?.length ? cfg.services : SERVICES;
+  const clientsList = cfg.clients?.length ? cfg.clients : CLIENTS;
+  const portfolioList = cfg.portfolio?.length ? cfg.portfolio : PORTFOLIO;
 
   return (
     <div style={{ backgroundColor: C.white, color: C.dark, fontFamily: "Inter, sans-serif" }}>
@@ -95,7 +143,7 @@ export default function HomeV5() {
       <section className="relative h-[80vh] min-h-[600px] flex items-center mt-16">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://epitaphe.ma/wp-content/uploads/2018/10/eventqatar.jpg" 
+            src={heroImg}
             alt="Événement Epitaphe" 
             className="w-full h-full object-cover"
           />
@@ -111,11 +159,12 @@ export default function HomeV5() {
             className="max-w-3xl"
           >
             <h1 className="text-5xl md:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
-              Inspirez. Connectez. <br />
-              <span style={{ color: C.red }}>Marquez durablement.</span>
+              {heroTitle.includes('Marquez') ? (
+                <>{heroTitle.split('Marquez')[0]}Marquez <span style={{ color: C.red }}>durablement.</span></>
+              ) : heroTitle}
             </h1>
             <p className="text-xl text-white/90 mb-10 max-w-xl font-light">
-              Agence de communication 360° basée à Casablanca. Nous gérons vos projets de l'idée créative à la fabrication et l'exécution sur le terrain.
+              {heroSubtitle}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/contact/brief">
@@ -144,19 +193,13 @@ export default function HomeV5() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <FadeUp>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-              Créativité & pragmatisme. <br />
-              L'agence des <span style={{ color: C.red }}>défis complexes.</span>
+              {aboutH2}
             </h2>
             <p className="text-lg leading-relaxed mb-6" style={{ color: C.grayText }}>
-              Depuis 20 ans, Epitaphe 360 accompagne les grandes entreprises, multinationales et PME. Nous comprenons vos contraintes de directeurs marketing ou communication : délais serrés, attentes élevées, besoin constant d'innovation.
+              {aboutDesc}
             </p>
             <ul className="mb-8 space-y-4">
-              {[
-                "Une maîtrise totale de A à Z (conception & exécution)",
-                "Un atelier de fabrication interne (menuiserie, impression, signalétique)",
-                "Respect strict des délais et des budgets",
-                "Un seul interlocuteur pour tout votre projet"
-              ].map((item, idx) => (
+              {aboutBullets.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3">
                   <div className="mt-1 flex-shrink-0">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.red }}></div>
@@ -174,8 +217,8 @@ export default function HomeV5() {
 
           <FadeUp delay={0.2}>
             <div className="grid grid-cols-2 gap-4">
-              <img src="https://epitaphe.ma/wp-content/uploads/2018/10/LIFE.jpg" alt="Production Epitaphe" className="w-full h-64 object-cover" />
-              <img src="https://epitaphe.ma/wp-content/uploads/2018/10/dell-rea.jpg" alt="Stand Epitaphe" className="w-full h-64 object-cover mt-8" />
+              <img src={aboutImg1} alt="Production Epitaphe" className="w-full h-64 object-cover" />
+              <img src={aboutImg2} alt="Stand Epitaphe" className="w-full h-64 object-cover mt-8" />
             </div>
           </FadeUp>
         </div>
@@ -185,12 +228,7 @@ export default function HomeV5() {
       <section className="py-16" style={{ backgroundColor: C.dark }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/10 text-center">
-            {[
-              { val: 20, suf: "+", label: "Années d'expérience" },
-              { val: 200, suf: "+", label: "Projets réalisés" },
-              { val: 50, suf: "+", label: "Clients actifs" },
-              { val: 100, suf: "%", label: "Autonomie de production" }
-            ].map((stat, i) => (
+            {statsList.map((stat, i) => (
               <div key={i} className="px-4">
                 <p className="text-4xl md:text-5xl font-bold text-white mb-2">
                   <StatsCounter to={stat.val} suffix={stat.suf} />
@@ -213,7 +251,7 @@ export default function HomeV5() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {SERVICES.map((service, idx) => (
+            {servicesList.map((service, idx) => (
               <FadeUp key={idx} delay={idx * 0.1}>
                 <Link href={service.href}>
                   <div className="group cursor-pointer bg-white overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
@@ -252,7 +290,7 @@ export default function HomeV5() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-            {PORTFOLIO.map((item, idx) => (
+            {portfolioList.map((item, idx) => (
               <FadeUp key={idx} delay={idx * 0.1}>
                 <div className="group relative overflow-hidden h-[400px] cursor-pointer bg-black">
                   <img 
@@ -274,7 +312,7 @@ export default function HomeV5() {
           <div className="border-t pt-12" style={{ borderColor: C.border }}>
             <p className="text-center font-bold uppercase tracking-widest text-sm mb-8" style={{ color: C.grayText }}>Gros comptes & institutions</p>
             <div className="flex flex-wrap justify-center gap-x-12 gap-y-6">
-              {CLIENTS.map(c => (
+              {clientsList.map(c => (
                 <span key={c} className="text-xl font-bold text-gray-300 hover:text-gray-800 transition-colors uppercase tracking-widest">{c}</span>
               ))}
             </div>

@@ -4,20 +4,19 @@ import { useSettings } from "@/hooks/useSettings";
 import { Link } from "wouter";
 import { resetCookieConsent } from "@/components/cookie-consent-banner";
 
-const footerLinks = {
-  services: [
-    { label: "Événements", href: "/evenements" },
-    { label: "Architecture de Marque", href: "/architecture-de-marque" },
-    { label: "La Fabrique", href: "/la-fabrique" },
-    { label: "Outils", href: "/outils/vigilance-score" },
-  ],
-  company: [
-    { label: "Références", href: "/nos-references" },
-    { label: "Blog", href: "/blog" },
-    { label: "Ressources", href: "/ressources" },
-    { label: "Contact", href: "/contact" },
-  ],
-};
+const defaultServicesLinks = [
+  { label: "Événements", href: "/evenements" },
+  { label: "Architecture de Marque", href: "/architecture-de-marque" },
+  { label: "La Fabrique", href: "/la-fabrique" },
+  { label: "Outils", href: "/outils/vigilance-score" },
+];
+
+const defaultCompanyLinks = [
+  { label: "Références", href: "/nos-references" },
+  { label: "Blog", href: "/blog" },
+  { label: "Ressources", href: "/ressources" },
+  { label: "Contact", href: "/contact" },
+];
 
 export function Footer() {
   const { settings } = useSettings("footer", {
@@ -28,7 +27,35 @@ export function Footer() {
     footer_linkedin: "",
     footer_facebook: "https://www.facebook.com/epitaphe360",
     footer_instagram: "",
+    footer_links_services: JSON.stringify(defaultServicesLinks),
+    footer_links_company: JSON.stringify(defaultCompanyLinks),
   });
+
+  const { settings: siteIdentity } = useSettings("site_identity", {
+    logo_white_url: "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png"
+  });
+
+  const parsedServicesLinks = (() => {
+    try {
+      return typeof settings.footer_links_services === "string" 
+        ? JSON.parse(settings.footer_links_services) 
+        : defaultServicesLinks;
+    } catch (e) {
+      return defaultServicesLinks;
+    }
+  })();
+
+  const parsedCompanyLinks = (() => {
+    try {
+      return typeof settings.footer_links_company === "string"
+        ? JSON.parse(settings.footer_links_company)
+        : defaultCompanyLinks;
+    } catch (e) {
+      return defaultCompanyLinks;
+    }
+  })();
+
+  const logoUrl = siteIdentity.logo_white_url || "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png";
 
   return (
     <footer
@@ -40,7 +67,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <div className="mb-4">
               <img
-                src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png"
+                src={logoUrl}
                 alt="Epitaphe 360"
                 className="h-10 w-auto brightness-0 invert"
                 data-testid="img-footer-logo"
@@ -89,7 +116,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-background mb-4">Nos services</h4>
             <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
+              {parsedServicesLinks.map((link: any) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -106,7 +133,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-background mb-4">L'agence</h4>
             <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
+              {parsedCompanyLinks.map((link: any) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}

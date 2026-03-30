@@ -187,6 +187,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
     { href: '/admin/media', label: 'Médias', icon: 'media', badge: 12 },
     { href: '/admin/qr-codes', label: 'QR Codes', icon: 'qrcodes' },
     { href: '/admin/menu', label: 'Menu navigation', icon: 'pages' },
+    { href: '/admin/appearance', label: 'Apparence', icon: 'paintbrush' },
     {
       href: '/admin/outils-phase2',
       label: 'Phase 2 — Outils',

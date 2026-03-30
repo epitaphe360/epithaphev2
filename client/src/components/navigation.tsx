@@ -10,13 +10,32 @@ import {
 } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useSettings } from "@/hooks/useSettings";
+
+interface SubEntryConfig {
+  label: string;
+  description: string;
+  href: string;
+  icon: string | null;
+  previewImage?: string;
+  isGroupHeader?: boolean;
+}
+interface NavEntryConfig {
+  label: string;
+  href?: string;
+  mega?: boolean;
+  rightAlign?: boolean;
+  previewImage?: string;
+  entries?: SubEntryConfig[];
+}
+
 interface SubEntry {
   label: string;
   description: string;
   href: string;
   icon: React.ReactNode;
   previewImage?: string;
-  isGroupHeader?: boolean; // si true : rendu comme en-tête de groupe (non-cliquable)
+  isGroupHeader?: boolean;
 }
 interface NavEntry {
   label: string;
@@ -27,20 +46,44 @@ interface NavEntry {
   entries?: SubEntry[];
 }
 
-/* === État prévisualisation interne ============================ */
+const ICON_MAP: Record<string, React.ReactNode> = {
+  Calendar: <Calendar className="w-5 h-5" />,
+  Trophy: <Trophy className="w-5 h-5" />,
+  Truck: <Truck className="w-5 h-5" />,
+  Store: <Store className="w-5 h-5" />,
+  Briefcase: <Briefcase className="w-5 h-5" />,
+  ShieldCheck: <ShieldCheck className="w-5 h-5" />,
+  Users: <Users className="w-5 h-5" />,
+  Printer: <Printer className="w-5 h-5" />,
+  Hammer: <Hammer className="w-5 h-5" />,
+  Signpost: <Signpost className="w-5 h-5" />,
+  LayoutGrid: <LayoutGrid className="w-5 h-5" />,
+  BookOpen: <BookOpen className="w-5 h-5" />,
+  FileText: <FileText className="w-5 h-5" />,
+  ImageIcon: <ImageIcon className="w-5 h-5" />,
+  BarChart2: <BarChart2 className="w-5 h-5" />,
+  Calculator: <Calculator className="w-5 h-5" />,
+  Mail: <Mail className="w-5 h-5" />,
+  FolderOpen: <FolderOpen className="w-5 h-5" />,
+  Lock: <Lock className="w-5 h-5" />,
+  UserCircle: <UserCircle className="w-5 h-5" />,
+  Palette: <Palette className="w-5 h-5" />,
+  MonitorPlay: <MonitorPlay className="w-5 h-5" />,
+  Layers: <Layers className="w-5 h-5" />
+};
 
 /* === Data ===================================================== */
-const navConfig: NavEntry[] = [
+const defaultNavConfig: NavEntryConfig[] = [
   {
     label: "Événements",
     mega: true,
     href: "/evenements",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg",
     entries: [
-      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: <Calendar className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
-      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: <Trophy   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
-      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows",    icon: <Truck    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
-      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons",    icon: <Store    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
+      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: "Calendar", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
+      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: "Trophy", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
+      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows",    icon: "Truck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
+      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons",    icon: "Store", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
     ],
   },
   {
@@ -49,9 +92,9 @@ const navConfig: NavEntry[] = [
     href: "/architecture-de-marque",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg",
     entries: [
-      { label: "Marque Employeur",    description: "Attirez et retenez les meilleurs talents",    href: "/architecture-de-marque/marque-employeur",   icon: <Briefcase   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
-      { label: "Communication QHSE", description: "Sécurité & conformité avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: <ShieldCheck className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
-      { label: "Expérience Clients", description: "Différenciation et fidélisation durables",    href: "/architecture-de-marque/experience-clients", icon: <Users       className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
+      { label: "Marque Employeur",    description: "Attirez et retenez les meilleurs talents",    href: "/architecture-de-marque/marque-employeur",   icon: "Briefcase", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
+      { label: "Communication QHSE", description: "Sécurité & conformité avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: "ShieldCheck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
+      { label: "Expérience Clients", description: "Différenciation et fidélisation durables",    href: "/architecture-de-marque/experience-clients", icon: "Users", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
     ],
   },
   {
@@ -61,10 +104,10 @@ const navConfig: NavEntry[] = [
     rightAlign: true,
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg",
     entries: [
-      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",     href: "/la-fabrique/impression",    icon: <Printer    className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
-      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: <Hammer     className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
-      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: <Signpost   className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
-      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: <LayoutGrid className="w-5 h-5" />, previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
+      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",     href: "/la-fabrique/impression",    icon: "Printer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
+      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: "Hammer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
+      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: "Signpost", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
+      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: "LayoutGrid", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
     ],
   },
   { label: "Références", href: "/nos-references" },
@@ -73,9 +116,9 @@ const navConfig: NavEntry[] = [
     label: "Ressources",
     href: "/ressources",
     entries: [
-      { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: <BookOpen  className="w-5 h-5" /> },
-      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/nos-references",              icon: <FileText  className="w-5 h-5" /> },
-      { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: <ImageIcon className="w-5 h-5" /> },
+      { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: "BookOpen" },
+      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/nos-references",              icon: "FileText" },
+      { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: "ImageIcon" },
     ],
   },
   {
@@ -84,28 +127,28 @@ const navConfig: NavEntry[] = [
     rightAlign: true,
     entries: [
       { label: "BMI 360™ Intelligence",     description: "", href: "#", icon: null, isGroupHeader: true },
-      { label: "BMI 360™ Dashboard",         description: "Vue globale de votre intelligence d'entreprise",    href: "/outils/bmi360",               icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "CommPulse™",              description: "Score Communication Interne · CLARITY™",             href: "/outils/commpulse",            icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "TalentPrint™",            description: "Score Marque Employeur · ATTRACT™",               href: "/outils/talentprint",          icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "ImpactTrace™",            description: "Score RSE & Impact · PROOF™",                   href: "/outils/impacttrace",          icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "SafeSignal™",             description: "Score Sécurité QHSE · SHIELD™",                href: "/outils/safesignal",           icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "EventImpact™",            description: "Score Événementiel · STAGE™",                    href: "/outils/eventimpact",          icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "SpaceScore™",             description: "Score Brand Physique · SPACE™",                 href: "/outils/spacescore",           icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "FinNarrative™",           description: "Score Com Financière · CAPITAL™",               href: "/outils/finnarrative",         icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "BMI 360™ Dashboard",         description: "Vue globale de votre intelligence d'entreprise",    href: "/outils/bmi360",               icon: "BarChart2" },
+      { label: "CommPulse™",              description: "Score Communication Interne · CLARITY™",             href: "/outils/commpulse",            icon: "BarChart2" },
+      { label: "TalentPrint™",            description: "Score Marque Employeur · ATTRACT™",               href: "/outils/talentprint",          icon: "BarChart2" },
+      { label: "ImpactTrace™",            description: "Score RSE & Impact · PROOF™",                   href: "/outils/impacttrace",          icon: "BarChart2" },
+      { label: "SafeSignal™",             description: "Score Sécurité QHSE · SHIELD™",                href: "/outils/safesignal",           icon: "BarChart2" },
+      { label: "EventImpact™",            description: "Score Événementiel · STAGE™",                    href: "/outils/eventimpact",          icon: "BarChart2" },
+      { label: "SpaceScore™",             description: "Score Brand Physique · SPACE™",                 href: "/outils/spacescore",           icon: "BarChart2" },
+      { label: "FinNarrative™",           description: "Score Com Financière · CAPITAL™",               href: "/outils/finnarrative",         icon: "BarChart2" },
       { label: "Outils Fabrique",          description: "", href: "#", icon: null, isGroupHeader: true },
-      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE",            href: "/outils/vigilance-score",      icon: <ShieldCheck className="w-5 h-5" /> },
-      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",              href: "/outils/calculateur-fabrique", icon: <Calculator  className="w-5 h-5" /> },
-      { label: "Déposer un brief",        description: "Formulaire stratégique multi-étapes",              href: "/contact/brief",               icon: <Mail        className="w-5 h-5" /> },
+      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE",            href: "/outils/vigilance-score",      icon: "ShieldCheck" },
+      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",              href: "/outils/calculateur-fabrique", icon: "Calculator" },
+      { label: "Déposer un brief",        description: "Formulaire stratégique multi-étapes",              href: "/contact/brief",               icon: "Mail" },
     ],
   },
   {
     label: "Espace Client",
     rightAlign: true,
     entries: [
-      { label: "Mes projets",     description: "Suivi temps réel de vos projets en cours",  href: "/espace-client/projets",    icon: <FolderOpen   className="w-5 h-5" /> },
-      { label: "Mes documents",   description: "Coffre-fort numérique & livrables signés",  href: "/espace-client/documents",  icon: <Lock         className="w-5 h-5" /> },
-      { label: "Mes ressources",  description: "Bibliothèque exclusive clients",            href: "/espace-client/ressources", icon: <BookOpen     className="w-5 h-5" /> },
-      { label: "Mon compte",      description: "Profil, notifications, accès biométrique",  href: "/espace-client",            icon: <UserCircle   className="w-5 h-5" /> },
+      { label: "Mes projets",     description: "Suivi temps réel de vos projets en cours",  href: "/espace-client/projets",    icon: "FolderOpen" },
+      { label: "Mes documents",   description: "Coffre-fort numérique & livrables signés",  href: "/espace-client/documents",  icon: "Lock" },
+      { label: "Mes ressources",  description: "Bibliothèque exclusive clients",            href: "/espace-client/ressources", icon: "BookOpen" },
+      { label: "Mon compte",      description: "Profil, notifications, accès biométrique",  href: "/espace-client",            icon: "UserCircle" },
     ],
   },
   { label: "Contact", href: "/contact" },
@@ -113,9 +156,9 @@ const navConfig: NavEntry[] = [
     label: "🎨 Maquettes",
     rightAlign: true,
     entries: [
-      { label: "Sélecteur",               description: "Comparer les variantes côte à côte",            href: "/design-preview", icon: <Palette     className="w-5 h-5" /> },
-      { label: "V4 — Black Monolith",     description: "Noir cinématique · Typographie géante",         href: "/design-v4",      icon: <MonitorPlay className="w-5 h-5" /> },
-      { label: "V5 — Accueil principal",  description: "Page d'accueil actuelle du site",               href: "/",               icon: <Layers      className="w-5 h-5" /> },
+      { label: "Sélecteur",               description: "Comparer les variantes côte à côte",            href: "/design-preview", icon: "Palette" },
+      { label: "V4 — Black Monolith",     description: "Noir cinématique · Typographie géante",         href: "/design-v4",      icon: "MonitorPlay" },
+      { label: "V5 — Accueil principal",  description: "Page d'accueil actuelle du site",               href: "/",               icon: "Layers" },
     ],
   },
 ];
@@ -313,6 +356,21 @@ export function Navigation() {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location] = useLocation();
   const { scrollY } = useScroll();
+  const [navSettings, setNavSettings] = useSettings('nav_config');
+  const [siteIdentity] = useSettings('site_identity');
+  
+  const rawNavConfig: NavEntryConfig[] = (navSettings as unknown as NavEntryConfig[]) || defaultNavConfig;
+  
+  const navConfig: NavEntry[] = rawNavConfig.map(entry => ({
+    ...entry,
+    entries: entry.entries?.map(sub => ({
+      ...sub,
+      icon: sub.icon ? (ICON_MAP[sub.icon] || null) : null
+    }))
+  }));
+
+  const logoUrl = siteIdentity?.logo_url || "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png";
+
   // Skill: UI/UX Pro Max → OLED dark glassmorphism navbar
   const bgColor   = useTransform(scrollY, [0, 60], ["rgba(0,0,5,0.0)",       "rgba(3,0,12,0.88)"]);
   const shadow    = useTransform(scrollY, [0, 60], ["0 0 0 0 transparent",   "0 2px 32px rgba(0,0,0,0.45)"]);
@@ -330,7 +388,7 @@ export function Navigation() {
         className="fixed top-0 left-0 right-0 z-[90] backdrop-blur-xl border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex-shrink-0">
-            <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-9 w-auto" />
+            <img src={logoUrl} alt="Epitaphe 360" className="h-9 w-auto" />
           </Link>
           <nav className="hidden lg:flex items-center gap-0.5">
             {navConfig.map((entry) => (
@@ -383,7 +441,7 @@ export function Navigation() {
               variants={drawerVariants} initial="hidden" animate="visible" exit="hidden"
               className="fixed top-0 right-0 bottom-0 z-[60] w-[85vw] max-w-sm bg-card border-l border-border flex flex-col lg:hidden overflow-y-auto">
               <div className="flex items-center justify-between p-4 border-b border-border">
-                <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-8 w-auto" />
+                <img src={logoUrl} alt="Epitaphe 360" className="h-8 w-auto" />
                 <button onClick={() => setDrawerOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground" aria-label="Fermer le menu">
                   <X className="w-4 h-4" aria-hidden />
                 </button>

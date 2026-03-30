@@ -46,6 +46,7 @@ import { ScoringResultsList } from './pages/scoring/ScoringResultsList';
 import { ClientProjectsAdmin } from './pages/clients/ClientProjectsAdmin';
 import { BriefFormEditor } from './pages/forms/BriefFormEditor';
 import { ScoringQuestionsEditor } from './pages/forms/ScoringQuestionsEditor';
+import { AppearanceSettings } from './pages/appearance/AppearanceSettings';
 
 // Auth guard component
 interface ProtectedRouteProps {
@@ -151,6 +152,10 @@ export const getDashboardRoutes = (
           element: <UsersList />,
         },
         // Settings
+        {
+          path: 'appearance',
+          element: <AppearanceSettings />,
+        },
         {
           path: 'settings/general',
           element: <GeneralSettings />,

@@ -27,6 +27,7 @@ import {
   Paintbrush,
   Target,
   FolderKanban,
+  ClipboardList,
 } from 'lucide-react';
 import { useDashboardConfig } from '../config';
 
@@ -158,6 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
     homepage: <Home className="w-5 h-5" />,
     scoring: <Target className="w-5 h-5" />,
     projects: <FolderKanban className="w-5 h-5" />,
+    forms: <ClipboardList className="w-5 h-5" />,
   };
 
   // Navigation enrichie
@@ -214,6 +216,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
       ]
     },
     { href: '/admin/scoring', label: 'Scoring BMI 360™', icon: 'scoring' },
+    {
+      href: '/admin/forms',
+      label: 'Formulaires',
+      icon: 'forms',
+      children: [
+        { to: '/admin/forms/brief', label: 'Options Brief' },
+        { to: '/admin/forms/scoring', label: 'Questions BMI 360™' },
+      ]
+    },
     { href: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
     { href: '/admin/users', label: 'Utilisateurs', icon: 'users' },
     {

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,7 @@ import {
 const TOOL_COLOR = '#0EA5E9'; // Cyan/Sky pour FinNarrative
 const TOOL_ID = 'finnarrative' as const;
 
-const QUESTIONS: ScoringQuestion[] = [
+const DEFAULT_QUESTIONS: ScoringQuestion[] = [
   // C — Clarté Narrative
   { id: 'c1', pillar: 'C', pillarLabel: 'Clarté Narrative', text: 'Notre rapport annuel est compréhensible par un lecteur non-financier en moins de 10 minutes.', weight: 3 },
   { id: 'c2', pillar: 'C', pillarLabel: 'Clarté Narrative', text: 'Notre message financier central ("notre thèse d\'investissement") est clair en une phrase.', weight: 3 },
@@ -99,6 +100,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; score: 
 type Step = 'roi' | 'form' | 'result';
 
 export default function FinNarrativePage() {
+  const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
   const [companyName, setCompanyName] = useState('');
@@ -110,8 +112,8 @@ export default function FinNarrativePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, QUESTIONS);
-    const pillarScores = calculatePillarScores(answers, QUESTIONS, PILLAR_COLORS);
+    const globalScore = calculateScore(answers, questions);
+    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
     const maturityLevel = getMaturityLevel(globalScore);
     const maturity = MATURITY_LEVELS[maturityLevel];
     const recommendations = generateRecommendations(pillarScores, globalScore);
@@ -249,7 +251,7 @@ export default function FinNarrativePage() {
 
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ScoringQuestionnaire toolId={TOOL_ID} toolName="FinNarrative™" toolColor={TOOL_COLOR} questions={QUESTIONS} onComplete={handleComplete} variant={respondentType} />
+                <ScoringQuestionnaire toolId={TOOL_ID} toolName="FinNarrative™" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
               </motion.div>
             )}
 

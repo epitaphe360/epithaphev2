@@ -9,6 +9,7 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { RevealSection } from "@/components/reveal-section";
 import axios from "axios";
+import { useBriefConfig } from "@/hooks/useToolQuestions";
 
 /* ─── Validation email professionnel ────────────────────── */
 const FREE_DOMAINS = ["gmail", "yahoo", "hotmail", "outlook", "yopmail", "protonmail", "icloud", "live"];
@@ -113,6 +114,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 
 /* ─── Page principale ───────────────────────────────────── */
 export default function BriefPage() {
+  const config = useBriefConfig({ sectors: SECTORS, needs: NEEDS, budgets: BUDGETS, timelines: TIMELINES });
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<Partial<Step1 & Step2 & Step3 & Step4>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -204,7 +206,7 @@ export default function BriefPage() {
                   <motion.div key="step0" custom={1} variants={slideVariants} initial="enter" animate="center" exit="exit">
                     <h2 className="text-xl font-bold text-foreground mb-6">Quel est votre secteur d'activité ?</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mb-6">
-                      {SECTORS.map((sector) => (
+                      {config.sectors.map((sector) => (
                         <label key={sector} className={`cursor-pointer flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                           form1.watch("sector") === sector
                             ? "border-primary bg-primary/10 text-primary"
@@ -229,7 +231,7 @@ export default function BriefPage() {
                     <h2 className="text-xl font-bold text-foreground mb-2">Quels sont vos besoins ?</h2>
                     <p className="text-sm text-muted-foreground mb-6">Sélectionnez tout ce qui s'applique</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-6">
-                      {NEEDS.map((need) => {
+                      {config.needs.map((need) => {
                         const checked = selectedNeeds.includes(need.value);
                         return (
                           <label key={need.value} className={`cursor-pointer flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
@@ -273,7 +275,7 @@ export default function BriefPage() {
                         <label className="block text-sm font-medium text-foreground mb-1.5">Budget estimé *</label>
                         <select {...form3.register("budget")} className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm">
                           <option value="">Sélectionner...</option>
-                          {BUDGETS.map((b) => <option key={b} value={b}>{b}</option>)}
+                          {config.budgets.map((b) => <option key={b} value={b}>{b}</option>)}
                         </select>
                         {form3.formState.errors.budget && <p className="text-destructive text-xs mt-1">{form3.formState.errors.budget.message}</p>}
                       </div>
@@ -281,7 +283,7 @@ export default function BriefPage() {
                         <label className="block text-sm font-medium text-foreground mb-1.5">Délai souhaité *</label>
                         <select {...form3.register("timeline")} className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm">
                           <option value="">Sélectionner...</option>
-                          {TIMELINES.map((t) => <option key={t} value={t}>{t}</option>)}
+                          {config.timelines.map((t) => <option key={t} value={t}>{t}</option>)}
                         </select>
                         {form3.formState.errors.timeline && <p className="text-destructive text-xs mt-1">{form3.formState.errors.timeline.message}</p>}
                       </div>

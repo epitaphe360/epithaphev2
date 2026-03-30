@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,7 +24,7 @@ const ZONES_AUDIT = [
   "Zone d'exposition produits / showroom", "Façade & enseigne extérieure", "Parking & abords"
 ];
 
-const QUESTIONS: ScoringQuestion[] = [
+const DEFAULT_QUESTIONS: ScoringQuestion[] = [
   // S — Signalétique
   { id: 's1', pillar: 'S', pillarLabel: 'Signalétique', text: 'Notre signalétique directionnelle permet à un visiteur de s\'orienter seul sans assistance.', weight: 3 },
   { id: 's2', pillar: 'S', pillarLabel: 'Signalétique', text: 'Les enseignes, panneaux et affichages sont en bon état, lisibles et professionnels.', weight: 2 },
@@ -83,6 +84,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; score: 
 type Step = 'roi' | 'form' | 'result';
 
 export default function SpaceScorePage() {
+  const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
   const [companyName, setCompanyName] = useState('');
@@ -97,8 +99,8 @@ export default function SpaceScorePage() {
   };
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, QUESTIONS);
-    const pillarScores = calculatePillarScores(answers, QUESTIONS, PILLAR_COLORS);
+    const globalScore = calculateScore(answers, questions);
+    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
     const maturityLevel = getMaturityLevel(globalScore);
     const maturity = MATURITY_LEVELS[maturityLevel];
     const recommendations = generateRecommendations(pillarScores, globalScore);
@@ -225,7 +227,7 @@ export default function SpaceScorePage() {
 
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ScoringQuestionnaire toolId={TOOL_ID} toolName="SpaceScore™" toolColor={TOOL_COLOR} questions={QUESTIONS} onComplete={handleComplete} variant={respondentType} />
+                <ScoringQuestionnaire toolId={TOOL_ID} toolName="SpaceScore™" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
               </motion.div>
             )}
 

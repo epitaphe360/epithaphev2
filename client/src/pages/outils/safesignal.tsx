@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,7 @@ import {
 const TOOL_COLOR = '#F97316'; // Orange pour SafeSignal
 const TOOL_ID = 'safesignal' as const;
 
-const QUESTIONS: ScoringQuestion[] = [
+const DEFAULT_QUESTIONS: ScoringQuestion[] = [
   // S — Signaux Faibles
   { id: 's1', pillar: 'S', pillarLabel: 'Signaux Faibles', text: 'Nous disposons d\'un système formalisé pour recueillir et analyser les signaux faibles de sécurité (near misses, observations).', weight: 3 },
   { id: 's2', pillar: 'S', pillarLabel: 'Signaux Faibles', text: 'Les employés signalent les situations à risque sans crainte de représailles.', weight: 3 },
@@ -84,6 +85,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; score: 
 type Step = 'roi' | 'form' | 'result';
 
 export default function SafeSignalPage() {
+  const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
   const [companyName, setCompanyName] = useState('');
@@ -93,8 +95,8 @@ export default function SafeSignalPage() {
   const [result, setResult] = useState<ScoringResult | null>(null);
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, QUESTIONS);
-    const pillarScores = calculatePillarScores(answers, QUESTIONS, PILLAR_COLORS);
+    const globalScore = calculateScore(answers, questions);
+    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
     const maturityLevel = getMaturityLevel(globalScore);
     const maturity = MATURITY_LEVELS[maturityLevel];
     const recommendations = generateRecommendations(pillarScores, globalScore);
@@ -218,7 +220,7 @@ export default function SafeSignalPage() {
 
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ScoringQuestionnaire toolId={TOOL_ID} toolName="SafeSignal™" toolColor={TOOL_COLOR} questions={QUESTIONS} onComplete={handleComplete} variant={respondentType} />
+                <ScoringQuestionnaire toolId={TOOL_ID} toolName="SafeSignal™" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
               </motion.div>
             )}
 

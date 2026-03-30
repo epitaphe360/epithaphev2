@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,7 @@ import {
 const TOOL_COLOR = '#10B981'; // Émeraude pour ImpactTrace
 const TOOL_ID = 'impacttrace' as const;
 
-const QUESTIONS: ScoringQuestion[] = [
+const DEFAULT_QUESTIONS: ScoringQuestion[] = [
   // P — Plateforme RSE
   { id: 'p1', pillar: 'P', pillarLabel: 'Plateforme RSE', text: 'Notre stratégie RSE est formalisée dans un document officiel (rapport, charte, politique).', weight: 3 },
   { id: 'p2', pillar: 'P', pillarLabel: 'Plateforme RSE', text: 'Les objectifs RSE sont chiffrés, datés et alignés sur un référentiel reconnu (ODD, GRI, Label CGEM).', weight: 3 },
@@ -76,6 +77,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; score: 
 type Step = 'roi' | 'form' | 'result';
 
 export default function ImpactTracePage() {
+  const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
   const [companyName, setCompanyName] = useState('');
@@ -87,8 +89,8 @@ export default function ImpactTracePage() {
   const walkTalkGap = 43; // 43% déclarent RSE, ~25% labellisées → illustration
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, QUESTIONS);
-    const pillarScores = calculatePillarScores(answers, QUESTIONS, PILLAR_COLORS);
+    const globalScore = calculateScore(answers, questions);
+    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
     const maturityLevel = getMaturityLevel(globalScore);
     const maturity = MATURITY_LEVELS[maturityLevel];
     const recommendations = generateRecommendations(pillarScores, globalScore);
@@ -220,7 +222,7 @@ export default function ImpactTracePage() {
 
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ScoringQuestionnaire toolId={TOOL_ID} toolName="ImpactTrace™" toolColor={TOOL_COLOR} questions={QUESTIONS} onComplete={handleComplete} variant={respondentType} />
+                <ScoringQuestionnaire toolId={TOOL_ID} toolName="ImpactTrace™" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
               </motion.div>
             )}
 

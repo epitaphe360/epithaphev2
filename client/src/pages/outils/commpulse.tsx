@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,7 @@ import {
 const TOOL_COLOR = '#6366F1'; // Indigo pour CommPulse
 const TOOL_ID = 'commpulse' as const;
 
-const QUESTIONS: ScoringQuestion[] = [
+const DEFAULT_QUESTIONS: ScoringQuestion[] = [
   // C — Cohérence
   { id: 'c1', pillar: 'C', pillarLabel: 'Cohérence', text: 'Les messages de la direction sont alignés avec les valeurs affichées de l\'entreprise.', weight: 2 },
   { id: 'c2', pillar: 'C', pillarLabel: 'Cohérence', text: 'Les communications internes reflètent fidèlement la stratégie de l\'entreprise.', weight: 2 },
@@ -96,6 +97,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; pillarL
 type Step = 'roi' | 'form' | 'result';
 
 export default function CommPulsePage() {
+  const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
   const [companyName, setCompanyName] = useState('');
@@ -108,8 +110,8 @@ export default function CommPulsePage() {
   const roiEstimate = calculateRoiEstimate(effectif, salaireMoyen, 0.18);
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, QUESTIONS);
-    const pillarScores = calculatePillarScores(answers, QUESTIONS, PILLAR_COLORS);
+    const globalScore = calculateScore(answers, questions);
+    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
     const maturityLevel = getMaturityLevel(globalScore);
     const maturity = MATURITY_LEVELS[maturityLevel];
     const recommendations = generateRecommendations(pillarScores, globalScore);
@@ -304,7 +306,7 @@ export default function CommPulsePage() {
                   toolId={TOOL_ID}
                   toolName="CommPulse™"
                   toolColor={TOOL_COLOR}
-                  questions={QUESTIONS}
+                  questions={questions}
                   onComplete={handleComplete}
                   variant={respondentType}
                 />

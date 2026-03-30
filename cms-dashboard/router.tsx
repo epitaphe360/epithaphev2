@@ -44,6 +44,8 @@ import { PageManagement } from './pages/website/PageManagement';
 import { HomepageSettings } from './pages/homepage/HomepageSettings';
 import { ScoringResultsList } from './pages/scoring/ScoringResultsList';
 import { ClientProjectsAdmin } from './pages/clients/ClientProjectsAdmin';
+import { BriefFormEditor } from './pages/forms/BriefFormEditor';
+import { ScoringQuestionsEditor } from './pages/forms/ScoringQuestionsEditor';
 
 // Auth guard component
 interface ProtectedRouteProps {
@@ -295,6 +297,15 @@ export const getDashboardRoutes = (
         {
           path: 'client-projects',
           element: <ClientProjectsAdmin />,
+        },
+        // ── Formulaires ──────────────────────────────────────────────────────
+        {
+          path: 'forms/brief',
+          element: <BriefFormEditor />,
+        },
+        {
+          path: 'forms/scoring',
+          element: <ScoringQuestionsEditor />,
         },
       ],
     },

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +17,7 @@ import {
 const TOOL_COLOR = '#EC4899'; // Rose/Fuchsia pour TalentPrint
 const TOOL_ID = 'talentprint' as const;
 
-const QUESTIONS: ScoringQuestion[] = [
+const DEFAULT_QUESTIONS: ScoringQuestion[] = [
   // A — Authenticité
   { id: 'a1', pillar: 'A', pillarLabel: 'Authenticité', text: 'Notre discours sur la marque employeur reflète fidèlement l\'expérience réelle des employés.', weight: 3 },
   { id: 'a2', pillar: 'A', pillarLabel: 'Authenticité', text: 'Les engagements pris lors du recrutement sont tenus dans la réalité du poste.', weight: 3 },
@@ -92,6 +93,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; score: 
 type Step = 'roi' | 'form' | 'result';
 
 export default function TalentPrintPage() {
+  const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
   const [companyName, setCompanyName] = useState('');
@@ -105,8 +107,8 @@ export default function TalentPrintPage() {
   const turnoverCost = Math.round(effectif * 0.20 * (salaireMoyen * 6));
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, QUESTIONS);
-    const pillarScores = calculatePillarScores(answers, QUESTIONS, PILLAR_COLORS);
+    const globalScore = calculateScore(answers, questions);
+    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
     const maturityLevel = getMaturityLevel(globalScore);
     const maturity = MATURITY_LEVELS[maturityLevel];
     const recommendations = generateRecommendations(pillarScores, globalScore);
@@ -229,7 +231,7 @@ export default function TalentPrintPage() {
 
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ScoringQuestionnaire toolId={TOOL_ID} toolName="TalentPrint™" toolColor={TOOL_COLOR} questions={QUESTIONS} onComplete={handleComplete} variant={respondentType} />
+                <ScoringQuestionnaire toolId={TOOL_ID} toolName="TalentPrint™" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
               </motion.div>
             )}
 

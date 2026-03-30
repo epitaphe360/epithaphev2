@@ -10,10 +10,21 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Skill: UI/UX Pro Max → Cormorant Garamond (luxury serif headings) + Montserrat (body)
-        cormorant: ['Cormorant Garamond', 'Cormorant', 'Georgia', 'serif'],
-        montserrat: ['Montserrat', 'sans-serif'],
-        sans: ['Montserrat', 'sans-serif'],
+        // CDC §1.5.2 — Inter (corps) + Playfair Display (titres luxe)
+        inter: ['Inter', 'system-ui', 'sans-serif'],
+        playfair: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+      },
+      fontSize: {
+        // CDC §1.5.2 — Typographic scale
+        'display': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'h1':      ['3rem',   { lineHeight: '1.15', letterSpacing: '-0.015em', fontWeight: '700' }],
+        'h2':      ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'h3':      ['1.875rem', { lineHeight: '1.25', fontWeight: '600' }],
+        'h4':      ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
+        'h5':      ['1.25rem', { lineHeight: '1.4', fontWeight: '500' }],
+        'h6':      ['1.125rem', { lineHeight: '1.5', fontWeight: '500' }],
       },
       borderRadius: {
         lg: ".5625rem", /* 9px */
@@ -85,6 +96,22 @@ export default {
           foreground: "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
           border: "var(--sidebar-accent-border)"
         },
+        // CDC §1.5.1 — Brand tokens
+        'brand-black': '#1A1A1A',
+        'brand-gold': {
+          light: '#D4B97E',
+          DEFAULT: '#C8A96E',
+          dark: '#A68B55',
+        },
+        // CDC §1.5.1 — Sector colors
+        sector: {
+          pharma:   '#2D6A4F',
+          auto:     '#1B4965',
+          finance:  '#283D3B',
+          tech:     '#4361EE',
+          energie:  '#F77F00',
+          luxury:   '#6C584C',
+        },
         status: {
           online: "rgb(34 197 94)",
           away: "rgb(245 158 11)",
@@ -92,11 +119,7 @@ export default {
           offline: "rgb(156 163 175)",
         },
       },
-      fontFamily: {
-        sans: ["var(--font-sans)"],
-        serif: ["var(--font-serif)"],
-        mono: ["var(--font-mono)"],
-      },
+
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

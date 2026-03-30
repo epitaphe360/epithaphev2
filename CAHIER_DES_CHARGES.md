@@ -1,6 +1,7 @@
 # Cahier des Charges Technique & Fonctionnel — Epitaphe360
-> Version 1.0 — 21 mars 2026  
-> Portail B2B Haut de Gamme — Architecture Next.js 14+ / TypeScript / Tailwind CSS / CMS Headless
+> Version 2.0 — 30 mars 2026  
+> Portail B2B Haut de Gamme + Plateforme de Scoring Intelligence — React/Vite/TypeScript / Tailwind CSS / CMS Headless  
+> Mise à jour : Intégration du portefeuille BMI 360™ (7 outils de scoring + dashboard agrégateur C-suite)
 
 ---
 
@@ -12,6 +13,308 @@
 4. [Module Lead Generation & Outils Interactifs](#4-module-lead-generation--outils-interactifs)
 5. [Module CMS, SEO & Performance](#5-module-cms-seo--performance)
 6. [Module Espace Client & PWA (Phase 2)](#6-module-espace-client--pwa-phase-2)
+7. [**Module BMI 360™ — Portefeuille de Scoring Intelligence**](#7-module-bmi-360--portefeuille-de-scoring-intelligence)
+
+---
+
+## 7. Module BMI 360™ — Portefeuille de Scoring Intelligence
+
+> Benchmark mondial réalisé le 24 mars 2026.  
+> Stratégie validée : créer des outils propriétaires de diagnostic et scoring qui attirent des prospects, démontrent l'expertise et convertissent en missions. C'est le meilleur levier d'acquisition B2B identifié en 2025-2026.
+
+### 7.0 Vision Stratégique
+
+Les 6 outils forment un **écosystème, pas une collection**. Chaque outil est autonome et génère ses propres leads, mais ensemble ils convergent vers le BMI 360™. Structure en entonnoir : un client entre par un pôle (souvent celui où il a le plus mal), découvre les autres lacunes via le rapport, et finit par commander le BMI 360™ complet.
+
+**Innovations transversales (signature propriétaire Epitaphe360) :**
+- **Dual/Triple Voice Score** — mesurer l'écart entre ce que la direction croit et ce que les équipes vivent
+- **ROI Calculator financier** en page d'accueil — transformer un problème abstrait en chiffre concret avant le scoring
+- **Photo-Audit / Upload document** — déclenche une analyse IA instantanée
+- **5 niveaux de maturité nommés** pour chaque outil
+- **Rapport bilingue FR/AR** adapté au contexte MENA
+- **Restitution humaine 45 minutes** avec un expert Epitaphe360
+
+**Phases de déploiement :**
+- Phase 1 (6-9 mois) : CommPulse™, TalentPrint™, SafeSignal™ (quick wins)
+- Phase 2 (9-18 mois) : BMI 360™ Brand Maturity Index (différenciation)
+- Phase 3 (18-36 mois) : SaaS white-label + expansion MENA (Tunisie, Algérie, Égypte, Émirats)
+
+---
+
+### 7.1 CommPulse™ — Communication Interne Intelligence
+
+**Tagline :** "Feel the heartbeat of your organization"  
+**Sous-titre :** The Internal Communication Intelligence Platform by Epitaphe360  
+**Prix :** 4 900 MAD  
+**Modèle :** CLARITY™
+
+**Benchmark :** Firstup, Staffbase (éditeurs logiciels) mesurent l'outil, pas la stratégie. 71% des employés insatisfaits de leur com interne. Cadres seniors perdent 63 jours/an → coût 54 860$/an par senior à +200K$/an.
+
+**5 différenciateurs uniques :**
+1. Scoring sectoriel (comparé à votre secteur, pas au monde entier)
+2. Calcul du coût financier réel de la communication défaillante
+3. Recommandations actionnables signées Epitaphe360 (pas des conseils génériques)
+4. Rapport bilingue FR/AR adapté au contexte MENA
+5. Restitution humaine de 45 min avec un expert
+
+**Modèle CLARITY™ (7 piliers × 6 questions = 42 questions) :**
+- **C**ohérence — alignement message/valeurs
+- **L**iens — canaux et flux d'information
+- **A**ttention — qualité d'écoute managériale
+- **R**ésultats — impact mesurable sur la performance
+- **I**nclusion — équité d'accès à l'information
+- **T**ransparence — clarté des décisions stratégiques
+- **Y**ou (Engagement) — implication des collaborateurs
+
+**Architecture technique :**
+```
+/outils/commpulse
+  ├── Landing page avec ROI Calculator
+  │     └── Calcul : effectif × salaire moyen × facteur CLARITY (0.18) = coût estimé
+  ├── Questionnaire multi-étapes (7 piliers × 6 questions)
+  │     ├── Réponses : 1-5 (jamais → toujours)
+  │     └── Variant Direction (A) vs Terrain (B) pour le Dual Voice Score
+  └── Résultats
+        ├── Score global /100
+        ├── Radar chart 7 axes
+        ├── Dual Voice Gap affiché
+        ├── Benchmark sectoriel MENA
+        └── PDF rapport + CTA restitution 45min
+```
+
+---
+
+### 7.2 TalentPrint™ — Marque Employeur Intelligence
+
+**Tagline :** "Your employer brand, decoded."  
+**Prix :** 7 500 MAD  
+**Modèle :** ATTRACT™
+
+**Benchmark :** PeopleScout Outthink Index (9 composantes, digital-only, ne touche pas au vécu terrain). Gartner : EVP convaincant → réduction turnover 69%, coûts recrutement -50%.
+
+**Insight central :** Les meilleures organisations consacrent 80% de leurs efforts à tenir leurs promesses EVP et 20% à les définir. TalentPrint™ révèle où se situe cet écart et combien il coûte.
+
+**Modèle ATTRACT™ (6 dimensions) :**
+- **A**uthenticité — cohérence discours/réalité vécue
+- **T**alent Magnet — pouvoir d'attraction des profils cibles
+- **T**urnover DNA — facteurs de rétention profonds
+- **R**eputation Digitale — présence Glassdoor, LinkedIn, réseaux
+- **A**mbassadeurs — niveau d'advocacy des employés actuels
+- **C**ulture Fitness — alignement culture/valeurs/pratiques
+- **T**ransition — expérience d'onboarding et d'offboarding
+
+**Innovation clé : Gap Score Double Voix**  
+Deux versions du questionnaire : direction vs employés. L'écart chiffré devient le premier argument commercial.
+
+---
+
+### 7.3 ImpactTrace™ — RSE Intelligence
+
+**Tagline :** "Walk the talk, prove the impact."  
+**Prix :** 8 400 MAD  
+**Modèle :** PROOF™
+
+**Contexte MENA :** 43% des 500 premières entreprises marocaines se déclarent RSE (2025, vs 27% en 2023). Seulement 124 ont le label CGEM dont 37 PME. 91% des consommateurs pensent que les marques font du greenwashing.
+
+**Innovation centrale : Walk vs Talk Score™**  
+Mesure l'écart entre les déclarations positives des dirigeants et les actions réelles. Premier outil accessible aux ETI MENA à quantifier cet écart de manière systématique.
+
+**Modèle PROOF™ :**
+- **P**lateforme RSE — structure et gouvernance
+- **R**eputation — perception externe et crédibilité
+- **O**pérations — empreinte environnementale réelle
+- **O**uverture communautaire — ancrage territorial
+- **F**ormation — engagement et culture RSE interne
+
+**Argument CSRD urgent :** Entreprises marocaines exportant vers l'Europe soumises aux exigences de la CSRD via leurs donneurs d'ordre européens. ImpactTrace™ contextualise les résultats selon cette exposition réglementaire.
+
+---
+
+### 7.4 SafeSignal™ — QHSE/SST Intelligence
+
+**Tagline :** "See the gap before it becomes an accident."  
+**Prix :** 7 900 MAD  
+**Modèle :** SHIELD™
+
+**Insight central (National Safety Council) :** Les responsables sécurité évaluent systématiquement leur culture de manière plus positive que les employés de terrain. 30% des travailleurs ressentant de la douleur ne le signalent pas → **Safety Perception Gap™**.
+
+**80-90% des blessures** causées par des erreurs humaines prévenables par la communication, pas par des équipements.
+
+**Modèle SHIELD™ :**
+- **S**ignaux faibles — détection précoce des risques
+- **H**iérarchie sécurité — leadership visible et engagé
+- **I**mpact terrain — communication opérateurs/managers
+- **E**ngagement total — implication de toute la chaîne
+- **L**earning culture — feedback et amélioration continue
+- **D**ispositifs physiques — signalétique, PLV, espaces sécurité
+
+**Innovation : SafeWalk™**  
+Upload de 12 photos terrain → IA génère un brief de production signalétique et d'habillage d'espace.
+
+---
+
+### 7.5 EventImpact™ — Événementiel Intelligence
+
+**Tagline :** "Every event has a score. What's yours?"  
+**Prix :** 7 900 MAD  
+**Modèle :** STAGE™
+
+**Benchmark :** 64% des responsables événementiels peinent à prouver le ROI. 58% s'appuient sur des métriques de vanité. 40% du ROI événementiel provient de l'impact long terme sur la marque.
+
+**Innovation : Triple Temporalité**  
+- Mode **Rétrospectif** — analyser un événement passé
+- Mode **Anticipatif** — planifier les objectifs avant le jour J
+- Mode **Annuel** — évaluer la stratégie événementielle globale
+
+**Modèle STAGE™ :**
+- **S**tratégie — alignement événement/objectifs business
+- **T**argeting — adéquation audience/message
+- **A**mbiance de marque — cohérence identité/scénographie
+- **G**eneration de leads/ROI — mesure de l'impact commercial
+- **E**ngagement — activation du public et suivi post-événement
+
+**Innovation : Brand Coherence Score™**  
+Mesure simultanément le ROI stratégique ET la cohérence de marque événementielle — seul Epitaphe360 peut adresser opérationnellement ces deux dimensions.
+
+---
+
+### 7.6 SpaceScore™ — Brand Physique Intelligence
+
+**Tagline :** "Your spaces speak. Are they saying the right thing?"  
+**Prix :** 6 500 MAD  
+**Modèle :** SPACE™
+
+**Data :** 76% des consommateurs entrent dans des magasins uniquement en raison de la signalétique. 68% ont payé car la signalétique a attiré leur regard. Différence de 25% de productivité entre bureaux "confortables" vs "inconfortables".
+
+**Modèle SPACE™ (5 dimensions) :**
+- **S**ignalétique — clarté, cohérence, impact visuel
+- **P**résence de marque — identité physique territoire
+- **A**mbiance globale — atmosphère et wellbeing
+- **C**ohérence — alignement entre espaces et valeurs d'entreprise
+- **E**xpérience visiteur — parcours client, wayfinding
+
+**Innovation : Photo-Audit 12 zones + First Impression Test™**  
+Upload de 12 photos d'espaces → IA génère une Brand Space Map™ + budget estimatif de mise à niveau.
+
+---
+
+### 7.7 FinNarrative™ — Communication Financière Intelligence
+
+**Tagline :** "Turn compliance into conviction."  
+**Prix :** 9 900 MAD  
+**Modèle :** CAPITAL™
+
+**Cible :** DG, DAF, Conseil d'Administration — interlocuteur le plus décisionnaire.
+
+**Context réglementaire :** AMMC 2025 — nouvelles recommandations pour sociétés cotées : rapport financier annuel structuré et homogène, communiqué de presse dans un journal d'annonces légales, résultats AG publiés sous 15 jours.
+
+**Insight :** Beaucoup de dirigeants financiers estiment que le reporting financier s'est "dégénéré" en un exercice de conformité plutôt qu'une démarche pour informer les parties prenantes.
+
+**Modèle CAPITAL™ :**
+- **C**larté narrative — lisibilité et structure du discours financier
+- **A**lignement stratégique — cohérence avec la vision d'entreprise
+- **P**erformance visuelle — qualité des supports (rapport annuel, présentations)
+- **I**mpact investisseurs — crédibilité et confiance des parties prenantes
+- **T**ransparence — conformité et accessibilité de l'information
+- **A**nticipation — proactivité dans la communication de crise
+- **L**ecture benchmark — positionnement vs pairs sectoriels
+
+**Innovation : Narrative Doctor™**  
+Upload du rapport annuel (PDF) → IA identifie 4 pathologies narratives en 3 minutes. Moment de prise de conscience immédiate pour le DG.
+
+---
+
+### 7.8 BMI 360™ — Brand Maturity Index Dashboard C-suite
+
+**Tagline :** "One score to see it all."  
+**Prix :** 9 900 MAD  
+**Positionnement :** Aucune agence en Afrique du Nord ne propose un scoring multi-pôles intégré.
+
+**Principe :** Agrège les 6 scores sectoriels en un indice global de maturité de communication, comparable par secteur et taille d'entreprise.
+
+**Tableau synthèse du portefeuille :**
+
+| Outil | Modèle | Innovation clé | Prix |
+|-------|--------|---------------|------|
+| CommPulse™ | CLARITY™ | Coût com défaillante | 4 900 MAD |
+| TalentPrint™ | ATTRACT™ | Gap Score Double Voix | 7 500 MAD |
+| ImpactTrace™ | PROOF™ | Walk vs Talk Score | 8 400 MAD |
+| SafeSignal™ | SHIELD™ | Safety Perception Gap | 7 900 MAD |
+| EventImpact™ | STAGE™ | Brand Coherence Score | 7 900 MAD |
+| SpaceScore™ | SPACE™ | Photo-Audit 12 zones | 6 500 MAD |
+| FinNarrative™ | CAPITAL™ | Narrative Doctor™ | 9 900 MAD |
+| **BMI 360™** | Agrégateur | Dashboard C-suite 6 pôles | **9 900 MAD** |
+
+**Architecture technique du dashboard BMI 360™ :**
+```
+/outils/bmi360
+  ├── Hero avec simulateur d'impact (chiffre coût global)
+  ├── Radar chart 6 pôles avec scores agrégés
+  ├── Benchmark sectoriel MENA (anonymisé)
+  ├── Comparaison re-scoring (avant/après mission)
+  ├── Recommandations priorisées par ROI
+  └── CTA : commander un BMI 360™ complet
+```
+
+**Modèle de données BMI 360™ :**
+```typescript
+interface BMI360Score {
+  companyId: string;
+  sector: 'pharma' | 'auto' | 'finance' | 'tech' | 'energie' | 'luxury' | 'autre';
+  companySize: 'tpe' | 'pme' | 'eti' | 'ge';
+  scores: {
+    commPulse?: number;    // /100
+    talentPrint?: number;  // /100
+    impactTrace?: number;  // /100
+    safeSignal?: number;   // /100
+    eventImpact?: number;  // /100
+    spaceScore?: number;   // /100
+    finNarrative?: number; // /100
+  };
+  bmi360Global?: number;   // moyenne pondérée /100
+  createdAt: Date;
+  version: number;         // permet le re-scoring comparatif
+}
+```
+
+---
+
+### 7.9 Architecture Technique Commune — Moteur de Scoring
+
+```typescript
+// lib/scoring-engine.ts
+
+interface ScoringQuestion {
+  id: string;
+  pillar: string;
+  text: string;
+  textAR?: string;      // Traduction arabe
+  weight: number;       // 1-3 (importance relative)
+  reverseScored?: boolean; // Question inversée
+}
+
+interface ScoringResult {
+  toolId: string;
+  companyName: string;
+  sector: string;
+  pillarScores: Record<string, number>;
+  globalScore: number;
+  maturityLevel: 1 | 2 | 3 | 4 | 5;
+  maturityLabel: string;
+  gap?: { direction: number; terrain: number; delta: number };
+  roiEstimate?: number;
+  recommendations: string[];
+  benchmarkPercentile?: number;
+  createdAt: Date;
+}
+```
+
+**5 Niveaux de maturité universels :**
+1. 🔴 **Fragile** (0-20) — Absence de stratégie structurée
+2. 🟠 **Émergent** (21-40) — Initiatives isolées sans cohérence
+3. 🟡 **Structuré** (41-60) — Processus en place mais non optimisés
+4. 🟢 **Performant** (61-80) — Pratiques solides et mesurables
+5. 🔵 **Leader** (81-100) — Excellence et benchmark sectoriel
 
 ---
 

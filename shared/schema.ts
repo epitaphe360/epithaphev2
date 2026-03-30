@@ -855,3 +855,30 @@ export const insertResourceSchema = createInsertSchema(resources).omit({
 });
 export type InsertResource = z.infer<typeof insertResourceSchema>;
 export type Resource = typeof resources.$inferSelect;
+
+// ============================================================
+// BMI 360™ — SCORING RESULTS
+// Persistance des résultats de scoring pour analytics et suivi
+// ============================================================
+
+export const scoringResults = pgTable("scoring_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  toolId: varchar("tool_id", { length: 50 }).notNull(), // commpulse, talentprint, etc.
+  companyName: text("company_name"),
+  sector: varchar("sector", { length: 80 }),
+  companySize: varchar("company_size", { length: 30 }),
+  globalScore: integer("global_score").notNull(),
+  pillarScores: json("pillar_scores").$type<Record<string, number>>().notNull(),
+  maturityLevel: integer("maturity_level").notNull(), // 1=Emergent … 5=Leader
+  recommendations: json("recommendations").$type<string[]>(),
+  sessionId: text("session_id"), // identifiant anonyme de session
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertScoringResultSchema = createInsertSchema(scoringResults).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertScoringResult = z.infer<typeof insertScoringResultSchema>;
+export type ScoringResult = typeof scoringResults.$inferSelect;

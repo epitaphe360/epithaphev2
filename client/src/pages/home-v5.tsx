@@ -10,7 +10,9 @@ import { useRef, useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, useInView } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, Menu, X, ChevronRight, Play, MapPin, Phone, Mail } from "lucide-react";
+import { ArrowRight, ChevronRight, Play, MapPin, Phone, Mail } from "lucide-react";
+import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
 
 /* ─── Palette Officielle ─────────────────────────────────── */
 const C = {
@@ -78,7 +80,6 @@ const PORTFOLIO = [
 ];
 
 export default function HomeV5() {
-  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div style={{ backgroundColor: C.white, color: C.dark, fontFamily: "Inter, sans-serif" }}>
@@ -87,52 +88,11 @@ export default function HomeV5() {
         <meta name="description" content="Epitaphe 360 accompagne depuis 20 ans les grandes entreprises. Événementiel, stands, signalétique et impression grand format à Casablanca, Maroc." />
       </Helmet>
 
-      {/* ─── HEADER (Classique, Blanc, Propre) ────────────── */}
-      <header className="sticky top-0 left-0 right-0 z-50 bg-white border-b" style={{ borderColor: C.border }}>
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/">
-            <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-10 w-auto" />
-          </Link>
-          
-          <nav className="hidden lg:flex items-center gap-8">
-            <Link href="/evenements"><span className="text-[15px] font-medium hover:text-[#E3001B] transition-colors cursor-pointer" style={{ color: C.dark }}>Événementiel</span></Link>
-            <Link href="/la-fabrique"><span className="text-[15px] font-medium hover:text-[#E3001B] transition-colors cursor-pointer" style={{ color: C.dark }}>La Fabrique</span></Link>
-            <Link href="/architecture-de-marque"><span className="text-[15px] font-medium hover:text-[#E3001B] transition-colors cursor-pointer" style={{ color: C.dark }}>Architecture de marque</span></Link>
-            <Link href="/nos-references"><span className="text-[15px] font-medium hover:text-[#E3001B] transition-colors cursor-pointer" style={{ color: C.dark }}>Références</span></Link>
-          </nav>
-
-          <div className="hidden lg:block">
-            <Link href="/contact">
-              <button 
-                className="px-6 py-2.5 text-[15px] font-bold text-white transition-colors"
-                style={{ backgroundColor: C.red }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = C.redHover}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = C.red}
-              >
-                Nous contacter
-              </button>
-            </Link>
-          </div>
-
-          <button className="lg:hidden p-2" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="lg:hidden absolute top-20 left-0 right-0 bg-white border-b shadow-lg p-6 flex flex-col gap-4" style={{ borderColor: C.border }}>
-            <Link href="/evenements"><span className="text-lg font-medium block" onClick={() => setMenuOpen(false)}>Événementiel</span></Link>
-            <Link href="/la-fabrique"><span className="text-lg font-medium block" onClick={() => setMenuOpen(false)}>La Fabrique</span></Link>
-            <Link href="/architecture-de-marque"><span className="text-lg font-medium block" onClick={() => setMenuOpen(false)}>Architecture de marque</span></Link>
-            <Link href="/nos-references"><span className="text-lg font-medium block" onClick={() => setMenuOpen(false)}>Références</span></Link>
-            <Link href="/contact"><span className="text-lg font-bold block mt-4" style={{ color: C.red }} onClick={() => setMenuOpen(false)}>Nous contacter</span></Link>
-          </div>
-        )}
-      </header>
+      {/* ─── NAVIGATION GLOBALE (Mega Menu complet) ───────── */}
+      <Navigation />
 
       {/* ─── HERO SECTION (L'image prime) ─────────────────── */}
-      <section className="relative h-[80vh] min-h-[600px] flex items-center">
+      <section className="relative h-[80vh] min-h-[600px] flex items-center mt-16">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://epitaphe.ma/wp-content/uploads/2018/10/eventqatar.jpg" 
@@ -344,55 +304,8 @@ export default function HomeV5() {
         </div>
       </section>
 
-      {/* ─── FOOTER CORPORATE ─────────────────────────────── */}
-      <footer className="py-16 pb-8" style={{ backgroundColor: C.dark, color: "white" }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 border-b border-white/10 pb-16">
-            <div className="md:col-span-2">
-              <img src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png" alt="Epitaphe 360" className="h-10 w-auto brightness-0 invert mb-6" />
-              <p className="text-gray-400 max-w-sm">
-                L'agence de communication globale qui produit en interne. Événementiel, signalétique, impression grand format au Maroc.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-lg mb-6">Informations</h4>
-              <ul className="space-y-3 text-gray-400">
-                <li><Link href="/evenements"><span className="hover:text-white cursor-pointer">Événementiel</span></Link></li>
-                <li><Link href="/la-fabrique"><span className="hover:text-white cursor-pointer">La Fabrique (Atelier)</span></Link></li>
-                <li><Link href="/architecture-de-marque"><span className="hover:text-white cursor-pointer">Architecture de marque</span></Link></li>
-                <li><Link href="/nos-references"><span className="hover:text-white cursor-pointer">Nos références</span></Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-lg mb-6">Contact</h4>
-              <ul className="space-y-4 text-gray-400">
-                <li className="flex items-start gap-3">
-                  <MapPin size={20} className="text-[#E3001B] shrink-0 mt-1" />
-                  <span>Rez de chaussée Immeuble 7, <br/>9 Rue Bussang. Casablanca<br/>Maroc</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Phone size={20} className="text-[#E3001B]" />
-                  <a href="tel:212662744741" className="hover:text-white">+212 6 62 74 47 41</a>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Mail size={20} className="text-[#E3001B]" />
-                  <a href="mailto:info@epitaphe.ma" className="hover:text-white">info@epitaphe.ma</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
-            <p>Epitaphe 360 © {new Date().getFullYear()}. Tous droits réservés.</p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/mentions-legales"><span className="hover:text-white">Mentions légales</span></Link>
-              <Link href="/politique-confidentialite"><span className="hover:text-white">Politique de confidentialité</span></Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* ─── FOOTER GLOBAL ─────────────────────────────────── */}
+      <Footer />
     </div>
   );
 }

@@ -108,6 +108,30 @@ const newsletterLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const briefLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1h
+  max: 5,
+  message: { error: 'Trop de briefs envoyés. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const leadMagnetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1h
+  max: 5,
+  message: { error: 'Trop de téléchargements. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const webauthnLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Trop de tentatives WebAuthn. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export function registerPublicApiRoutes(app: Express): void {
   // Vérifier JWT_SECRET au démarrage
   if (!process.env.JWT_SECRET) {
@@ -268,7 +292,7 @@ export function registerPublicApiRoutes(app: Express): void {
    * POST /api/project-brief
    * Submit a project brief from configurator
    */
-  app.post("/api/project-brief", async (req: Request, res: Response) => {
+  app.post("/api/project-brief", briefLimiter, async (req: Request, res: Response) => {
     try {
       // Check if configurator feature is enabled
       const isEnabled = process.env.ENABLE_PROJECT_CONFIGURATOR !== "false";
@@ -967,7 +991,7 @@ Disallow: /
     documentSlug: z.string().min(1),
   });
 
-  app.post("/api/leads/lead-magnet", async (req: Request, res: Response) => {
+  app.post("/api/leads/lead-magnet", leadMagnetLimiter, async (req: Request, res: Response) => {
     try {
       const { email, documentSlug } = leadMagnetSchema.parse(req.body);
 
@@ -1196,7 +1220,7 @@ Disallow: /
    * Générer un challenge d'authentification biométrique
    * (body: { email })
    */
-  app.post("/api/client/webauthn/auth-challenge", async (req: Request, res: Response) => {
+  app.post("/api/client/webauthn/auth-challenge", webauthnLimiter, async (req: Request, res: Response) => {
     try {
       const { email } = req.body as { email?: string };
       if (!email) return res.status(400).json({ error: "email requis" });
@@ -1244,7 +1268,7 @@ Disallow: /
    * POST /api/client/webauthn/auth-verify
    * Vérifier l'authentification biométrique → retourne JWT
    */
-  app.post("/api/client/webauthn/auth-verify", async (req: Request, res: Response) => {
+  app.post("/api/client/webauthn/auth-verify", webauthnLimiter, async (req: Request, res: Response) => {
     try {
       const { email, response } = req.body as { email?: string; response?: any };
       if (!email || !response) return res.status(400).json({ error: "email et response requis" });

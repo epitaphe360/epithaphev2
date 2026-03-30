@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -14,70 +14,82 @@ import { OrganizationSchema } from "@/components/seo/schema-org";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { PushPermissionBanner } from "@/components/push-permission-banner";
 import { PwaInstallPrompt }     from "@/components/pwa-install-prompt";
+import { CookieConsentBanner }  from "@/components/cookie-consent-banner";
 
 // ── Admin routes (lazy-loaded, code-split) ────────────────────────────────────
 import { AdminRoutes } from "@/routes/admin-routes";
 
-// ── Public pages ──────────────────────────────────────────────────────────────
+// ── Pages critiques — restent statiques (LCP) ────────────────────────────────
 import HomeV5 from "@/pages/home-v5";
-import HomeV4 from "@/pages/home-v4";
-
-
-
-import DesignPreview from "@/pages/design-preview";
-import DynamicPage from "@/pages/dynamic-page";
-import ReferencesPage from "@/pages/references";
-import ReferenceDetailPage from "@/pages/references/detail";
-import BlogPage from "@/pages/blog";
-import BlogArticlePage from "@/pages/blog-article";
-import SolutionPage from "@/pages/solution";
 import NotFound from "@/pages/not-found";
 
+// ── Toutes les autres pages — lazy-loaded (code splitting) ───────────────────
+const HomeV4                 = lazy(() => import("@/pages/home-v4"));
+const DesignPreview          = lazy(() => import("@/pages/design-preview"));
+const DynamicPage            = lazy(() => import("@/pages/dynamic-page"));
+const ReferencesPage         = lazy(() => import("@/pages/references"));
+const ReferenceDetailPage    = lazy(() => import("@/pages/references/detail"));
+const BlogPage               = lazy(() => import("@/pages/blog"));
+const BlogArticlePage        = lazy(() => import("@/pages/blog-article"));
+const SolutionPage           = lazy(() => import("@/pages/solution"));
+
 // ── Événements ────────────────────────────────────────────────────────────────
-import EvenementsHub from "@/pages/evenements/index";
-import ConventionsKickoffs from "@/pages/evenements/conventions-kickoffs";
-import SoireesDeGala from "@/pages/evenements/soirees-de-gala";
-import Roadshows from "@/pages/evenements/roadshows";
-import Salons from "@/pages/evenements/salons";
+const EvenementsHub          = lazy(() => import("@/pages/evenements/index"));
+const ConventionsKickoffs    = lazy(() => import("@/pages/evenements/conventions-kickoffs"));
+const SoireesDeGala          = lazy(() => import("@/pages/evenements/soirees-de-gala"));
+const Roadshows              = lazy(() => import("@/pages/evenements/roadshows"));
+const Salons                 = lazy(() => import("@/pages/evenements/salons"));
 
 // ── Architecture de Marque ────────────────────────────────────────────────────
-import ArchitectureDeMarqueHub from "@/pages/architecture-de-marque/index";
-import MarqueEmployeur from "@/pages/architecture-de-marque/marque-employeur";
-import CommunicationQhse from "@/pages/architecture-de-marque/communication-qhse";
-import ExperienceClients from "@/pages/architecture-de-marque/experience-clients";
+const ArchitectureDeMarqueHub = lazy(() => import("@/pages/architecture-de-marque/index"));
+const MarqueEmployeur         = lazy(() => import("@/pages/architecture-de-marque/marque-employeur"));
+const CommunicationQhse       = lazy(() => import("@/pages/architecture-de-marque/communication-qhse"));
+const ExperienceClients       = lazy(() => import("@/pages/architecture-de-marque/experience-clients"));
 
 // ── La Fabrique ───────────────────────────────────────────────────────────────
-import LaFabriqueHub from "@/pages/la-fabrique/index";
-import Impression from "@/pages/la-fabrique/impression";
-import Menuiserie from "@/pages/la-fabrique/menuiserie";
-import Signaletique from "@/pages/la-fabrique/signaletique";
-import Amenagement from "@/pages/la-fabrique/amenagement";
+const LaFabriqueHub   = lazy(() => import("@/pages/la-fabrique/index"));
+const Impression      = lazy(() => import("@/pages/la-fabrique/impression"));
+const Menuiserie      = lazy(() => import("@/pages/la-fabrique/menuiserie"));
+const Signaletique    = lazy(() => import("@/pages/la-fabrique/signaletique"));
+const Amenagement     = lazy(() => import("@/pages/la-fabrique/amenagement"));
 
 // ── Contact & Lead Gen ────────────────────────────────────────────────────────
-import ContactPage from "@/pages/contact/index";
-import BriefPage from "@/pages/contact/brief";
+const ContactPage  = lazy(() => import("@/pages/contact/index"));
+const BriefPage    = lazy(() => import("@/pages/contact/brief"));
 
 // ── Outils ────────────────────────────────────────────────────────────────────
-import VigilanceScore from "@/pages/outils/vigilance-score";
-import CalculateurFabrique from "@/pages/outils/calculateur-fabrique";
-import StandViewerPage from "@/pages/outils/stand-viewer";
+const VigilanceScore      = lazy(() => import("@/pages/outils/vigilance-score"));
+const CalculateurFabrique = lazy(() => import("@/pages/outils/calculateur-fabrique"));
+const StandViewerPage     = lazy(() => import("@/pages/outils/stand-viewer"));
+const OutilsHub           = lazy(() => import("@/pages/outils/index"));
+
+// ── BMI 360™ Scoring Outils ───────────────────────────────────────────────────
+const CommPulsePage   = lazy(() => import("@/pages/outils/commpulse"));
+const TalentPrintPage = lazy(() => import("@/pages/outils/talentprint"));
+const ImpactTracePage = lazy(() => import("@/pages/outils/impacttrace"));
+const SafeSignalPage  = lazy(() => import("@/pages/outils/safesignal"));
+const EventImpactPage = lazy(() => import("@/pages/outils/eventimpact"));
+const SpaceScorePage  = lazy(() => import("@/pages/outils/spacescore"));
+const FinNarrativePage = lazy(() => import("@/pages/outils/finnarrative"));
+const BMI360Page      = lazy(() => import("@/pages/outils/bmi360"));
 
 // ── Ressources ────────────────────────────────────────────────────────────────
-import RessourcesPage from "@/pages/ressources/index";
+const RessourcesPage = lazy(() => import("@/pages/ressources/index"));
 
 // ── Espace Client ─────────────────────────────────────────────────────────────
-import EspaceClientPage from "@/pages/espace-client/index";
-import ProjetsList   from "@/pages/espace-client/projets/index";
-import ProjetDetail  from "@/pages/espace-client/projets/detail";
-import DocumentsPage from "@/pages/espace-client/documents";
-import EcRessources  from "@/pages/espace-client/ressources";
-import EcSecurite    from "@/pages/espace-client/securite";
+const EspaceClientPage = lazy(() => import("@/pages/espace-client/index"));
+const ProjetsList      = lazy(() => import("@/pages/espace-client/projets/index"));
+const ProjetDetail     = lazy(() => import("@/pages/espace-client/projets/detail"));
+const DocumentsPage    = lazy(() => import("@/pages/espace-client/documents"));
+const EcRessources     = lazy(() => import("@/pages/espace-client/ressources"));
+const EcSecurite       = lazy(() => import("@/pages/espace-client/securite"));
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
-import AnalyticsPage from "@/pages/analytics/index";
-// ── Pages légales ─────────────────────────────────────────────────────────
-import MentionsLegales from "@/pages/mentions-legales";
-import PolitiqueConfidentialite from "@/pages/politique-confidentialite";
+const AnalyticsPage = lazy(() => import("@/pages/analytics/index"));
+
+// ── Pages légales ─────────────────────────────────────────────────────────────
+const MentionsLegales          = lazy(() => import("@/pages/mentions-legales"));
+const PolitiqueConfidentialite = lazy(() => import("@/pages/politique-confidentialite"));
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Router() {
@@ -135,9 +147,19 @@ function Router() {
           <Route path="/contact/brief" component={BriefPage} />
 
           {/* ── Outils ──────────────────────────────────────────── */}
+          <Route path="/outils" component={OutilsHub} />
           <Route path="/outils/vigilance-score" component={VigilanceScore} />
           <Route path="/outils/calculateur-fabrique" component={CalculateurFabrique} />
           <Route path="/outils/stand-viewer" component={StandViewerPage} />
+          {/* ── BMI 360™ Scoring Intelligence ──────────────────── */}
+          <Route path="/outils/commpulse" component={CommPulsePage} />
+          <Route path="/outils/talentprint" component={TalentPrintPage} />
+          <Route path="/outils/impacttrace" component={ImpactTracePage} />
+          <Route path="/outils/safesignal" component={SafeSignalPage} />
+          <Route path="/outils/eventimpact" component={EventImpactPage} />
+          <Route path="/outils/spacescore" component={SpaceScorePage} />
+          <Route path="/outils/finnarrative" component={FinNarrativePage} />
+          <Route path="/outils/bmi360" component={BMI360Page} />
 
           {/* ── Ressources ──────────────────────────────────────── */}
           <Route path="/ressources" component={RessourcesPage} />
@@ -180,6 +202,7 @@ function App() {
               <WhatsAppButton />
               <PushPermissionBanner />
               <PwaInstallPrompt />
+              <CookieConsentBanner />
               <Suspense fallback={
                 <div style={{ minHeight: '100vh', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #EC4899', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />

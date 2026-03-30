@@ -1,5 +1,6 @@
 /**
  * Utilitaire Analytics — GA4 + Microsoft Clarity
+ * IDs chargés depuis VITE_GA4_ID et VITE_CLARITY_ID (variables d'env)
  * Usage : trackEvent("brief_submitted", { category: "evenements" })
  */
 
@@ -8,6 +9,38 @@ declare global {
     dataLayer: unknown[];
     gtag: (...args: unknown[]) => void;
     clarity: (cmd: string, ...args: unknown[]) => void;
+  }
+}
+
+/**
+ * Initialise GA4 + Clarity en chargeant dynamiquement les scripts.
+ * À appeler UNE SEULE FOIS depuis main.tsx après consentement.
+ */
+export function initAnalytics() {
+  if (typeof window === "undefined") return;
+
+  const ga4Id = import.meta.env.VITE_GA4_ID as string | undefined;
+  const clarityId = import.meta.env.VITE_CLARITY_ID as string | undefined;
+
+  // — Google Analytics 4 —
+  if (ga4Id && ga4Id !== "G-XXXXXXXXXX" && ga4Id.startsWith("G-")) {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${ga4Id}`;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function (...args: unknown[]) { window.dataLayer.push(args); };
+    window.gtag("js", new Date());
+    window.gtag("config", ga4Id, { anonymize_ip: true, send_page_view: true });
+  }
+
+  // — Microsoft Clarity —
+  if (clarityId && clarityId !== "XXXXXXXXXX") {
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = `https://www.clarity.ms/tag/${clarityId}`;
+    document.head.appendChild(s);
   }
 }
 

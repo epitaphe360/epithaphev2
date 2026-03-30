@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContactMessageSchema } from "@shared/schema";
+import { insertContactMessageSchema, insertScoringResultSchema, scoringResults } from "@shared/schema";
 import { sendContactConfirmation, sendContactNotificationToAdmin } from "./lib/email";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerPublicApiRoutes } from "./public-api-routes";
@@ -15,6 +15,39 @@ const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { error: 'Trop de messages envoyés. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// CDC — Rate limiters pour endpoints sensibles
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const briefLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Trop de briefs envoyés. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const toolsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: 'Trop de requêtes. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const leadMagnetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Trop de téléchargements. Réessayez dans 1 heure.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -308,6 +341,52 @@ export async function registerRoutes(
     } catch (error) {
       console.error("[GET /api/resources/public]", error);
       res.status(500).json({ error: 'Erreur ressources' });
+    }
+  });
+
+  // ─── BMI 360™ Scoring — persistance résultats ──────────────────────────────
+
+  /** POST /api/scoring/save — Sauvegarder un résultat de scoring */
+  app.post("/api/scoring/save", toolsLimiter, async (req, res) => {
+    try {
+      const parsed = insertScoringResultSchema.safeParse({
+        ...req.body,
+        userAgent: req.headers["user-agent"]?.slice(0, 500) ?? null,
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Données invalides", details: parsed.error.flatten() });
+      }
+
+      const [saved] = await db.insert(scoringResults).values(parsed.data).returning({ id: scoringResults.id });
+      res.status(201).json({ id: saved.id });
+    } catch (error) {
+      console.error("[POST /api/scoring/save]", error);
+      res.status(500).json({ error: "Erreur lors de la sauvegarde" });
+    }
+  });
+
+  /** GET /api/scoring/stats — Statistiques publiques anonymisées par outil */
+  app.get("/api/scoring/stats/:toolId", toolsLimiter, async (req, res) => {
+    try {
+      const { toolId } = req.params;
+      const allowed = ["commpulse", "talentprint", "impacttrace", "safesignal", "eventimpact", "spacescore", "finnarrative"];
+      if (!allowed.includes(toolId)) {
+        return res.status(400).json({ error: "toolId invalide" });
+      }
+
+      const rows = await db
+        .select({
+          avgScore: sql<number>`round(avg(${scoringResults.globalScore}), 0)`,
+          count: sql<number>`count(*)`,
+        })
+        .from(scoringResults)
+        .where(eq(scoringResults.toolId, toolId));
+
+      res.json({ toolId, avgScore: rows[0]?.avgScore ?? 0, count: rows[0]?.count ?? 0 });
+    } catch (error) {
+      console.error("[GET /api/scoring/stats]", error);
+      res.status(500).json({ error: "Erreur stats" });
     }
   });
 

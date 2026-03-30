@@ -9,13 +9,14 @@ import {
   Settings,
 } from "lucide-react";
 
-/* === Types ==================================================== */
+import { LanguageSwitcher } from "@/components/language-switcher";
 interface SubEntry {
   label: string;
   description: string;
   href: string;
   icon: React.ReactNode;
   previewImage?: string;
+  isGroupHeader?: boolean; // si true : rendu comme en-tête de groupe (non-cliquable)
 }
 interface NavEntry {
   label: string;
@@ -79,11 +80,22 @@ const navConfig: NavEntry[] = [
   },
   {
     label: "Outils",
+    href: "/outils",
     rightAlign: true,
     entries: [
-      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE",    href: "/outils/vigilance-score",      icon: <BarChart2   className="w-5 h-5" /> },
-      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",        href: "/outils/calculateur-fabrique", icon: <Calculator  className="w-5 h-5" /> },
-      { label: "Déposer un brief",        description: "Formulaire stratégique multi-étapes",        href: "/contact/brief",               icon: <Mail        className="w-5 h-5" /> },
+      { label: "BMI 360™ Intelligence",     description: "", href: "#", icon: null, isGroupHeader: true },
+      { label: "BMI 360™ Dashboard",         description: "Vue globale de votre intelligence d'entreprise",    href: "/outils/bmi360",               icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "CommPulse™",              description: "Score Communication Interne · CLARITY™",             href: "/outils/commpulse",            icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "TalentPrint™",            description: "Score Marque Employeur · ATTRACT™",               href: "/outils/talentprint",          icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "ImpactTrace™",            description: "Score RSE & Impact · PROOF™",                   href: "/outils/impacttrace",          icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "SafeSignal™",             description: "Score Sécurité QHSE · SHIELD™",                href: "/outils/safesignal",           icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "EventImpact™",            description: "Score Événementiel · STAGE™",                    href: "/outils/eventimpact",          icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "SpaceScore™",             description: "Score Brand Physique · SPACE™",                 href: "/outils/spacescore",           icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "FinNarrative™",           description: "Score Com Financière · CAPITAL™",               href: "/outils/finnarrative",         icon: <BarChart2   className="w-5 h-5" /> },
+      { label: "Outils Fabrique",          description: "", href: "#", icon: null, isGroupHeader: true },
+      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE",            href: "/outils/vigilance-score",      icon: <ShieldCheck className="w-5 h-5" /> },
+      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",              href: "/outils/calculateur-fabrique", icon: <Calculator  className="w-5 h-5" /> },
+      { label: "Déposer un brief",        description: "Formulaire stratégique multi-étapes",              href: "/contact/brief",               icon: <Mail        className="w-5 h-5" /> },
     ],
   },
   {
@@ -125,6 +137,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
   const [hoveredSub, setHoveredSub] = useState<SubEntry | null>(null);
   const [resolvedRight, setResolvedRight] = useState(rightAlign);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
 
@@ -161,8 +174,8 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
   return (
     <div
       className="relative"
-      onMouseEnter={() => { if (timer.current) clearTimeout(timer.current); setOpen(true); }}
-      onMouseLeave={() => { timer.current = setTimeout(() => { setOpen(false); setHoveredSub(null); }, 200); }}
+      onMouseEnter={() => { if (timer.current) clearTimeout(timer.current); openTimer.current = setTimeout(() => setOpen(true), 150); }}
+      onMouseLeave={() => { if (openTimer.current) clearTimeout(openTimer.current); timer.current = setTimeout(() => { setOpen(false); setHoveredSub(null); }, 200); }}
     >
       <button
         className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
@@ -263,19 +276,28 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
               </div>
             ) : (
               /* ─── Dropdown standard ─── */
-              <div className="p-4 grid grid-cols-1 gap-2">
-                {entry.entries.map((sub) => (
-                  <Link key={sub.href} href={sub.href} onClick={() => setOpen(false)}
-                    className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors group">
-                    <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
-                      {sub.icon}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{sub.label}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{sub.description}</p>
-                    </div>
-                  </Link>
-                ))}
+              <div className="p-4 grid grid-cols-1 gap-1">
+                {entry.entries.map((sub) => {
+                  if (sub.isGroupHeader) {
+                    return (
+                      <p key={sub.label} className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60 pt-3 pb-1 px-3 first:pt-1">
+                        {sub.label}
+                      </p>
+                    );
+                  }
+                  return (
+                    <Link key={sub.href} href={sub.href} onClick={() => setOpen(false)}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors group">
+                      <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
+                        {sub.icon}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{sub.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{sub.description}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </motion.div>
@@ -316,6 +338,7 @@ export function Navigation() {
             ))}
           </nav>
           <div className="hidden lg:flex items-center gap-2">
+            <LanguageSwitcher />
             <Link href="/contact/brief">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">

@@ -1,7 +1,8 @@
-import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram } from "lucide-react";
+import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/useSettings";
 import { Link } from "wouter";
+import { resetCookieConsent } from "@/components/cookie-consent-banner";
 
 const footerLinks = {
   services: [
@@ -162,6 +163,13 @@ export function Footer() {
               >
                 Politique de confidentialité
               </Link>
+              <button
+                onClick={resetCookieConsent}
+                className="text-sm text-background/50 hover:text-primary transition-colors flex items-center gap-1"
+                data-testid="link-cookie-settings"
+              >
+                <Cookie className="w-3 h-3" /> Paramètres cookies
+              </button>
             </div>
           </div>
         </div>

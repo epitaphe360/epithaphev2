@@ -201,22 +201,22 @@ export default function HomeV5() {
   const heroSubtitle = cfg?.hero?.subtitle ?? "Agence de communication 360° basée à Casablanca. Nous gérons vos projets de l'idée créative à la fabrication et l'exécution sur le terrain.";
   const aboutH2 = cfg?.about?.h2 ?? "Créativité & pragmatisme. L'agence des défis complexes.";
   const aboutDesc = cfg?.about?.description ?? "Depuis 20 ans, Epitaphe 360 accompagne les grandes entreprises, multinationales et PME. Nous comprenons vos contraintes de directeurs marketing ou communication : délais serrés, attentes élevées, besoin constant d'innovation.";
-  const aboutBullets = cfg?.about?.bullets?.length ? cfg.about.bullets : [
+  const aboutBullets = Array.isArray(cfg?.about?.bullets) && cfg.about.bullets.length ? cfg.about.bullets : [
     "Une maîtrise totale de A à Z (conception & exécution)",
     "Un atelier de fabrication interne (menuiserie, impression, signalétique)",
     "Respect strict des délais et des budgets",
     "Un seul interlocuteur pour tout votre projet",
   ];
-  const statsList = cfg?.stats?.length ? cfg.stats : [
+  const statsList = Array.isArray(cfg?.stats) && cfg.stats.length ? cfg.stats : [
     { val: 20, suffix: "+", label: "Années d'expérience" },
     { val: 200, suffix: "+", label: "Projets réalisés" },
     { val: 50, suffix: "+", label: "Clients actifs" },
     { val: 100, suffix: "%", label: "Autonomie de production" },
   ];
   
-  const servicesList = cfg?.services?.length ? cfg.services : DEFAULT_SERVICES;
-  const clientsList = cfg?.clients?.length ? cfg.clients : DEFAULT_CLIENTS;
-  const portfolioList = cfg?.portfolio?.length ? cfg.portfolio : DEFAULT_PORTFOLIO;
+  const servicesList = Array.isArray(cfg?.services) && cfg.services.length ? cfg.services : DEFAULT_SERVICES;
+  const clientsList = Array.isArray(cfg?.clients) && cfg.clients.length ? cfg.clients : DEFAULT_CLIENTS;
+  const portfolioList = Array.isArray(cfg?.portfolio) && cfg.portfolio.length ? cfg.portfolio : DEFAULT_PORTFOLIO;
 
   return (
     <div className="bg-white text-[#111111] font-sans antialiased overflow-hidden">

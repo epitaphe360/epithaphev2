@@ -50,7 +50,8 @@ export function BiometricSetup() {
     try {
       const res = await fetch("/api/client/webauthn/credentials", { headers: apiHeaders });
       if (!res.ok) throw new Error("Erreur serveur");
-      setCreds(await res.json());
+      const credsData = await res.json();
+      setCreds(Array.isArray(credsData) ? credsData : []);
     } catch (e: any) {
       setError(e.message);
     } finally {

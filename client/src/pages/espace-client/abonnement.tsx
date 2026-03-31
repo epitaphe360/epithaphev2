@@ -100,9 +100,9 @@ export default function AbonnementPage() {
         apiGet<Subscription | null>("/api/client/subscription", token!),
         apiGet<Devis[]>("/api/client/devis", token!),
       ]);
-      if (plansData.status === "fulfilled") setPlans(plansData.value);
+      if (plansData.status === "fulfilled") setPlans(Array.isArray(plansData.value) ? plansData.value : []);
       if (subData.status === "fulfilled") setSubscription(subData.value);
-      if (devisData.status === "fulfilled") setDevisList(devisData.value);
+      if (devisData.status === "fulfilled") setDevisList(Array.isArray(devisData.value) ? devisData.value : []);
     } catch (e: any) {
       setError(e.message);
     } finally {

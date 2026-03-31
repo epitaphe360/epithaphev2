@@ -383,7 +383,7 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
     setError("");
     try {
       const raw = await apiGet<any[]>("/api/client/projects", token);
-      setProjects(raw.map(mapProject));
+      setProjects(Array.isArray(raw) ? raw.map(mapProject) : []);
     } catch (e: any) {
       setError(e.message ?? "Erreur de chargement");
     } finally {

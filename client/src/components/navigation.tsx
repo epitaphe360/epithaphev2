@@ -348,7 +348,7 @@ export function Navigation() {
   const { settings: navSettings } = useSettings('nav_config');
   const { settings: siteIdentity } = useSettings('site_identity');
   
-  const rawNavConfig: NavEntryConfig[] = (navSettings as unknown as NavEntryConfig[]) || defaultNavConfig;
+  const rawNavConfig: NavEntryConfig[] = Array.isArray(navSettings) ? navSettings : defaultNavConfig;
   
   const navConfig: NavEntry[] = rawNavConfig.map(entry => ({
     ...entry,

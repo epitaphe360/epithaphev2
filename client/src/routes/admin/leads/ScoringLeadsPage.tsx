@@ -11,7 +11,8 @@ export default function ScoringLeadsPage() {
     // Reutilisation de la meme route pour la demo, idealement on aurait /api/admin/leads
     fetch('/api/portal/reports')
       .then(res => res.json())
-      .then(data => { setLeads(data); setLoading(false); });
+      .then(data => { setLeads(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
   return (

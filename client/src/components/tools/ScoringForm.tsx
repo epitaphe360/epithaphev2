@@ -113,7 +113,7 @@ export default function ScoringForm({ toolId, toolName, description, questions }
               {questions.map((_, i) => (
                 <div 
                   key={i} 
-                  className={"h-2 rounded-full transition-all duration-500  + (i === step ? 'w-12 bg-teal-500' : 'w-4 bg-neutral-800') + "} 
+                  className={`h-2 rounded-full transition-all duration-500 ${i === step ? 'w-12 bg-teal-500' : 'w-4 bg-neutral-800'}`} 
                 />
               ))}
             </div>

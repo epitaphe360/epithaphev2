@@ -16,8 +16,10 @@ export default function ClientPortal() {
           fetch('/api/portal/reports'),
           fetch('/api/portal/invoices')
         ]);
-        setReports(await repRes.json());
-        setInvoices(await invRes.json());
+        const repData = await repRes.json();
+        const invData = await invRes.json();
+        setReports(Array.isArray(repData) ? repData : []);
+        setInvoices(Array.isArray(invData) ? invData : []);
       } catch(e) {
         console.error(e);
       } finally {
@@ -64,7 +66,7 @@ export default function ClientPortal() {
                   <div>
                     <div className="text-sm font-medium text-teal-600 mb-1">{report.toolId.toUpperCase()}</div>
                     <CardTitle className="text-xl mb-1">Rapport de diagnostic</CardTitle>
-                    <div className="text-sm text-zinc-500">Score Global: {report.globalScore}% • Maturite: {report.maturityLevel}/5</div>
+                    <div className="text-sm text-zinc-500">Score Global: {report.globalScore}% ï¿½ Maturite: {report.maturityLevel}/5</div>
                   </div>
                   <Button variant="ghost" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50">
                     Voir detail <ArrowRight className="w-4 h-4 ml-2"/>
@@ -103,7 +105,7 @@ export default function ClientPortal() {
                   </div>
                   <div className="text-right">
                     <div className="font-bold">{inv.amount}</div>
-                    <div className={"text-xs font-medium {inv.status === 'Paye' ? 'text-green-600' : 'text-amber-500'}"}>
+                    <div className={`text-xs font-medium ${inv.status === 'Paye' ? 'text-green-600' : 'text-amber-500'}`}>
                       {inv.status}
                     </div>
                   </div>

@@ -219,6 +219,43 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
         <p className="text-xs text-muted-foreground text-center mt-5">
           Pas encore de compte ? Contactez votre chargé de compte.
         </p>
+
+        {/* Boutons de test — connexion rapide */}
+        <div className="mt-6 pt-4 border-t border-border">
+          <p className="text-xs text-muted-foreground text-center mb-3 font-medium">🔧 Accès test</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                // Seed le client test puis pré-remplit le formulaire
+                await fetch("/api/dev/seed-test-client").catch(() => {});
+                const form = document.querySelector('form') as HTMLFormElement;
+                const emailInput = form?.querySelector('input[type=email]') as HTMLInputElement;
+                const passInput = form?.querySelector('input[type=password]') as HTMLInputElement;
+                if (emailInput && passInput) {
+                  // Utiliser les setters natifs pour déclencher react-hook-form
+                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                  nativeInputValueSetter?.call(emailInput, 'client@test.com');
+                  emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  nativeInputValueSetter?.call(passInput, 'client123');
+                  passInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  // Soumettre après un court délai
+                  setTimeout(() => form?.requestSubmit(), 300);
+                }
+              }}
+              className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <User className="w-3.5 h-3.5" /> Client Test
+            </button>
+            <button
+              type="button"
+              onClick={() => { window.location.href = '/admin'; }}
+              className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Shield className="w-3.5 h-3.5" /> Admin Test
+            </button>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Express } from "express";
 import { db } from "./db";
-import { users, scoringResults } from "../shared/schema";
+import { users, scoringResults, clientAccounts, clientProjects } from "../shared/schema";
+import bcrypt from "bcrypt";
 
 export function registerDevRoutes(app: Express) {
   app.get("/api/dev/seed", async (req, res) => {
@@ -8,7 +9,7 @@ export function registerDevRoutes(app: Express) {
       // 1. Ajouter un Admin
       await db.insert(users).values({
         email: "admin@epitaphe360.test",
-        password: "admin123", // Attention: En prod ce doit �tre hash�
+        password: "admin123", // Attention: En prod ce doit �tre hash�
         name: "Administrateur Test",
         role: "ADMIN",
       }).onConflictDoNothing({ target: users.email });
@@ -21,7 +22,7 @@ export function registerDevRoutes(app: Express) {
         role: "USER",
       }).onConflictDoNothing({ target: users.email });
 
-      // 3. Ajouter des donn�es de Scoring (Leads & Rapports)
+      // 3. Ajouter des donn�es de Scoring (Leads & Rapports)
       await db.insert(scoringResults).values([
         {
           toolId: "commpulse",
@@ -58,6 +59,39 @@ export function registerDevRoutes(app: Express) {
       res.json({ message: "Base de donnees peuplee avec succes ! Les utilisateurs tests et donnees d'audit sont prets." });
     } catch (error: any) {
       console.error("Erreur lors du peuplement :", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Seed un compte client test pour l'espace client
+  app.get("/api/dev/seed-test-client", async (req, res) => {
+    try {
+      const passwordHash = await bcrypt.hash("client123", 10);
+      await db.insert(clientAccounts).values({
+        email: "client@test.com",
+        passwordHash,
+        name: "Client Test",
+        company: "Entreprise Demo",
+        isActive: true,
+      }).onConflictDoNothing({ target: clientAccounts.email });
+
+      // Récupérer l'id du client
+      const { eq } = await import("drizzle-orm");
+      const [client] = await db.select().from(clientAccounts).where(eq(clientAccounts.email, "client@test.com")).limit(1);
+      if (client) {
+        await db.insert(clientProjects).values({
+          clientId: client.id,
+          title: "Projet Démo - Site Vitrine",
+          type: "Site Web",
+          status: "en_cours",
+          progress: 45,
+          description: "Création d'un site vitrine moderne pour Entreprise Demo.",
+        }).onConflictDoNothing();
+      }
+
+      res.json({ message: "Compte client test créé : client@test.com / client123" });
+    } catch (error: any) {
+      console.error("Erreur seed client:", error);
       res.status(500).json({ error: error.message });
     }
   });

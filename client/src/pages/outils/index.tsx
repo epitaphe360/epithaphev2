@@ -177,15 +177,11 @@ export default function OutilsHub() {
               la maturité de votre communication d'entreprise.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link href="/contact/brief">
-                <a className="px-8 py-4 bg-[#E3001B] text-white font-semibold rounded-lg hover:bg-[#c2001a] transition-colors">
+              <Link href="/contact/brief" className="px-8 py-4 bg-[#E3001B] text-white font-semibold rounded-lg hover:bg-[#c2001a] transition-colors">
                   Demander un diagnostic gratuit
-                </a>
               </Link>
-              <Link href="/outils/bmi360">
-                <a className="px-8 py-4 border border-white/20 text-white font-semibold rounded-lg hover:bg-white/5 transition-colors">
+              <Link href="/outils/bmi360" className="px-8 py-4 border border-white/20 text-white font-semibold rounded-lg hover:bg-white/5 transition-colors">
                   Voir le Dashboard BMI 360™
-                </a>
               </Link>
             </div>
           </div>
@@ -204,8 +200,7 @@ export default function OutilsHub() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {TOOLS.filter((t) => t.id !== "bmi360").map((tool) => (
-              <Link key={tool.id} href={tool.url}>
-                <a className="group relative block p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-white dark:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <Link key={tool.id} href={tool.url} className="group relative block p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-white dark:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                   {/* Pastille couleur */}
                   <div
                     className="w-12 h-12 rounded-xl mb-6 flex items-center justify-center"
@@ -243,7 +238,6 @@ export default function OutilsHub() {
                       Lancer le diagnostic →
                     </span>
                   </div>
-                </a>
               </Link>
             ))}
           </div>
@@ -260,10 +254,8 @@ export default function OutilsHub() {
                 et pilotez votre transformation communication avec un score global sur 100.
               </p>
             </div>
-            <Link href="/outils/bmi360">
-              <a className="shrink-0 px-8 py-4 bg-[#E3001B] text-white font-semibold rounded-lg hover:bg-[#c2001a] transition-colors whitespace-nowrap">
+            <Link href="/outils/bmi360" className="shrink-0 px-8 py-4 bg-[#E3001B] text-white font-semibold rounded-lg hover:bg-[#c2001a] transition-colors whitespace-nowrap">
                 Accéder au Dashboard
-              </a>
             </Link>
           </div>
         </section>
@@ -303,10 +295,8 @@ export default function OutilsHub() {
               ))}
             </div>
             <div className="mt-10">
-              <Link href="/contact/brief">
-                <a className="inline-block px-10 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-lg hover:opacity-90 transition-opacity">
+              <Link href="/contact/brief" className="inline-block px-10 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-lg hover:opacity-90 transition-opacity">
                   Demander une démo
-                </a>
               </Link>
             </div>
           </div>

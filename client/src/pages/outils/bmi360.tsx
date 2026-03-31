@@ -156,11 +156,9 @@ export default function BMI360Page() {
               <div className="text-5xl mb-4">🧭</div>
               <h2 className="text-xl font-bold text-white mb-2">Aucun score disponible</h2>
               <p className="text-gray-400 text-sm mb-6">Complétez au moins un outil de scoring pour visualiser votre BMI 360™.</p>
-              <Link href="/outils/commpulse">
-                <a className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+              <Link href="/outils/commpulse" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
                   Commencer par CommPulse™ →
-                </a>
               </Link>
             </div>
           )}
@@ -204,17 +202,13 @@ export default function BMI360Page() {
                           <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: `${meta.color}20`, color: meta.color }}>
                             {MATURITY_LEVELS[Math.ceil((score as number) / 20) as 1 | 2 | 3 | 4 | 5 || 1].label}
                           </span>
-                          <Link href={meta.href}>
-                            <a className="text-xs text-gray-500 hover:text-white transition-colors">Refaire →</a>
-                          </Link>
+                          <Link href={meta.href} className="text-xs text-gray-500 hover:text-white transition-colors">Refaire →</Link>
                         </div>
                       </>
                     ) : (
-                      <Link href={meta.href}>
-                        <a className="flex items-center justify-center w-full py-2 rounded-xl border text-xs font-semibold transition-all hover:opacity-90"
+                      <Link href={meta.href} className="flex items-center justify-center w-full py-2 rounded-xl border text-xs font-semibold transition-all hover:opacity-90"
                           style={{ borderColor: `${meta.color}40`, color: meta.color }}>
                           + Démarrer ce scoring — {meta.price}
-                        </a>
                       </Link>
                     )}
                   </div>
@@ -231,17 +225,13 @@ export default function BMI360Page() {
               Un consultant senior Epitaphe360 analyse vos scores, identifie vos 3 leviers prioritaires et co-construit avec vous une feuille de route sur 12 mois.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact">
-                <a className="px-8 py-3 rounded-xl text-sm font-semibold text-black transition-all hover:opacity-90"
+              <Link href="/contact" className="px-8 py-3 rounded-xl text-sm font-semibold text-black transition-all hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
                   Réserver ma restitution BMI 360™ — 9 900 MAD
-                </a>
               </Link>
               {completedTools.length < 7 && (
-                <Link href={TOOL_META[TOOL_IDS.find(id => !scores[id]) ?? 'commpulse'].href}>
-                  <a className="px-8 py-3 rounded-xl text-sm font-semibold border border-gray-700 text-gray-300 hover:border-gray-500 transition-colors">
+                <Link href={TOOL_META[TOOL_IDS.find(id => !scores[id]) ?? 'commpulse'].href} className="px-8 py-3 rounded-xl text-sm font-semibold border border-gray-700 text-gray-300 hover:border-gray-500 transition-colors">
                     Compléter les {7 - completedTools.length} outils restants →
-                  </a>
                 </Link>
               )}
             </div>

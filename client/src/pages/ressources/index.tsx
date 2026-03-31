@@ -221,10 +221,8 @@ function ResourceCard({ resource, onDownload }: { resource: Resource; onDownload
             <Download className="w-4 h-4" /> Télécharger
           </button>
         ) : resource.externalUrl?.startsWith("/") ? (
-          <Link href={resource.externalUrl}>
-            <a className="flex items-center gap-1.5 text-primary hover:text-primary/70 font-semibold text-sm transition-colors">
+          <Link href={resource.externalUrl} className="flex items-center gap-1.5 text-primary hover:text-primary/70 font-semibold text-sm transition-colors">
               <ArrowRight className="w-4 h-4" /> Accéder
-            </a>
           </Link>
         ) : (
           <a href={resource.externalUrl ?? resource.downloadUrl} target="_blank" rel="noopener noreferrer"

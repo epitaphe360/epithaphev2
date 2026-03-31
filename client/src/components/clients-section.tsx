@@ -59,7 +59,7 @@ export function ClientsSection() {
               <img
                 src={client.logo}
                 alt={client.name}
-                className="h-12 md:h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+                className="h-12 md:h-16 w-auto object-contain transition-all duration-300"
               />
             </div>
           ))}

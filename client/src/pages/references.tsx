@@ -1,8 +1,8 @@
 /**
- * Page Références — /nos-references
- * - Études de cas dynamiques depuis DB
+ * Page Rï¿½fï¿½rences ï¿½ /nos-references
+ * - ï¿½tudes de cas dynamiques depuis DB
  * - Logos clients filtrables par secteur
- * - CDC 2.5 : maillage interne vers études de cas
+ * - CDC 2.5 : maillage interne vers ï¿½tudes de cas
  */
 import { useState } from "react";
 import { Link } from "wouter";
@@ -23,7 +23,7 @@ interface CaseStudy {
 }
 
 const clientCategories = [
-  { name: "Bâtiment et Travaux Publics (BTP)", sector: "BTP", clients: [
+  { name: "Bï¿½timent et Travaux Publics (BTP)", sector: "BTP", clients: [
     { name: "LafargeHolcim", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/lafargeholcim.jpg" },
     { name: "Weber", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/weber.jpg" },
     { name: "AkzoNobel", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/akzonobel.jpg" },
@@ -41,7 +41,7 @@ const clientCategories = [
     { name: "Cosumar", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/cosumar.jpg" },
     { name: "Lesieur Cristal", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/lesieurcristal.jpg" },
   ]},
-  { name: "IT & Télécoms", sector: "IT", clients: [
+  { name: "IT & Tï¿½lï¿½coms", sector: "IT", clients: [
     { name: "Huawei", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/huawei.jpg" },
     { name: "Dell", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/dell.jpg" },
     { name: "Intel", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/intel.jpg" },
@@ -53,7 +53,7 @@ const clientCategories = [
     { name: "Tanger Med", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/trangermed.jpg" },
     { name: "Qatar Airways", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/qatarairways.jpg" },
     { name: "FedEx", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/fedex.jpg" },
-    { name: "Bolloré", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/bollore.jpg" },
+    { name: "Bollorï¿½", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/bollore.jpg" },
     { name: "TMSA", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/TMSA.jpg" },
   ]},
   { name: "Finance & Assurance", sector: "Finance", clients: [
@@ -84,7 +84,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
               <Building2 className="w-12 h-12 text-primary/30" />
             </div>
           )}
-          {cs.isFeatured && <div className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2.5 py-1 rounded-full">À la une</div>}
+          {cs.isFeatured && <div className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2.5 py-1 rounded-full">ï¿½ la une</div>}
           {cs.clientName && <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">{cs.clientName}</div>}
         </div>
         <div className="p-5 flex flex-col flex-1">
@@ -107,7 +107,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
             </p>
           )}
           <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-auto">
-            Voir l'étude de cas <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            Voir l'ï¿½tude de cas <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
       </motion.article>
@@ -133,8 +133,8 @@ export default function ReferencesPage() {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Nos Références Clients — Epitaphe 360"
-        description="Plus de 500 entreprises nous font confiance. Découvrez nos références et études de cas par secteur."
+        title="Nos Rï¿½fï¿½rences Clients ï¿½ Epitaphe 360"
+        description="Plus de 500 entreprises nous font confiance. Dï¿½couvrez nos rï¿½fï¿½rences et ï¿½tudes de cas par secteur."
         canonicalPath="/nos-references"
       />
       <Navigation />
@@ -148,7 +148,7 @@ export default function ReferencesPage() {
             <br />
             <span className="inline-block bg-primary px-4 py-2 mt-2">confiance</span>
           </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">500+ entreprises au Maroc et à l'international</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">500+ entreprises au Maroc et ï¿½ l'international</motion.p>
         </div>
       </section>
 
@@ -158,8 +158,8 @@ export default function ReferencesPage() {
             <RevealSection>
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Études de cas</h2>
-                  <p className="text-muted-foreground text-sm">Nos réalisations les plus marquantes</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-1">ï¿½tudes de cas</h2>
+                  <p className="text-muted-foreground text-sm">Nos rï¿½alisations les plus marquantes</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-primary/30" />
               </div>
@@ -200,7 +200,7 @@ export default function ReferencesPage() {
                       <motion.div key={client.name} whileHover={{ y: -3 }}
                         className="bg-white dark:bg-card rounded-xl p-4 flex items-center justify-center aspect-[3/2] border border-border/50 hover:border-primary/20 transition-all"
                         title={client.name}>
-                        <img src={client.logo} alt={client.name} className="max-h-14 max-w-full object-contain grayscale hover:grayscale-0 transition-all" loading="lazy" />
+                        <img src={client.logo} alt={client.name} className="max-h-14 max-w-full object-contain transition-all" loading="lazy" />
                       </motion.div>
                     ))}
                   </div>

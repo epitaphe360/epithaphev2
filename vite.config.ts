@@ -40,8 +40,7 @@ export default defineConfig({
           // GrapesJS : 1MB+ isolÃ© dans son chunk (dÃ©pendances internes propres)
           if (id.includes('/node_modules/grapesjs')) return 'grapesjs';
           if (id.includes('/node_modules/three') && !id.includes('@react-three')) return 'vendor-three';
-          if (id.includes('/node_modules/react') || id.includes('/node_modules/wouter')) return 'vendor-react';
-          if (id.includes('/node_modules/framer-motion')) return 'vendor-framer';
+          if (id.includes('/node_modules/react') || id.includes('/node_modules/wouter') || id.includes('/node_modules/@react-three') || id.includes('/node_modules/framer-motion')) return 'vendor-react';
           if (id.includes('/node_modules/lucide-react') || id.includes('/node_modules/@radix-ui')) return 'vendor-ui';
           if (id.includes('node_modules')) return 'vendor-core';
         }

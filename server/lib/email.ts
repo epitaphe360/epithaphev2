@@ -133,3 +133,54 @@ export async function sendContactNotificationToAdmin(data: {
     `,
   });
 }
+
+/* ── Emails Scoring / Lead Gen ───────────────────────────────────────────────────────────── */
+
+export async function sendScoringResultEmail(email: string, name: string, data: { sourceTool: string, magicLinkUrl: string }): Promise<void> {
+  await send({
+    to: email,
+    subject: `Vos résultats d'audit ${data.sourceTool} sont prêts ! — Epitaphe 360`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:12px;">
+        <h2 style="color:#6366F1;margin-bottom:8px;">Votre diagnostic ${data.sourceTool} est prêt ! 🚀</h2>
+        <p>Bonjour <strong>${name}</strong>,</p>
+        <p>Merci d'avoir complété notre diagnostic <strong>${data.sourceTool}</strong>. L'analyse de vos réponses est terminée.</p>
+        <p>Pour des raisons de confidentialité, votre rapport détaillé et vos recommandations sont stockés dans votre Espace Privé Epitaphe360, généré à l'instant pour vous.</p>
+        
+        <div style="text-align: center; margin: 36px 0;">
+          <a href="${data.magicLinkUrl}" style="background-color: #6366F1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Découvrir mon plan d'action</a>
+        </div>
+        
+        <p style="font-size:14px;"><em>Ce bouton (Magic Link) vous connecte automatiquement et de façon sécurisée à votre Espace Client.</em></p>
+        <hr style="border:none;border-top:1px solid #eee;margin:32px 0" />
+        <p style="font-size:12px;color:#888;text-align:center;">
+          <strong>Epitaphe 360</strong> — Intelligence Stratégique & Audit<br/>
+          <a href="https://epitaphe360.ma" style="color:#888;">www.epitaphe360.ma</a>
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendScoringNotificationToAdmin(data: { name: string; email: string; company?: string; sourceTool: string }): Promise<void> {
+  await send({
+    to: ADMIN,
+    subject: `✨ [Lead Qualifié] Nouveau profil capturé via ${data.sourceTool}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background-color:#fafafa;border-radius:12px">
+        <h2 style="color:#111;margin-top:0;">⚡ Nouveau Lead Capturé (Email-Gate)</h2>
+        <div style="background:#fff;padding:20px;border-radius:8px;margin-top:16px;">
+          <table style="width:100%;border-collapse:collapse;font-size:15px;">
+            <tr><td style="padding:8px 0;color:#555;width:30%;"><strong>Nom</strong></td><td>${data.name}</td></tr>
+            <tr><td style="padding:8px 0;color:#555;"><strong>Email</strong></td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
+            <tr><td style="padding:8px 0;color:#555;"><strong>Société</strong></td><td>${data.company ?? "Non renseigné"}</td></tr>
+            <tr><td style="padding:8px 0;color:#555;"><strong>Outil Source</strong></td><td><span style="background:#e0e7ff;color:#4f46e5;padding:4px 8px;border-radius:4px;font-size:13px;font-weight:bold;">${data.sourceTool}</span></td></tr>
+          </table>
+        </div>
+        <p style="margin-top:24px;text-align:center;">
+          <a href="https://www.epitaphe360.ma/admin/clients" style="background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Voir dans le Dashboard Admin →</a>
+        </p>
+      </div>
+    `,
+  });
+}

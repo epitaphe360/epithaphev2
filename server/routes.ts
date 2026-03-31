@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactMessageSchema, insertScoringResultSchema, scoringResults } from "@shared/schema";
-import { sendContactConfirmation, sendContactNotificationToAdmin } from "./lib/email";
+import { sendContactConfirmation, sendContactNotificationToAdmin, sendScoringResultEmail, sendScoringNotificationToAdmin } from "./lib/email";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerPublicApiRoutes } from "./public-api-routes";
 import { db } from "./db";
@@ -382,6 +382,16 @@ export async function registerRoutes(
       } else {
         clientId = existing.id;
       }
+
+      // Generate fake "magic link" just for UX simulation (in real life, tied to NextAuth/JWT)
+      const baseDomain = process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000";
+      const magicLinkUrl = `${baseDomain}/espace-client?login_hint=${encodeURIComponent(email)}&magic_token=${clientId}-welcome`;
+
+      // Background Email Sending
+      Promise.all([
+        sendScoringResultEmail(email, name, { sourceTool, magicLinkUrl }),
+        sendScoringNotificationToAdmin({ name, email, company: companyName, sourceTool })
+      ]).catch(e => console.error("Erreur envoi email scoring:", e));
 
       res.status(200).json({ success: true, clientId, message: "Lead capturé et compte préparé" });
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
@@ -7,6 +7,7 @@ import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 import { ScoringQuestionnaire } from '@/components/scoring-questionnaire';
 import { ScoringResults } from '@/components/scoring-results';
+import { EmailGate } from '@/components/email-gate';
 import {
   calculateScore, calculatePillarScores,
   getMaturityLevel, MATURITY_LEVELS, saveScore,
@@ -18,48 +19,48 @@ const TOOL_COLOR = '#F59E0B'; // Ambre pour SpaceScore
 const TOOL_ID = 'spacescore' as const;
 
 const ZONES_AUDIT = [
-  "Entrée principale & accueil", "Signalétique directionnelle", "Salle d'attente / Réception",
-  "Salles de réunion", "Espaces de travail collaboratifs", "Bureaux individuels",
-  "Espaces de pause / Cafétéria", "Couloirs & circulations", "Fenêtres & façade",
-  "Zone d'exposition produits / showroom", "Façade & enseigne extérieure", "Parking & abords"
+  "EntrÃ©e principale & accueil", "SignalÃ©tique directionnelle", "Salle d'attente / RÃ©ception",
+  "Salles de rÃ©union", "Espaces de travail collaboratifs", "Bureaux individuels",
+  "Espaces de pause / CafÃ©tÃ©ria", "Couloirs & circulations", "FenÃªtres & faÃ§ade",
+  "Zone d'exposition produits / showroom", "FaÃ§ade & enseigne extÃ©rieure", "Parking & abords"
 ];
 
 const DEFAULT_QUESTIONS: ScoringQuestion[] = [
-  // S — Signalétique
-  { id: 's1', pillar: 'S', pillarLabel: 'Signalétique', text: 'Notre signalétique directionnelle permet à un visiteur de s\'orienter seul sans assistance.', weight: 3 },
-  { id: 's2', pillar: 'S', pillarLabel: 'Signalétique', text: 'Les enseignes, panneaux et affichages sont en bon état, lisibles et professionnels.', weight: 2 },
-  { id: 's3', pillar: 'S', pillarLabel: 'Signalétique', text: 'La signalétique utilise de manière cohérente les codes graphiques de notre marque (typographie, couleurs, logo).', weight: 3 },
-  { id: 's4', pillar: 'S', pillarLabel: 'Signalétique', text: '76% des clients entrent grâce à la signalétique — la nôtre est suffisamment visible depuis la rue.', weight: 2 },
-  { id: 's5', pillar: 'S', pillarLabel: 'Signalétique', text: 'Les informations pratiques (horaires, wifi, urgences) sont clairement affichées.', weight: 1 },
-  { id: 's6', pillar: 'S', pillarLabel: 'Signalétique', text: 'La signalétique a été révisée et mise à jour dans les 2 dernières années.', weight: 2 },
-  // P — Présence de Marque
-  { id: 'p1', pillar: 'P', pillarLabel: 'Présence de Marque', text: 'Notre logo et identité visuelle sont visibles dès l\'entrée et tout au long du parcours visiteur.', weight: 3 },
-  { id: 'p2', pillar: 'P', pillarLabel: 'Présence de Marque', text: 'Les couleurs, matériaux et finitions de nos espaces reflètent notre positionnement de marque.', weight: 3 },
-  { id: 'p3', pillar: 'P', pillarLabel: 'Présence de Marque', text: 'Les visuels affichés (photos, illustrations, écrans) sont de qualité professionnelle et actualisés.', weight: 2 },
-  { id: 'p4', pillar: 'P', pillarLabel: 'Présence de Marque', text: 'Les supports imprimés (brochures, plaquettes) disponibles dans l\'espace sont à jour et cohérents.', weight: 2 },
-  { id: 'p5', pillar: 'P', pillarLabel: 'Présence de Marque', text: 'La façade extérieure reflète dignement notre image de marque et attire le regard.', weight: 2 },
-  { id: 'p6', pillar: 'P', pillarLabel: 'Présence de Marque', text: 'Nos espaces racontent une histoire de marque cohérente à travers leur aménagement.', weight: 2 },
-  // A — Ambiance
-  { id: 'a1', pillar: 'A', pillarLabel: 'Ambiance', text: 'L\'ambiance lumineuse (naturelle + artificielle) est appropriée à notre activité et agréable.', weight: 2 },
-  { id: 'a2', pillar: 'A', pillarLabel: 'Ambiance', text: 'L\'environnement sonore (musique, niveau de bruit) est maîtrisé et cohérent avec notre image.', weight: 2 },
-  { id: 'a3', pillar: 'A', pillarLabel: 'Ambiance', text: 'La propreté et le rangement des espaces sont irréprochables à tout moment de la journée.', weight: 3 },
-  { id: 'a4', pillar: 'A', pillarLabel: 'Ambiance', text: 'La température et la qualité de l\'air sont confortables et contrôlées.', weight: 2 },
-  { id: 'a5', pillar: 'A', pillarLabel: 'Ambiance', text: 'Les espaces communs donnent une impression de dynamisme, de vie et d\'activité positive.', weight: 2 },
+  // S â€” SignalÃ©tique
+  { id: 's1', pillar: 'S', pillarLabel: 'SignalÃ©tique', text: 'Notre signalÃ©tique directionnelle permet Ã  un visiteur de s\'orienter seul sans assistance.', weight: 3 },
+  { id: 's2', pillar: 'S', pillarLabel: 'SignalÃ©tique', text: 'Les enseignes, panneaux et affichages sont en bon Ã©tat, lisibles et professionnels.', weight: 2 },
+  { id: 's3', pillar: 'S', pillarLabel: 'SignalÃ©tique', text: 'La signalÃ©tique utilise de maniÃ¨re cohÃ©rente les codes graphiques de notre marque (typographie, couleurs, logo).', weight: 3 },
+  { id: 's4', pillar: 'S', pillarLabel: 'SignalÃ©tique', text: '76% des clients entrent grÃ¢ce Ã  la signalÃ©tique â€” la nÃ´tre est suffisamment visible depuis la rue.', weight: 2 },
+  { id: 's5', pillar: 'S', pillarLabel: 'SignalÃ©tique', text: 'Les informations pratiques (horaires, wifi, urgences) sont clairement affichÃ©es.', weight: 1 },
+  { id: 's6', pillar: 'S', pillarLabel: 'SignalÃ©tique', text: 'La signalÃ©tique a Ã©tÃ© rÃ©visÃ©e et mise Ã  jour dans les 2 derniÃ¨res annÃ©es.', weight: 2 },
+  // P â€” PrÃ©sence de Marque
+  { id: 'p1', pillar: 'P', pillarLabel: 'PrÃ©sence de Marque', text: 'Notre logo et identitÃ© visuelle sont visibles dÃ¨s l\'entrÃ©e et tout au long du parcours visiteur.', weight: 3 },
+  { id: 'p2', pillar: 'P', pillarLabel: 'PrÃ©sence de Marque', text: 'Les couleurs, matÃ©riaux et finitions de nos espaces reflÃ¨tent notre positionnement de marque.', weight: 3 },
+  { id: 'p3', pillar: 'P', pillarLabel: 'PrÃ©sence de Marque', text: 'Les visuels affichÃ©s (photos, illustrations, Ã©crans) sont de qualitÃ© professionnelle et actualisÃ©s.', weight: 2 },
+  { id: 'p4', pillar: 'P', pillarLabel: 'PrÃ©sence de Marque', text: 'Les supports imprimÃ©s (brochures, plaquettes) disponibles dans l\'espace sont Ã  jour et cohÃ©rents.', weight: 2 },
+  { id: 'p5', pillar: 'P', pillarLabel: 'PrÃ©sence de Marque', text: 'La faÃ§ade extÃ©rieure reflÃ¨te dignement notre image de marque et attire le regard.', weight: 2 },
+  { id: 'p6', pillar: 'P', pillarLabel: 'PrÃ©sence de Marque', text: 'Nos espaces racontent une histoire de marque cohÃ©rente Ã  travers leur amÃ©nagement.', weight: 2 },
+  // A â€” Ambiance
+  { id: 'a1', pillar: 'A', pillarLabel: 'Ambiance', text: 'L\'ambiance lumineuse (naturelle + artificielle) est appropriÃ©e Ã  notre activitÃ© et agrÃ©able.', weight: 2 },
+  { id: 'a2', pillar: 'A', pillarLabel: 'Ambiance', text: 'L\'environnement sonore (musique, niveau de bruit) est maÃ®trisÃ© et cohÃ©rent avec notre image.', weight: 2 },
+  { id: 'a3', pillar: 'A', pillarLabel: 'Ambiance', text: 'La propretÃ© et le rangement des espaces sont irrÃ©prochables Ã  tout moment de la journÃ©e.', weight: 3 },
+  { id: 'a4', pillar: 'A', pillarLabel: 'Ambiance', text: 'La tempÃ©rature et la qualitÃ© de l\'air sont confortables et contrÃ´lÃ©es.', weight: 2 },
+  { id: 'a5', pillar: 'A', pillarLabel: 'Ambiance', text: 'Les espaces communs donnent une impression de dynamisme, de vie et d\'activitÃ© positive.', weight: 2 },
   { id: 'a6', pillar: 'A', pillarLabel: 'Ambiance', text: 'Nos visiteurs commentent positivement l\'ambiance et le cadre de travail lors de leurs visites.', weight: 3 },
-  // C — Cohérence
-  { id: 'c1', pillar: 'C', pillarLabel: 'Cohérence', text: 'Il existe un Brand Space Guide documentant les standards d\'aménagement de nos espaces.', weight: 2 },
-  { id: 'c2', pillar: 'C', pillarLabel: 'Cohérence', text: 'Tous nos sites ou points de vente offrent une expérience visuelle cohérente.', weight: 3 },
-  { id: 'c3', pillar: 'C', pillarLabel: 'Cohérence', text: 'L\'espace physique est cohérent avec nos supports digitaux (site web, réseaux sociaux).', weight: 2 },
-  { id: 'c4', pillar: 'C', pillarLabel: 'Cohérence', text: 'Les nouvelles recrues trouvent leurs nouvelles conditions de travail conformes à l\'image externe de l\'entreprise.', weight: 2 },
-  { id: 'c5', pillar: 'C', pillarLabel: 'Cohérence', text: 'Après chaque rénovation ou déménagement, la cohérence de marque est préservée et vérifiée.', weight: 2 },
-  { id: 'c6', pillar: 'C', pillarLabel: 'Cohérence', text: 'Les photos de nos espaces publiées sur les réseaux sociaux sont cohérentes avec l\'expérience réelle.', weight: 2 },
-  // E — Expérience Visiteur
-  { id: 'e1', pillar: 'E', pillarLabel: 'Expérience Visiteur', text: 'Un visiteur découvrant nos locaux pour la première fois en ressort avec une excellente première impression.', weight: 3 },
-  { id: 'e2', pillar: 'E', pillarLabel: 'Expérience Visiteur', text: 'Le parcours visiteur (de l\'entrée à la sortie) est conçu pour guider et valoriser l\'expérience.', weight: 3 },
-  { id: 'e3', pillar: 'E', pillarLabel: 'Expérience Visiteur', text: 'L\'accueil (physique ou digital) est professionnel, chaleureux et représentatif de notre culture.', weight: 3 },
-  { id: 'e4', pillar: 'E', pillarLabel: 'Expérience Visiteur', text: 'Les espaces favorisent les échanges informels, la créativité et la collaboration.', weight: 2 },
-  { id: 'e5', pillar: 'E', pillarLabel: 'Expérience Visiteur', text: 'Nous avons explicitement conçu un "First Impression Test™" et l\'avons fait réaliser par des personnes externes.', weight: 2 },
-  { id: 'e6', pillar: 'E', pillarLabel: 'Expérience Visiteur', text: 'Les locaux contribuent positivement à notre attractivité employeur (talent et recrutement).', weight: 2 },
+  // C â€” CohÃ©rence
+  { id: 'c1', pillar: 'C', pillarLabel: 'CohÃ©rence', text: 'Il existe un Brand Space Guide documentant les standards d\'amÃ©nagement de nos espaces.', weight: 2 },
+  { id: 'c2', pillar: 'C', pillarLabel: 'CohÃ©rence', text: 'Tous nos sites ou points de vente offrent une expÃ©rience visuelle cohÃ©rente.', weight: 3 },
+  { id: 'c3', pillar: 'C', pillarLabel: 'CohÃ©rence', text: 'L\'espace physique est cohÃ©rent avec nos supports digitaux (site web, rÃ©seaux sociaux).', weight: 2 },
+  { id: 'c4', pillar: 'C', pillarLabel: 'CohÃ©rence', text: 'Les nouvelles recrues trouvent leurs nouvelles conditions de travail conformes Ã  l\'image externe de l\'entreprise.', weight: 2 },
+  { id: 'c5', pillar: 'C', pillarLabel: 'CohÃ©rence', text: 'AprÃ¨s chaque rÃ©novation ou dÃ©mÃ©nagement, la cohÃ©rence de marque est prÃ©servÃ©e et vÃ©rifiÃ©e.', weight: 2 },
+  { id: 'c6', pillar: 'C', pillarLabel: 'CohÃ©rence', text: 'Les photos de nos espaces publiÃ©es sur les rÃ©seaux sociaux sont cohÃ©rentes avec l\'expÃ©rience rÃ©elle.', weight: 2 },
+  // E â€” ExpÃ©rience Visiteur
+  { id: 'e1', pillar: 'E', pillarLabel: 'ExpÃ©rience Visiteur', text: 'Un visiteur dÃ©couvrant nos locaux pour la premiÃ¨re fois en ressort avec une excellente premiÃ¨re impression.', weight: 3 },
+  { id: 'e2', pillar: 'E', pillarLabel: 'ExpÃ©rience Visiteur', text: 'Le parcours visiteur (de l\'entrÃ©e Ã  la sortie) est conÃ§u pour guider et valoriser l\'expÃ©rience.', weight: 3 },
+  { id: 'e3', pillar: 'E', pillarLabel: 'ExpÃ©rience Visiteur', text: 'L\'accueil (physique ou digital) est professionnel, chaleureux et reprÃ©sentatif de notre culture.', weight: 3 },
+  { id: 'e4', pillar: 'E', pillarLabel: 'ExpÃ©rience Visiteur', text: 'Les espaces favorisent les Ã©changes informels, la crÃ©ativitÃ© et la collaboration.', weight: 2 },
+  { id: 'e5', pillar: 'E', pillarLabel: 'ExpÃ©rience Visiteur', text: 'Nous avons explicitement conÃ§u un "First Impression Testâ„¢" et l\'avons fait rÃ©aliser par des personnes externes.', weight: 2 },
+  { id: 'e6', pillar: 'E', pillarLabel: 'ExpÃ©rience Visiteur', text: 'Les locaux contribuent positivement Ã  notre attractivitÃ© employeur (talent et recrutement).', weight: 2 },
 ];
 
 const PILLAR_COLORS: Record<string, string> = {
@@ -70,18 +71,18 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; score: 
   const recs: string[] = [];
   const sorted = [...pillarScores].sort((a, b) => a.score - b.score);
   const weakest = sorted.slice(0, 3);
-  if (globalScore < 40) recs.push("Impact immédiat : 76% des clients entrent dans un établissement à cause de la signalétique. Votre score révèle un espace qui nuit à votre image de marque. Un audit Photo-Audit™ 12 zones s'impose en priorité.");
+  if (globalScore < 40) recs.push("Impact immÃ©diat : 76% des clients entrent dans un Ã©tablissement Ã  cause de la signalÃ©tique. Votre score rÃ©vÃ¨le un espace qui nuit Ã  votre image de marque. Un audit Photo-Auditâ„¢ 12 zones s'impose en prioritÃ©.");
   weakest.forEach(ps => {
-    if (ps.pillarId === 'S') recs.push("Signalétique : réalisez un audit de toutes vos signalétiques (intérieure + extérieure) et établissez un plan de mise aux normes graphiques avec un designer spécialisé en signalétique de marque.");
-    if (ps.pillarId === 'P') recs.push("Présence de marque : créez un Brand Space Guide avec les standards visuels (logo, couleurs, typographies, matériaux recommandés) et systématisez son application lors de chaque réaménagement.");
-    if (ps.pillarId === 'A') recs.push("Ambiance : définissez votre 'Brand Sensory Profile' (lumière, son, température, propreté) avec des standards mesurables et un processus de contrôle régulier.");
-    if (ps.pillarId === 'C') recs.push("Cohérence : comparez vos espaces physiques avec votre site web et vos réseaux sociaux. L'écart de perception nuit à votre crédibilité. Utilisez la Brand Space Map™ pour identifier les zones prioritaires.");
-    if (ps.pillarId === 'E') recs.push("Expérience visiteur : faites réaliser un First Impression Test™ par 3 personnes externes (clients, partenaires, candidats) et documentez leurs retours spontanés dans les 5 premières minutes.");
+    if (ps.pillarId === 'S') recs.push("SignalÃ©tique : rÃ©alisez un audit de toutes vos signalÃ©tiques (intÃ©rieure + extÃ©rieure) et Ã©tablissez un plan de mise aux normes graphiques avec un designer spÃ©cialisÃ© en signalÃ©tique de marque.");
+    if (ps.pillarId === 'P') recs.push("PrÃ©sence de marque : crÃ©ez un Brand Space Guide avec les standards visuels (logo, couleurs, typographies, matÃ©riaux recommandÃ©s) et systÃ©matisez son application lors de chaque rÃ©amÃ©nagement.");
+    if (ps.pillarId === 'A') recs.push("Ambiance : dÃ©finissez votre 'Brand Sensory Profile' (lumiÃ¨re, son, tempÃ©rature, propretÃ©) avec des standards mesurables et un processus de contrÃ´le rÃ©gulier.");
+    if (ps.pillarId === 'C') recs.push("CohÃ©rence : comparez vos espaces physiques avec votre site web et vos rÃ©seaux sociaux. L'Ã©cart de perception nuit Ã  votre crÃ©dibilitÃ©. Utilisez la Brand Space Mapâ„¢ pour identifier les zones prioritaires.");
+    if (ps.pillarId === 'E') recs.push("ExpÃ©rience visiteur : faites rÃ©aliser un First Impression Testâ„¢ par 3 personnes externes (clients, partenaires, candidats) et documentez leurs retours spontanÃ©s dans les 5 premiÃ¨res minutes.");
   });
   return recs.slice(0, 4);
 }
 
-type Step = 'roi' | 'form' | 'result';
+type Step = 'roi' | 'form' | 'gate' | 'result';
 
 export default function SpaceScorePage() {
   const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
@@ -111,36 +112,53 @@ export default function SpaceScorePage() {
     };
     saveScore(newResult);
     setResult(newResult);
-    setStep('result');
+    setStep('gate');
+  };
+
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const handleUnlock = async (data: { email: string; name: string }) => {
+    setIsUnlocking(true);
+    try {
+      await fetch('/api/leads/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, sourceTool: TOOL_ID, companyName }),
+      });
+    } catch (err) {
+      console.error('Erreur capture lead', err);
+    } finally {
+      setIsUnlocking(false);
+      setStep('result');
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       <Helmet>
-        <title>SpaceScore™ — Scoring Signalétique & Espaces | Epitaphe 360</title>
-        <meta name="description" content="Auditez la performance de votre signalétique et vos espaces de travail avec SpaceScore™ (modèle SPACE). 42 indicateurs." />
+        <title>SpaceScoreâ„¢ â€” Scoring SignalÃ©tique & Espaces | Epitaphe 360</title>
+        <meta name="description" content="Auditez la performance de votre signalÃ©tique et vos espaces de travail avec SpaceScoreâ„¢ (modÃ¨le SPACE). 42 indicateurs." />
         <link rel="canonical" href="https://www.epitaphe360.ma/outils/spacescore" />
-        <meta property="og:title" content="SpaceScore™ — Scoring Signalétique" />
+        <meta property="og:title" content="SpaceScoreâ„¢ â€” Scoring SignalÃ©tique" />
         <meta property="og:url" content="https://www.epitaphe360.ma/outils/spacescore" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-      <SoftwareApplicationSchema name="SpaceScore™" description="Auditez la performance de votre signalétique et vos espaces de travail." url="/outils/spacescore" priceMad={4900} />
-      <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"SpaceScore™",url:"/outils/spacescore"}]} />
+      <SoftwareApplicationSchema name="SpaceScoreâ„¢" description="Auditez la performance de votre signalÃ©tique et vos espaces de travail." url="/outils/spacescore" priceMad={4900} />
+      <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360â„¢",url:"/outils"},{name:"SpaceScoreâ„¢",url:"/outils/spacescore"}]} />
       <Navigation />
       <main className="pt-24 pb-20">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold"
               style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR, border: `1px solid ${TOOL_COLOR}40` }}>
-              SpaceScore™ · Modèle SPACE™
+              SpaceScoreâ„¢ Â· ModÃ¨le SPACEâ„¢
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Votre espace parle<br />
-              <span style={{ color: TOOL_COLOR }}>avant vos équipes.</span>
+              <span style={{ color: TOOL_COLOR }}>avant vos Ã©quipes.</span>
             </h1>
             <p className="text-gray-400 text-lg">
-              76% des clients entrent dans un magasin à cause de la signalétique.<br />
-              Le Photo-Audit™ 12 zones mesure la cohérence de votre marque dans chaque recoin de vos locaux.
+              76% des clients entrent dans un magasin Ã  cause de la signalÃ©tique.<br />
+              Le Photo-Auditâ„¢ 12 zones mesure la cohÃ©rence de votre marque dans chaque recoin de vos locaux.
             </p>
           </div>
 
@@ -152,7 +170,7 @@ export default function SpaceScorePage() {
                   {i + 1}
                 </div>
                 <span className="text-xs text-gray-500 hidden sm:block">
-                  {s === 'roi' ? 'Zones' : s === 'form' ? 'Évaluation' : 'Résultats'}
+                  {s === 'roi' ? 'Zones' : s === 'form' ? 'Ã‰valuation' : 'RÃ©sultats'}
                 </span>
                 {i < 2 && <div className="w-8 h-px bg-gray-700" />}
               </div>
@@ -163,8 +181,8 @@ export default function SpaceScorePage() {
             {step === 'roi' && (
               <motion.div key="roi" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                 <div className="border border-gray-800 rounded-2xl p-8 space-y-6">
-                  <h2 className="text-xl font-bold text-white">Photo-Audit™ — Sélectionnez vos zones</h2>
-                  <p className="text-gray-400 text-sm">Identifiez les zones de votre espace qui feront l'objet d'un audit visuel après votre scoring. Votre brief d'audit sera généré automatiquement.</p>
+                  <h2 className="text-xl font-bold text-white">Photo-Auditâ„¢ â€” SÃ©lectionnez vos zones</h2>
+                  <p className="text-gray-400 text-sm">Identifiez les zones de votre espace qui feront l'objet d'un audit visuel aprÃ¨s votre scoring. Votre brief d'audit sera gÃ©nÃ©rÃ© automatiquement.</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {ZONES_AUDIT.map(zone => (
                       <button key={zone} onClick={() => toggleZone(zone)}
@@ -175,7 +193,7 @@ export default function SpaceScorePage() {
                     ))}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {auditZones.length} zone{auditZones.length !== 1 ? 's' : ''} sélectionnée{auditZones.length !== 1 ? 's' : ''} sur 12
+                    {auditZones.length} zone{auditZones.length !== 1 ? 's' : ''} sÃ©lectionnÃ©e{auditZones.length !== 1 ? 's' : ''} sur 12
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
@@ -187,31 +205,31 @@ export default function SpaceScorePage() {
                       <select value={sector} onChange={e => setSector(e.target.value as SectorType)} className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white focus:outline-none">
                         <option value="luxury">Retail / Luxe</option>
                         <option value="finance">Finance / Banque</option>
-                        <option value="pharma">Santé / Pharma</option>
+                        <option value="pharma">SantÃ© / Pharma</option>
                         <option value="btp">Immobilier / BTP</option>
                         <option value="tech">Tech / Coworking</option>
                         <option value="agroalimentaire">Restauration / F&B</option>
-                        <option value="energie">Industrie / Énergie</option>
+                        <option value="energie">Industrie / Ã‰nergie</option>
                         <option value="autre">Autre</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm text-gray-400 mb-2">Taille entreprise</label>
                       <select value={companySize} onChange={e => setCompanySize(e.target.value as CompanySizeType)} className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white focus:outline-none">
-                        <option value="tpe">TPE / Indépendant</option>
+                        <option value="tpe">TPE / IndÃ©pendant</option>
                         <option value="pme">PME</option>
                         <option value="eti">ETI</option>
-                        <option value="grande">Grande entreprise / Réseau</option>
+                        <option value="grande">Grande entreprise / RÃ©seau</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2">Vous évaluez :</label>
+                      <label className="block text-sm text-gray-400 mb-2">Vous Ã©valuez :</label>
                       <div className="grid grid-cols-2 gap-2">
                         {(['direction', 'terrain'] as const).map(type => (
                           <button key={type} onClick={() => setRespondentType(type)}
                             className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all ${respondentType === type ? 'text-black' : 'border-gray-700 text-gray-400'}`}
                             style={respondentType === type ? { backgroundColor: TOOL_COLOR, borderColor: TOOL_COLOR } : {}}>
-                            {type === 'direction' ? '🏢 Direction' : '👁️ Terrain'}
+                            {type === 'direction' ? 'ðŸ¢ Direction' : 'ðŸ‘ï¸ Terrain'}
                           </button>
                         ))}
                       </div>
@@ -219,7 +237,7 @@ export default function SpaceScorePage() {
                   </div>
                   <button onClick={() => setStep('form')} className="w-full py-4 rounded-xl text-sm font-semibold text-black transition-all hover:opacity-90"
                     style={{ backgroundColor: TOOL_COLOR }}>
-                    Démarrer l'évaluation SPACE™ — 30 questions →
+                    DÃ©marrer l'Ã©valuation SPACEâ„¢ â€” 30 questions â†’
                   </button>
                 </div>
               </motion.div>
@@ -227,20 +245,20 @@ export default function SpaceScorePage() {
 
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <ScoringQuestionnaire toolId={TOOL_ID} toolName="SpaceScore™" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
+                <ScoringQuestionnaire toolId={TOOL_ID} toolName="SpaceScoreâ„¢" toolColor={TOOL_COLOR} questions={questions} onComplete={handleComplete} variant={respondentType} />
               </motion.div>
             )}
 
             {step === 'result' && result && (
               <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-white">Votre score SpaceScore™ — {result.companyName}</h2>
-                  <p className="text-gray-400 mt-1">Analyse SPACE™ · Brand Space Map™ · {new Date().toLocaleDateString('fr-FR')}</p>
+                  <h2 className="text-2xl font-bold text-white">Votre score SpaceScoreâ„¢ â€” {result.companyName}</h2>
+                  <p className="text-gray-400 mt-1">Analyse SPACEâ„¢ Â· Brand Space Mapâ„¢ Â· {new Date().toLocaleDateString('fr-FR')}</p>
                 </div>
                 {auditZones.length > 0 && (
                   <div className="rounded-xl p-4 mb-6 border" style={{ borderColor: `${TOOL_COLOR}40`, background: `${TOOL_COLOR}10` }}>
-                    <p className="text-sm font-semibold text-white mb-2">📸 Votre Brief Photo-Audit™</p>
-                    <p className="text-xs text-gray-400 mb-3">Photographiez ces {auditZones.length} zones et partagez-les avec votre consultant Epitaphe360 pour l'analyse Brand Space Map™ :</p>
+                    <p className="text-sm font-semibold text-white mb-2">ðŸ“¸ Votre Brief Photo-Auditâ„¢</p>
+                    <p className="text-xs text-gray-400 mb-3">Photographiez ces {auditZones.length} zones et partagez-les avec votre consultant Epitaphe360 pour l'analyse Brand Space Mapâ„¢ :</p>
                     <div className="flex flex-wrap gap-2">
                       {auditZones.map(zone => (
                         <span key={zone} className="px-2 py-1 rounded-full text-xs font-medium text-black" style={{ backgroundColor: TOOL_COLOR }}>{zone}</span>
@@ -248,7 +266,7 @@ export default function SpaceScorePage() {
                     </div>
                   </div>
                 )}
-                <ScoringResults result={result} toolName="SpaceScore™" toolColor={TOOL_COLOR} toolModel="SPACE™" />
+                <ScoringResults result={result} toolName="SpaceScoreâ„¢" toolColor={TOOL_COLOR} toolModel="SPACEâ„¢" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -258,3 +276,6 @@ export default function SpaceScorePage() {
     </div>
   );
 }
+
+
+

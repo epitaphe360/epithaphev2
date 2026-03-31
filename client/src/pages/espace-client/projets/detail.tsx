@@ -129,7 +129,7 @@ export default function ProjetDetail() {
   useEffect(() => {
     if (!token) { setLocation("/espace-client"); return; }
     loadProject();
-  }, [token, projectId]);
+  }, [token, projectId, setLocation]);
 
   useEffect(() => {
     if (activeTab === "messages") {

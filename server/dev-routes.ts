@@ -4,6 +4,9 @@ import { users, scoringResults, clientAccounts, clientProjects } from "../shared
 import bcrypt from "bcrypt";
 
 export function registerDevRoutes(app: Express) {
+  // Guard: dev routes only in non-production
+  if (process.env.NODE_ENV === "production") return;
+
   app.get("/api/dev/seed", async (req, res) => {
     try {
       // 1. Ajouter un Admin
@@ -59,7 +62,7 @@ export function registerDevRoutes(app: Express) {
       res.json({ message: "Base de donnees peuplee avec succes ! Les utilisateurs tests et donnees d'audit sont prets." });
     } catch (error: any) {
       console.error("Erreur lors du peuplement :", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Erreur interne du serveur" });
     }
   });
 
@@ -92,7 +95,7 @@ export function registerDevRoutes(app: Express) {
       res.json({ message: "Compte client test créé : client@test.com / client123" });
     } catch (error: any) {
       console.error("Erreur seed client:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "Erreur interne du serveur" });
     }
   });
 }

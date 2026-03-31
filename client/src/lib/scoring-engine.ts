@@ -124,10 +124,12 @@ export const SIZE_LABELS: Record<CompanySizeType, string> = {
 export const STORAGE_KEY_PREFIX = 'bmi360_score_';
 
 export function saveScore(result: ScoringResult): void {
-  const key = `${STORAGE_KEY_PREFIX}${result.toolId}`;
-  const existing = loadAllScores(result.toolId);
-  existing.push(result);
-  localStorage.setItem(key, JSON.stringify(existing));
+  try {
+    const key = `${STORAGE_KEY_PREFIX}${result.toolId}`;
+    const existing = loadAllScores(result.toolId);
+    existing.push(result);
+    localStorage.setItem(key, JSON.stringify(existing));
+  } catch { /* QuotaExceededError — silently fail */ }
 }
 
 /**

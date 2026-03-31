@@ -239,7 +239,7 @@ export function LightboxGallery({ items, columns = 3, className }: LightboxGalle
                       i === activeIndex ? "ring-primary" : "ring-transparent opacity-50 hover:opacity-80"
                     }`}
                   >
-                    <img src={item.thumb ?? item.src} alt="" className="w-full h-full object-cover" />
+                    <img src={item.thumb ?? item.src} alt={item.alt || "Miniature galerie"} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

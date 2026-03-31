@@ -85,8 +85,8 @@ export default function ArchitectureDeMarqueHub() {
               </motion.div>
               <RevealSection direction="left" className="hidden md:block">
                 <div className="grid grid-cols-2 gap-3">
-                  <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80" alt="" className="rounded-2xl object-cover h-48 w-full" />
-                  <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&q=80" alt="" className="rounded-2xl object-cover h-48 w-full mt-6" />
+                  <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80" alt="Espace de travail moderne" className="rounded-2xl object-cover h-48 w-full" />
+                  <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&q=80" alt="Bureau collaboratif" className="rounded-2xl object-cover h-48 w-full mt-6" />
                 </div>
               </RevealSection>
             </div>

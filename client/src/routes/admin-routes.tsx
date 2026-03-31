@@ -2,7 +2,7 @@
  * Admin Routes — CMS Dashboard
  * Lazy-loaded pour ne pas impacter le bundle des pages publiques.
  */
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Route, useLocation } from "wouter";
 import { useAuthStore } from "../../../cms-dashboard/store/authStore";
 import type { ReactNode } from "react";
@@ -57,8 +57,13 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [, setLocation] = useLocation();
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation("/admin/login");
+    }
+  }, [isAuthenticated, setLocation]);
+
   if (!isAuthenticated) {
-    setLocation("/admin/login");
     return null;
   }
 

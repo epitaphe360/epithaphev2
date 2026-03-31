@@ -84,8 +84,8 @@ const allowedOrigins = [
   ...(siteUrl ? [siteUrl] : []),
 ];
 
-// Accepte tous les sous-domaines *.vercel.app (previews, staging, prod)
-const vercelPattern = /^https:\/\/.+\.vercel\.app$/;
+// Accepte uniquement les sous-domaines epithaphev2*.vercel.app (previews, staging, prod)
+const vercelPattern = /^https:\/\/epithaphev2[a-z0-9-]*\.vercel\.app$/;
 
 console.log('🌐 CORS allowed origins:', allowedOrigins);
 

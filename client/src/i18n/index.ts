@@ -10,10 +10,14 @@ import en from "./locales/en.json";
 
 // Détection de la langue stockée ou langue du navigateur
 function detectLanguage(): string {
-  const stored = localStorage.getItem("epitaphe_lang");
-  if (stored && ["fr", "en"].includes(stored)) return stored;
-  const nav = navigator.language.split("-")[0];
-  return ["fr", "en"].includes(nav) ? nav : "fr";
+  try {
+    const stored = localStorage.getItem("epitaphe_lang");
+    if (stored && ["fr", "en"].includes(stored)) return stored;
+  } catch { /* localStorage unavailable */ }
+  try {
+    const nav = navigator.language.split("-")[0];
+    return ["fr", "en"].includes(nav) ? nav : "fr";
+  } catch { return "fr"; }
 }
 
 i18n.use(initReactI18next).init({
@@ -31,7 +35,7 @@ export default i18n;
 
 /** Changer la langue et persister le choix */
 export function changeLanguage(lang: "fr" | "en") {
-  localStorage.setItem("epitaphe_lang", lang);
+  try { localStorage.setItem("epitaphe_lang", lang); } catch { /* quota exceeded */ }
   i18n.changeLanguage(lang);
-  document.documentElement.lang = lang;
+  try { document.documentElement.lang = lang; } catch { /* SSR safety */ }
 }

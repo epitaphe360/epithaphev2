@@ -22,6 +22,12 @@ const transporter = isDev
 const FROM = process.env.EMAIL_FROM ?? "Epitaphe 360 <no-reply@epitaphe360.ma>";
 const ADMIN = process.env.EMAIL_ADMIN ?? "contact@epitaphe360.ma";
 
+/** Escape HTML to prevent XSS in email templates */
+function esc(str: string | undefined | null): string {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 async function send(options: nodemailer.SendMailOptions): Promise<void> {
   if (!transporter) {
     // Dev fallback — log instead of sending
@@ -61,8 +67,8 @@ export async function sendBriefConfirmation(email: string, name: string, project
     html: `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
         <h2 style="color:#d1295a">Votre brief a bien été reçu 🎉</h2>
-        <p>Bonjour ${name},</p>
-        <p>Nous avons bien reçu votre brief pour votre projet <strong>${projectType}</strong>.</p>
+        <p>Bonjour ${esc(name)},</p>
+        <p>Nous avons bien reçu votre brief pour votre projet <strong>${esc(projectType)}</strong>.</p>
         <p>Notre équipe va l'analyser et vous contactera dans les <strong>48 heures ouvrées</strong> pour organiser un premier échange.</p>
         <p>En attendant, n'hésitez pas à nous joindre via WhatsApp ou par email.</p>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
@@ -82,12 +88,12 @@ export async function sendBriefNotificationToAdmin(data: {
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
         <h2 style="color:#d1295a">Nouveau brief reçu</h2>
         <table style="width:100%;border-collapse:collapse">
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Nom</td><td>${data.name}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Email</td><td>${data.email}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Société</td><td>${data.company ?? "—"}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Type de projet</td><td>${data.projectType}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Budget</td><td>${data.budget ?? "—"}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Message</td><td>${data.message ?? "—"}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Nom</td><td>${esc(data.name)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Email</td><td>${esc(data.email)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Société</td><td>${esc(data.company) ?? "—"}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Type de projet</td><td>${esc(data.projectType)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Budget</td><td>${esc(data.budget) ?? "—"}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Message</td><td>${esc(data.message) ?? "—"}</td></tr>
         </table>
         <p style="margin-top:16px"><a href="https://www.epitaphe360.ma/admin/leads" style="background:#d1295a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Voir dans le CMS →</a></p>
       </div>
@@ -104,7 +110,7 @@ export async function sendContactConfirmation(email: string, name: string): Prom
     html: `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
         <h2 style="color:#d1295a">Message bien reçu ✅</h2>
-        <p>Bonjour ${name},</p>
+        <p>Bonjour ${esc(name)},</p>
         <p>Merci pour votre message. Notre équipe vous contactera dans les plus brefs délais.</p>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
         <p style="font-size:12px;color:#888">Epitaphe 360 — Agence événementielle &amp; communication</p>
@@ -123,10 +129,10 @@ export async function sendContactNotificationToAdmin(data: {
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
         <h2 style="color:#d1295a">Nouveau message de contact</h2>
         <table style="width:100%;border-collapse:collapse">
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Nom</td><td>${data.name}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Email</td><td>${data.email}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Sujet</td><td>${data.subject}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Message</td><td style="white-space:pre-wrap">${data.message}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Nom</td><td>${esc(data.name)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Email</td><td>${esc(data.email)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Sujet</td><td>${esc(data.subject)}</td></tr>
+          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Message</td><td style="white-space:pre-wrap">${esc(data.message)}</td></tr>
         </table>
         <p style="margin-top:16px"><a href="https://www.epitaphe360.ma/admin/contacts" style="background:#d1295a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Voir dans le CMS →</a></p>
       </div>
@@ -143,8 +149,8 @@ export async function sendScoringResultEmail(email: string, name: string, data: 
     html: `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:12px;">
         <h2 style="color:#6366F1;margin-bottom:8px;">Votre diagnostic ${data.sourceTool} est prêt ! 🚀</h2>
-        <p>Bonjour <strong>${name}</strong>,</p>
-        <p>Merci d'avoir complété notre diagnostic <strong>${data.sourceTool}</strong>. L'analyse de vos réponses est terminée.</p>
+        <p>Bonjour <strong>${esc(name)}</strong>,</p>
+        <p>Merci d'avoir complété notre diagnostic <strong>${esc(data.sourceTool)}</strong>. L'analyse de vos réponses est terminée.</p>
         <p>Pour des raisons de confidentialité, votre rapport détaillé et vos recommandations sont stockés dans votre Espace Privé Epitaphe360, généré à l'instant pour vous.</p>
         
         <div style="text-align: center; margin: 36px 0;">
@@ -171,10 +177,10 @@ export async function sendScoringNotificationToAdmin(data: { name: string; email
         <h2 style="color:#111;margin-top:0;">⚡ Nouveau Lead Capturé (Email-Gate)</h2>
         <div style="background:#fff;padding:20px;border-radius:8px;margin-top:16px;">
           <table style="width:100%;border-collapse:collapse;font-size:15px;">
-            <tr><td style="padding:8px 0;color:#555;width:30%;"><strong>Nom</strong></td><td>${data.name}</td></tr>
-            <tr><td style="padding:8px 0;color:#555;"><strong>Email</strong></td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
-            <tr><td style="padding:8px 0;color:#555;"><strong>Société</strong></td><td>${data.company ?? "Non renseigné"}</td></tr>
-            <tr><td style="padding:8px 0;color:#555;"><strong>Outil Source</strong></td><td><span style="background:#e0e7ff;color:#4f46e5;padding:4px 8px;border-radius:4px;font-size:13px;font-weight:bold;">${data.sourceTool}</span></td></tr>
+            <tr><td style="padding:8px 0;color:#555;width:30%;"><strong>Nom</strong></td><td>${esc(data.name)}</td></tr>
+            <tr><td style="padding:8px 0;color:#555;"><strong>Email</strong></td><td><a href="mailto:${encodeURIComponent(data.email)}">${esc(data.email)}</a></td></tr>
+            <tr><td style="padding:8px 0;color:#555;"><strong>Société</strong></td><td>${esc(data.company) ?? "Non renseigné"}</td></tr>
+            <tr><td style="padding:8px 0;color:#555;"><strong>Outil Source</strong></td><td><span style="background:#e0e7ff;color:#4f46e5;padding:4px 8px;border-radius:4px;font-size:13px;font-weight:bold;">${esc(data.sourceTool)}</span></td></tr>
           </table>
         </div>
         <p style="margin-top:24px;text-align:center;">

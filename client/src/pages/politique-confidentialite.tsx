@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { Helmet } from "react-helmet-async";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export default function PolitiqueConfidentialite() {
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export default function PolitiqueConfidentialite() {
           {htmlContent ? (
             <div
               className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
             />
           ) : (
           <>

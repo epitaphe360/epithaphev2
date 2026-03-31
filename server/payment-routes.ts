@@ -20,6 +20,7 @@ import {
 import { requireClientAuth } from "./public-api-routes";
 import type { ClientAuthRequest } from "./public-api-routes";
 import { sendPaymentConfirmation } from "./lib/email";
+import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
 
 const paymentLimiter = rateLimit({
@@ -316,7 +317,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * GET /api/admin/devis
    */
-  app.get("/api/admin/devis", async (req: Request, res: Response) => {
+  app.get("/api/admin/devis", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const { status, limit = "50", offset = "0" } = req.query as Record<string, string>;
       let query = db.select().from(devis).orderBy(desc(devis.createdAt)).$dynamic();
@@ -332,7 +333,7 @@ export function registerPaymentRoutes(app: Express) {
    * POST /api/admin/devis
    * Créer un devis depuis le CMS admin
    */
-  app.post("/api/admin/devis", async (req: Request, res: Response) => {
+  app.post("/api/admin/devis", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const reference = await generateDevisRef();
       const { items = [], subtotal, taxRate = 20, ...rest } = req.body;
@@ -360,7 +361,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * PUT /api/admin/devis/:id
    */
-  app.put("/api/admin/devis/:id", async (req: Request, res: Response) => {
+  app.put("/api/admin/devis/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const { id: _id, reference: _ref, createdAt: _c, ...updateData } = req.body;
 
@@ -387,7 +388,7 @@ export function registerPaymentRoutes(app: Express) {
    * POST /api/admin/devis/:id/send
    * Envoyer le devis au client par email
    */
-  app.post("/api/admin/devis/:id/send", async (req: Request, res: Response) => {
+  app.post("/api/admin/devis/:id/send", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const [d] = await db.select().from(devis).where(eq(devis.id, Number(req.params.id))).limit(1);
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
@@ -415,7 +416,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * DELETE /api/admin/devis/:id
    */
-  app.delete("/api/admin/devis/:id", async (req: Request, res: Response) => {
+  app.delete("/api/admin/devis/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       await db.delete(devis).where(eq(devis.id, Number(req.params.id)));
       res.json({ success: true });
@@ -428,7 +429,7 @@ export function registerPaymentRoutes(app: Express) {
   // ADMIN — Plans d'abonnement (CRUD)
   // ================================================================
 
-  app.get("/api/admin/plans", async (_req: Request, res: Response) => {
+  app.get("/api/admin/plans", requireAuth as any, requireAdmin as any, async (_req: Request, res: Response) => {
     try {
       const plans = await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.sortOrder);
       res.json({ data: plans, total: plans.length });
@@ -437,7 +438,7 @@ export function registerPaymentRoutes(app: Express) {
     }
   });
 
-  app.post("/api/admin/plans", async (req: Request, res: Response) => {
+  app.post("/api/admin/plans", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const [plan] = await db.insert(subscriptionPlans).values(req.body).returning();
       res.status(201).json(plan);
@@ -446,7 +447,7 @@ export function registerPaymentRoutes(app: Express) {
     }
   });
 
-  app.put("/api/admin/plans/:id", async (req: Request, res: Response) => {
+  app.put("/api/admin/plans/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const { id: _id, createdAt: _c, ...updateData } = req.body;
       const [updated] = await db.update(subscriptionPlans).set(updateData)
@@ -461,7 +462,7 @@ export function registerPaymentRoutes(app: Express) {
   // ADMIN — Paiements (lecture seule)
   // ================================================================
 
-  app.get("/api/admin/payments", async (req: Request, res: Response) => {
+  app.get("/api/admin/payments", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
       const { type, status, limit = "50", offset = "0" } = req.query as Record<string, string>;
       let q = db.select().from(payments).orderBy(desc(payments.createdAt)).$dynamic();

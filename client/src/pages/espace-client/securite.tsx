@@ -2,7 +2,7 @@
  * Espace Client — Page Sécurité
  * Gestion des clés biométriques WebAuthn + préférences push
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Shield, ChevronLeft, Bell, CheckCircle2, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -23,7 +23,9 @@ const PUSH_CATEGORIES = [
 
 export default function SecuritePage() {
   const [, navigate] = useLocation();
-  const token = localStorage.getItem(TOKEN_KEY);
+  const [token] = useState<string | null>(() => {
+    try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
+  });
 
   const [pushCategories, setPushCategories] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem("push_categories") ?? "[]"); } catch { return []; }
@@ -32,10 +34,11 @@ export default function SecuritePage() {
   const [pushSaved, setPushSaved] = useState(false);
   const [pushError, setPushError] = useState("");
 
-  if (!token) {
-    navigate("/espace-client");
-    return null;
-  }
+  useEffect(() => {
+    if (!token) navigate("/espace-client");
+  }, [token, navigate]);
+
+  if (!token) return null;
 
   const toggleCategory = (id: string) => {
     setPushCategories((prev) =>

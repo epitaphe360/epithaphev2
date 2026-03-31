@@ -90,7 +90,7 @@ export default function AbonnementPage() {
   useEffect(() => {
     if (!token) { navigate("/espace-client"); return; }
     loadAll();
-  }, [token]);
+  }, [token, navigate]);
 
   async function loadAll() {
     try {

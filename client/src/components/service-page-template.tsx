@@ -99,7 +99,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
       <section className="relative min-h-[70vh] flex items-center overflow-hidden">
         {data.heroImage && (
           <div className="absolute inset-0">
-            <img src={data.heroImage} alt="" className="w-full h-full object-cover" />
+            <img src={data.heroImage} alt={data.heroTitle || "Image d'en-tête du service"} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-transparent" />
           </div>
         )}

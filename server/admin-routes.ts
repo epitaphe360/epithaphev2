@@ -227,7 +227,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Create article
-  app.post('/api/admin/articles', requireAuth, async (req: AuthRequest, res) => {
+  app.post('/api/admin/articles', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       // Validate input data with Zod schema
       const validatedData = insertArticleSchema.parse(req.body);
@@ -260,7 +260,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Update article
-  app.put('/api/admin/articles/:id', requireAuth, async (req: AuthRequest, res) => {
+  app.put('/api/admin/articles/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const [existing] = await db.select().from(articles).where(eq(articles.id, req.params.id)).limit(1);
 
@@ -301,7 +301,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Delete article
-  app.delete('/api/admin/articles/:id', requireAuth, async (req: AuthRequest, res) => {
+  app.delete('/api/admin/articles/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const [existing] = await db.select().from(articles).where(eq(articles.id, req.params.id)).limit(1);
 
@@ -387,7 +387,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Create event
-  app.post('/api/admin/events', requireAuth, async (req: AuthRequest, res) => {
+  app.post('/api/admin/events', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       // Validate input data with Zod schema
       const validatedData = insertEventSchema.parse(req.body);
@@ -418,7 +418,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Update event
-  app.put('/api/admin/events/:id', requireAuth, async (req: AuthRequest, res) => {
+  app.put('/api/admin/events/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const [existing] = await db.select().from(events).where(eq(events.id, req.params.id)).limit(1);
 
@@ -453,7 +453,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Delete event
-  app.delete('/api/admin/events/:id', requireAuth, async (req: AuthRequest, res) => {
+  app.delete('/api/admin/events/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const [existing] = await db.select().from(events).where(eq(events.id, req.params.id)).limit(1);
 
@@ -494,7 +494,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Create category
-  app.post('/api/admin/categories', requireAuth, async (req, res) => {
+  app.post('/api/admin/categories', requireAuth, requireAdmin, async (req, res) => {
     try {
       const [newCategory] = await db.insert(categories).values(req.body).returning();
       res.status(201).json(newCategory);
@@ -505,7 +505,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Update category
-  app.put('/api/admin/categories/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/categories/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const [updated] = await db.update(categories)
         .set(req.body)
@@ -524,7 +524,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Delete category
-  app.delete('/api/admin/categories/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/categories/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(categories).where(eq(categories.id, req.params.id));
       res.json({ success: true });
@@ -715,7 +715,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Create page
-  app.post('/api/admin/pages', requireAuth, async (req: AuthRequest, res) => {
+  app.post('/api/admin/pages', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       // Validate input data with Zod schema
       const validatedData = insertPageSchema.parse(req.body);
@@ -738,7 +738,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Update page
-  app.put('/api/admin/pages/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/pages/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       // Validate input data with Zod schema (partial for updates)
       const validatedData = insertPageSchema.partial().parse(req.body);
@@ -763,7 +763,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Delete page
-  app.delete('/api/admin/pages/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/pages/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(pages).where(eq(pages.id, req.params.id));
       res.json({ success: true });
@@ -916,7 +916,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/services', requireAuth, async (req, res) => {
+  app.post('/api/admin/services', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertServiceSchema.safeParse(req.body);
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -927,7 +927,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/services/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/services/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [service] = await db.update(services).set({ ...updateData, updatedAt: new Date() })
@@ -939,7 +939,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/services/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/services/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(services).where(eq(services.id, req.params.id));
       res.json({ success: true });
@@ -988,7 +988,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/references', requireAuth, async (req, res) => {
+  app.post('/api/admin/references', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertClientReferenceSchema.safeParse(req.body);
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -999,7 +999,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/references/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/references/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [ref] = await db.update(clientReferences).set({ ...updateData, updatedAt: new Date() })
@@ -1011,7 +1011,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/references/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/references/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(clientReferences).where(eq(clientReferences.id, req.params.id));
       res.json({ success: true });
@@ -1061,7 +1061,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/case-studies', requireAuth, async (req, res) => {
+  app.post('/api/admin/case-studies', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertCaseStudySchema.safeParse(req.body);
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -1072,7 +1072,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/case-studies/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/case-studies/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [cs] = await db.update(caseStudies).set({ ...updateData, updatedAt: new Date() })
@@ -1084,7 +1084,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/case-studies/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/case-studies/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(caseStudies).where(eq(caseStudies.id, req.params.id));
       res.json({ success: true });
@@ -1134,7 +1134,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/testimonials', requireAuth, async (req, res) => {
+  app.post('/api/admin/testimonials', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertTestimonialSchema.safeParse(req.body);
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -1145,7 +1145,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/testimonials/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/testimonials/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [testimonial] = await db.update(testimonials).set({ ...updateData, updatedAt: new Date() })
@@ -1157,7 +1157,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/testimonials/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/testimonials/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(testimonials).where(eq(testimonials.id, req.params.id));
       res.json({ success: true });
@@ -1206,7 +1206,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/team', requireAuth, async (req, res) => {
+  app.post('/api/admin/team', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertTeamMemberSchema.safeParse(req.body);
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -1217,7 +1217,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/team/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/team/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [member] = await db.update(teamMembers).set({ ...updateData, updatedAt: new Date() })
@@ -1229,7 +1229,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/team/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/team/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(teamMembers).where(eq(teamMembers.id, req.params.id));
       res.json({ success: true });
@@ -1272,7 +1272,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/settings', requireAuth, async (req, res) => {
+  app.put('/api/admin/settings', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { group, data: formData } = req.body;
       if (!group || !formData || typeof formData !== 'object') {
@@ -1302,7 +1302,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/settings/general', requireAuth, async (req, res) => {
+  app.post('/api/admin/settings/general', requireAuth, requireAdmin, async (req, res) => {
     try {
       const formData = req.body;
       const upserts = Object.entries(formData).map(([key, value]) =>
@@ -1365,7 +1365,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/solutions', requireAuth, async (req, res) => {
+  app.post('/api/admin/solutions', requireAuth, requireAdmin, async (req, res) => {
     try {
       const [svc] = await db.insert(services).values(req.body).returning();
       res.status(201).json(svc);
@@ -1374,7 +1374,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/solutions/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/solutions/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const [svc] = await db.update(services).set({ ...req.body, updatedAt: new Date() })
         .where(eq(services.id, req.params.id)).returning();
@@ -1385,7 +1385,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/solutions/:id/status', requireAuth, async (req, res) => {
+  app.put('/api/admin/solutions/:id/status', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { isActive } = req.body;
       const status = isActive ? 'PUBLISHED' : 'DRAFT';
@@ -1398,7 +1398,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/solutions/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/solutions/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(services).where(eq(services.id, req.params.id));
       res.json({ success: true });
@@ -1431,7 +1431,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/navigations', requireAuth, async (req, res) => {
+  app.post('/api/admin/navigations', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { name, slug, location, items, isActive } = req.body;
       const now = new Date();
@@ -1451,7 +1451,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/navigations/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/navigations/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { name, slug, location, items, isActive } = req.body;
       const [menu] = await db.update(navigationMenus)
@@ -1528,7 +1528,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/leads/:id', requireAuth, async (req: AuthRequest, res) => {
+  app.put('/api/admin/leads/:id', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [lead] = await db.update(projectBriefs)
@@ -1584,7 +1584,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/newsletter/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/newsletter/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [sub] = await db.update(newsletterSubscriptions)
@@ -1640,7 +1640,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/contacts/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/contacts/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { status } = req.body;
       const [msg] = await db.update(contactMessages)
@@ -1685,7 +1685,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/resources', requireAuth, async (req, res) => {
+  app.post('/api/admin/resources', requireAuth, requireAdmin, async (req, res) => {
     try {
       const data = insertResourceSchema.parse(req.body);
       const [newR] = await db.insert(resources).values(data as any).returning();
@@ -1696,7 +1696,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/resources/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/resources/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [updated] = await db.update(resources)
@@ -1764,7 +1764,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/clients', requireAuth, async (req, res) => {
+  app.post('/api/admin/clients', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { email, password, name, company, phone } = req.body;
       if (!email || !password || !name) return res.status(400).json({ error: 'email, password et name requis' });
@@ -1779,7 +1779,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/clients/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/clients/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { password, passwordHash: _, id: _id, createdAt: _c, ...updateData } = req.body;
       if (password) updateData.passwordHash = await hashPassword(password);
@@ -1888,7 +1888,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/client-projects', requireAuth, async (req, res) => {
+  app.post('/api/admin/client-projects', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertClientProjectSchema.safeParse(req.body);
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -1899,7 +1899,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/client-projects/:id', requireAuth, async (req, res) => {
+  app.put('/api/admin/client-projects/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [project] = await db.update(clientProjects)
@@ -1928,7 +1928,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Milestones
-  app.post('/api/admin/client-projects/:id/milestones', requireAuth, async (req, res) => {
+  app.post('/api/admin/client-projects/:id/milestones', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertClientMilestoneSchema.safeParse({ ...req.body, projectId: parseInt(req.params.id, 10) });
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -1939,7 +1939,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.put('/api/admin/client-projects/:id/milestones/:mid', requireAuth, async (req, res) => {
+  app.put('/api/admin/client-projects/:id/milestones/:mid', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id, createdAt, ...updateData } = req.body;
       const [m] = await db.update(clientMilestones).set(updateData)
@@ -1951,7 +1951,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/client-projects/:id/milestones/:mid', requireAuth, async (req, res) => {
+  app.delete('/api/admin/client-projects/:id/milestones/:mid', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(clientMilestones).where(eq(clientMilestones.id, parseInt(req.params.mid, 10)));
       res.json({ success: true });
@@ -1961,7 +1961,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Documents
-  app.post('/api/admin/client-projects/:id/documents', requireAuth, async (req, res) => {
+  app.post('/api/admin/client-projects/:id/documents', requireAuth, requireAdmin, async (req, res) => {
     try {
       const parsed = insertClientDocumentSchema.safeParse({ ...req.body, projectId: parseInt(req.params.id, 10) });
       if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
@@ -1972,7 +1972,7 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.delete('/api/admin/client-projects/:id/documents/:did', requireAuth, async (req, res) => {
+  app.delete('/api/admin/client-projects/:id/documents/:did', requireAuth, requireAdmin, async (req, res) => {
     try {
       await db.delete(clientDocuments).where(eq(clientDocuments.id, parseInt(req.params.did, 10)));
       res.json({ success: true });

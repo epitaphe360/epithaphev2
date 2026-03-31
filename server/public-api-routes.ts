@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from "express";
+import crypto from "crypto";
 import rateLimit from "express-rate-limit";
 import { db } from "./db";
 import { z } from "zod";
@@ -778,8 +779,10 @@ Disallow: /
         return res.status(401).json({ error: "Compte introuvable" });
       }
 
-      // Vérification du token magique (format: `{id}-welcome`)
-      if (magicToken !== `${account.id}-welcome`) {
+      // Vérification du token magique avec HMAC
+      const secret = process.env.JWT_SECRET || "dev-secret";
+      const expectedToken = crypto.createHmac("sha256", secret).update(`${account.id}:${account.email}`).digest("hex");
+      if (!crypto.timingSafeEqual(Buffer.from(magicToken), Buffer.from(expectedToken))) {
         return res.status(401).json({ error: "Lien invalide ou expiré" });
       }
 
@@ -1656,7 +1659,7 @@ Disallow: /
       return res.json({ success: true, sent: results.sent, failed: results.failed });
     } catch (error: any) {
       console.error("Push broadcast error:", error);
-      return res.status(500).json({ error: error.message ?? "Erreur serveur" });
+      return res.status(500).json({ error: "Erreur serveur" });
     }
   });
 

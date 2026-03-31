@@ -6,6 +6,9 @@ import { Database, ShieldAlert, Users, Activity, X, BugPlay } from "lucide-react
 export default function DevShortcuts() {
   const [open, setOpen] = useState(false);
 
+  // Ne pas afficher en production
+  if (import.meta.env.PROD) return null;
+
   if (!open) {
     return (
       <Button 
@@ -30,9 +33,9 @@ export default function DevShortcuts() {
       <div className="space-y-2 flex flex-col">
         <Button variant="outline" className="w-full justify-start border-neutral-700 hover:bg-neutral-800 hover:text-teal-400" onClick={async () => {
           await fetch('/api/dev/seed');
-          alert('Donnees injectees avec succes ! Rechargez la page.');
+          alert('Donn\u00e9es inject\u00e9es avec succ\u00e8s ! Rechargez la page.');
         }}>
-          <Database className="w-4 h-4 mr-2" /> 1. Injecter Données de Test
+          <Database className="w-4 h-4 mr-2" /> 1. Injecter Donn\u00e9es de Test
         </Button>
         
         <Link href="/admin/leads">
@@ -41,15 +44,15 @@ export default function DevShortcuts() {
           </Button>
         </Link>
         
-        <Link href="/portal">
+        <Link href="/espace-client">
           <Button variant="outline" className="w-full justify-start border-neutral-700 hover:bg-neutral-800 hover:text-white">
-            <Users className="w-4 h-4 mr-2" /> Portail Client B2B
+            <Users className="w-4 h-4 mr-2" /> Portail Client
           </Button>
         </Link>
         
-        <Link href="/tools/bmi360">
+        <Link href="/outils/bmi360">
           <Button variant="outline" className="w-full justify-start border-neutral-700 hover:bg-neutral-800 hover:text-white">
-            <Activity className="w-4 h-4 mr-2" /> Outil: BMI 360™
+            <Activity className="w-4 h-4 mr-2" /> Outil: BMI 360\u2122
           </Button>
         </Link>
       </div>

@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import crypto from "crypto";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactMessageSchema, insertScoringResultSchema, scoringResults } from "@shared/schema";
@@ -387,9 +388,11 @@ export async function registerRoutes(
         clientId = existing.id;
       }
 
-      // Generate fake "magic link" just for UX simulation (in real life, tied to NextAuth/JWT)
+      // Generate secure magic link token using HMAC
       const baseDomain = process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000";
-      const magicLinkUrl = `${baseDomain}/espace-client?login_hint=${encodeURIComponent(email)}&magic_token=${clientId}-welcome`;
+      const secret = process.env.JWT_SECRET || "dev-secret";
+      const magicToken = crypto.createHmac("sha256", secret).update(`${clientId}:${email}`).digest("hex");
+      const magicLinkUrl = `${baseDomain}/espace-client?login_hint=${encodeURIComponent(email)}&magic_token=${magicToken}`;
 
       // Background Email Sending
       Promise.all([

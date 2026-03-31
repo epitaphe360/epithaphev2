@@ -40,7 +40,17 @@ const ContactsList          = lazy(() => import("../../../cms-dashboard/pages/co
 const QRCodesList           = lazy(() => import("../../../cms-dashboard/pages/qr-codes/QRCodesList").then(m => ({ default: m.QRCodesList })));
 const PushBroadcastPage     = lazy(() => import("../../../cms-dashboard/pages/push/PushBroadcastPage").then(m => ({ default: m.PushBroadcastPage })));
 const AdminResourcesList    = lazy(() => import("../../../cms-dashboard/pages/resources/ResourcesList").then(m => ({ default: m.ResourcesList })));
+const ScoringResultsList    = lazy(() => import("../../../cms-dashboard/pages/scoring/ScoringResultsList").then(m => ({ default: m.ScoringResultsList })));
+const ClientProjectsAdmin   = lazy(() => import("../../../cms-dashboard/pages/clients/ClientProjectsAdmin").then(m => ({ default: m.ClientProjectsAdmin })));
+const ClientsList           = lazy(() => import("../../../cms-dashboard/pages/clients/ClientsList").then(m => ({ default: m.ClientsList })));
+const DevisList             = lazy(() => import("../../../cms-dashboard/pages/devis/DevisList").then(m => ({ default: m.DevisList })));
+const PlansList             = lazy(() => import("../../../cms-dashboard/pages/plans/PlansList").then(m => ({ default: m.PlansList })));
+const PaymentsList          = lazy(() => import("../../../cms-dashboard/pages/payments/PaymentsList").then(m => ({ default: m.PaymentsList })));
 const AnalyticsDashboard    = lazy(() => import("../pages/analytics/index"));
+const HomepageSettings      = lazy(() => import("../../../cms-dashboard/pages/homepage/HomepageSettings").then(m => ({ default: m.HomepageSettings })));
+const AppearanceSettings    = lazy(() => import("../../../cms-dashboard/pages/appearance/AppearanceSettings").then(m => ({ default: m.AppearanceSettings })));
+const BriefFormEditor       = lazy(() => import("../../../cms-dashboard/pages/forms/BriefFormEditor").then(m => ({ default: m.BriefFormEditor })));
+const ScoringQuestionsEditor = lazy(() => import("../../../cms-dashboard/pages/forms/ScoringQuestionsEditor").then(m => ({ default: m.ScoringQuestionsEditor })));
 
 // ─── ProtectedRoute ───────────────────────────────────────────────────────────
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -202,6 +212,64 @@ export function AdminRoutes() {
       {/* Analytics */}
       <Route path="/admin/analytics">
         {() => <AdminPage><AnalyticsDashboard /></AdminPage>}
+      </Route>
+
+      {/* Scoring — résultats des outils */}
+      <Route path="/admin/scoring">
+        {() => <AdminPage><ScoringResultsList /></AdminPage>}
+      </Route>
+
+      {/* Clients — projets */}
+      <Route path="/admin/clients/projects">
+        {() => <AdminPage><ClientProjectsAdmin /></AdminPage>}
+      </Route>
+
+      {/* Devis */}
+      <Route path="/admin/devis">
+        {() => <AdminPage><DevisList /></AdminPage>}
+      </Route>
+
+      {/* Plans d'abonnement */}
+      <Route path="/admin/plans">
+        {() => <AdminPage><PlansList /></AdminPage>}
+      </Route>
+
+      {/* Paiements */}
+      <Route path="/admin/payments">
+        {() => <AdminPage><PaymentsList /></AdminPage>}
+      </Route>
+
+      {/* Homepage settings */}
+      <Route path="/admin/homepage">
+        {() => <AdminPage><HomepageSettings /></AdminPage>}
+      </Route>
+
+      {/* Apparence */}
+      <Route path="/admin/appearance">
+        {() => <AdminPage><AppearanceSettings /></AdminPage>}
+      </Route>
+
+      {/* Formulaires CMS (alias /admin/menu pour le lien sidebar) */}
+      <Route path="/admin/menu">
+        {() => <AdminPage><MenuManagement /></AdminPage>}
+      </Route>
+
+      {/* Comptes clients */}
+      <Route path="/admin/clients">
+        {() => <AdminPage><ClientsList /></AdminPage>}
+      </Route>
+
+      {/* Projets clients (alias sidebar) */}
+      <Route path="/admin/client-projects">
+        {() => <AdminPage><ClientProjectsAdmin /></AdminPage>}
+      </Route>
+
+      {/* Formulaires — Brief + Scoring */}
+      <Route path="/admin/forms/brief">
+        {() => <AdminPage><BriefFormEditor /></AdminPage>}
+      </Route>
+      <Route path="/admin/forms/scoring">
+        {() => <AdminPage><ScoringQuestionsEditor /></AdminPage>}
       </Route>
 
       {/* Legacy routes */}

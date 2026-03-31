@@ -10,7 +10,7 @@ import { ScoringResults } from '@/components/scoring-results';
 import { EmailGate } from '@/components/email-gate';
 import {
   calculateScore, calculatePillarScores, calculateRoiEstimate,
-  getMaturityLevel, MATURITY_LEVELS, saveScore,
+  getMaturityLevel, MATURITY_LEVELS, saveScore, persistScore,
   type ScoringQuestion, type ScoringAnswer, type ScoringResult,
   type SectorType, type CompanySizeType,
 } from '@/lib/scoring-engine';
@@ -134,7 +134,7 @@ export default function CommPulsePage() {
       benchmarkPercentile: Math.round(40 + Math.random() * 40),
       createdAt: new Date(),
     };
-    saveScore(newResult);
+    persistScore(newResult);
     setResult(newResult);
     setStep('gate');
   };

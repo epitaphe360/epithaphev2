@@ -130,6 +130,34 @@ export function saveScore(result: ScoringResult): void {
   localStorage.setItem(key, JSON.stringify(existing));
 }
 
+/**
+ * Persiste le résultat en localStorage ET en base de données via l'API.
+ * Fire-and-forget côté serveur (les erreurs réseau sont silencieuses).
+ */
+export function persistScore(result: ScoringResult): void {
+  saveScore(result);
+  try {
+    fetch('/api/scoring/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toolId:         result.toolId,
+        companyName:    result.companyName,
+        sector:         result.sector,
+        companySize:    result.companySize,
+        respondentType: result.respondentType ?? 'direction',
+        globalScore:    result.globalScore,
+        maturityLevel:  result.maturityLevel,
+        pillarScores:   result.pillarScores,
+        recommendations: result.recommendations,
+        roiEstimate:    result.roiEstimate,
+      }),
+    }).catch(() => { /* Silently fail — offline ou erreur réseau */ });
+  } catch {
+    // No-op
+  }
+}
+
 export function loadAllScores(toolId: ToolId): ScoringResult[] {
   try {
     const raw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${toolId}`);

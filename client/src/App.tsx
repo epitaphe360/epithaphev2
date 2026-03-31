@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 import { Switch, Route } from "wouter";
+import DevShortcuts from "./components/DevShortcuts";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -83,6 +84,10 @@ const ProjetDetail     = lazy(() => import("@/pages/espace-client/projets/detail
 const DocumentsPage    = lazy(() => import("@/pages/espace-client/documents"));
 const EcRessources     = lazy(() => import("@/pages/espace-client/ressources"));
 const EcSecurite       = lazy(() => import("@/pages/espace-client/securite"));
+const AbonnementPage   = lazy(() => import("@/pages/espace-client/abonnement"));
+
+// ── Devis public ──────────────────────────────────────────────────────────────
+const DevisPage = lazy(() => import("@/pages/devis/index"));
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 const AnalyticsPage = lazy(() => import("@/pages/analytics/index"));
@@ -171,6 +176,10 @@ function Router() {
           <Route path="/espace-client/documents" component={DocumentsPage} />
           <Route path="/espace-client/ressources" component={EcRessources} />
           <Route path="/espace-client/securite" component={EcSecurite} />
+          <Route path="/espace-client/abonnement" component={AbonnementPage} />
+
+          {/* ── Devis public ────────────────────────────────────── */}
+          <Route path="/devis/:reference" component={DevisPage} />
 
           {/* ── Analytics ───────────────────────────────────────── */}
           <Route path="/analytics" component={AnalyticsPage} />
@@ -198,6 +207,7 @@ function App() {
             <TooltipProvider>
               <OrganizationSchema />
               <Toaster />
+      <DevShortcuts />
               <MagentaCursor />
               <WhatsAppButton />
               <PushPermissionBanner />
@@ -220,3 +230,4 @@ function App() {
 }
 
 export default App;
+

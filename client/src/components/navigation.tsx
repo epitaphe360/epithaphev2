@@ -75,15 +75,15 @@ const ICON_MAP: Record<string, React.ReactNode> = {
 /* === Data ===================================================== */
 const defaultNavConfig: NavEntryConfig[] = [
   {
-    label: "Événements",
+    label: "ï¿½vï¿½nements",
     mega: true,
     href: "/evenements",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg",
     entries: [
-      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: "Calendar", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
-      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: "Trophy", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
-      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows",    icon: "Truck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
-      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons",    icon: "Store", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
+      { label: "Conventions & Kickoffs",   description: "Fï¿½dï¿½rez vos ï¿½quipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: "Calendar", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
+      { label: "Soirï¿½es de gala",          description: "Crï¿½ez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: "Trophy", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
+      { label: "Roadshows & Tournï¿½es",     description: "Portez votre message dans toute la rï¿½gion",      href: "/evenements/roadshows",    icon: "Truck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
+      { label: "Salons & Expositions",     description: "Maximisez votre visibilitï¿½ sur les salons B2B",  href: "/evenements/salons",    icon: "Store", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
     ],
   },
   {
@@ -93,8 +93,8 @@ const defaultNavConfig: NavEntryConfig[] = [
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg",
     entries: [
       { label: "Marque Employeur",    description: "Attirez et retenez les meilleurs talents",    href: "/architecture-de-marque/marque-employeur",   icon: "Briefcase", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
-      { label: "Communication QHSE", description: "Sécurité & conformité avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: "ShieldCheck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
-      { label: "Expérience Clients", description: "Différenciation et fidélisation durables",    href: "/architecture-de-marque/experience-clients", icon: "Users", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
+      { label: "Communication QHSE", description: "Sï¿½curitï¿½ & conformitï¿½ avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: "ShieldCheck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
+      { label: "Expï¿½rience Clients", description: "Diffï¿½renciation et fidï¿½lisation durables",    href: "/architecture-de-marque/experience-clients", icon: "Users", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
     ],
   },
   {
@@ -104,21 +104,21 @@ const defaultNavConfig: NavEntryConfig[] = [
     rightAlign: true,
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg",
     entries: [
-      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",     href: "/la-fabrique/impression",    icon: "Printer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
-      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: "Hammer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
-      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: "Signpost", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
-      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: "LayoutGrid", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
+      { label: "Impression grand format", description: "Bï¿½ches, adhï¿½sifs, toiles rï¿½troï¿½clairï¿½es",     href: "/la-fabrique/impression",    icon: "Printer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
+      { label: "Menuiserie & Dï¿½cor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: "Hammer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
+      { label: "Signalï¿½tique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: "Signpost", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
+      { label: "Amï¿½nagement Espace",      description: "Scï¿½nographie & architecture ï¿½phï¿½mï¿½re",        href: "/la-fabrique/amenagement",   icon: "LayoutGrid", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
     ],
   },
-  { label: "Références", href: "/nos-references" },
+  { label: "Rï¿½fï¿½rences", href: "/nos-references" },
   { label: "Blog",       href: "/blog" },
   {
     label: "Ressources",
     href: "/ressources",
     entries: [
-      { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: "BookOpen" },
-      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/nos-references",              icon: "FileText" },
-      { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: "ImageIcon" },
+      { label: "Bibliothï¿½que",            description: "Guides, templates et livres blancs (accï¿½s libre)", href: "/ressources",                  icon: "BookOpen" },
+      { label: "ï¿½tudes de cas",           description: "Dï¿½couvrez nos rï¿½alisations sectorielles",          href: "/nos-references",              icon: "FileText" },
+      { label: "Blog & Actualitï¿½s",       description: "Insights, conseils et tendances ï¿½vï¿½nementielles",  href: "/blog",                        icon: "ImageIcon" },
     ],
   },
   {
@@ -126,41 +126,30 @@ const defaultNavConfig: NavEntryConfig[] = [
     href: "/outils",
     rightAlign: true,
     entries: [
-      { label: "BMI 360™ Intelligence",     description: "", href: "#", icon: null, isGroupHeader: true },
-      { label: "BMI 360™ Dashboard",         description: "Vue globale de votre intelligence d'entreprise",    href: "/outils/bmi360",               icon: "BarChart2" },
-      { label: "CommPulse™",              description: "Score Communication Interne · CLARITY™",             href: "/outils/commpulse",            icon: "BarChart2" },
-      { label: "TalentPrint™",            description: "Score Marque Employeur · ATTRACT™",               href: "/outils/talentprint",          icon: "BarChart2" },
-      { label: "ImpactTrace™",            description: "Score RSE & Impact · PROOF™",                   href: "/outils/impacttrace",          icon: "BarChart2" },
-      { label: "SafeSignal™",             description: "Score Sécurité QHSE · SHIELD™",                href: "/outils/safesignal",           icon: "BarChart2" },
-      { label: "EventImpact™",            description: "Score Événementiel · STAGE™",                    href: "/outils/eventimpact",          icon: "BarChart2" },
-      { label: "SpaceScore™",             description: "Score Brand Physique · SPACE™",                 href: "/outils/spacescore",           icon: "BarChart2" },
-      { label: "FinNarrative™",           description: "Score Com Financière · CAPITAL™",               href: "/outils/finnarrative",         icon: "BarChart2" },
-      { label: "Outils Fabrique",          description: "", href: "#", icon: null, isGroupHeader: true },
-      { label: "Vigilance-Score QHSE",    description: "Évaluez votre niveau de conformité QHSE",            href: "/outils/vigilance-score",      icon: "ShieldCheck" },
-      { label: "Calculateur La Fabrique", description: "Estimez vos économies de production",              href: "/outils/calculateur-fabrique", icon: "Calculator" },
-      { label: "Déposer un brief",        description: "Formulaire stratégique multi-étapes",              href: "/contact/brief",               icon: "Mail" },
+      { label: "BMI 360â„¢ Intelligence", description: "", href: "#", icon: null, isGroupHeader: true },
+      { label: "CommPulseâ„¢",      description: "Score Communication Interne",    href: "/outils/commpulse",            icon: "BarChart2" },
+      { label: "TalentPrintâ„¢",     description: "Score Marque Employeur",        href: "/outils/talentprint",          icon: "BarChart2" },
+      { label: "ImpactTraceâ„¢",     description: "Score RSE et Impact",           href: "/outils/impacttrace",          icon: "BarChart2" },
+      { label: "SafeSignalâ„¢",      description: "Score SÃ©curitÃ© QHSE",             href: "/outils/safesignal",           icon: "BarChart2" },
+      { label: "EventImpactâ„¢",     description: "Score Ã‰vÃ©nementiel",              href: "/outils/eventimpact",          icon: "BarChart2" },
+      { label: "SpaceScoreâ„¢",      description: "Score Brand Physique",          href: "/outils/spacescore",           icon: "BarChart2" },
+      { label: "FinNarrativeâ„¢",    description: "Score Com FinanciÃ¨re",          href: "/outils/finnarrative",         icon: "BarChart2" },
+      { label: "Tableau BMI 360â„¢",  description: "Vue globale de votre intelligence", href: "/outils/bmi360", icon: "BarChart2" },
+      { label: "Calculateur Fabrique", description: "Estimez vos Ã©conomies de production", href: "/outils/calculateur-fabrique", icon: "Calculator" },
+      { label: "DÃ©poser un brief",  description: "Formulaire stratÃ©gique multi-Ã©tapes", href: "/contact/brief", icon: "Mail" },
     ],
   },
   {
     label: "Espace Client",
     rightAlign: true,
     entries: [
-      { label: "Mes projets",     description: "Suivi temps réel de vos projets en cours",  href: "/espace-client/projets",    icon: "FolderOpen" },
-      { label: "Mes documents",   description: "Coffre-fort numérique & livrables signés",  href: "/espace-client/documents",  icon: "Lock" },
-      { label: "Mes ressources",  description: "Bibliothèque exclusive clients",            href: "/espace-client/ressources", icon: "BookOpen" },
-      { label: "Mon compte",      description: "Profil, notifications, accès biométrique",  href: "/espace-client",            icon: "UserCircle" },
+      { label: "Se connecter",     description: "AccÃ©der Ã  votre espace personnel",          href: "/espace-client",            icon: "LogIn" },
+      { label: "Mes projets",      description: "Suivi temps rÃ©el de vos projets en cours", href: "/espace-client/projets",    icon: "FolderOpen" },
+      { label: "Mes documents",    description: "Coffre-fort numÃ©rique et livrables signÃ©s",  href: "/espace-client/documents",  icon: "Lock" },
+      { label: "Mon abonnement",   description: "Plans, facturation et devis",                href: "/espace-client/abonnement", icon: "UserCircle" },
     ],
   },
   { label: "Contact", href: "/contact" },
-  {
-    label: "?? Maquettes",
-    rightAlign: true,
-    entries: [
-      { label: "Sélecteur",               description: "Comparer les variantes côte à côte",            href: "/design-preview", icon: "Palette" },
-      { label: "V4 — Black Monolith",     description: "Noir cinématique · Typographie géante",         href: "/design-v4",      icon: "MonitorPlay" },
-      { label: "V5 — Accueil principal",  description: "Page d'accueil actuelle du site",               href: "/",               icon: "Layers" },
-    ],
-  },
 ];
 
 /* === Framer Motion variants =================================== */
@@ -190,7 +179,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
 
   const previewImg = (hoveredSub?.previewImage ?? entry.previewImage) ?? null;
 
-  // Détection débordement viewport après affichage
+  // Dï¿½tection dï¿½bordement viewport aprï¿½s affichage
   useEffect(() => {
     if (open && panelRef.current) {
       const rect = panelRef.current.getBoundingClientRect();
@@ -244,7 +233,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
             }`}
           >
             {entry.mega ? (
-              /* --- Mega menu : liens à gauche + preview à droite --- */
+              /* --- Mega menu : liens ï¿½ gauche + preview ï¿½ droite --- */
               <div className="flex">
                 {/* Colonne liens */}
                 <div className="flex-1 p-4 grid grid-cols-1 gap-1">
@@ -266,7 +255,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                       </div>
                     </Link>
                   ))}
-                  {/* Pied : voir tout — lien fonctionnel */}
+                  {/* Pied : voir tout ï¿½ lien fonctionnel */}
                   {entry.href && (
                     <div className="pt-2 mt-1 border-t border-border">
                       <Link
@@ -282,7 +271,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                     </div>
                   )}
                 </div>
-                {/* Colonne prévisualisation image */}
+                {/* Colonne prï¿½visualisation image */}
                 <div className="w-56 flex-shrink-0 bg-muted/40 border-l border-border overflow-hidden relative">
                   <AnimatePresence mode="wait">
                     {previewImg ? (
@@ -305,7 +294,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                         className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40"
                       >
                         <ImageIcon className="w-10 h-10" />
-                        <span className="text-xs">Aperçu</span>
+                        <span className="text-xs">Aperï¿½u</span>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -400,7 +389,7 @@ export function Navigation() {
             <Link href="/contact/brief">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
-                <Mail className="w-4 h-4" /> Déposer un brief
+                <Mail className="w-4 h-4" /> Dï¿½poser un brief
               </motion.button>
             </Link>
             <Link href="/espace-client">
@@ -489,7 +478,7 @@ export function Navigation() {
               <div className="p-4 border-t border-border space-y-2">
                 <Link href="/contact/brief">
                   <motion.button whileTap={{ scale: 0.96 }} className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl text-sm font-semibold">
-                    <Mail className="w-4 h-4" /> Déposer un brief
+                    <Mail className="w-4 h-4" /> Dï¿½poser un brief
                   </motion.button>
                 </Link>
                 <Link href="/espace-client">

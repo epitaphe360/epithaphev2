@@ -138,8 +138,8 @@ export const AppearanceSettings: React.FC = () => {
       const parsedFooterServices = validateJsonString(footerConfig.footer_links_services, 'Liens Footer (Services)');
       const parsedFooterCompany = validateJsonString(footerConfig.footer_links_company, 'Liens Footer (Entreprise)');
       
-      let parsedSolutionsCategories = null;
-      let parsedMetiersData = null;
+      let parsedSolutionsCategories: any[] | null = null;
+      let parsedMetiersData: any[] | null = null;
       if (solutionsConfig.solutionCategories) {
         parsedSolutionsCategories = validateJsonString(solutionsConfig.solutionCategories, 'Catégories de Solutions');
       }
@@ -172,8 +172,8 @@ export const AppearanceSettings: React.FC = () => {
           api.put('/admin/settings', {
             group: 'solutions_data',
             data: {
-              ...(parsedSolutionsCategories && { solutionCategories: parsedSolutionsCategories }),
-              ...(parsedMetiersData && { metiersData: parsedMetiersData })
+              ...(parsedSolutionsCategories ? { solutionCategories: parsedSolutionsCategories } : {}),
+              ...(parsedMetiersData ? { metiersData: parsedMetiersData } : {})
             }
           })
         );

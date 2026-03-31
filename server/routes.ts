@@ -4,7 +4,11 @@ import { storage } from "./storage";
 import { insertContactMessageSchema, insertScoringResultSchema, scoringResults } from "@shared/schema";
 import { sendContactConfirmation, sendContactNotificationToAdmin, sendScoringResultEmail, sendScoringNotificationToAdmin } from "./lib/email";
 import { registerAdminRoutes } from "./admin-routes";
+import { registerScoringRoutes } from './scoring-routes';
+import { registerClientPortalRoutes } from './client-portal-routes';
+import { registerDevRoutes } from './dev-routes';
 import { registerPublicApiRoutes } from "./public-api-routes";
+import { registerPaymentRoutes } from "./payment-routes";
 import { db } from "./db";
 import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials, resources, clientAccounts, clientProjects } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -449,6 +453,10 @@ export async function registerRoutes(
 
   // Register public API routes (newsletter, project-brief, sitemap, robots, rss)
   registerPublicApiRoutes(app);
+  registerScoringRoutes(app);
+  registerClientPortalRoutes(app);
+  registerDevRoutes(app);
+  registerPaymentRoutes(app);
   return httpServer;
 }
 

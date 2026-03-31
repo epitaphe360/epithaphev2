@@ -670,7 +670,7 @@ export function ScoringQuestionsEditor() {
   };
 
   // Calcul des piliers pour le tool actif
-  const pillars = [...new Set(questions.map(q => q.pillar))].map(pid => ({
+  const pillars = Array.from(new Set(questions.map(q => q.pillar))).map(pid => ({
     id: pid,
     label: questions.find(q => q.pillar === pid)?.pillarLabel || pid,
     count: questions.filter(q => q.pillar === pid).length,

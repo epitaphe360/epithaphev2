@@ -522,19 +522,53 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
 export default function EspaceClientPage() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
-  const [checking, setChecking] = useState(!!token);
+  const [checking, setChecking] = useState(true);
+  const [magicError, setMagicError] = useState("");
 
-  /* Vérifier token existant au montage */
+  /* Vérifier token existant et gérer magic link au montage */
   useEffect(() => {
-    if (!token) { setChecking(false); return; }
-    apiGet<ClientInfo>("/api/client/me", token)
+    const params = new URLSearchParams(window.location.search);
+    const loginHint = params.get("login_hint");
+    const magicToken = params.get("magic_token");
+
+    if (loginHint && magicToken) {
+      // Effacer les params de l'URL sans rechargement
+      window.history.replaceState({}, "", "/espace-client");
+
+      fetch("/api/client/magic-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginHint, token: magicToken }),
+      })
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.token) {
+            localStorage.setItem(TOKEN_KEY, json.token);
+            setToken(json.token);
+            setClientInfo(json.client);
+          } else {
+            setMagicError(json.error ?? "Lien invalide ou expiré");
+          }
+          setChecking(false);
+        })
+        .catch(() => {
+          setMagicError("Erreur de connexion, veuillez vous connecter manuellement");
+          setChecking(false);
+        });
+      return;
+    }
+
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    if (!storedToken) { setChecking(false); return; }
+
+    apiGet<ClientInfo>("/api/client/me", storedToken)
       .then((info) => { setClientInfo(info); setChecking(false); })
       .catch(() => {
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setChecking(false);
       });
-  }, [token]);
+  }, []);
 
   const handleLogin = (newToken: string, client: ClientInfo) => {
     setToken(newToken);
@@ -564,7 +598,16 @@ export default function EspaceClientPage() {
         ) : token && clientInfo ? (
           <ClientDashboard clientInfo={clientInfo} token={token} onLogout={handleLogout} />
         ) : (
-          <LoginScreen onLogin={handleLogin} />
+          <>
+            {magicError && (
+              <div className="max-w-sm mx-auto mt-8 px-4">
+                <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 text-center">
+                  <p className="text-destructive text-sm font-medium">{magicError}</p>
+                </div>
+              </div>
+            )}
+            <LoginScreen onLogin={handleLogin} />
+          </>
         )}
       </main>
       <Footer />

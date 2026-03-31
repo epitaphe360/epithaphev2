@@ -184,3 +184,64 @@ export async function sendScoringNotificationToAdmin(data: { name: string; email
     `,
   });
 }
+
+// ── Utilitaires génériques ──────────────────────────────────────────────────
+
+/** Envoi générique — wraps le transporteur interne */
+export async function sendEmail(options: nodemailer.SendMailOptions): Promise<void> {
+  await send(options);
+}
+
+/** Confirmation de paiement / abonnement */
+export async function sendPaymentConfirmation(
+  email: string,
+  name: string,
+  data: {
+    type: "subscription" | "devis";
+    planName?: string;
+    amount: number;
+    currency?: string;
+    billingCycle?: string;
+    reference?: string;
+  }
+): Promise<void> {
+  const amountFormatted = (data.amount / 100).toLocaleString("fr-MA", {
+    style: "currency",
+    currency: data.currency ?? "MAD",
+    minimumFractionDigits: 0,
+  });
+
+  const subject =
+    data.type === "subscription"
+      ? `✅ Confirmation d'abonnement — ${data.planName ?? "Epitaphe360"}`
+      : `✅ Devis accepté — ${data.reference ?? ""}`.trim();
+
+  const bodyHtml =
+    data.type === "subscription"
+      ? `
+        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#fafafa;border-radius:12px">
+          <h2 style="color:#111;margin-top:0;">Bienvenue sur Epitaphe360 ${data.planName} !</h2>
+          <p>Bonjour ${name},</p>
+          <p>Votre abonnement <strong>${data.planName}</strong> est maintenant actif.</p>
+          <table style="width:100%;border-collapse:collapse;font-size:15px;margin-top:16px;">
+            <tr><td style="padding:6px 0;color:#555;"><strong>Plan</strong></td><td>${data.planName}</td></tr>
+            <tr><td style="padding:6px 0;color:#555;"><strong>Montant</strong></td><td>${amountFormatted} / ${data.billingCycle === "annual" ? "an" : "mois"}</td></tr>
+          </table>
+          <p style="margin-top:24px;">
+            <a href="https://www.epitaphe360.ma/espace-client/abonnement" style="background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Gérer mon abonnement →</a>
+          </p>
+        </div>`
+      : `
+        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#fafafa;border-radius:12px">
+          <h2 style="color:#111;margin-top:0;">Devis ${data.reference} accepté</h2>
+          <p>Bonjour ${name},</p>
+          <p>Nous avons bien reçu votre acceptation du devis <strong>${data.reference}</strong>.</p>
+          <p>Montant : <strong>${amountFormatted}</strong></p>
+          <p>Notre équipe vous contactera très prochainement pour démarrer votre projet.</p>
+          <p style="margin-top:24px;">
+            <a href="https://www.epitaphe360.ma/espace-client" style="background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Accéder à mon espace →</a>
+          </p>
+        </div>`;
+
+  await send({ from: FROM, to: email, subject, html: bodyHtml });
+}

@@ -2,6 +2,9 @@ import { Express } from "express";
 import { db } from "./db";
 import { users, scoringResults, clientAccounts, clientProjects } from "../shared/schema";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { eq } from "drizzle-orm";
+import { generateToken } from "./lib/auth";
 
 export function registerDevRoutes(app: Express) {
   // Guard: dev routes only in non-production
@@ -79,7 +82,6 @@ export function registerDevRoutes(app: Express) {
       }).onConflictDoNothing({ target: clientAccounts.email });
 
       // Récupérer l'id du client
-      const { eq } = await import("drizzle-orm");
       const [client] = await db.select().from(clientAccounts).where(eq(clientAccounts.email, "client@test.com")).limit(1);
       if (client) {
         await db.insert(clientProjects).values({
@@ -95,6 +97,84 @@ export function registerDevRoutes(app: Express) {
       res.json({ message: "Compte client test créé : client@test.com / client123" });
     } catch (error: any) {
       console.error("Erreur seed client:", error);
+      res.status(500).json({ error: "Erreur interne du serveur" });
+    }
+  });
+
+  // ─── Auto-login client test ─────────────────────────────────────────────
+  app.post("/api/dev/auto-login-client", async (_req, res) => {
+    try {
+      const passwordHash = await bcrypt.hash("client123", 10);
+      await db.insert(clientAccounts).values({
+        email: "client@test.com",
+        passwordHash,
+        name: "Client Test",
+        company: "Entreprise Demo",
+        isActive: true,
+      }).onConflictDoNothing({ target: clientAccounts.email });
+
+      const [account] = await db.select().from(clientAccounts)
+        .where(eq(clientAccounts.email, "client@test.com")).limit(1);
+
+      if (!account) return res.status(500).json({ error: "Impossible de créer le compte test" });
+
+      // Seed un projet demo si aucun n'existe
+      const existing = await db.select().from(clientProjects)
+        .where(eq(clientProjects.clientId, account.id)).limit(1);
+      if (existing.length === 0) {
+        await db.insert(clientProjects).values({
+          clientId: account.id,
+          title: "Projet Démo - Site Vitrine",
+          type: "Site Web",
+          status: "en_cours",
+          progress: 45,
+          description: "Création d'un site vitrine moderne pour Entreprise Demo.",
+        });
+      }
+
+      const CLIENT_JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+      const token = jwt.sign(
+        { clientId: account.id, email: account.email },
+        CLIENT_JWT_SECRET,
+        { expiresIn: "30d" }
+      );
+
+      res.json({
+        token,
+        client: { id: account.id, name: account.name, company: account.company, email: account.email },
+      });
+    } catch (error: any) {
+      console.error("Auto-login client error:", error);
+      res.status(500).json({ error: "Erreur interne du serveur" });
+    }
+  });
+
+  // ─── Auto-login admin test ──────────────────────────────────────────────
+  app.post("/api/dev/auto-login-admin", async (_req, res) => {
+    try {
+      const hashedPw = await bcrypt.hash("Admin123!", 10);
+      await db.insert(users).values({
+        email: "admin@epitaphe360.test",
+        password: hashedPw,
+        name: "Administrateur Test",
+        role: "ADMIN",
+      }).onConflictDoNothing({ target: users.email });
+
+      const [user] = await db.select().from(users)
+        .where(eq(users.email, "admin@epitaphe360.test")).limit(1);
+
+      if (!user) return res.status(500).json({ error: "Impossible de créer l'admin test" });
+
+      const token = generateToken({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      const { password: _, ...userData } = user;
+      res.json({ token, user: userData });
+    } catch (error: any) {
+      console.error("Auto-login admin error:", error);
       res.status(500).json({ error: "Erreur interne du serveur" });
     }
   });

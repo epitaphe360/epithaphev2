@@ -227,20 +227,14 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
             <button
               type="button"
               onClick={async () => {
-                // Seed le client test puis pré-remplit le formulaire
-                await fetch("/api/dev/seed-test-client").catch(() => {});
-                const form = document.querySelector('form') as HTMLFormElement;
-                const emailInput = form?.querySelector('input[type=email]') as HTMLInputElement;
-                const passInput = form?.querySelector('input[type=password]') as HTMLInputElement;
-                if (emailInput && passInput) {
-                  // Utiliser les setters natifs pour déclencher react-hook-form
-                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                  nativeInputValueSetter?.call(emailInput, 'client@test.com');
-                  emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                  nativeInputValueSetter?.call(passInput, 'client123');
-                  passInput.dispatchEvent(new Event('input', { bubbles: true }));
-                  // Soumettre après un court délai
-                  setTimeout(() => form?.requestSubmit(), 300);
+                try {
+                  const res = await fetch("/api/dev/auto-login-client", { method: "POST" });
+                  if (!res.ok) throw new Error("Échec auto-login client");
+                  const json = await res.json();
+                  localStorage.setItem(TOKEN_KEY, json.token);
+                  onLogin(json.token, json.client);
+                } catch (e) {
+                  alert("Auto-login client échoué. Vérifiez que le serveur dev tourne.");
                 }
               }}
               className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
@@ -249,7 +243,19 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
             </button>
             <button
               type="button"
-              onClick={() => { window.location.href = '/admin'; }}
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/dev/auto-login-admin", { method: "POST" });
+                  if (!res.ok) throw new Error("Échec auto-login admin");
+                  const json = await res.json();
+                  // Stocker dans le store admin (même format que cms-auth-storage)
+                  const authData = { state: { user: json.user, token: json.token, isAuthenticated: true, isLoading: false }, version: 0 };
+                  localStorage.setItem("cms-auth-storage", JSON.stringify(authData));
+                  window.location.href = "/admin";
+                } catch (e) {
+                  alert("Auto-login admin échoué. Vérifiez que le serveur dev tourne.");
+                }
+              }}
               className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
             >
               <Shield className="w-3.5 h-3.5" /> Admin Test

@@ -105,10 +105,10 @@ function Router() {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={isAdmin ? "admin" : location}
-        initial={isAdmin ? {} : { opacity: 0, y: 12 }}
-        animate={isAdmin ? {} : { opacity: 1, y: 0 }}
-        exit={isAdmin ? {} : { opacity: 0, y: -8 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        initial={isAdmin ? {} : { opacity: 0 }}
+        animate={isAdmin ? {} : { opacity: 1 }}
+        exit={isAdmin ? {} : { opacity: 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
         <Switch>
           {/* ── Home & Design variants ──────────────────────────── */}

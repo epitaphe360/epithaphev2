@@ -226,7 +226,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
           <motion.div
             ref={panelRef}
             variants={megaMenuVariants} initial="hidden" animate="visible" exit="exit"
-            className={`absolute top-full mt-2 bg-card border border-border rounded-2xl shadow-xl z-[100] overflow-hidden ${
+            className={`absolute top-full mt-2 bg-card border border-border rounded-2xl shadow-xl z-[100] ${
               entry.mega
                 ? `w-[min(760px,calc(100vw-1.5rem))] ${resolvedRight ? "right-0 left-auto" : "left-0"}`
                 : `w-72 ${resolvedRight ? "right-0 left-auto" : "left-0"}`
@@ -374,7 +374,7 @@ export function Navigation() {
   return (
     <>
       <motion.header style={{ backgroundColor: bgColor, boxShadow: shadow, borderColor: borderCol }}
-        className="fixed top-0 left-0 right-0 z-[90] backdrop-blur-xl border-b">
+        className="fixed top-0 left-0 right-0 z-[90] backdrop-blur-xl border-b overflow-visible">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex-shrink-0">
             <img src={logoUrl} alt="Epitaphe 360" className="h-9 w-auto" />
@@ -435,7 +435,7 @@ export function Navigation() {
                   <X className="w-4 h-4" aria-hidden />
                 </button>
               </div>
-              <nav className="flex-1 p-4 space-y-1" aria-label="Navigation principale">
+              <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1" aria-label="Navigation principale">
                 {navConfig.map((entry) => (
                   <div key={entry.label}>
                     {entry.entries ? (

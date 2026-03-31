@@ -219,7 +219,7 @@ export default function HomeV5() {
   const portfolioList = Array.isArray(cfg?.portfolio) && cfg.portfolio.length ? cfg.portfolio : DEFAULT_PORTFOLIO;
 
   return (
-    <div className="bg-white text-[#111111] font-sans antialiased overflow-hidden">
+    <div className="bg-white text-[#111111] font-sans antialiased overflow-x-hidden">
       <Helmet>
         <title>Epitaphe 360 | Agence de communication 360° à Casablanca</title>
         <meta name="description" content="Epitaphe 360 accompagne depuis 20 ans les grandes entreprises. Événementiel, stands, signalétique et impression grand format à Casablanca, Maroc." />

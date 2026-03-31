@@ -6,7 +6,7 @@ import { sendContactConfirmation, sendContactNotificationToAdmin } from "./lib/e
 import { registerAdminRoutes } from "./admin-routes";
 import { registerPublicApiRoutes } from "./public-api-routes";
 import { db } from "./db";
-import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials, resources } from "@shared/schema";
+import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials, resources, clientAccounts, clientProjects } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
@@ -345,6 +345,50 @@ export async function registerRoutes(
   });
 
   // ─── BMI 360™ Scoring — persistance résultats ──────────────────────────────
+
+  /** POST /api/leads/capture - Capture un lead depuis l'Email Gate et crée un compe client */
+  app.post("/api/leads/capture", toolsLimiter, async (req, res) => {
+    try {
+      const { email, name, sourceTool, companyName } = req.body;
+      if (!email || !name) {
+        return res.status(400).json({ error: "Email et Nom requis" });
+      }
+
+      // 1. Check if client account exists
+      const [existing] = await db.select().from(clientAccounts).where(eq(clientAccounts.email, email)).limit(1);
+
+      let clientId;
+      
+      if (!existing) {
+        // Create new client account (Lead status essentially)
+        const [newClient] = await db.insert(clientAccounts).values({
+          email,
+          name,
+          company: companyName || "À définir",
+          passwordHash: "pending_invite", // Not usable until they set it via magic link
+          isActive: false // Will be activated when they confirm email
+        }).returning({ id: clientAccounts.id });
+        clientId = newClient.id;
+
+        // Auto-create a project stub to show in their dashboard
+        await db.insert(clientProjects).values({
+          clientId,
+          title: `Diagnostic ${sourceTool || 'Epitaphe360'}`, // e.g. "Diagnostic CommPulse"
+          type: 'Audit',
+          status: 'en_cours',
+          progress: 10,
+          description: `Analyse initiale et restitution du diagnostic en ligne.`
+        });
+      } else {
+        clientId = existing.id;
+      }
+
+      res.status(200).json({ success: true, clientId, message: "Lead capturé et compte préparé" });
+    } catch (error) {
+      console.error("[POST /api/leads/capture]", error);
+      res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
 
   /** POST /api/scoring/save — Sauvegarder un résultat de scoring */
   app.post("/api/scoring/save", toolsLimiter, async (req, res) => {

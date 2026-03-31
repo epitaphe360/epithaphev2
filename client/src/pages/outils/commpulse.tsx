@@ -7,6 +7,7 @@ import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 import { ScoringQuestionnaire } from '@/components/scoring-questionnaire';
 import { ScoringResults } from '@/components/scoring-results';
+import { EmailGate } from '@/components/email-gate';
 import {
   calculateScore, calculatePillarScores, calculateRoiEstimate,
   getMaturityLevel, MATURITY_LEVELS, saveScore,
@@ -94,7 +95,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; pillarL
   return recs.slice(0, 4);
 }
 
-type Step = 'roi' | 'form' | 'result';
+type Step = 'roi' | 'form' | 'gate' | 'result';
 
 export default function CommPulsePage() {
   const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
@@ -135,7 +136,24 @@ export default function CommPulsePage() {
     };
     saveScore(newResult);
     setResult(newResult);
-    setStep('result');
+    setStep('gate');
+  };
+
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const handleUnlock = async (data: { email: string; name: string }) => {
+    setIsUnlocking(true);
+    try {
+      await fetch('/api/leads/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, sourceTool: TOOL_ID, companyName }),
+      });
+    } catch (err) {
+      console.error("Erreur capture lead", err);
+    } finally {
+      setIsUnlocking(false);
+      setStep('result');
+    }
   };
 
   return (
@@ -313,7 +331,19 @@ export default function CommPulsePage() {
               </motion.div>
             )}
 
-            {/* STEP 3: Results */}
+            {/* STEP 3: Email Gate */}
+            {step === 'gate' && (
+              <motion.div key="gate" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <EmailGate
+                  toolName="CommPulse™"
+                  toolColor={TOOL_COLOR}
+                  onUnlock={handleUnlock}
+                  isLoading={isUnlocking}
+                />
+              </motion.div>
+            )}
+
+            {/* STEP 4: Results */}
             {step === 'result' && result && (
               <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                 <div className="text-center mb-8">

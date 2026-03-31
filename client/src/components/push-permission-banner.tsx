@@ -16,7 +16,7 @@ const PUSH_PREF_KEY = "e360_push_decision"; // "accepted" | "declined"
 
 type PushDecision = "accepted" | "declined" | null;
 
-function urlBase64ToUint8Array(b64: string): Uint8Array<ArrayBuffer> {
+function urlBase64ToUint8Array(b64: string): Uint8Array {
   const padding = "=".repeat((4 - (b64.length % 4)) % 4);
   const base64 = (b64 + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = window.atob(base64);
@@ -181,3 +181,4 @@ export function PushPermissionBanner() {
     </AnimatePresence>
   );
 }
+

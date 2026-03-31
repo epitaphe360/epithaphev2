@@ -85,9 +85,9 @@ export async function registerRoutes(
       const validatedData = insertContactMessageSchema.parse(req.body);
       const message = await storage.createContactMessage(validatedData);
       Promise.all([
-        sendContactConfirmation(validatedData.email, validatedData.name ?? ""),
+        sendContactConfirmation(validatedData.email, (validatedData.firstName + ' ' + validatedData.lastName).trim()),
         sendContactNotificationToAdmin({
-          name: validatedData.name ?? "",
+          name: (validatedData.firstName + ' ' + validatedData.lastName).trim(),
           email: validatedData.email,
           subject: "Contact",
           message: validatedData.message,
@@ -262,7 +262,7 @@ export async function registerRoutes(
         );
       }
       const result = await query;
-      const obj: Record<string, string | null> = {};
+      const obj: Record<string, any> = {};
       for (const row of result) { obj[row.key] = row.value; }
       res.json(obj);
     } catch (error) {
@@ -358,7 +358,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Données invalides", details: parsed.error.flatten() });
       }
 
-      const [saved] = await db.insert(scoringResults).values(parsed.data).returning({ id: scoringResults.id });
+      const [saved] = await db.insert(scoringResults).values(parsed.data as any).returning({ id: scoringResults.id });
       res.status(201).json({ id: saved.id });
     } catch (error) {
       console.error("[POST /api/scoring/save]", error);
@@ -397,3 +397,6 @@ export async function registerRoutes(
   registerPublicApiRoutes(app);
   return httpServer;
 }
+
+
+

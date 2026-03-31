@@ -82,7 +82,7 @@ export function calculatePillarScores(
   questions: ScoringQuestion[],
   pillarColors: Record<string, string>
 ): PillarScore[] {
-  const pillars = [...new Set(questions.map(q => q.pillar))];
+  const pillars = Array.from(new Set(questions.map(q => q.pillar)));
   return pillars.map(pillarId => {
     const pillarQuestions = questions.filter(q => q.pillar === pillarId);
     const pillarAnswers = answers.filter(a =>
@@ -156,3 +156,4 @@ export function calculateBMI360Global(scores: Partial<Record<ToolId, number>>): 
   if (values.length === 0) return 0;
   return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
 }
+

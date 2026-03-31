@@ -21,7 +21,7 @@ export function ScoringQuestionnaire({
   onComplete,
   variant,
 }: ScoringQuestionnaireProps) {
-  const pillars = [...new Set(questions.map(q => q.pillar))];
+  const pillars = Array.from(new Set(questions.map(q => q.pillar)));
   const [currentPillarIdx, setCurrentPillarIdx] = useState(0);
   const [currentQIdx, setCurrentQIdx] = useState(0);
   const [answers, setAnswers] = useState<ScoringAnswer[]>([]);
@@ -153,3 +153,4 @@ export function ScoringQuestionnaire({
     </div>
   );
 }
+

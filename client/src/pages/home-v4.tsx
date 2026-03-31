@@ -93,7 +93,7 @@ function ProjectCard({ img, title, category, index }: { img: string; title: stri
         <img
           src={img}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
@@ -504,3 +504,4 @@ export default function HomeV4() {
     </div>
   );
 }
+

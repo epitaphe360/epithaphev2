@@ -82,7 +82,7 @@ function RadarChart({ scores }: { scores: Record<ToolId, number | null> }) {
 }
 
 export default function BMI360Page() {
-  const [scores, setScores] = useState<Record<ToolId, ScoringResult | null>>({} as Record<ToolId, ScoringResult | null>);
+  const [scores, setScores] = useState<Partial<Record<ToolId, number>>>({});
   const [globalScore, setGlobalScore] = useState<number | null>(null);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function BMI360Page() {
   }, []);
 
   const completedTools = TOOL_IDS.filter(id => scores[id] !== null && scores[id] !== undefined);
-  const numericScores = Object.fromEntries(TOOL_IDS.map(id => [id, scores[id]?.globalScore ?? null])) as Record<ToolId, number | null>;
+  const numericScores = Object.fromEntries(TOOL_IDS.map(id => [id, scores[id] ?? null])) as Record<ToolId, number | null>;
 
   const globalMaturity = globalScore !== null ? MATURITY_LEVELS[Math.ceil(globalScore / 20) as 1 | 2 | 3 | 4 | 5 || 1] : null;
 
@@ -190,7 +190,7 @@ export default function BMI360Page() {
                       </div>
                       {done && (
                         <div className="text-2xl font-bold" style={{ color: meta.color }}>
-                          {Math.round(score!.globalScore)}
+                          {Math.round(score)}
                         </div>
                       )}
                     </div>
@@ -198,11 +198,11 @@ export default function BMI360Page() {
                     {done ? (
                       <>
                         <div className="w-full bg-gray-800 rounded-full h-1.5 mb-3">
-                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${score!.globalScore}%`, backgroundColor: meta.color }} />
+                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${score}%`, backgroundColor: meta.color }} />
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: `${meta.color}20`, color: meta.color }}>
-                            {score!.maturityLabel}
+                            {MATURITY_LEVELS[Math.ceil((score as number) / 20) as 1 | 2 | 3 | 4 | 5 || 1].label}
                           </span>
                           <Link href={meta.href}>
                             <a className="text-xs text-gray-500 hover:text-white transition-colors">Refaire →</a>
@@ -252,3 +252,7 @@ export default function BMI360Page() {
     </div>
   );
 }
+
+
+
+

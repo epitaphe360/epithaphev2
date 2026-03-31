@@ -1688,7 +1688,7 @@ export function registerAdminRoutes(app: Express) {
   app.post('/api/admin/resources', requireAuth, async (req, res) => {
     try {
       const data = insertResourceSchema.parse(req.body);
-      const [newR] = await db.insert(resources).values(data).returning();
+      const [newR] = await db.insert(resources).values(data as any).returning();
       res.status(201).json(newR);
     } catch (error) {
       if (error instanceof z.ZodError) return res.status(400).json({ error: 'Données invalides', details: error.errors });
@@ -1981,3 +1981,4 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 }
+

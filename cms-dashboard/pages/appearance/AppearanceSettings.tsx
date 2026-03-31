@@ -25,6 +25,11 @@ export const AppearanceSettings: React.FC = () => {
     footer_links_company: ''
   });
 
+  const [solutionsConfig, setSolutionsConfig] = useState({
+    solutionCategories: '',
+    metiersData: ''
+  });
+
   const toast = useToast();
 
   useEffect(() => {
@@ -34,15 +39,17 @@ export const AppearanceSettings: React.FC = () => {
   const loadAllSettings = async () => {
     try {
       const api = getApi();
-      const [identityRes, navRes, footerRes] = await Promise.all([
+      const [identityRes, navRes, footerRes, solutionsRes] = await Promise.all([
         api.get('/admin/settings/site_identity'),
         api.get('/admin/settings/nav_config'),
-        api.get('/admin/settings/footer')
+        api.get('/admin/settings/footer'),
+        api.get('/admin/settings/solutions_data')
       ]);
 
       const identityData = identityRes.data?.data || {};
       const navData = navRes.data?.data || {};
       const footerData = footerRes.data?.data || {};
+      const solutionsData = solutionsRes.data?.data || {};
 
       setSiteIdentity({
         logo_url: identityData.logo_url || '',
@@ -62,6 +69,15 @@ export const AppearanceSettings: React.FC = () => {
         footer_links_company: footerData.footer_links_company 
           ? JSON.stringify(footerData.footer_links_company, null, 2) 
           : '[\n  \n]'
+      });
+
+      setSolutionsConfig({
+        solutionCategories: solutionsData.solutionCategories 
+          ? JSON.stringify(solutionsData.solutionCategories, null, 2) 
+          : '',
+        metiersData: solutionsData.metiersData 
+          ? JSON.stringify(solutionsData.metiersData, null, 2) 
+          : ''
       });
 
     } catch (error) {
@@ -95,6 +111,11 @@ export const AppearanceSettings: React.FC = () => {
     setFooterConfig(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSolutionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setSolutionsConfig(prev => ({ ...prev, [name]: value }));
+  };
+
   const validateJsonString = (str: string, fieldName: string) => {
     try {
       const parsed = JSON.parse(str);
@@ -116,11 +137,19 @@ export const AppearanceSettings: React.FC = () => {
       const parsedNavItems = validateJsonString(navConfig.nav_items, 'Menu de navigation');
       const parsedFooterServices = validateJsonString(footerConfig.footer_links_services, 'Liens Footer (Services)');
       const parsedFooterCompany = validateJsonString(footerConfig.footer_links_company, 'Liens Footer (Entreprise)');
+      
+      let parsedSolutionsCategories = null;
+      let parsedMetiersData = null;
+      if (solutionsConfig.solutionCategories) {
+        parsedSolutionsCategories = validateJsonString(solutionsConfig.solutionCategories, 'Catégories de Solutions');
+      }
+      if (solutionsConfig.metiersData) {
+        parsedMetiersData = validateJsonString(solutionsConfig.metiersData, 'Données Métiers');
+      }
 
       const api = getApi();
       
-      // Save all 3 groups
-      await Promise.all([
+      const promises = [
         api.put('/admin/settings', { 
           group: 'site_identity', 
           data: siteIdentity 
@@ -136,9 +165,23 @@ export const AppearanceSettings: React.FC = () => {
             footer_links_company: parsedFooterCompany
           } 
         })
-      ]);
+      ];
 
-      toast.success('Succès', 'Paramètres d\'apparence enregistrés');
+      if (parsedSolutionsCategories || parsedMetiersData) {
+        promises.push(
+          api.put('/admin/settings', {
+            group: 'solutions_data',
+            data: {
+              ...(parsedSolutionsCategories && { solutionCategories: parsedSolutionsCategories }),
+              ...(parsedMetiersData && { metiersData: parsedMetiersData })
+            }
+          })
+        );
+      }
+
+      await Promise.all(promises);
+
+      toast.success('Succès', 'Paramètres enregistrés avec succès');
     } catch (error: any) {
       console.error('Save error:', error);
       toast.error('Erreur de validation ou de sauvegarde', error.message || 'Impossible d\'enregistrer les paramètres');
@@ -287,6 +330,51 @@ export const AppearanceSettings: React.FC = () => {
                 onChange={handleFooterChange}
                 placeholder={'[\n  {\n    "label": "À propos",\n    "href": "/about"\n  }\n]'}
               />
+            </div>
+          </div>
+        </Card>
+
+        {/* Solutions Config */}
+        <Card>
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Layout className="w-5 h-5" />
+              Données des Solutions (JSON)
+            </h2>
+          </div>
+          <div className="p-6 space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Catégories de Solutions (Tableau JSON)
+              </label>
+              <Textarea
+                className="font-mono text-sm leading-relaxed"
+                rows={12}
+                name="solutionCategories"
+                value={solutionsConfig.solutionCategories}
+                onChange={handleSolutionsChange}
+                placeholder={'[\n  {\n    "slug": "evenementiel",\n    "label": "Événementiel",\n    "items": [...]\n  }\n]'}
+              />
+              <p className="text-xs text-slate-500 mt-2">
+                Définition de l'attribut <b>solutionCategories</b>. Laisser vide pour utiliser les données codées en dur (fallback).
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Données Métiers (Tableau JSON)
+              </label>
+              <Textarea
+                className="font-mono text-sm leading-relaxed"
+                rows={12}
+                name="metiersData"
+                value={solutionsConfig.metiersData}
+                onChange={handleSolutionsChange}
+                placeholder={'[\n  {\n    "slug": "evenementiel",\n    "label": "Événementiel",\n    "items": [...]\n  }\n]'}
+              />
+              <p className="text-xs text-slate-500 mt-2">
+                Définition de l'attribut <b>metiersData</b>. Laisser vide pour utiliser les données codées en dur (fallback).
+              </p>
             </div>
           </div>
         </Card>

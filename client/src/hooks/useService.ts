@@ -70,7 +70,7 @@ export function useService(
         setFromDb(true);
       })
       .catch(() => {
-        // Silently fall back to hardcoded data — no visual impact
+        // Silently fall back to hardcoded/dynamic data
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -81,5 +81,9 @@ export function useService(
     };
   }, [slug]);
 
-  return { data, loading, fromDb };
+  // Si on n'a pas chargé la donnée depuis la DB, on retourne directement le fallback.
+  // Cela permet au composant parent de mettre à jour le fallback (ex: via useSolutionsData chargé dynamiquement).
+  const currentData = fromDb ? data : fallback;
+
+  return { data: currentData, loading, fromDb };
 }

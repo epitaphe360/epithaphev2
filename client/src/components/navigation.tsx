@@ -360,8 +360,8 @@ export function Navigation() {
 
   const logoUrl = siteIdentity?.logo_url || "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png";
 
-  // Skill: UI/UX Pro Max ? OLED dark glassmorphism navbar
-  const bgColor   = useTransform(scrollY, [0, 60], ["rgba(0,0,5,0.0)",       "rgba(3,0,12,0.88)"]);
+  // Navbar: fond sombre semi-transparent au repos, plus opaque au scroll
+  const bgColor   = useTransform(scrollY, [0, 60], ["rgba(3,0,12,0.75)",     "rgba(3,0,12,0.95)"]);
   const shadow    = useTransform(scrollY, [0, 60], ["0 0 0 0 transparent",   "0 2px 32px rgba(0,0,0,0.45)"]);
   const borderCol = useTransform(scrollY, [0, 60], ["rgba(236,72,153,0.0)",  "rgba(236,72,153,0.18)"]);
 

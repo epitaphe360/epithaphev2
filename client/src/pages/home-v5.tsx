@@ -1,275 +1,400 @@
-/**
- * HOME V5 — B2B INDUSTRIEL OFFICIEL
- * Direction: Le VRAI Epitaphe 360. 
- * Couleurs réelles : Blanc (#FFF), Noir (#111), Gris chaud (#F8F9FA), Rouge Signature (#E3001B)
- * Ton : Direct, institutionnel, B2B, grosse mise en avant des visuels d'événements.
- * Typographie : Inter (propre, lisible, sans fioritures).
- */
-
 import { useRef, useState, useEffect } from "react";
 import { Link } from "wouter";
-import { motion, useInView } from "framer-motion";
+import { 
+  motion, 
+  useInView, 
+  useScroll, 
+  useTransform, 
+  useSpring,
+  useMotionValue,
+  animate,
+  stagger,
+} from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { ArrowRight, ChevronRight, Play, MapPin, Phone, Mail } from "lucide-react";
+import { ArrowRight, ChevronRight, Phone } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { useSettings } from "@/hooks/useSettings";
 
-/* ─── Palette Officielle ─────────────────────────────────── */
-const C = {
-  white: "#FFFFFF",
-  bg: "#F8F9FA", // Gris très clair B2B
-  dark: "#111111",
-  red: "#E3001B", // Le vrai rouge Epitaphe
-  redHover: "#C20017",
-  grayText: "#555555",
-  border: "#EAEAEA",
+/* ─── Framer Motion Animations ───────────────────────────── */
+const revealVariants = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] } 
+  },
 };
 
-/* ─── Composants d'animation simples ─────────────────────── */
-function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const textRevealVariants = {
+  hidden: { opacity: 0, y: "100%" },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 1, ease: [0.25, 1, 0.5, 1] } 
+  },
+};
+
+function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, ease: "easeOut", delay }}
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+      variants={revealVariants}
+      custom={delay}
+      className={className}
     >
       {children}
     </motion.div>
   );
 }
 
-function StatsCounter({ to, suffix }: { to: number; suffix: string }) {
-  const [val, setVal] = useState(0);
+function RevealText({ children }: { children: React.ReactNode }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = Math.ceil(to / 40);
-    const timer = setInterval(() => {
-      start = Math.min(start + step, to);
-      setVal(start);
-      if (start >= to) clearInterval(timer);
-    }, 30);
-    return () => clearInterval(timer);
-  }, [inView, to]);
-  return <span ref={ref}>{val}{suffix}</span>;
+  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  return (
+    <div ref={ref} className="overflow-hidden inline-block">
+      <motion.div
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        variants={textRevealVariants}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
 }
 
-/* ─── Données ────────────────────────────────────────────── */
-const SERVICES = [
-  { img: "https://epitaphe.ma/wp-content/uploads/2018/10/eventqatar.jpg", title: "Événementiel Corporate", href: "/evenements" },
-  { img: "https://epitaphe.ma/wp-content/uploads/2018/10/LIFE.jpg", title: "Architecture & Stands", href: "/la-fabrique/menuiserie" },
-  { img: "https://epitaphe.ma/wp-content/uploads/2018/10/REARapport.jpg", title: "Signalétique & Wayfinding", href: "/la-fabrique/signaletique" },
-  { img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800", title: "Impression Grand Format", href: "/la-fabrique/impression" },
+/* ─── Physics-based Stats Counter ────────────────────────── */
+function StatsCounter({ to, suffix }: { to: number; suffix: string }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const motionValue = useMotionValue(0);
+  const springValue = useSpring(motionValue, {
+    damping: 40,
+    stiffness: 100,
+    mass: 1,
+  });
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (inView) {
+      motionValue.set(to);
+    }
+  }, [inView, to, motionValue]);
+
+  useEffect(() => {
+    return springValue.on("change", (latest) => {
+      setDisplayValue(Math.floor(latest));
+    });
+  }, [springValue]);
+
+  return <span ref={ref}>{displayValue}{suffix}</span>;
+}
+
+/* ─── Infinite Marquee ───────────────────────────────────── */
+function InfiniteMarquee({ items }: { items: string[] }) {
+  // Triple the items to ensure smooth infinite loop
+  const marqueeItems = [...items, ...items, ...items];
+  
+  return (
+    <div className="relative flex overflow-hidden w-full py-12 bg-white">
+      <motion.div
+        className="flex whitespace-nowrap items-center min-w-max"
+        animate={{ x: ["0%", "-33.333333%"] }}
+        transition={{
+          repeat: Infinity,
+          ease: "linear",
+          duration: 30, // Adjust speed here
+        }}
+      >
+        {marqueeItems.map((item, idx) => (
+          <div 
+            key={`${item}-${idx}`} 
+            className="flex items-center justify-center px-12 lg:px-24 mx-4"
+          >
+            <span className="text-3xl lg:text-5xl font-extrabold text-[#F8F9FA] stroke-text uppercase tracking-widest hover:text-[#111111] transition-colors duration-500 cursor-default">
+              {item}
+            </span>
+          </div>
+        ))}
+      </motion.div>
+      <style>{`
+        .stroke-text {
+          -webkit-text-stroke: 1px #EAEAEA;
+          color: transparent;
+        }
+        .stroke-text:hover {
+          -webkit-text-stroke: 1px #111111;
+          color: #111111;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ─── Parallax Image ─────────────────────────────────────── */
+function ParallaxImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+
+  return (
+    <div ref={ref} className={`relative overflow-hidden ${className}`}>
+      <motion.img 
+        src={src} 
+        alt={alt}
+        className="absolute inset-0 w-full h-[120%] object-cover"
+        style={{ y }}
+        loading="lazy"
+      />
+    </div>
+  );
+}
+
+/* ─── Default Data ───────────────────────────────────────── */
+const DEFAULT_SERVICES = [
+  { img: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1920&q=100", title: "Événementiel Corporate", href: "/evenements" },
+  { img: "https://images.unsplash.com/photo-1541123356219-284ebe98ae3b?w=1920&q=100", title: "Architecture & Stands", href: "/la-fabrique/menuiserie" },
+  { img: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1920&q=100", title: "Signalétique & Wayfinding", href: "/la-fabrique/signaletique" },
+  { img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=100", title: "Impression Grand Format", href: "/la-fabrique/impression" },
 ];
 
-const CLIENTS = [
+const DEFAULT_CLIENTS = [
   "Qatar Airways", "HPS", "Schneider Electric", "Vinci Energies",
   "Dell", "SNEP", "Ajial", "Wafa Assurance", "LafargeHolcim", "OCP Group",
 ];
 
-const PORTFOLIO = [
-  { client: "Qatar Airways", type: "Dîner de Gala", thumb: "https://epitaphe.ma/wp-content/uploads/2018/10/eventqatar.jpg" },
-  { client: "Schneider Electric", type: "Convention Life Is On", thumb: "https://epitaphe.ma/wp-content/uploads/2018/10/LIFE.jpg" },
-  { client: "Dell", type: "Stand & Exposition", thumb: "https://epitaphe.ma/wp-content/uploads/2018/10/dell-rea.jpg" },
-  { client: "Ajial", type: "Scénographie", thumb: "https://epitaphe.ma/wp-content/uploads/2018/10/Ajial2-1.jpg" },
+const DEFAULT_PORTFOLIO = [
+  { client: "Qatar Airways", type: "Dîner de Gala", thumb: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=100" },
+  { client: "Schneider Electric", type: "Convention Life Is On", thumb: "https://images.unsplash.com/photo-1541123356219-284ebe98ae3b?w=1920&q=100" },
+  { client: "Dell", type: "Stand & Exposition", thumb: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1920&q=100" },
+  { client: "Ajial", type: "Scénographie", thumb: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1920&q=100" },
 ];
 
-type HomepageCfg = {
-  hero?: { title?: string; subtitle?: string; image?: string };
-  about?: { h2?: string; description?: string; bullets?: string[]; img1?: string; img2?: string };
-  stats?: Array<{ val: number; suffix: string; label: string }>;
-  services?: typeof SERVICES;
-  clients?: string[];
-  portfolio?: typeof PORTFOLIO;
-};
-
+/* ─── M A I N   C O M P O N E N T ────────────────────────── */
 export default function HomeV5() {
-  const [cfg, setCfg] = useState<HomepageCfg>({});
+  const { settings: cfg } = useSettings("homepage");
+  
+  const heroImg = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=3840&q=100";
+  const aboutImg1 = "https://images.unsplash.com/photo-1541123356219-284ebe98ae3b?w=3840&q=100";
+  const aboutImg2 = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=3840&q=100";
 
-  useEffect(() => {
-    fetch('/api/settings?group=homepage')
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (!d?.homepage_config) return;
-        try {
-          const parsed = typeof d.homepage_config === 'string'
-            ? JSON.parse(d.homepage_config)
-            : d.homepage_config;
-          if (parsed && typeof parsed === 'object') setCfg(parsed);
-        } catch { /* garde les valeurs par défaut */ }
-      })
-      .catch(() => {});
-  }, []);
-
-  const heroImg = cfg.hero?.image ?? "https://epitaphe.ma/wp-content/uploads/2018/10/eventqatar.jpg";
-  const heroTitle = cfg.hero?.title ?? "Inspirez. Connectez. Marquez durablement.";
-  const heroSubtitle = cfg.hero?.subtitle ?? "Agence de communication 360° basée à Casablanca. Nous gérons vos projets de l'idée créative à la fabrication et l'exécution sur le terrain.";
-  const aboutH2 = cfg.about?.h2 ?? "Créativité & pragmatisme. L'agence des défis complexes.";
-  const aboutDesc = cfg.about?.description ?? "Depuis 20 ans, Epitaphe 360 accompagne les grandes entreprises, multinationales et PME. Nous comprenons vos contraintes de directeurs marketing ou communication : délais serrés, attentes élevées, besoin constant d'innovation.";
-  const aboutBullets = cfg.about?.bullets?.length ? cfg.about.bullets : [
+  const heroTitle = cfg?.hero?.title ?? "Inspirez. Connectez. Marquez durablement.";
+  const heroSubtitle = cfg?.hero?.subtitle ?? "Agence de communication 360° basée à Casablanca. Nous gérons vos projets de l'idée créative à la fabrication et l'exécution sur le terrain.";
+  const aboutH2 = cfg?.about?.h2 ?? "Créativité & pragmatisme. L'agence des défis complexes.";
+  const aboutDesc = cfg?.about?.description ?? "Depuis 20 ans, Epitaphe 360 accompagne les grandes entreprises, multinationales et PME. Nous comprenons vos contraintes de directeurs marketing ou communication : délais serrés, attentes élevées, besoin constant d'innovation.";
+  const aboutBullets = cfg?.about?.bullets?.length ? cfg.about.bullets : [
     "Une maîtrise totale de A à Z (conception & exécution)",
     "Un atelier de fabrication interne (menuiserie, impression, signalétique)",
     "Respect strict des délais et des budgets",
     "Un seul interlocuteur pour tout votre projet",
   ];
-  const aboutImg1 = cfg.about?.img1 ?? "https://epitaphe.ma/wp-content/uploads/2018/10/LIFE.jpg";
-  const aboutImg2 = cfg.about?.img2 ?? "https://epitaphe.ma/wp-content/uploads/2018/10/dell-rea.jpg";
-  const statsList = cfg.stats?.length ? cfg.stats.map(s => ({ val: s.val, suf: s.suffix, label: s.label })) : [
-    { val: 20, suf: "+", label: "Années d'expérience" },
-    { val: 200, suf: "+", label: "Projets réalisés" },
-    { val: 50, suf: "+", label: "Clients actifs" },
-    { val: 100, suf: "%", label: "Autonomie de production" },
+  const statsList = cfg?.stats?.length ? cfg.stats : [
+    { val: 20, suffix: "+", label: "Années d'expérience" },
+    { val: 200, suffix: "+", label: "Projets réalisés" },
+    { val: 50, suffix: "+", label: "Clients actifs" },
+    { val: 100, suffix: "%", label: "Autonomie de production" },
   ];
-  const servicesList = cfg.services?.length ? cfg.services : SERVICES;
-  const clientsList = cfg.clients?.length ? cfg.clients : CLIENTS;
-  const portfolioList = cfg.portfolio?.length ? cfg.portfolio : PORTFOLIO;
+  
+  const servicesList = cfg?.services?.length ? cfg.services : DEFAULT_SERVICES;
+  const clientsList = cfg?.clients?.length ? cfg.clients : DEFAULT_CLIENTS;
+  const portfolioList = cfg?.portfolio?.length ? cfg.portfolio : DEFAULT_PORTFOLIO;
 
   return (
-    <div style={{ backgroundColor: C.white, color: C.dark, fontFamily: "Inter, sans-serif" }}>
+    <div className="bg-white text-[#111111] font-sans antialiased overflow-hidden">
       <Helmet>
         <title>Epitaphe 360 | Agence de communication 360° à Casablanca</title>
         <meta name="description" content="Epitaphe 360 accompagne depuis 20 ans les grandes entreprises. Événementiel, stands, signalétique et impression grand format à Casablanca, Maroc." />
       </Helmet>
 
-      {/* ─── NAVIGATION GLOBALE (Mega Menu complet) ───────── */}
       <Navigation />
 
-      {/* ─── HERO SECTION (L'image prime) ─────────────────── */}
-      <section className="relative h-[80vh] min-h-[600px] flex items-center mt-16">
+      {/* ─── HERO SECTION ───────────────────────────────────── */}
+      <section className="relative h-screen min-h-[800px] mt-16 w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
+          <motion.img 
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
             src={heroImg}
             alt="Événement Epitaphe" 
             className="w-full h-full object-cover"
+            loading="lazy"
           />
-          {/* Un overlay noir simple pour garantir la lisibilité du texte blanc */}
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+        <div className="relative z-10 w-full max-w-[90rem] mx-auto px-6 md:px-12">
           <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="max-w-4xl"
           >
-            <h1 className="text-5xl md:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
-              {heroTitle.includes('Marquez') ? (
-                <>{heroTitle.split('Marquez')[0]}Marquez <span style={{ color: C.red }}>durablement.</span></>
-              ) : heroTitle}
+            <h1 className="text-6xl md:text-8xl lg:text-[6rem] font-bold text-white leading-[1.05] tracking-tight mb-8">
+              <RevealText>
+                {heroTitle.includes('Marquez') ? (
+                  <>{heroTitle.split('Marquez')[0]}Marquez <span className="text-[#E3001B]">durablement.</span></>
+                ) : heroTitle}
+              </RevealText>
             </h1>
-            <p className="text-xl text-white/90 mb-10 max-w-xl font-light">
+            <motion.p 
+              variants={revealVariants}
+              className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl font-light leading-relaxed"
+            >
               {heroSubtitle}
-            </p>
-            <div className="flex flex-wrap gap-4">
+            </motion.p>
+            <motion.div variants={revealVariants} className="flex flex-wrap gap-6">
               <Link href="/contact/brief">
-                <button 
-                  className="px-8 py-4 text-[16px] font-bold text-white flex items-center gap-2 transition-colors"
-                  style={{ backgroundColor: C.red }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = C.redHover}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = C.red}
-                >
-                  Démarrer un projet <ArrowRight size={20} />
+                <button className="px-10 py-5 text-lg font-bold text-white bg-[#E3001B] hover:bg-[#C20017] flex items-center gap-3 transition-colors duration-300 rounded-none">
+                  Démarrer un projet <ArrowRight size={24} />
                 </button>
               </Link>
               <button 
-                  onClick={() => document.querySelector('#expertises')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-8 py-4 text-[16px] font-bold text-white border-2 border-white flex items-center gap-2 hover:bg-white hover:text-black transition-colors"
-                >
-                  Nos métiers
-                </button>
-            </div>
+                onClick={() => document.querySelector('#expertises')?.scrollIntoView({ behavior: 'smooth' })}
+                className="px-10 py-5 text-lg font-bold text-white border-2 border-white hover:bg-white hover:text-[#111111] flex items-center gap-3 transition-colors duration-300 rounded-none bg-transparent"
+              >
+                Nos métiers
+              </button>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* ─── ABOUT / INTRO (Corporate et direct) ──────────── */}
-      <section className="py-24" style={{ backgroundColor: C.white }}>
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <FadeUp>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-              {aboutH2}
-            </h2>
-            <p className="text-lg leading-relaxed mb-6" style={{ color: C.grayText }}>
-              {aboutDesc}
-            </p>
-            <ul className="mb-8 space-y-4">
-              {aboutBullets.map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <div className="mt-1 flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.red }}></div>
-                  </div>
-                  <span className="text-[16px] font-medium" style={{ color: C.dark }}>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/nos-references">
-              <span className="font-bold flex items-center gap-1 hover:underline" style={{ color: C.red }}>
-                Découvrir l'agence <ChevronRight size={18} />
-              </span>
-            </Link>
-          </FadeUp>
+      {/* ─── ABOUT SECTION ──────────────────────────────────── */}
+      <section className="py-32 lg:py-48 bg-white" id="about">
+        <div className="max-w-[90rem] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
+          <div className="lg:col-span-6">
+            <FadeUp>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tight leading-tight text-[#111111]">
+                <RevealText>{aboutH2}</RevealText>
+              </h2>
+              <p className="text-xl md:text-2xl leading-relaxed mb-10 text-[#555555] font-light">
+                {aboutDesc}
+              </p>
+              <ul className="mb-12 space-y-6">
+                {aboutBullets.map((item, idx) => (
+                  <motion.li 
+                    key={idx} 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1, duration: 0.5 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="mt-2.5 flex-shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-[#E3001B]"></div>
+                    </div>
+                    <span className="text-xl font-medium text-[#111111]">{item}</span>
+                  </motion.li>
+                ))}
+              </ul>
+              <Link href="/nos-references">
+                <span className="inline-flex items-center gap-2 text-xl font-bold text-[#E3001B] hover:text-[#C20017] transition-colors group cursor-pointer">
+                  Découvrir l'agence 
+                  <motion.span whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
+                    <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                  </motion.span>
+                </span>
+              </Link>
+            </FadeUp>
+          </div>
 
-          <FadeUp delay={0.2}>
-            <div className="grid grid-cols-2 gap-4">
-              <img src={aboutImg1} alt="Production Epitaphe" className="w-full h-64 object-cover" />
-              <img src={aboutImg2} alt="Stand Epitaphe" className="w-full h-64 object-cover mt-8" />
+          <div className="lg:col-span-6 grid grid-cols-2 gap-6 relative">
+            <div className="pt-24">
+              <ParallaxImage src={aboutImg1} alt="Production Epitaphe" className="w-full h-[500px]" />
             </div>
-          </FadeUp>
+            <div>
+              <ParallaxImage src={aboutImg2} alt="Stand Epitaphe" className="w-full h-[600px]" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ─── STATS B2B (Barre de crédibilité) ─────────────── */}
-      <section className="py-16" style={{ backgroundColor: C.dark }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/10 text-center">
+      {/* ─── STATS SECTION ──────────────────────────────────── */}
+      <section className="py-32 bg-[#111111] relative overflow-hidden">
+        <div className="absolute -top-[50%] -left-[10%] w-[120%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(227,0,27,0.05)_0%,transparent_50%)] z-0"></div>
+        <div className="max-w-[90rem] mx-auto px-6 md:px-12 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8 divide-x-0 md:divide-x divide-white/20 text-center">
             {statsList.map((stat, i) => (
-              <div key={i} className="px-4">
-                <p className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  <StatsCounter to={stat.val} suffix={stat.suf} />
+              <div key={i} className="px-4 flex flex-col items-center justify-center">
+                <p className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter">
+                  <StatsCounter to={stat.val} suffix={stat.suffix || stat.suf} />
                 </p>
-                <p className="text-sm font-medium uppercase tracking-wider" style={{ color: "#AAA" }}>{stat.label}</p>
+                <p className="text-lg md:text-xl font-medium uppercase tracking-[0.2em] text-[#AAAAAA] max-w-[200px]">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── NOS MÉTIERS (Visuel et clair) ────────────────── */}
-      <section id="expertises" className="py-24" style={{ backgroundColor: C.bg }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Nos domaines d'intervention.</h2>
-            <p className="text-lg" style={{ color: C.grayText }}>
-              Qu'il s'agisse d'une soirée de gala, de l'aménagement de vos locaux ou de la conception d'un stand sur-mesure, nous avons la solution.
-            </p>
+      {/* ─── SERVICES SECTION ───────────────────────────────── */}
+      <section id="expertises" className="py-32 lg:py-48 bg-[#F8F9FA]">
+        <div className="max-w-[90rem] mx-auto px-6 md:px-12">
+          <div className="text-center max-w-4xl mx-auto mb-24">
+            <FadeUp>
+              <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#111111]">
+                Nos domaines d'intervention.
+              </h2>
+              <p className="text-2xl text-[#555555] font-light leading-relaxed">
+                Qu'il s'agisse d'une soirée de gala, de l'aménagement de vos locaux ou de la conception d'un stand sur-mesure, nous avons la solution.
+              </p>
+            </FadeUp>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {servicesList.map((service, idx) => (
               <FadeUp key={idx} delay={idx * 0.1}>
                 <Link href={service.href}>
-                  <div className="group cursor-pointer bg-white overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300">
-                    <div className="relative h-56 overflow-hidden">
-                      <img 
+                  <motion.div 
+                    whileHover="hover"
+                    className="group cursor-pointer bg-white overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500"
+                  >
+                    <div className="relative h-[400px] overflow-hidden">
+                      <motion.img 
                         src={service.img} 
                         alt={service.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        variants={{
+                          hover: { scale: 1.05 }
+                        }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500"></div>
                     </div>
-                    <div className="p-6 border border-t-0" style={{ borderColor: C.border }}>
-                      <h3 className="text-lg font-bold mb-2 group-hover:text-[#E3001B] transition-colors">{service.title}</h3>
-                      <span className="text-sm font-bold flex items-center gap-1" style={{ color: C.red }}>
-                        En savoir plus <ChevronRight size={16} />
+                    <div className="p-8 border border-t-0 border-[#EAEAEA] bg-white relative z-10">
+                      <h3 className="text-2xl font-bold mb-4 text-[#111111] group-hover:text-[#E3001B] transition-colors duration-300">
+                        {service.title}
+                      </h3>
+                      <span className="text-lg font-bold flex items-center gap-2 text-[#E3001B]">
+                        En savoir plus 
+                        <motion.span variants={{ hover: { x: 5 } }}>
+                          <ChevronRight size={20} />
+                        </motion.span>
                       </span>
                     </div>
-                  </div>
+                  </motion.div>
                 </Link>
               </FadeUp>
             ))}
@@ -277,73 +402,99 @@ export default function HomeV5() {
         </div>
       </section>
 
-      {/* ─── RÉFÉRENCES (Leur vrai point fort) ────────────── */}
-      <section className="py-24" style={{ backgroundColor: C.white }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-end mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Ils nous font <span style={{ color: C.red }}>confiance</span></h2>
-            <Link href="/nos-references">
-              <span className="hidden md:flex font-bold items-center gap-1 hover:underline cursor-pointer" style={{ color: C.dark }}>
-                Voir tout le portfolio <ArrowRight size={18} />
-              </span>
-            </Link>
-          </div>
+      {/* ─── PORTFOLIO / REFERENCES ─────────────────────────── */}
+      <section className="py-32 lg:py-48 bg-white border-b border-[#EAEAEA]">
+        <div className="max-w-[90rem] mx-auto px-6 md:px-12">
+          <FadeUp>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-[#111111]">
+                Ils nous font <span className="text-[#E3001B]">confiance</span>
+              </h2>
+              <Link href="/nos-references">
+                <span className="hidden md:flex text-xl font-bold items-center gap-2 hover:text-[#E3001B] transition-colors cursor-pointer group pb-4">
+                  Voir tout le portfolio 
+                  <motion.span whileHover={{ x: 5 }}>
+                    <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                  </motion.span>
+                </span>
+              </Link>
+            </div>
+          </FadeUp>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
             {portfolioList.map((item, idx) => (
               <FadeUp key={idx} delay={idx * 0.1}>
-                <div className="group relative overflow-hidden h-[400px] cursor-pointer bg-black">
-                  <img 
+                <div className="group relative overflow-hidden h-[500px] lg:h-[700px] cursor-pointer bg-[#111111]">
+                  <motion.img 
                     src={item.thumb} 
                     alt={item.client} 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <p className="text-white/80 font-bold uppercase tracking-widest text-xs mb-2">{item.type}</p>
-                    <p className="text-3xl font-bold text-white">{item.client}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none"></div>
+                  <div className="absolute bottom-10 left-10 right-10 z-10">
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      whileInView={{ y: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      <p className="text-white/80 font-bold uppercase tracking-[0.2em] text-sm mb-3">
+                        {item.type}
+                      </p>
+                      <p className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                        {item.client}
+                      </p>
+                    </motion.div>
                   </div>
                 </div>
               </FadeUp>
             ))}
           </div>
 
-          {/* Bandeau Logos Clients basique */}
-          <div className="border-t pt-12" style={{ borderColor: C.border }}>
-            <p className="text-center font-bold uppercase tracking-widest text-sm mb-8" style={{ color: C.grayText }}>Gros comptes & institutions</p>
-            <div className="flex flex-wrap justify-center gap-x-12 gap-y-6">
-              {clientsList.map(c => (
-                <span key={c} className="text-xl font-bold text-gray-300 hover:text-gray-800 transition-colors uppercase tracking-widest">{c}</span>
-              ))}
+          <FadeUp>
+            <div className="text-center pt-16">
+              <p className="text-center font-bold uppercase tracking-[0.2em] text-[#555555] mb-16 text-lg">
+                Gros comptes & institutions
+              </p>
             </div>
-          </div>
+          </FadeUp>
+        </div>
+        
+        {/* Infinite Marquee via Framer Motion */}
+        <InfiniteMarquee items={clientsList} />
+      </section>
+
+      {/* ─── CALL TO ACTION FINAL ───────────────────────────── */}
+      <section className="py-32 lg:py-48 text-center bg-[#E3001B] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=50')] opacity-10 bg-cover bg-center mix-blend-overlay"></div>
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <FadeUp>
+            <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-10 tracking-tight leading-[1.1]">
+              Prêt à donner vie à votre projet ?
+            </h2>
+            <p className="text-2xl lg:text-3xl text-white/90 mb-16 font-light">
+              Un interlocuteur dédié vous répond sous 24h ouvrées.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+              <Link href="/contact/brief">
+                <button className="w-full sm:w-auto px-12 py-6 bg-white text-[#111111] text-xl font-bold hover:bg-[#F8F9FA] transition-colors flex items-center justify-center gap-3 shadow-2xl">
+                  Déposer un brief en ligne <ChevronRight size={24} />
+                </button>
+              </Link>
+              <a href="tel:212662744741" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-12 py-6 border-2 border-white text-white text-xl font-bold hover:bg-white hover:text-[#111111] transition-colors flex items-center justify-center gap-3 bg-transparent">
+                  <Phone size={24} /> Nous appeler
+                </button>
+              </a>
+            </div>
+          </FadeUp>
         </div>
       </section>
 
-      {/* ─── CALL TO ACTION FINAL B2B ─────────────────────── */}
-      <section className="py-24 text-center" style={{ backgroundColor: C.red }}>
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Prêt à donner vie à votre projet ?</h2>
-          <p className="text-xl text-white/90 mb-10">
-            Un interlocuteur dédié vous répond sous 24h ouvrées.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/contact/brief">
-              <button className="px-8 py-4 bg-white text-black text-[16px] font-bold hover:bg-gray-100 transition-colors flex items-center gap-2">
-                Déposer un brief en ligne
-              </button>
-            </Link>
-            <a href="tel:212662744741">
-              <button className="px-8 py-4 border-2 border-white text-white text-[16px] font-bold hover:bg-white hover:text-black transition-colors flex items-center gap-2">
-                <Phone size={20} /> Nous appeler
-              </button>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── FOOTER GLOBAL ─────────────────────────────────── */}
       <Footer />
     </div>
   );
 }
+

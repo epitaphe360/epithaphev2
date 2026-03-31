@@ -75,15 +75,15 @@ const ICON_MAP: Record<string, React.ReactNode> = {
 /* === Data ===================================================== */
 const defaultNavConfig: NavEntryConfig[] = [
   {
-    label: "�v�nements",
+    label: "Événements",
     mega: true,
     href: "/evenements",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg",
     entries: [
-      { label: "Conventions & Kickoffs",   description: "F�d�rez vos �quipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: "Calendar", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
-      { label: "Soir�es de gala",          description: "Cr�ez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: "Trophy", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
-      { label: "Roadshows & Tourn�es",     description: "Portez votre message dans toute la r�gion",      href: "/evenements/roadshows",    icon: "Truck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
-      { label: "Salons & Expositions",     description: "Maximisez votre visibilit� sur les salons B2B",  href: "/evenements/salons",    icon: "Store", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
+      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: "Calendar", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
+      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: "Trophy", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
+      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows",    icon: "Truck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
+      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons",    icon: "Store", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
     ],
   },
   {
@@ -93,8 +93,8 @@ const defaultNavConfig: NavEntryConfig[] = [
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg",
     entries: [
       { label: "Marque Employeur",    description: "Attirez et retenez les meilleurs talents",    href: "/architecture-de-marque/marque-employeur",   icon: "Briefcase", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
-      { label: "Communication QHSE", description: "S�curit� & conformit� avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: "ShieldCheck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
-      { label: "Exp�rience Clients", description: "Diff�renciation et fid�lisation durables",    href: "/architecture-de-marque/experience-clients", icon: "Users", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
+      { label: "Communication QHSE", description: "Sécurité & conformité avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: "ShieldCheck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
+      { label: "Expérience Clients", description: "Différenciation et fidélisation durables",    href: "/architecture-de-marque/experience-clients", icon: "Users", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
     ],
   },
   {
@@ -104,21 +104,21 @@ const defaultNavConfig: NavEntryConfig[] = [
     rightAlign: true,
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg",
     entries: [
-      { label: "Impression grand format", description: "B�ches, adh�sifs, toiles r�tro�clair�es",     href: "/la-fabrique/impression",    icon: "Printer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
-      { label: "Menuiserie & D�cor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: "Hammer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
-      { label: "Signal�tique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: "Signpost", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
-      { label: "Am�nagement Espace",      description: "Sc�nographie & architecture �ph�m�re",        href: "/la-fabrique/amenagement",   icon: "LayoutGrid", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
+      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",     href: "/la-fabrique/impression",    icon: "Printer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
+      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: "Hammer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
+      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: "Signpost", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
+      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: "LayoutGrid", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
     ],
   },
-  { label: "R�f�rences", href: "/nos-references" },
+  { label: "Références", href: "/nos-references" },
   { label: "Blog",       href: "/blog" },
   {
     label: "Ressources",
     href: "/ressources",
     entries: [
-      { label: "Biblioth�que",            description: "Guides, templates et livres blancs (acc�s libre)", href: "/ressources",                  icon: "BookOpen" },
-      { label: "�tudes de cas",           description: "D�couvrez nos r�alisations sectorielles",          href: "/nos-references",              icon: "FileText" },
-      { label: "Blog & Actualit�s",       description: "Insights, conseils et tendances �v�nementielles",  href: "/blog",                        icon: "ImageIcon" },
+      { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: "BookOpen" },
+      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/nos-references",              icon: "FileText" },
+      { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: "ImageIcon" },
     ],
   },
   {
@@ -179,7 +179,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
 
   const previewImg = (hoveredSub?.previewImage ?? entry.previewImage) ?? null;
 
-  // D�tection d�bordement viewport apr�s affichage
+  // Détection débordement viewport après affichage
   useEffect(() => {
     if (open && panelRef.current) {
       const rect = panelRef.current.getBoundingClientRect();
@@ -233,7 +233,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
             }`}
           >
             {entry.mega ? (
-              /* --- Mega menu : liens � gauche + preview � droite --- */
+              /* --- Mega menu : liens à gauche + preview à droite --- */
               <div className="flex">
                 {/* Colonne liens */}
                 <div className="flex-1 p-4 grid grid-cols-1 gap-1">
@@ -255,7 +255,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                       </div>
                     </Link>
                   ))}
-                  {/* Pied : voir tout � lien fonctionnel */}
+                  {/* Pied : voir tout — lien fonctionnel */}
                   {entry.href && (
                     <div className="pt-2 mt-1 border-t border-border">
                       <Link
@@ -271,7 +271,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                     </div>
                   )}
                 </div>
-                {/* Colonne pr�visualisation image */}
+                {/* Colonne prévisualisation image */}
                 <div className="w-56 flex-shrink-0 bg-muted/40 border-l border-border overflow-hidden relative">
                   <AnimatePresence mode="wait">
                     {previewImg ? (
@@ -294,7 +294,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                         className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground/40"
                       >
                         <ImageIcon className="w-10 h-10" />
-                        <span className="text-xs">Aper�u</span>
+                        <span className="text-xs">Aperçu</span>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -389,7 +389,7 @@ export function Navigation() {
             <Link href="/contact/brief">
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
-                <Mail className="w-4 h-4" /> D�poser un brief
+                <Mail className="w-4 h-4" /> Déposer un brief
               </motion.button>
             </Link>
             <Link href="/espace-client">
@@ -478,7 +478,7 @@ export function Navigation() {
               <div className="p-4 border-t border-border space-y-2">
                 <Link href="/contact/brief">
                   <motion.button whileTap={{ scale: 0.96 }} className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl text-sm font-semibold">
-                    <Mail className="w-4 h-4" /> D�poser un brief
+                    <Mail className="w-4 h-4" /> Déposer un brief
                   </motion.button>
                 </Link>
                 <Link href="/espace-client">

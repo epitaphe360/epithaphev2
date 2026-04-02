@@ -228,6 +228,13 @@ export const NewLoginPage: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center mt-8 space-y-3">
+          <a
+            href="/admin/forgot-password"
+            onClick={(e) => { e.preventDefault(); setLocation('/admin/forgot-password'); }}
+            className="text-sm text-slate-400 hover:text-[#E63946] transition-colors"
+          >
+            Mot de passe oublié ?
+          </a>
           <p className="text-xs text-slate-500">
             © 2026 Epitaphe — Tous droits réservés
           </p>

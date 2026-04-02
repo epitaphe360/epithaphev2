@@ -8,6 +8,7 @@ import { db } from "./db";
 import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./lib/auth";
+import { sendContactNotification } from "./lib/email";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -18,6 +19,13 @@ export async function registerRoutes(
       const validatedData = insertContactMessageSchema.parse(req.body);
       const message = await storage.createContactMessage(validatedData);
       res.status(201).json({ success: true, id: message.id });
+      sendContactNotification({
+        adminEmail: process.env.SMTP_USER ?? "admin@epitaph.ma",
+        fromName: `${validatedData.firstName} ${validatedData.lastName}`,
+        fromEmail: validatedData.email,
+        company: validatedData.company,
+        message: validatedData.message,
+      }).catch(e => console.error("[EMAIL] Contact notification error:", e));
     } catch (error) {
       console.error("Contact form error:", error);
       res.status(400).json({ error: "Invalid form data" });

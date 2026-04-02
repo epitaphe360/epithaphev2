@@ -1,5 +1,13 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
+import {
+  sendNewsletterConfirmation,
+  sendBriefConfirmation,
+  sendBriefNotification,
+  sendContactNotification,
+  sendClientPasswordReset,
+  sendAgencyMessageNotification,
+} from "./lib/email";
 import { db } from "./db";
 import { z } from "zod";
 import {
@@ -162,8 +170,10 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // TODO: Send welcome email via SMTP/Mailchimp
-      // await sendWelcomeEmail(newSubscription.email);
+      // Envoyer l'email de confirmation (non-bloquant)
+      sendNewsletterConfirmation(newSubscription.email).catch((e) =>
+        console.error("[EMAIL] Newsletter confirmation error:", e)
+      );
 
       res.status(201).json({
         success: true,
@@ -268,11 +278,21 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // TODO: Send notification email to team
-      // await sendProjectBriefNotification(newBrief);
-
-      // TODO: Send confirmation email to client
-      // await sendProjectBriefConfirmation(newBrief.email, newBrief);
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || "";
+      if (adminEmail) {
+        // Notification interne (non-bloquante)
+        sendBriefNotification({
+          adminEmail,
+          clientName: newBrief.name,
+          clientEmail: newBrief.email,
+          projectType: newBrief.projectType || "Non précisé",
+          budget: newBrief.budget ?? undefined,
+          description: newBrief.description ?? undefined,
+        }).catch((e) => console.error("[EMAIL] Brief notification error:", e));
+      }
+      // Confirmation au client (non-bloquante)
+      sendBriefConfirmation(newBrief.email, newBrief.name, newBrief.projectType || "votre projet")
+        .catch((e) => console.error("[EMAIL] Brief confirmation error:", e));
 
       res.status(201).json({
         success: true,
@@ -694,7 +714,7 @@ Disallow: /
       const { email } = req.body as { email?: string };
       if (!email) return res.status(400).json({ error: "Email requis" });
 
-      const [account] = await db.select({ id: clientAccounts.id, email: clientAccounts.email })
+      const [account] = await db.select({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name })
         .from(clientAccounts)
         .where(eq(clientAccounts.email, email.toLowerCase().trim()))
         .limit(1);
@@ -713,9 +733,8 @@ Disallow: /
         token, email: account.email, accountType: "client", expiresAt,
       });
 
-      // TODO: Envoyer l'email avec le lien reset
-      // Le lien doit être: ${process.env.FRONTEND_URL}/espace-client/reset-password?token=${token}
-      console.log(`[PASSWORD RESET] Token client pour ${account.email}: ${token}`);
+      sendClientPasswordReset(account.email, account.name ?? account.email, token)
+        .catch(e => console.error("[EMAIL] Client reset error:", e));
 
       return res.json({ message: "Si ce compte existe, un lien de réinitialisation a été envoyé." });
     } catch (error) {

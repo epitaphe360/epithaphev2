@@ -113,7 +113,7 @@ export const apiHelpers = {
     upload: (file: File, onProgress?: (progress: number) => void) => {
       const formData = new FormData();
       formData.append('file', file);
-      return client.post('/admin/media/upload', formData, {
+      return client.post('/admin/media', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (event) => {
           if (event.total) {

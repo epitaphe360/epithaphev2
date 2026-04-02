@@ -19,6 +19,7 @@ import {
 } from "@shared/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, type AuthRequest } from "./lib/auth";
+import { sendAdminPasswordReset, sendAgencyMessageNotification } from "./lib/email";
 import { z } from "zod";
 
 // ── Multer — stockage local des médias uploadés ───────────────────────────────
@@ -197,9 +198,8 @@ export function registerAdminRoutes(app: Express) {
         token, email: user.email, accountType: 'admin', expiresAt,
       });
 
-      // TODO: Envoyer l'email avec le lien reset
-      // Le lien doit être: ${process.env.FRONTEND_URL}/admin/reset-password?token=${token}
-      console.log(`[PASSWORD RESET] Token admin pour ${user.email}: ${token}`);
+      sendAdminPasswordReset(user.email, token)
+        .catch(e => console.error("[EMAIL] Admin reset error:", e));
 
       res.json({ message: 'Si ce compte existe, un lien de réinitialisation a été envoyé.' });
     } catch (error) {
@@ -969,6 +969,26 @@ export function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error('Delete page error:', error);
       res.status(500).json({ error: 'Erreur lors de la suppression de la page' });
+    }
+  });
+
+  // Toggle page publish/draft status
+  app.put('/api/admin/pages/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body as { status?: string };
+      const normalized = status?.toUpperCase();
+      if (!normalized || !['PUBLISHED', 'DRAFT'].includes(normalized)) {
+        return res.status(400).json({ error: 'Status doit être "published" ou "draft"' });
+      }
+      const [updated] = await db.update(pages)
+        .set({ status: normalized, updatedAt: new Date() })
+        .where(eq(pages.id, req.params.id))
+        .returning();
+      if (!updated) return res.status(404).json({ error: 'Page non trouvée' });
+      res.json(updated);
+    } catch (error) {
+      console.error('Toggle page status error:', error);
+      res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
     }
   });
 
@@ -2165,11 +2185,27 @@ export function registerAdminRoutes(app: Express) {
       const projectId = parseInt(req.params.projectId, 10);
       const { clientId, content } = req.body;
       if (!clientId || !content?.trim()) return res.status(400).json({ error: 'clientId et content requis' });
+      const parsedClientId = parseInt(clientId, 10);
       const [msg] = await db.insert(clientMessagesTable).values({
-        projectId, clientId: parseInt(clientId, 10),
+        projectId, clientId: parsedClientId,
         senderRole: 'agency', content: content.trim(), isRead: false,
       }).returning();
       res.status(201).json(msg);
+
+      // Send email notification to client (non-blocking)
+      Promise.all([
+        db.select({ email: clientAccounts.email, name: clientAccounts.name })
+          .from(clientAccounts).where(eq(clientAccounts.id, parsedClientId)).limit(1),
+        db.select({ title: clientProjectsTable.title })
+          .from(clientProjectsTable).where(eq(clientProjectsTable.id, projectId)).limit(1),
+      ]).then(([[client], [project]]) => {
+        if (client && project) {
+          sendAgencyMessageNotification({
+            to: client.email, clientName: client.name,
+            projectTitle: project.title, message: content.trim(),
+          }).catch(e => console.error('[EMAIL] Agency message notification error:', e));
+        }
+      }).catch(() => {});
     } catch (error) {
       res.status(500).json({ error: 'Erreur envoi message' });
     }

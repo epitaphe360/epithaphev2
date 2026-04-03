@@ -8,7 +8,7 @@ import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
   services, clientReferences, caseStudies, testimonials, teamMembers,
   projectBriefs, newsletterSubscriptions, contactMessages,
-  passwordResetTokens,
+  passwordResetTokens, qrCodes,
   clientAccounts, clientProjects as clientProjectsTable,
   clientMilestones as clientMilestonesTable,
   clientDocuments as clientDocumentsTable,
@@ -2208,6 +2208,53 @@ export function registerAdminRoutes(app: Express) {
       }).catch(() => {});
     } catch (error) {
       res.status(500).json({ error: 'Erreur envoi message' });
+    }
+  });
+
+  // ========================================
+  // QR CODES
+  // ========================================
+
+  app.get('/api/admin/qr-codes', requireAuth, async (req, res) => {
+    try {
+      const list = await db.select().from(qrCodes).orderBy(desc(qrCodes.createdAt));
+      res.json({ data: list, total: list.length });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération QR codes' });
+    }
+  });
+
+  app.post('/api/admin/qr-codes', requireAuth, async (req, res) => {
+    try {
+      const { label, targetPath, utmSource, utmMedium, utmCampaign, utmContent } = req.body;
+      if (!label || !targetPath || !utmSource || !utmMedium || !utmCampaign) {
+        return res.status(400).json({ error: 'Champs obligatoires manquants' });
+      }
+      // Generate QR code SVG
+      const QRCode = await import('qrcode');
+      const baseUrl = process.env.SITE_URL ?? process.env.FRONTEND_URL ?? 'https://epitaphe360.com';
+      const params = new URLSearchParams({
+        utm_source: utmSource, utm_medium: utmMedium,
+        utm_campaign: utmCampaign, ...(utmContent ? { utm_content: utmContent } : {}),
+      });
+      const fullUrl = `${baseUrl}${targetPath}?${params.toString()}`;
+      const svgData = await QRCode.toString(fullUrl, { type: 'svg' });
+      const [created] = await db.insert(qrCodes).values({
+        label, targetPath, utmSource, utmMedium, utmCampaign, utmContent: utmContent ?? null, svgData,
+      }).returning();
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('QR code create error:', error);
+      res.status(500).json({ error: 'Erreur création QR code' });
+    }
+  });
+
+  app.delete('/api/admin/qr-codes/:id', requireAuth, async (req, res) => {
+    try {
+      await db.delete(qrCodes).where(eq(qrCodes.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression QR code' });
     }
   });
 }

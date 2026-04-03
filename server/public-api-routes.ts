@@ -1,5 +1,8 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import {
   sendNewsletterConfirmation,
   sendBriefConfirmation,
@@ -1038,6 +1041,66 @@ Disallow: /
       return res.status(201).json(message);
     } catch (error) {
       console.error("Client message error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/messages/upload
+   * Upload d'une pièce jointe pour la messagerie client
+   */
+  const clientUploadDir = path.resolve(process.cwd(), "dist", "public", "uploads", "client-messages");
+  if (!fs.existsSync(clientUploadDir)) fs.mkdirSync(clientUploadDir, { recursive: true });
+
+  const clientUpload = multer({
+    storage: multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, clientUploadDir),
+      filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`);
+      },
+    }),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+    fileFilter: (_req, file, cb) => {
+      const allowed = ["image/", "application/pdf", "application/msword",
+        "application/vnd.openxmlformats-officedocument", "text/plain"];
+      const ok = allowed.some((t) => file.mimetype.startsWith(t));
+      cb(null, ok);
+    },
+  });
+
+  app.post("/api/client/messages/upload", requireClientAuth as any, clientUpload.single("file"), (req: Request, res: Response) => {
+    if (!req.file) return res.status(400).json({ error: "Aucun fichier valide" });
+    const url = `/uploads/client-messages/${req.file.filename}`;
+    return res.json({ url, name: req.file.originalname, size: req.file.size, mime: req.file.mimetype });
+  });
+
+  /**
+   * PUT /api/client/messages/read
+   * Marquer les messages agence d'un projet comme lus par le client
+   */
+  app.put("/api/client/messages/read", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const { projectId } = req.body as { projectId?: number };
+      if (!projectId) return res.status(400).json({ error: "projectId requis" });
+
+      // Verify project belongs to client
+      const [proj] = await db.select({ id: clientProjects.id }).from(clientProjects)
+        .where(and(eq(clientProjects.id, projectId), eq(clientProjects.clientId, clientId))).limit(1);
+      if (!proj) return res.status(403).json({ error: "Accès refusé" });
+
+      await db.update(clientMessages)
+        .set({ isRead: true })
+        .where(and(
+          eq(clientMessages.projectId, projectId),
+          eq(clientMessages.senderRole, "agency"),
+          eq(clientMessages.isRead, false),
+        ));
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Mark read error:", error);
       return res.status(500).json({ error: "Erreur serveur" });
     }
   });

@@ -299,12 +299,25 @@ const MenuLinkForm: React.FC<{
   onSave: (link: MenuLink) => void;
   onCancel: () => void;
 }> = ({ link, onSave, onCancel }) => {
-  const [formData, setFormData] = useState(link);
+  const [formData, setFormData] = useState<MenuLink>({ ...link, submenu: link.submenu ?? [] });
+  const [newSubLabel, setNewSubLabel] = useState('');
+  const [newSubHref, setNewSubHref] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
+
+  const addSubmenuItem = () => {
+    if (!newSubLabel.trim() || !newSubHref.trim()) return;
+    const item: SubMenuLink = { id: Date.now().toString(), label: newSubLabel.trim(), href: newSubHref.trim(), order: formData.submenu!.length };
+    setFormData({ ...formData, submenu: [...(formData.submenu ?? []), item], hasSubmenu: true });
+    setNewSubLabel('');
+    setNewSubHref('');
+  };
+
+  const removeSubmenuItem = (id: string) =>
+    setFormData({ ...formData, submenu: formData.submenu?.filter((s) => s.id !== id) ?? [] });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -314,7 +327,7 @@ const MenuLinkForm: React.FC<{
         onChange={(e) => setFormData({ ...formData, label: e.target.value })}
         required
       />
-      
+
       <Input
         label="URL"
         value={formData.href}
@@ -329,14 +342,52 @@ const MenuLinkForm: React.FC<{
         placeholder="#section"
       />
 
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="hasSubmenu"
-          checked={formData.hasSubmenu}
-          onChange={(e) => setFormData({ ...formData, hasSubmenu: e.target.checked })}
-        />
-        <label htmlFor="hasSubmenu">A des sous-menus</label>
+      {/* Sous-menus */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-700">Sous-menus</label>
+          <span className="text-xs text-gray-400">{formData.submenu?.length ?? 0} item(s)</span>
+        </div>
+
+        {/* Existing submenu items */}
+        {(formData.submenu ?? []).length > 0 && (
+          <div className="border border-gray-200 rounded-lg divide-y divide-gray-100">
+            {formData.submenu!.map((sub) => (
+              <div key={sub.id} className="flex items-center gap-3 px-3 py-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-700 truncate">{sub.label}</p>
+                  <p className="text-xs text-gray-400 truncate">{sub.href}</p>
+                </div>
+                <button type="button" onClick={() => removeSubmenuItem(sub.id)}
+                  className="text-red-400 hover:text-red-600 p-1">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add new submenu item */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Libellé"
+            value={newSubLabel}
+            onChange={(e) => setNewSubLabel(e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400"
+          />
+          <input
+            type="text"
+            placeholder="/chemin"
+            value={newSubHref}
+            onChange={(e) => setNewSubHref(e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400"
+          />
+          <button type="button" onClick={addSubmenuItem}
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors">
+            <Plus size={16} />
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-end space-x-2">

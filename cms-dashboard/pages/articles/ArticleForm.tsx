@@ -521,10 +521,25 @@ export const ArticleForm: React.FC = () => {
                 onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as any }))}
                 options={[
                   { value: 'DRAFT', label: 'Brouillon' },
-                  { value: 'PUBLISHED', label: 'Publié' },
+                  { value: 'PUBLISHED', label: 'Publié maintenant' },
+                  { value: 'SCHEDULED', label: 'Programmé' },
                   { value: 'ARCHIVED', label: 'Archivé' },
                 ]}
               />
+
+              {formData.status === 'SCHEDULED' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date de publication</label>
+                  <input
+                    type="datetime-local"
+                    value={(formData as any).publishedAt?.slice(0, 16) ?? ''}
+                    min={new Date().toISOString().slice(0, 16)}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, publishedAt: e.target.value } as any))}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-blue-400"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">L'article sera publié automatiquement à cette date.</p>
+                </div>
+              )}
 
               <Select
                 label="Catégorie"

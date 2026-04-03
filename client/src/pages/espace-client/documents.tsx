@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import {
   FileText, Download, Upload, ChevronRight, Shield,
   AlertCircle, Loader2, Search, LogOut, FolderOpen,
-  FileArchive, FileSpreadsheet, File,
+  FileArchive, FileSpreadsheet, File, Eye, X,
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -37,6 +37,48 @@ function fileIcon(type: string) {
   return <FileText className="w-5 h-5 text-[#C8A96E]" />;
 }
 
+function isPreviewable(doc: Document): boolean {
+  const t = doc.fileType?.toUpperCase() ?? "";
+  const url = doc.url ?? "";
+  return t === "PDF" || url.match(/\.(pdf|png|jpg|jpeg|gif|webp|svg)(\?|$)/i) !== null;
+}
+
+function isImage(doc: Document): boolean {
+  return /\.(png|jpg|jpeg|gif|webp|svg)(\?|$)/i.test(doc.url ?? "");
+}
+
+function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+      onClick={onClose}>
+      <div className="w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-2xl overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
+          <p className="text-sm font-medium text-gray-700 truncate">{doc.name}</p>
+          <div className="flex items-center gap-2">
+            <a href={doc.url} target="_blank" rel="noopener noreferrer" download
+              className="flex items-center gap-1.5 text-xs text-[#C8A96E] hover:text-[#b8965e] transition-colors px-3 py-1.5 rounded-lg border border-[#C8A96E]/30">
+              <Download className="w-3.5 h-3.5" /> Télécharger
+            </a>
+            <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        {/* Preview */}
+        <div className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center min-h-64">
+          {isImage(doc) ? (
+            <img src={doc.url} alt={doc.name} className="max-w-full max-h-full object-contain p-4" />
+          ) : (
+            <iframe src={doc.url} title={doc.name} className="w-full h-full min-h-[70vh] border-0" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString("fr-MA", { day: "2-digit", month: "short", year: "numeric" });
 }
@@ -47,6 +89,7 @@ export default function DocumentsPage() {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
   const [search, setSearch]     = useState("");
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
 
@@ -207,16 +250,20 @@ export default function DocumentsPage() {
                               </p>
                             </div>
                           </div>
-                          <a
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            className="ml-4 shrink-0 p-2 rounded-lg text-gray-400 hover:text-[#C8A96E] hover:bg-[#C8A96E]/10 transition opacity-0 group-hover:opacity-100"
-                            title={`Télécharger ${doc.name}`}
-                          >
-                            <Download className="w-4 h-4" />
-                          </a>
+                          <div className="ml-4 shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                            {isPreviewable(doc) && (
+                              <button onClick={() => setPreviewDoc(doc)}
+                                className="p-2 rounded-lg text-gray-400 hover:text-[#C8A96E] hover:bg-[#C8A96E]/10 transition"
+                                title="Aperçu">
+                                <Eye className="w-4 h-4" />
+                              </button>
+                            )}
+                            <a href={doc.url} target="_blank" rel="noopener noreferrer" download
+                              className="p-2 rounded-lg text-gray-400 hover:text-[#C8A96E] hover:bg-[#C8A96E]/10 transition"
+                              title={`Télécharger ${doc.name}`}>
+                              <Download className="w-4 h-4" />
+                            </a>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -240,6 +287,7 @@ export default function DocumentsPage() {
       </main>
 
       <Footer />
+      {previewDoc && <DocumentPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
     </>
   );
 }

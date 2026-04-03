@@ -2,7 +2,7 @@
 // Module Leads / Briefs — Liste + Détail
 // ========================================
 import React, { useState } from 'react';
-import { Eye, Trash2, X } from 'lucide-react';
+import { Eye, Trash2, X, CheckSquare } from 'lucide-react';
 import { ListPage, Column, ListPageAction } from '../../components/ListPage';
 import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
@@ -121,9 +121,36 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 export function LeadsList() {
   const [viewLead, setViewLead] = useState<Lead | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const { items, total, loading, error, page, limit, setPage, setSearch, setFilter, refetch } =
     usePaginatedList<Lead>({ endpoint: '/admin/leads', limit: 20 });
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+
+  const toggleAll = () =>
+    setSelected(selected.size === items.length ? new Set() : new Set(items.map((i) => i.id)));
+
+  const bulkStatus = async (status: string) => {
+    setBulkLoading(true);
+    try {
+      await Promise.all([...selected].map((id) => getApi().put(`/admin/leads/${id}`, { status })));
+      setSelected(new Set()); refetch();
+    } catch { alert('Erreur action groupée'); }
+    finally { setBulkLoading(false); }
+  };
+
+  const bulkDelete = async () => {
+    if (!confirm(`Supprimer ${selected.size} lead(s) ?`)) return;
+    setBulkLoading(true);
+    try {
+      await Promise.all([...selected].map((id) => getApi().delete(`/admin/leads/${id}`)));
+      setSelected(new Set()); refetch();
+    } catch { alert('Erreur suppression'); }
+    finally { setBulkLoading(false); }
+  };
 
   const handleDelete = async (item: Lead) => {
     if (!confirm(`Supprimer le lead de "${item.firstName} ${item.lastName}" ?`)) return;
@@ -132,6 +159,15 @@ export function LeadsList() {
   };
 
   const columns: Column<Lead>[] = [
+    {
+      key: 'select' as any,
+      label: '',
+      width: '48px',
+      render: (l) => (
+        <input type="checkbox" checked={selected.has(l.id)} onChange={() => toggleSelect(l.id)}
+          className="w-4 h-4 rounded accent-[#E63946]" onClick={(e) => e.stopPropagation()} />
+      ),
+    },
     {
       key: 'firstName',
       label: 'Contact',
@@ -182,17 +218,42 @@ export function LeadsList() {
   ];
 
   const statusFilter = (
-    <select
-      onChange={(e) => setFilter('status', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
-    >
-      <option value="">Tous les statuts</option>
-      {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
-    </select>
+    <div className="flex items-center gap-3 flex-wrap">
+      <select
+        onChange={(e) => setFilter('status', e.target.value || undefined)}
+        className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none"
+      >
+        <option value="">Tous les statuts</option>
+        {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
+      </select>
+
+      {selected.size > 0 && (
+        <div className="flex items-center gap-2 bg-[#1E293B] border border-[#E63946]/30 rounded-xl px-3 py-1.5">
+          <span className="text-xs text-slate-400">{selected.size} sélectionné(s)</span>
+          <button onClick={() => bulkStatus('contacted')} disabled={bulkLoading}
+            className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Contacté</button>
+          <button onClick={() => bulkStatus('won')} disabled={bulkLoading}
+            className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Gagné</button>
+          <button onClick={() => bulkStatus('lost')} disabled={bulkLoading}
+            className="text-xs text-slate-400 hover:text-white transition-colors">Perdu</button>
+          <button onClick={bulkDelete} disabled={bulkLoading}
+            className="text-xs text-rose-400 hover:text-rose-300 transition-colors">Supprimer</button>
+        </div>
+      )}
+    </div>
   );
 
   return (
     <>
+      {items.length > 0 && (
+        <div className="px-6 pt-4">
+          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer">
+            <input type="checkbox" checked={selected.size === items.length && items.length > 0}
+              onChange={toggleAll} className="w-4 h-4 rounded accent-[#E63946]" />
+            Tout sélectionner
+          </label>
+        </div>
+      )}
       <ListPage
         title="Leads & Briefs"
         subtitle="Demandes de projet reçues via le formulaire de contact"

@@ -1876,6 +1876,43 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Répondre par email à un message de contact
+  app.post('/api/admin/contacts/:id/reply', requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { replyBody } = req.body as { replyBody?: string };
+      if (!replyBody?.trim()) return res.status(400).json({ error: 'Le message de réponse est requis' });
+
+      const [contact] = await db.select().from(contactMessages).where(eq(contactMessages.id, req.params.id)).limit(1);
+      if (!contact) return res.status(404).json({ error: 'Message introuvable' });
+
+      const { sendMail } = await import('./lib/email');
+      const ok = await sendMail({
+        to: contact.email,
+        subject: `Re: Message de ${contact.firstName ?? ''} ${contact.lastName ?? ''} — Epitaphe360`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
+            <p style="color:#333;">${replyBody.trim().replace(/\n/g, '<br/>')}</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
+            <blockquote style="color:#888;border-left:3px solid #E63946;padding-left:12px;margin:0;">
+              <p><strong>Votre message original :</strong></p>
+              <p>${(contact.message ?? '').replace(/</g, '&lt;')}</p>
+            </blockquote>
+            <p style="color:#aaa;font-size:12px;margin-top:24px;">Epitaphe360 · <a href="${process.env.FRONTEND_URL ?? 'https://epitaphe360.com'}" style="color:#E63946;">epitaphe360.com</a></p>
+          </div>
+        `,
+      });
+
+      if (!ok) return res.status(500).json({ error: 'Échec envoi email' });
+
+      // Marquer comme répondu
+      await db.update(contactMessages).set({ status: 'replied' }).where(eq(contactMessages.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Contact reply error:', error);
+      res.status(500).json({ error: 'Erreur lors de l\'envoi de la réponse' });
+    }
+  });
+
   // ========================================
   // ESPACE CLIENT — Gestion des comptes clients (admin)
   // ========================================

@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from '../../hooks/useRouterParams';
 import { ArrowLeft, Save, Eye, Plus, Trash2, GripVertical, FileText } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Input, Textarea, Select } from '../../components/Input';
@@ -146,6 +147,16 @@ export const PageForm: React.FC = () => {
       ...prev,
       sections: prev.sections.filter((_, i) => i !== index),
     }));
+  };
+
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+    setFormData((prev) => {
+      const sections = Array.from(prev.sections);
+      const [moved] = sections.splice(result.source.index, 1);
+      sections.splice(result.destination.index, 0, moved);
+      return { ...prev, sections: sections.map((s, i) => ({ ...s, order: i })) };
+    });
   };
 
   const applyTemplate = (templateId: string) => {
@@ -292,14 +303,23 @@ export const PageForm: React.FC = () => {
                     Aucune section. Cliquez sur "Ajouter une section" pour commencer.
                   </div>
                 ) : (
-                  formData.sections.map((section, index) => (
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="page-sections">
+                      {(provided) => (
+                        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+                  {formData.sections.map((section, index) => (
+                    <Draggable key={section.id || String(index)} draggableId={section.id || String(index)} index={index}>
+                      {(prov, snap) => (
                     <div
-                      key={section.id || index}
-                      className="border border-gray-200 rounded-lg p-4 space-y-4"
+                      ref={prov.innerRef}
+                      {...prov.draggableProps}
+                      className={`border rounded-lg p-4 space-y-4 ${snap.isDragging ? 'border-blue-400 shadow-lg bg-blue-50/5' : 'border-gray-200'}`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                          <div {...prov.dragHandleProps} className="cursor-grab active:cursor-grabbing">
+                            <GripVertical className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                          </div>
                           <span className="font-medium">Section {index + 1}</span>
                         </div>
                         <button
@@ -333,7 +353,14 @@ export const PageForm: React.FC = () => {
                         minHeight="150px"
                       />
                     </div>
-                  ))
+                      )}
+                    </Draggable>
+                  ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                 )}
               </CardContent>
             </Card>

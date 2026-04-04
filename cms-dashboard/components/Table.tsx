@@ -1,9 +1,9 @@
 // ========================================
-// CMS Dashboard - UI Components: Table
+// CMS Dashboard - UI Components: Table (Dark Theme)
 // ========================================
 
 import React from 'react';
-import { ChevronUp, ChevronDown, MoreVertical, Loader2 } from 'lucide-react';
+import { ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './Button';
 
 export interface Column<T> {
@@ -77,14 +77,14 @@ export function Table<T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#E63946]" />
       </div>
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
         <p className="text-lg">{emptyMessage}</p>
       </div>
     );
@@ -94,15 +94,15 @@ export function Table<T extends Record<string, any>>({
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead className={stickyHeader ? 'sticky top-0 z-10' : ''}>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <tr className="bg-[#020617] border-b border-[#1E293B]">
             {columns.map((column) => (
               <th
                 key={String(column.key)}
                 className={`
-                  px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider
+                  px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider
                   ${column.align === 'center' ? 'text-center' : ''}
                   ${column.align === 'right' ? 'text-right' : 'text-left'}
-                  ${column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''}
+                  ${column.sortable ? 'cursor-pointer hover:text-white' : ''}
                 `}
                 style={{ width: column.width }}
                 onClick={() => handleSort(column)}
@@ -122,13 +122,14 @@ export function Table<T extends Record<string, any>>({
             {actions && <th className="px-4 py-3 w-12"></th>}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-[#1E293B]">
           {data.map((item, index) => (
             <tr
               key={getRowKey(item, index)}
               className={`
-                ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
-                ${striped && index % 2 === 1 ? 'bg-gray-50' : 'bg-white'}
+                transition-colors
+                ${onRowClick ? 'cursor-pointer hover:bg-[#1E293B]/40' : ''}
+                ${striped && index % 2 === 1 ? 'bg-[#0B1121]/50' : ''}
               `}
               onClick={() => onRowClick?.(item)}
             >
@@ -136,7 +137,7 @@ export function Table<T extends Record<string, any>>({
                 <td
                   key={String(column.key)}
                   className={`
-                    px-4 py-4 text-sm text-gray-900
+                    px-4 py-4 text-sm text-slate-300
                     ${column.align === 'center' ? 'text-center' : ''}
                     ${column.align === 'right' ? 'text-right' : ''}
                   `}
@@ -147,7 +148,7 @@ export function Table<T extends Record<string, any>>({
                 </td>
               ))}
               {actions && (
-                <td className="px-4 py-4 text-sm text-gray-900 text-right">
+                <td className="px-4 py-4 text-sm text-right">
                   {typeof actions === 'function' ? actions(item) : (
                     <div className="flex justify-end gap-2">
                       {actions.filter(a => !a.condition || a.condition(item)).map((action, i) => {
@@ -212,42 +213,42 @@ export const Pagination: React.FC<PaginationProps> = ({
   }
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
-      <div className="text-sm text-gray-600">
-        Affichage de <span className="font-medium">{startItem}</span> à{' '}
-        <span className="font-medium">{endItem}</span> sur{' '}
-        <span className="font-medium">{total}</span> résultats
+    <div className="flex items-center justify-between px-4 py-3 bg-[#0B1121] border-t border-[#1E293B]">
+      <div className="text-sm text-slate-400">
+        Affichage de <span className="font-medium text-white">{startItem}</span> à{' '}
+        <span className="font-medium text-white">{endItem}</span> sur{' '}
+        <span className="font-medium text-white">{total}</span> résultats
       </div>
-      
+
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1}
-          className="px-3 py-1 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          className="px-3 py-1 text-sm border border-[#334155] text-slate-400 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1E293B] hover:text-white transition-colors"
         >
           Précédent
         </button>
-        
+
         {pages.map((p) => (
           <button
             key={p}
             onClick={() => onPageChange(p)}
             className={`
-              w-8 h-8 text-sm rounded-lg
+              w-8 h-8 text-sm rounded-xl transition-colors
               ${p === page
-                ? 'bg-primary-600 text-white'
-                : 'border border-gray-300 hover:bg-gray-50'
+                ? 'bg-[#E63946] text-white'
+                : 'border border-[#334155] text-slate-400 hover:bg-[#1E293B] hover:text-white'
               }
             `}
           >
             {p}
           </button>
         ))}
-        
+
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page === totalPages}
-          className="px-3 py-1 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          className="px-3 py-1 text-sm border border-[#334155] text-slate-400 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1E293B] hover:text-white transition-colors"
         >
           Suivant
         </button>

@@ -1,5 +1,5 @@
 // ========================================
-// CMS Dashboard - UI Components: Card
+// CMS Dashboard - UI Components: Card (Dark Theme)
 // ========================================
 
 import React from 'react';
@@ -27,8 +27,8 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`
-        bg-white rounded-xl shadow-sm border border-gray-200
-        ${hover ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}
+        bg-[#0B1121] rounded-xl border border-[#1E293B]
+        ${hover ? 'hover:border-[#334155] transition-colors cursor-pointer' : ''}
         ${paddingStyles[padding]}
         ${className}
       `}
@@ -50,7 +50,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   actions,
 }) => {
   return (
-    <div className={`flex items-center justify-between px-6 py-4 border-b border-gray-200 ${className}`}>
+    <div className={`flex items-center justify-between px-6 py-4 border-b border-[#1E293B] ${className}`}>
       <div className="flex-1">{children}</div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
@@ -79,7 +79,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl ${className}`}>
+    <div className={`px-6 py-4 bg-[#020617] border-t border-[#1E293B] rounded-b-xl ${className}`}>
       {children}
     </div>
   );
@@ -95,7 +95,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   className = '',
 }) => {
   return (
-    <h3 className={`text-lg font-semibold text-gray-900 ${className}`}>
+    <h3 className={`text-lg font-semibold text-white ${className}`}>
       {children}
     </h3>
   );
@@ -111,7 +111,7 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
   className = '',
 }) => {
   return (
-    <p className={`text-sm text-gray-600 mt-1 ${className}`}>
+    <p className={`text-sm text-slate-400 mt-1 ${className}`}>
       {children}
     </p>
   );

@@ -1,5 +1,5 @@
 // ========================================
-// CMS Dashboard - UI Components: Button
+// CMS Dashboard - UI Components: Button (Dark Theme)
 // ========================================
 
 import React from 'react';
@@ -15,11 +15,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-  secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-  ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-  outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500',
+  primary:   'bg-[#E63946] text-white hover:bg-[#cc2f3b] focus:ring-[#E63946]/50',
+  secondary: 'bg-[#1E293B] text-slate-300 hover:bg-[#334155] hover:text-white border border-[#334155] focus:ring-[#334155]',
+  danger:    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+  ghost:     'text-slate-400 hover:bg-[#1E293B] hover:text-white focus:ring-[#334155]',
+  outline:   'border border-[#334155] text-slate-300 hover:bg-[#1E293B] hover:text-white focus:ring-[#334155]',
 };
 
 const sizeStyles = {
@@ -45,9 +45,9 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       className={`
-        inline-flex items-center justify-center gap-2 font-medium rounded-lg
+        inline-flex items-center justify-center gap-2 font-medium rounded-xl
         transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#020617]
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantStyles[variant]}
         ${sizeStyles[size]}
@@ -91,9 +91,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
   return (
     <button
       className={`
-        inline-flex items-center justify-center rounded-lg
+        inline-flex items-center justify-center rounded-xl
         transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#020617]
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantStyles[variant]}
         ${iconSizeStyles[size]}

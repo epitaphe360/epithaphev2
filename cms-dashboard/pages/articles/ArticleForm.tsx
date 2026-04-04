@@ -50,7 +50,7 @@ export const ArticleForm: React.FC = () => {
   const loadCategories = async () => {
     try {
       const api = getApi();
-      const response = await api.get('/categories');
+      const response = await api.get('/admin/categories');
       // S'assurer que c'est un array
       setCategories(Array.isArray(response.data) ? response.data : response.data.data || []);
     } catch (error) {
@@ -396,24 +396,24 @@ export const ArticleForm: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E63946]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/articles')}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-[#1E293B] text-slate-400 hover:text-white rounded-xl transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-white">
               {isEditing ? 'Modifier l\'article' : 'Nouvel article'}
             </h1>
           </div>

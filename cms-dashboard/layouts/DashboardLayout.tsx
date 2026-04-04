@@ -27,6 +27,11 @@ import {
   Target,
   Mail,
   Phone,
+  QrCode,
+  Bell,
+  FolderOpen,
+  Layers,
+  Lightbulb,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -73,6 +78,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Catégories',    href: '/admin/categories',         icon: FolderTree },
     { name: 'Médias',        href: '/admin/media',              icon: Image },
     { name: 'Utilisateurs',  href: '/admin/users',              icon: User },
+    { name: 'QR Codes',      href: '/admin/qr-codes',           icon: QrCode },
+    { name: 'Push',          href: '/admin/push',               icon: Bell },
+    { name: 'Ressources',    href: '/admin/resources',          icon: FolderOpen },
+    { name: 'Éditeur visuel', href: '/admin/visual-editor',     icon: Layers },
+    { name: 'Solutions',     href: '/admin/solutions',          icon: Lightbulb },
     { name: 'Paramètres',    href: '/admin/settings/general',   icon: Settings },
   ];
 

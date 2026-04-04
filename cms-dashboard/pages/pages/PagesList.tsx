@@ -4,7 +4,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from '../../hooks/useRouterParams';
-import { Link } from 'wouter';
 import { Plus, Edit, Trash2, Eye, GripVertical, Paintbrush } from 'lucide-react';
 import { Card, CardContent } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -74,10 +73,10 @@ export const PagesList: React.FC = () => {
       header: 'Titre',
       render: (pageItem) => (
         <div className="flex items-center gap-3">
-          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+          <GripVertical className="w-4 h-4 text-slate-600 cursor-grab" />
           <div>
-            <p className="font-medium text-gray-900">{pageItem.title}</p>
-            <p className="text-sm text-gray-500">/{pageItem.slug}</p>
+            <p className="font-medium text-white">{pageItem.title}</p>
+            <p className="text-sm text-slate-500">/{pageItem.slug}</p>
           </div>
         </div>
       ),
@@ -88,9 +87,9 @@ export const PagesList: React.FC = () => {
       render: (pageItem) => {
         const template = pageItem.template || 'DEFAULT';
         const getTemplateColor = () => {
-          if (template === 'GRAPES_JS') return 'purple';
-          if (['HOME', 'REFERENCES', 'BLOG_LIST', 'SOLUTIONS', 'CONTACT'].includes(template)) return 'blue';
-          return 'gray';
+          if (template === 'GRAPES_JS') return 'warning';
+          if (['HOME', 'REFERENCES', 'BLOG_LIST', 'SOLUTIONS', 'CONTACT'].includes(template)) return 'default';
+          return 'default';
         };
 
         return (
@@ -108,20 +107,24 @@ export const PagesList: React.FC = () => {
     {
       key: 'updatedAt',
       header: 'Modifié',
-      render: (pageItem) => new Date(pageItem.updatedAt).toLocaleDateString('fr-FR'),
+      render: (pageItem) => (
+        <span className="text-slate-400 text-xs">
+          {new Date(pageItem.updatedAt).toLocaleDateString('fr-FR')}
+        </span>
+      ),
     },
     {
       key: 'actions',
       header: '',
-      width: '120px',
+      width: '140px',
       render: (pageItem) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
               window.open(`/${pageItem.slug}`, '_blank');
             }}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-slate-500 hover:text-white hover:bg-[#1E293B] rounded-lg transition-colors"
             title="Voir"
           >
             <Eye className="w-4 h-4" />
@@ -131,7 +134,7 @@ export const PagesList: React.FC = () => {
               e.stopPropagation();
               navigate(`/admin/visual-editor/edit/${pageItem.id}`);
             }}
-            className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
             title="Éditeur visuel GrapesJS"
           >
             <Paintbrush className="w-4 h-4" />
@@ -141,7 +144,7 @@ export const PagesList: React.FC = () => {
               e.stopPropagation();
               navigate(`/admin/pages/${pageItem.id}/edit`);
             }}
-            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
@@ -151,7 +154,7 @@ export const PagesList: React.FC = () => {
               e.stopPropagation();
               setDeleteId(pageItem.id);
             }}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -162,19 +165,19 @@ export const PagesList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pages</h1>
-          <p className="text-gray-600">Gérez les pages de votre site</p>
+          <h1 className="text-2xl font-bold text-white">Pages du site</h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Gérez toutes les pages — y compris Événements, Architecture de Marque, La Fabrique, etc.
+          </p>
         </div>
-        <Link to="/admin/pages/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvelle page
-          </Button>
-        </Link>
+        <Button onClick={() => navigate('/admin/pages/new')}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvelle page
+        </Button>
       </div>
 
       {/* Filters */}

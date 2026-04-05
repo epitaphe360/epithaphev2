@@ -11,7 +11,7 @@ import { registerDevRoutes } from './dev-routes';
 import { registerPublicApiRoutes } from "./public-api-routes";
 import { registerPaymentRoutes } from "./payment-routes";
 import { db } from "./db";
-import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials, resources, clientAccounts, clientProjects } from "@shared/schema";
+import { pages, articles, events, categories, media, services, settings, clientReferences, caseStudies, testimonials, resources, clientAccounts, clientProjects, passwordResetTokens } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
@@ -386,10 +386,19 @@ export async function registerRoutes(
         clientId = existing.id;
       }
 
-      // Generate secure magic link token using HMAC
-      const baseDomain = process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000";
-      const secret = process.env.JWT_SECRET || "dev-secret";
-      const magicToken = crypto.createHmac("sha256", secret).update(`${clientId}:${email}`).digest("hex");
+      // Generate secure magic link token — random nonce stored in DB with 24h expiry
+      const baseDomain = process.env.SITE_URL || (process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000");
+      const magicToken = crypto.randomBytes(48).toString("hex");
+      const magicExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 heures
+
+      // Invalider les anciens magic tokens pour cet email
+      await db.delete(passwordResetTokens)
+        .where(and(eq(passwordResetTokens.email, email.toLowerCase()), eq(passwordResetTokens.accountType, "magic")));
+
+      await db.insert(passwordResetTokens).values({
+        token: magicToken, email: email.toLowerCase(), accountType: "magic", expiresAt: magicExpiry,
+      });
+
       const magicLinkUrl = `${baseDomain}/espace-client?login_hint=${encodeURIComponent(email)}&magic_token=${magicToken}`;
 
       // Background Email Sending

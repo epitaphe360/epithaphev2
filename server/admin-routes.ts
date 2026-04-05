@@ -47,7 +47,6 @@ const ALLOWED_MIME = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/zip",
 ]);
 
 const upload = multer({
@@ -120,8 +119,8 @@ function validatePagination(limit: string | undefined, offset: string | undefine
     return { error: 'Invalid limit parameter. Must be a number between 0 and 1000.' };
   }
 
-  if (isNaN(offsetNum) || offsetNum < 0) {
-    return { error: 'Invalid offset parameter. Must be a non-negative number.' };
+  if (isNaN(offsetNum) || offsetNum < 0 || offsetNum > 100000) {
+    return { error: 'Invalid offset parameter. Must be between 0 and 100000.' };
   }
 
   return { limit: limitNum, offset: offsetNum };
@@ -634,7 +633,17 @@ export function registerAdminRoutes(app: Express) {
   // Create category
   app.post('/api/admin/categories', requireAuth, requireAdmin, async (req, res) => {
     try {
-      const [newCategory] = await db.insert(categories).values(req.body).returning();
+      const schema = z.object({
+        name: z.string().min(1).max(100),
+        slug: z.string().min(1).max(100),
+        description: z.string().max(500).optional(),
+        color: z.string().max(20).optional(),
+        icon: z.string().max(50).optional(),
+        order: z.number().int().min(0).optional(),
+        parentId: z.string().optional(),
+      });
+      const data = schema.parse(req.body);
+      const [newCategory] = await db.insert(categories).values(data).returning();
       res.status(201).json(newCategory);
     } catch (error) {
       console.error('Create category error:', error);
@@ -645,8 +654,9 @@ export function registerAdminRoutes(app: Express) {
   // Update category
   app.put('/api/admin/categories/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
+      const { id: _id, createdAt: _c, ...updateData } = req.body;
       const [updated] = await db.update(categories)
-        .set(req.body)
+        .set(updateData)
         .where(eq(categories.id, req.params.id))
         .returning();
 
@@ -1590,7 +1600,22 @@ export function registerAdminRoutes(app: Express) {
 
   app.post('/api/admin/solutions', requireAuth, requireAdmin, async (req, res) => {
     try {
-      const [svc] = await db.insert(services).values(req.body).returning();
+      const schema = z.object({
+        title: z.string().min(1).max(200),
+        slug: z.string().min(1).max(200),
+        description: z.string().optional(),
+        shortDescription: z.string().max(500).optional(),
+        icon: z.string().max(100).optional(),
+        coverImage: z.string().max(500).optional(),
+        category: z.string().max(100).optional(),
+        status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
+        order: z.number().int().min(0).optional(),
+        features: z.any().optional(),
+        benefits: z.any().optional(),
+        cta: z.any().optional(),
+      });
+      const data = schema.parse(req.body);
+      const [svc] = await db.insert(services).values(data).returning();
       res.status(201).json(svc);
     } catch (error) {
       res.status(500).json({ error: 'Erreur création solution' });

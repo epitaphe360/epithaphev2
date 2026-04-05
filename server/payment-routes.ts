@@ -22,6 +22,7 @@ import type { ClientAuthRequest } from "./public-api-routes";
 import { sendMail } from "./lib/email";
 import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
+import crypto from "crypto";
 
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -29,12 +30,11 @@ const paymentLimiter = rateLimit({
   message: { error: "Trop de requêtes", retryAfter: 15 },
 });
 
-// ─── Générer une référence de devis unique ────────────────────────────────────
+// ─── Générer une référence de devis unique (non prédictible) ─────────────────────────────
 async function generateDevisRef(): Promise<string> {
   const year = new Date().getFullYear();
-  const rows = await db.select({ id: devis.id }).from(devis).orderBy(desc(devis.id)).limit(1);
-  const next = rows.length > 0 ? rows[0].id + 1 : 1;
-  return `DEV-${year}-${String(next).padStart(4, "0")}`;
+  const rand = crypto.randomBytes(4).toString("hex").toUpperCase();
+  return `DEV-${year}-${rand}`;
 }
 
 export function registerPaymentRoutes(app: Express) {
@@ -161,14 +161,14 @@ export function registerPaymentRoutes(app: Express) {
         })
         .returning();
 
-      // Enregistrer le paiement
+      // Enregistrer le paiement en mode « pending » — sera confirmé via webhook Stripe en prod
       await db.insert(payments).values({
         clientId,
         subscriptionId: newSub.id,
         type: "subscription",
         amount,
         currency: plan.currency ?? "MAD",
-        status: "paid",  // En mode démo local — pending en prod Stripe
+        status: "pending",  // Toujours « pending » — seul le webhook Stripe peut passer en « paid »
         paymentMethod: "card",
       });
 
@@ -238,6 +238,9 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.get("/api/devis/:reference", async (req: Request, res: Response) => {
     try {
+      const { sig } = req.query as { sig?: string };
+      if (!sig) return res.status(401).json({ error: "Signature requise" });
+
       const [d] = await db
         .select()
         .from(devis)
@@ -245,6 +248,15 @@ export function registerPaymentRoutes(app: Express) {
         .limit(1);
 
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
+
+      // Vérifier la signature HMAC
+      const secret = process.env.JWT_SECRET || "dev-secret";
+      const expectedSig = crypto.createHmac("sha256", secret)
+        .update(`${d.id}:${d.reference}`)
+        .digest("hex");
+      if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+        return res.status(401).json({ error: "Signature invalide" });
+      }
 
       // Marquer comme consulté
       if (d.status === "sent") {
@@ -393,8 +405,11 @@ export function registerPaymentRoutes(app: Express) {
 
       await db.update(devis).set({ status: "sent", updatedAt: new Date() }).where(eq(devis.id, d.id));
 
-      const baseDomain = process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000";
-      const devisUrl = `${baseDomain}/devis/${d.reference}`;
+      const baseDomain = process.env.SITE_URL || (process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000");
+      const sig = crypto.createHmac("sha256", process.env.JWT_SECRET || "dev-secret")
+        .update(`${d.id}:${d.reference}`)
+        .digest("hex");
+      const devisUrl = `${baseDomain}/devis/${d.reference}?sig=${sig}`;
 
       sendDevisEmail(d.clientEmail, d.clientName, {
         reference: d.reference,

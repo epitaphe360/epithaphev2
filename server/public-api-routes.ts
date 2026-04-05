@@ -37,7 +37,7 @@ import {
   resources,
   passwordResetTokens,
 } from "@shared/schema";
-import { eq, desc, and, isNotNull } from "drizzle-orm";
+import { eq, desc, and, isNotNull, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -402,28 +402,36 @@ export function registerPublicApiRoutes(app: Express): void {
    */
   app.get("/api/analytics/stats", async (_req: Request, res: Response) => {
     try {
-      const [briefs, newsletter, articlesList, contacts] = await Promise.all([
-        db.select().from(projectBriefs),
-        db.select().from(newsletterSubscriptions),
-        db.select().from(articles),
-        db.select().from(contactMessages),
+      // Utiliser des COUNT SQL au lieu de charger toutes les tables en mémoire
+      const [[briefCount], [newsletterCount], [articleCount], [contactCount]] = await Promise.all([
+        db.select({ count: sql<number>`count(*)::int` }).from(projectBriefs),
+        db.select({ count: sql<number>`count(*)::int` }).from(newsletterSubscriptions),
+        db.select({ count: sql<number>`count(*)::int` }).from(articles),
+        db.select({ count: sql<number>`count(*)::int` }).from(contactMessages),
       ]);
 
-      const totalLeads = briefs.length + contacts.length;
-      const totalNewsletter = newsletter.length;
-      const totalArticles = articlesList.length;
-      const totalBriefs = briefs.length;
+      const totalLeads = (briefCount?.count ?? 0) + (contactCount?.count ?? 0);
+      const totalNewsletter = newsletterCount?.count ?? 0;
+      const totalArticles = articleCount?.count ?? 0;
+      const totalBriefs = briefCount?.count ?? 0;
 
-      // Monthly breakdown (last 7 months)
+      // Monthly breakdown — SQL GROUP BY au lieu de filtre JS
+      const monthlyData = await db.select({
+        month: sql<string>`TO_CHAR(created_at, 'YYYY-MM')`,
+        count: sql<number>`count(*)::int`,
+      }).from(projectBriefs)
+        .where(sql`created_at >= NOW() - INTERVAL '7 months'`)
+        .groupBy(sql`TO_CHAR(created_at, 'YYYY-MM')`)
+        .orderBy(sql`TO_CHAR(created_at, 'YYYY-MM')`);
+
+      // Construire les 7 derniers mois avec les valeurs SQL
       const now = new Date();
       const monthlyLeads = Array.from({ length: 7 }, (_, i) => {
         const d = new Date(now.getFullYear(), now.getMonth() - (6 - i), 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         const label = d.toLocaleString("fr-FR", { month: "short" });
-        const count = briefs.filter((b) => {
-          const created = new Date(b.createdAt ?? "");
-          return created.getFullYear() === d.getFullYear() && created.getMonth() === d.getMonth();
-        }).length;
-        return { month: label, leads: count };
+        const found = monthlyData.find((m) => m.month === key);
+        return { month: label, leads: found?.count ?? 0 };
       });
 
       res.json({
@@ -437,7 +445,7 @@ export function registerPublicApiRoutes(app: Express): void {
         sources: [
           { name: "BriefForm", count: totalBriefs, percentage: totalLeads > 0 ? Math.round((totalBriefs / totalLeads) * 100) : 0 },
           { name: "Vigilance Score", count: Math.round(totalBriefs * 0.4), percentage: 29 },
-          { name: "Contact direct", count: contacts.length, percentage: totalLeads > 0 ? Math.round((contacts.length / totalLeads) * 100) : 0 },
+          { name: "Contact direct", count: contactCount?.count ?? 0, percentage: totalLeads > 0 ? Math.round(((contactCount?.count ?? 0) / totalLeads) * 100) : 0 },
           { name: "Newsletter CTA", count: Math.round(totalNewsletter * 0.3), percentage: 14 },
         ],
       });
@@ -457,7 +465,8 @@ export function registerPublicApiRoutes(app: Express): void {
    */
   app.get("/sitemap.xml", async (req: Request, res: Response) => {
     try {
-      const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get("host")}`;
+      // Utiliser SITE_URL uniquement — ne jamais injecter req.get("host") dans le XML
+      const baseUrl = process.env.SITE_URL || "https://epitaphe360.ma";
 
       // Fetch all published content
       const [publishedPages, publishedArticles, publishedEvents] = await Promise.all([
@@ -583,7 +592,7 @@ export function registerPublicApiRoutes(app: Express): void {
    */
   app.get("/robots.txt", async (req: Request, res: Response) => {
     try {
-      const baseUrl = process.env.SITE_URL || `${req.protocol}://${req.get("host")}`;
+      const baseUrl = process.env.SITE_URL || "https://epitaphe360.ma";
       const isProduction = process.env.NODE_ENV === "production";
 
       let content: string;
@@ -787,12 +796,20 @@ Disallow: /
         return res.status(401).json({ error: "Compte introuvable" });
       }
 
-      // Vérification du token magique avec HMAC
-      const secret = process.env.JWT_SECRET || "dev-secret";
-      const expectedToken = crypto.createHmac("sha256", secret).update(`${account.id}:${account.email}`).digest("hex");
-      if (!crypto.timingSafeEqual(Buffer.from(magicToken), Buffer.from(expectedToken))) {
+      // Vérification du magic token via la table passwordResetTokens (nonce aléatoire + expiration)
+      const [tokenRecord] = await db.select().from(passwordResetTokens)
+        .where(and(
+          eq(passwordResetTokens.token, magicToken),
+          eq(passwordResetTokens.accountType, "magic"),
+          eq(passwordResetTokens.email, account.email)
+        )).limit(1);
+
+      if (!tokenRecord || tokenRecord.usedAt || new Date() > tokenRecord.expiresAt) {
         return res.status(401).json({ error: "Lien invalide ou expiré" });
       }
+
+      // Marquer le token comme utilisé (usage unique)
+      await db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.id, tokenRecord.id));
 
       // Activer le compte si ce n'est pas déjà fait
       await db.update(clientAccounts)
@@ -824,7 +841,16 @@ Disallow: /
    * POST /api/client/forgot-password
    * Demande de réinitialisation du mot de passe client
    */
-  app.post("/api/client/forgot-password", async (req: Request, res: Response) => {
+  const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+  });
+
+  app.post("/api/client/forgot-password", forgotPasswordLimiter, async (req: Request, res: Response) => {
     try {
       const { email } = req.body as { email?: string };
       if (!email) return res.status(400).json({ error: "Email requis" });
@@ -866,7 +892,11 @@ Disallow: /
     try {
       const { token, password } = req.body as { token?: string; password?: string };
       if (!token || !password) return res.status(400).json({ error: "Token et mot de passe requis" });
-      if (password.length < 8) return res.status(422).json({ error: "Le mot de passe doit contenir au moins 8 caractères" });
+      if (password.length < 12) return res.status(422).json({ error: "Le mot de passe doit contenir au moins 12 caractères" });
+      if (!/[A-Z]/.test(password)) return res.status(422).json({ error: "Le mot de passe doit contenir au moins une majuscule" });
+      if (!/[a-z]/.test(password)) return res.status(422).json({ error: "Le mot de passe doit contenir au moins une minuscule" });
+      if (!/[0-9]/.test(password)) return res.status(422).json({ error: "Le mot de passe doit contenir au moins un chiffre" });
+      if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return res.status(422).json({ error: "Le mot de passe doit contenir au moins un caractère spécial" });
 
       const [resetRecord] = await db.select().from(passwordResetTokens)
         .where(and(

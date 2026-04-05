@@ -11,7 +11,7 @@ import { Input, Textarea, Select } from '../../components/Input';
 import { RichTextEditor } from '../../components/RichTextEditor';
 import { FileUpload } from '../../components/FileUpload';
 import { useToast } from '../../components/Toast';
-import { getApi } from '../../lib/simple-api';
+import { getApi } from '../../lib/api';
 import { Event, EventFormData } from '../../types';
 import { EVENT_TEMPLATES, EventTemplate } from '../../types/templates';
 

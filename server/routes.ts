@@ -113,11 +113,21 @@ export async function registerRoutes(
     }
   });
 
-  // ─── Pages ──────────────────────────────────────────────────────────────────
+  // ─── Pages (publiques — PUBLISHED uniquement) ──────────────────────────────
   app.get("/api/pages", async (req, res) => {
     try {
-      const result = await db.select().from(pages);
-      res.json({ data: result, total: result.length });
+      const { page, pageSize, offset } = parsePagination(req.query as Record<string, unknown>);
+
+      const [rows, countResult] = await Promise.all([
+        db.select().from(pages)
+          .where(eq(pages.status, 'PUBLISHED'))
+          .limit(pageSize).offset(offset),
+        db.select({ count: sql<number>`count(*)` }).from(pages)
+          .where(eq(pages.status, 'PUBLISHED')),
+      ]);
+
+      const total = Number(countResult[0]?.count ?? 0);
+      res.json(paginatedResponse(rows, total, page, pageSize));
     } catch (error) {
       console.error("[GET /api/pages]", error);
       res.status(500).json({ error: 'Erreur lors de la récupération des pages' });
@@ -126,7 +136,9 @@ export async function registerRoutes(
 
   app.get("/api/pages/slug/:slug", async (req, res) => {
     try {
-      const result = await db.select().from(pages).where(eq(pages.slug, req.params.slug)).limit(1);
+      const result = await db.select().from(pages)
+        .where(and(eq(pages.slug, req.params.slug), eq(pages.status, 'PUBLISHED')))
+        .limit(1);
       if (result.length === 0) return res.status(404).json({ error: 'Page non trouvée' });
       res.json(result[0]);
     } catch (error) {
@@ -173,14 +185,18 @@ export async function registerRoutes(
     }
   });
 
-  // ─── Events ─────────────────────────────────────────────────────────────────
+  // ─── Events (publics — PUBLISHED uniquement) ───────────────────────────────
   app.get("/api/events", async (req, res) => {
     try {
       const { page, pageSize, offset } = parsePagination(req.query as Record<string, unknown>);
 
       const [rows, countResult] = await Promise.all([
-        db.select().from(events).limit(pageSize).offset(offset),
-        db.select({ count: sql<number>`count(*)` }).from(events),
+        db.select().from(events)
+          .where(eq(events.status, 'PUBLISHED'))
+          .orderBy(desc(events.startDate))
+          .limit(pageSize).offset(offset),
+        db.select({ count: sql<number>`count(*)` }).from(events)
+          .where(eq(events.status, 'PUBLISHED')),
       ]);
 
       const total = Number(countResult[0]?.count ?? 0);

@@ -46,7 +46,7 @@ export const IntegrationSettings: React.FC = () => {
     try {
       const api = getApi();
       const response = await api.get('/admin/settings/integrations');
-      const d = response.data?.data || {};
+      const d = response.data || response || {};
       setFormData((prev) => ({ ...prev, ...d }));
     } catch (error) {
       console.error('Error loading integration settings:', error);

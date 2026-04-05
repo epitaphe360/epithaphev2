@@ -5,7 +5,7 @@
 
   "buildCommand": "npm run build:client",
   "outputDirectory": "dist/public",
-  "installCommand": "npm install --legacy-peer-deps --force",
+  "installCommand": "npm install --legacy-peer-deps",
 
   "rewrites": [
     {

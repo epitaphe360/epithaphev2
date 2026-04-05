@@ -1,0 +1,46 @@
+# .dockerignore — Exclude files not needed in Docker build context
+# Speeds up `docker build` and prevents accidental inclusion of secrets
+
+# Dependencies (reinstalled inside Docker)
+node_modules/
+npm-debug.log*
+
+# Build outputs (rebuilt inside Docker)
+dist/
+
+# Git history (not needed in production)
+.git/
+.gitignore
+
+# Development files
+*.env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
+tests/
+coverage/
+vitest.config.ts
+
+# Documentation
+*.md
+!README.md
+
+# Temporary files
+temp.txt
+*.tmp

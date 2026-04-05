@@ -66,8 +66,10 @@ COPY migrations ./migrations
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Create uploads directory
-RUN mkdir -p /app/uploads && chown -R nodejs:nodejs /app/uploads
+# Create uploads directory at the correct path and set ownership
+# The server writes to dist/public/uploads (served as /uploads)
+RUN mkdir -p /app/dist/public/uploads && \
+    chown -R nodejs:nodejs /app/dist /app/migrations
 
 # Switch to non-root user
 USER nodejs

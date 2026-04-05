@@ -13,17 +13,19 @@ export function registerDevRoutes(app: Express) {
   app.get("/api/dev/seed", async (req, res) => {
     try {
       // 1. Ajouter un Admin
+      const adminHash = await bcrypt.hash("Admin123!Test", 10);
       await db.insert(users).values({
         email: "admin@epitaphe360.test",
-        password: "admin123", // Attention: En prod ce doit �tre hash�
+        password: adminHash,
         name: "Administrateur Test",
         role: "ADMIN",
       }).onConflictDoNothing({ target: users.email });
 
       // 2. Ajouter un Client Test
+      const clientHash = await bcrypt.hash("Client123!Test", 10);
       await db.insert(users).values({
         email: "client@entreprise.test",
-        password: "client123", 
+        password: clientHash,
         name: "Client Test B2B",
         role: "USER",
       }).onConflictDoNothing({ target: users.email });
@@ -132,7 +134,10 @@ export function registerDevRoutes(app: Express) {
         });
       }
 
-      const CLIENT_JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+      const CLIENT_JWT_SECRET = process.env.JWT_SECRET;
+      if (!CLIENT_JWT_SECRET) {
+        return res.status(500).json({ error: "JWT_SECRET non configuré" });
+      }
       const token = jwt.sign(
         { clientId: account.id, email: account.email },
         CLIENT_JWT_SECRET,

@@ -7,6 +7,7 @@
  * l'intégration Stripe. En attendant la clé Stripe, elles fonctionnent
  * en mode "local" (mise à jour BDD directe, email confirmation).
  */
+/// <reference path="./types.d.ts" />
 import type { Express, Request, Response } from "express";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -23,6 +24,7 @@ import { sendMail } from "./lib/email";
 import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
+import { z } from "zod";
 
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -71,7 +73,7 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.get("/api/client/subscription", requireClientAuth as any, async (req: Request, res: Response) => {
     try {
-      const clientId = (req as any).clientId as number;
+      const clientId = req.clientId!;
       const [sub] = await db
         .select({
           id: clientSubscriptions.id,
@@ -114,17 +116,16 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.post("/api/client/subscription", paymentLimiter, requireClientAuth as any, async (req: Request, res: Response) => {
     try {
-      const clientId = (req as any).clientId as number;
-      const { planSlug, billingCycle = "monthly" } = req.body as { planSlug: string; billingCycle?: string };
-
-      if (!planSlug) {
-        return res.status(400).json({ error: "planSlug requis" });
-      }
+      const clientId = req.clientId!;
+      const subscriptionInput = z.object({
+        planSlug: z.string().min(1).max(100),
+        billingCycle: z.enum(["monthly", "annual"]).default("monthly"),
+      }).parse(req.body);
 
       const [plan] = await db
         .select()
         .from(subscriptionPlans)
-        .where(and(eq(subscriptionPlans.slug, planSlug), eq(subscriptionPlans.isActive, true)))
+        .where(and(eq(subscriptionPlans.slug, subscriptionInput.planSlug), eq(subscriptionPlans.isActive, true)))
         .limit(1);
 
       if (!plan) {
@@ -140,13 +141,13 @@ export function registerPaymentRoutes(app: Express) {
       // Calculer les dates de période
       const now = new Date();
       const periodEnd = new Date(now);
-      if (billingCycle === "annual") {
+      if (subscriptionInput.billingCycle === "annual") {
         periodEnd.setFullYear(periodEnd.getFullYear() + 1);
       } else {
         periodEnd.setMonth(periodEnd.getMonth() + 1);
       }
 
-      const amount = billingCycle === "annual" ? plan.priceAnnual : plan.priceMonthly;
+      const amount = subscriptionInput.billingCycle === "annual" ? plan.priceAnnual : plan.priceMonthly;
 
       // Créer le nouvel abonnement
       const [newSub] = await db
@@ -155,7 +156,7 @@ export function registerPaymentRoutes(app: Express) {
           clientId,
           planId: plan.id,
           status: "active",
-          billingCycle,
+          billingCycle: subscriptionInput.billingCycle,
           currentPeriodStart: now,
           currentPeriodEnd: periodEnd,
         })
@@ -180,7 +181,7 @@ export function registerPaymentRoutes(app: Express) {
         sendMail({
           to: account.email,
           subject: `Confirmation de paiement — Epitaphe 360`,
-          html: `<p>Bonjour ${account.name},</p><p>Votre abonnement <strong>${plan.name}</strong> (${amount / 100} ${plan.currency ?? "MAD"}/${billingCycle}) a bien été activé.</p><p>Merci de votre confiance !</p>`,
+          html: `<p>Bonjour ${account.name},</p><p>Votre abonnement <strong>${plan.name}</strong> (${amount / 100} ${plan.currency ?? "MAD"}/${subscriptionInput.billingCycle}) a bien été activé.</p><p>Merci de votre confiance !</p>`,
         }).catch(e => console.error("[email] payment confirmation:", e));
       }
 
@@ -197,7 +198,7 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.delete("/api/client/subscription", requireClientAuth as any, async (req: Request, res: Response) => {
     try {
-      const clientId = (req as any).clientId as number;
+      const clientId = req.clientId!;
       await db
         .update(clientSubscriptions)
         .set({ cancelAtPeriodEnd: true, updatedAt: new Date() })
@@ -219,7 +220,7 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.get("/api/client/devis", requireClientAuth as any, async (req: Request, res: Response) => {
     try {
-      const clientId = (req as any).clientId as number;
+      const clientId = req.clientId!;
       const list = await db
         .select()
         .from(devis)
@@ -250,7 +251,8 @@ export function registerPaymentRoutes(app: Express) {
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
 
       // Vérifier la signature HMAC
-      const secret = process.env.JWT_SECRET || "dev-secret";
+      const secret = process.env.JWT_SECRET;
+      if (!secret) return res.status(500).json({ error: "Configuration serveur manquante" });
       const expectedSig = crypto.createHmac("sha256", secret)
         .update(`${d.id}:${d.reference}`)
         .digest("hex");
@@ -276,8 +278,22 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.post("/api/devis/:reference/accept", paymentLimiter, async (req: Request, res: Response) => {
     try {
+      const { sig } = req.query as { sig?: string };
+      if (!sig) return res.status(401).json({ error: "Signature requise" });
+
       const [d] = await db.select().from(devis).where(eq(devis.reference, req.params.reference)).limit(1);
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
+
+      // Vérifier la signature HMAC
+      const secret = process.env.JWT_SECRET;
+      if (!secret) return res.status(500).json({ error: "Configuration serveur manquante" });
+      const expectedSig = crypto.createHmac("sha256", secret)
+        .update(`${d.id}:${d.reference}`)
+        .digest("hex");
+      if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+        return res.status(401).json({ error: "Signature invalide" });
+      }
+
       if (!["sent", "viewed"].includes(d.status ?? "")) {
         return res.status(400).json({ error: "Ce devis ne peut plus être accepté" });
       }
@@ -309,10 +325,24 @@ export function registerPaymentRoutes(app: Express) {
    * POST /api/devis/:reference/refuse
    * Client refuse le devis
    */
-  app.post("/api/devis/:reference/refuse", async (req: Request, res: Response) => {
+  app.post("/api/devis/:reference/refuse", paymentLimiter, async (req: Request, res: Response) => {
     try {
+      const { sig } = req.query as { sig?: string };
+      if (!sig) return res.status(401).json({ error: "Signature requise" });
+
       const [d] = await db.select().from(devis).where(eq(devis.reference, req.params.reference)).limit(1);
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
+
+      // Vérifier la signature HMAC
+      const secret = process.env.JWT_SECRET;
+      if (!secret) return res.status(500).json({ error: "Configuration serveur manquante" });
+      const expectedSig = crypto.createHmac("sha256", secret)
+        .update(`${d.id}:${d.reference}`)
+        .digest("hex");
+      if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+        return res.status(401).json({ error: "Signature invalide" });
+      }
+
       await db.update(devis).set({ status: "refused", updatedAt: new Date() }).where(eq(devis.id, d.id));
       res.json({ success: true });
     } catch (error) {
@@ -345,18 +375,34 @@ export function registerPaymentRoutes(app: Express) {
    */
   app.post("/api/admin/devis", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
+      const devisSchema = z.object({
+        clientName: z.string().min(1).max(200),
+        clientEmail: z.string().email().max(200),
+        clientCompany: z.string().max(200).optional(),
+        title: z.string().min(1).max(300),
+        description: z.string().max(5000).optional(),
+        items: z.array(z.object({
+          label: z.string(),
+          description: z.string().optional(),
+          quantity: z.number().int().min(1),
+          unitPrice: z.number().int().min(0),
+          total: z.number().int().min(0),
+        })).default([]),
+        subtotal: z.number().int().min(0),
+        taxRate: z.number().min(0).max(100).default(20),
+        currency: z.string().max(10).default("MAD"),
+        validUntil: z.string().optional().transform(v => v ? new Date(v) : undefined),
+        clientId: z.number().int().optional(),
+      });
+      const validated = devisSchema.parse(req.body);
       const reference = await generateDevisRef();
-      const { items = [], subtotal, taxRate = 20, ...rest } = req.body;
 
-      const taxAmount = Math.round(subtotal * (taxRate / 100));
-      const total = subtotal + taxAmount;
+      const taxAmount = Math.round(validated.subtotal * (validated.taxRate / 100));
+      const total = validated.subtotal + taxAmount;
 
       const [d] = await db.insert(devis).values({
         reference,
-        ...rest,
-        items,
-        subtotal,
-        taxRate,
+        ...validated,
         taxAmount,
         total,
       }).returning();
@@ -406,7 +452,9 @@ export function registerPaymentRoutes(app: Express) {
       await db.update(devis).set({ status: "sent", updatedAt: new Date() }).where(eq(devis.id, d.id));
 
       const baseDomain = process.env.SITE_URL || (process.env.NODE_ENV === "production" ? "https://epitaphe360.ma" : "http://localhost:5000");
-      const sig = crypto.createHmac("sha256", process.env.JWT_SECRET || "dev-secret")
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) return res.status(500).json({ error: "Configuration serveur manquante" });
+      const sig = crypto.createHmac("sha256", jwtSecret)
         .update(`${d.id}:${d.reference}`)
         .digest("hex");
       const devisUrl = `${baseDomain}/devis/${d.reference}?sig=${sig}`;
@@ -453,7 +501,20 @@ export function registerPaymentRoutes(app: Express) {
 
   app.post("/api/admin/plans", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
-      const [plan] = await db.insert(subscriptionPlans).values(req.body).returning();
+      const planSchema = z.object({
+        name: z.string().min(1).max(100),
+        slug: z.string().min(1).max(100),
+        description: z.string().max(500).optional(),
+        priceMonthly: z.number().int().min(0),
+        priceAnnual: z.number().int().min(0),
+        currency: z.string().max(10).default("MAD"),
+        features: z.any().optional(),
+        maxProjects: z.number().int().min(0).optional(),
+        isActive: z.boolean().default(true),
+        sortOrder: z.number().int().default(0),
+      });
+      const data = planSchema.parse(req.body);
+      const [plan] = await db.insert(subscriptionPlans).values(data).returning();
       res.status(201).json(plan);
     } catch (error) {
       res.status(500).json({ error: "Erreur serveur" });
@@ -462,7 +523,20 @@ export function registerPaymentRoutes(app: Express) {
 
   app.put("/api/admin/plans/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
     try {
-      const { id: _id, createdAt: _c, ...updateData } = req.body;
+      const { id: _id, createdAt: _c, ...rawData } = req.body;
+      const updatePlanSchema = z.object({
+        name: z.string().min(1).max(100).optional(),
+        slug: z.string().min(1).max(100).optional(),
+        description: z.string().max(500).optional(),
+        priceMonthly: z.number().int().min(0).optional(),
+        priceAnnual: z.number().int().min(0).optional(),
+        currency: z.string().max(10).optional(),
+        features: z.any().optional(),
+        maxProjects: z.number().int().min(0).optional(),
+        isActive: z.boolean().optional(),
+        sortOrder: z.number().int().optional(),
+      });
+      const updateData = updatePlanSchema.parse(rawData);
       const [updated] = await db.update(subscriptionPlans).set(updateData)
         .where(eq(subscriptionPlans.id, Number(req.params.id))).returning();
       res.json(updated);

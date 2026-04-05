@@ -17,7 +17,9 @@ const queryClient = postgres(process.env.DATABASE_URL, {
   connect_timeout: 30,
   idle_timeout: 20,
   max_lifetime: 60 * 30,
+  max: 10, // Pool max connections — prevents exhausting Supabase limits
   prepare: false, // Required for PgBouncer transaction mode
+  onnotice: () => {}, // Suppress PostgreSQL NOTICE messages
 });
 
 // Initialize Drizzle ORM with proper typing

@@ -18,7 +18,7 @@ import {
   insertClientProjectSchema, insertClientMilestoneSchema, insertClientDocumentSchema,
 } from "@shared/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
-import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, type AuthRequest } from "./lib/auth";
+import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, validatePassword, type AuthRequest } from "./lib/auth";
 import { sendAdminPasswordReset, sendAgencyMessageNotification } from "./lib/email";
 import { z } from "zod";
 
@@ -68,43 +68,6 @@ const upload = multer({
 function sanitizeLikePattern(input: string): string {
   if (!input) return '';
   return input.replace(/[%_\\]/g, '\\$&');
-}
-
-/**
- * Validate password strength
- * Requirements:
- * - At least 12 characters
- * - At least one uppercase letter
- * - At least one lowercase letter
- * - At least one number
- * - At least one special character
- */
-function validatePassword(password: string): { valid: boolean; error?: string } {
-  if (!password) {
-    return { valid: false, error: 'Le mot de passe est requis' };
-  }
-
-  if (password.length < 12) {
-    return { valid: false, error: 'Le mot de passe doit contenir au moins 12 caractères' };
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, error: 'Le mot de passe doit contenir au moins une lettre majuscule' };
-  }
-
-  if (!/[a-z]/.test(password)) {
-    return { valid: false, error: 'Le mot de passe doit contenir au moins une lettre minuscule' };
-  }
-
-  if (!/[0-9]/.test(password)) {
-    return { valid: false, error: 'Le mot de passe doit contenir au moins un chiffre' };
-  }
-
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    return { valid: false, error: 'Le mot de passe doit contenir au moins un caractère spécial' };
-  }
-
-  return { valid: true };
 }
 
 /**

@@ -119,3 +119,33 @@ export function requireRole(...roles: string[]) {
 export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
   return requireRole('ADMIN')(req, res, next);
 }
+
+// ========================================
+// PASSWORD VALIDATION
+// ========================================
+
+/**
+ * Validate password strength.
+ * Requirements: ≥12 chars, uppercase, lowercase, digit, special char.
+ */
+export function validatePassword(password: string): { valid: boolean; error?: string } {
+  if (!password) {
+    return { valid: false, error: 'Le mot de passe est requis' };
+  }
+  if (password.length < 12) {
+    return { valid: false, error: 'Le mot de passe doit contenir au moins 12 caractères' };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, error: 'Le mot de passe doit contenir au moins une lettre majuscule' };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, error: 'Le mot de passe doit contenir au moins une lettre minuscule' };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, error: 'Le mot de passe doit contenir au moins un chiffre' };
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return { valid: false, error: 'Le mot de passe doit contenir au moins un caractère spécial' };
+  }
+  return { valid: true };
+}

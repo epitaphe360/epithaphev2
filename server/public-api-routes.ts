@@ -1894,7 +1894,8 @@ Disallow: /
         .select()
         .from(resources)
         .where(and(eq(resources.accessLevel, "public"), eq(resources.isPublished, true)))
-        .orderBy(resources.sortOrder, resources.createdAt);
+        .orderBy(resources.sortOrder, resources.createdAt)
+        .limit(200);
       return res.json(rows);
     } catch (error) {
       console.error("Resources public error:", error);
@@ -1913,7 +1914,8 @@ Disallow: /
         .select()
         .from(resources)
         .where(eq(resources.isPublished, true))
-        .orderBy(resources.sortOrder, resources.createdAt);
+        .orderBy(resources.sortOrder, resources.createdAt)
+        .limit(200);
       return res.json(rows);
     } catch (error) {
       console.error("Resources client error:", error);
@@ -1949,7 +1951,7 @@ Disallow: /
    */
   app.get("/api/admin/resources", async (_req: Request, res: Response) => {
     try {
-      const rows = await db.select().from(resources).orderBy(resources.sortOrder, desc(resources.createdAt));
+      const rows = await db.select().from(resources).orderBy(resources.sortOrder, desc(resources.createdAt)).limit(500);
       return res.json(rows);
     } catch (error) {
       return res.status(500).json({ error: "Erreur serveur" });

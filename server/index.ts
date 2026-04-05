@@ -16,6 +16,7 @@ console.log('📊 NODE_ENV:', process.env.NODE_ENV);
 console.log('🔌 PORT:', process.env.PORT);
 
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { registerGrapesRoutes } from "./plasmic-routes";
 import { serveStatic } from "./static";
@@ -56,6 +57,9 @@ declare module "http" {
     rawBody: unknown;
   }
 }
+
+// ─── Compression middleware (gzip/brotli API responses) ──────────────────────
+app.use(compression());
 
 app.use(
   express.json({
@@ -223,8 +227,10 @@ app.use((req, res, next) => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      // Ne PAS logger le body des réponses en production (fuite de données sensibles)
+      if (process.env.NODE_ENV !== "production" && capturedJsonResponse) {
+        const truncated = JSON.stringify(capturedJsonResponse).slice(0, 200);
+        logLine += ` :: ${truncated}`;
       }
 
       log(logLine);

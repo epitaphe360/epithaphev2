@@ -1,14 +1,20 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
-import { db } from "./db";
-import { z } from "zod";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import {
   sendNewsletterConfirmation,
   sendBriefConfirmation,
-  sendBriefNotificationToAdmin,
-  sendEmail,
+  sendBriefNotification,
+  sendContactNotification,
+  sendClientPasswordReset,
+  sendAgencyMessageNotification,
+  sendMail,
 } from "./lib/email";
+import { db } from "./db";
+import { z } from "zod";
 import {
   newsletterSubscriptions,
   projectBriefs,
@@ -29,6 +35,7 @@ import {
   webauthnChallenges,
   qrCodes,
   resources,
+  passwordResetTokens,
 } from "@shared/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -239,8 +246,10 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // Email de bienvenue envoyé de façon asynchrone
-      sendNewsletterConfirmation(newSubscription.email).catch((e) => console.error("[email] newsletter:", e));
+      // Envoyer l'email de confirmation (non-bloquant)
+      sendNewsletterConfirmation(newSubscription.email).catch((e) =>
+        console.error("[EMAIL] Newsletter confirmation error:", e)
+      );
 
       res.status(201).json({
         success: true,
@@ -345,22 +354,21 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // Emails asynchrones — on ne bloque pas la réponse
-      Promise.all([
-        sendBriefNotificationToAdmin({
-          name: `${newBrief.firstName} ${newBrief.lastName}`,
-          email: newBrief.email,
-          company: (newBrief as any).company,
-          projectType: (newBrief as any).projectType ?? "Projet",
-          budget: (newBrief as any).budget,
-          message: (newBrief as any).description,
-        }),
-        sendBriefConfirmation(
-          newBrief.email,
-          `${newBrief.firstName} ${newBrief.lastName}`,
-          (newBrief as any).projectType ?? "Projet",
-        ),
-      ]).catch((e) => console.error("[email] brief:", e));
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || "";
+      if (adminEmail) {
+        // Notification interne (non-bloquante)
+        sendBriefNotification({
+          adminEmail,
+          clientName: `${newBrief.firstName} ${newBrief.lastName}`,
+          clientEmail: newBrief.email,
+          projectType: newBrief.projectType || "Non précisé",
+          budget: newBrief.budget ?? undefined,
+          description: newBrief.projectDescription ?? undefined,
+        }).catch((e) => console.error("[EMAIL] Brief notification error:", e));
+      }
+      // Confirmation au client (non-bloquante)
+      sendBriefConfirmation(newBrief.email, `${newBrief.firstName} ${newBrief.lastName}`, newBrief.projectType || "votre projet")
+        .catch((e) => console.error("[EMAIL] Brief confirmation error:", e));
 
       res.status(201).json({
         success: true,
@@ -813,6 +821,105 @@ Disallow: /
   });
 
   /**
+   * POST /api/client/forgot-password
+   * Demande de réinitialisation du mot de passe client
+   */
+  app.post("/api/client/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body as { email?: string };
+      if (!email) return res.status(400).json({ error: "Email requis" });
+
+      const [account] = await db.select({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name })
+        .from(clientAccounts)
+        .where(eq(clientAccounts.email, email.toLowerCase().trim()))
+        .limit(1);
+
+      // Toujours 200 pour éviter l'énumération d'emails
+      if (!account) return res.json({ message: "Si ce compte existe, un lien de réinitialisation a été envoyé." });
+
+      const token = crypto.randomBytes(48).toString("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
+
+      // Invalider les anciens tokens
+      await db.delete(passwordResetTokens)
+        .where(and(eq(passwordResetTokens.email, account.email), eq(passwordResetTokens.accountType, "client")));
+
+      await db.insert(passwordResetTokens).values({
+        token, email: account.email, accountType: "client", expiresAt,
+      });
+
+      sendClientPasswordReset(account.email, account.name ?? account.email, token)
+        .catch(e => console.error("[EMAIL] Client reset error:", e));
+
+      return res.json({ message: "Si ce compte existe, un lien de réinitialisation a été envoyé." });
+    } catch (error) {
+      console.error("Client forgot password error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/reset-password
+   * Réinitialise le mot de passe client via un token valide
+   */
+  app.post("/api/client/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { token, password } = req.body as { token?: string; password?: string };
+      if (!token || !password) return res.status(400).json({ error: "Token et mot de passe requis" });
+      if (password.length < 8) return res.status(422).json({ error: "Le mot de passe doit contenir au moins 8 caractères" });
+
+      const [resetRecord] = await db.select().from(passwordResetTokens)
+        .where(and(
+          eq(passwordResetTokens.token, token),
+          eq(passwordResetTokens.accountType, "client")
+        )).limit(1);
+
+      if (!resetRecord) return res.status(400).json({ error: "Token invalide ou expiré" });
+      if (resetRecord.usedAt) return res.status(400).json({ error: "Ce lien a déjà été utilisé" });
+      if (new Date() > resetRecord.expiresAt) return res.status(400).json({ error: "Ce lien a expiré" });
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      await Promise.all([
+        db.update(clientAccounts).set({ passwordHash }).where(eq(clientAccounts.email, resetRecord.email)),
+        db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.token, token)),
+      ]);
+
+      return res.json({ message: "Mot de passe réinitialisé avec succès" });
+    } catch (error) {
+      console.error("Client reset password error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * POST /api/client/change-password
+   * Changer son propre mot de passe (client authentifié)
+   */
+  app.post("/api/client/change-password", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const { currentPassword, newPassword } = req.body as { currentPassword?: string; newPassword?: string };
+      if (!currentPassword || !newPassword) return res.status(400).json({ error: "Mot de passe actuel et nouveau requis" });
+      if (newPassword.length < 8) return res.status(422).json({ error: "Le nouveau mot de passe doit contenir au moins 8 caractères" });
+
+      const [account] = await db.select().from(clientAccounts).where(eq(clientAccounts.id, clientId)).limit(1);
+      if (!account) return res.status(404).json({ error: "Compte non trouvé" });
+
+      const isValid = await bcrypt.compare(currentPassword, account.passwordHash);
+      if (!isValid) return res.status(401).json({ error: "Mot de passe actuel incorrect" });
+
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+      await db.update(clientAccounts).set({ passwordHash }).where(eq(clientAccounts.id, clientId));
+
+      return res.json({ message: "Mot de passe changé avec succès" });
+    } catch (error) {
+      console.error("Client change password error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
    * POST /api/client/login
    * Authentifie un client et retourne un JWT
    */
@@ -1050,6 +1157,66 @@ Disallow: /
     }
   });
 
+  /**
+   * POST /api/client/messages/upload
+   * Upload d'une pièce jointe pour la messagerie client
+   */
+  const clientUploadDir = path.resolve(process.cwd(), "dist", "public", "uploads", "client-messages");
+  if (!fs.existsSync(clientUploadDir)) fs.mkdirSync(clientUploadDir, { recursive: true });
+
+  const clientUpload = multer({
+    storage: multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, clientUploadDir),
+      filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`);
+      },
+    }),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+    fileFilter: (_req, file, cb) => {
+      const allowed = ["image/", "application/pdf", "application/msword",
+        "application/vnd.openxmlformats-officedocument", "text/plain"];
+      const ok = allowed.some((t) => file.mimetype.startsWith(t));
+      cb(null, ok);
+    },
+  });
+
+  app.post("/api/client/messages/upload", requireClientAuth as any, clientUpload.single("file"), (req: Request, res: Response) => {
+    if (!req.file) return res.status(400).json({ error: "Aucun fichier valide" });
+    const url = `/uploads/client-messages/${req.file.filename}`;
+    return res.json({ url, name: req.file.originalname, size: req.file.size, mime: req.file.mimetype });
+  });
+
+  /**
+   * PUT /api/client/messages/read
+   * Marquer les messages agence d'un projet comme lus par le client
+   */
+  app.put("/api/client/messages/read", requireClientAuth as any, async (req: Request, res: Response) => {
+    try {
+      const clientId = (req as any).clientId as number;
+      const { projectId } = req.body as { projectId?: number };
+      if (!projectId) return res.status(400).json({ error: "projectId requis" });
+
+      // Verify project belongs to client
+      const [proj] = await db.select({ id: clientProjects.id }).from(clientProjects)
+        .where(and(eq(clientProjects.id, projectId), eq(clientProjects.clientId, clientId))).limit(1);
+      if (!proj) return res.status(403).json({ error: "Accès refusé" });
+
+      await db.update(clientMessages)
+        .set({ isRead: true })
+        .where(and(
+          eq(clientMessages.projectId, projectId),
+          eq(clientMessages.senderRole, "agency"),
+          eq(clientMessages.isRead, false),
+        ));
+
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Mark read error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
   // ── Lead Magnet (CDC 4.6) ───────────────────────────────────────────────────
   const leadMagnetSchema = z.object({
     email:        z.string().email("Email invalide"),
@@ -1087,7 +1254,7 @@ Disallow: /
       const resourceTitle = resource[0]?.title ?? documentSlug;
       const siteUrl = process.env.SITE_URL ?? "https://www.epitaphe360.ma";
 
-      sendEmail({
+      sendMail({
         to: email.toLowerCase(),
         subject: `📥 Votre ressource "${resourceTitle}" — Epitaphe360`,
         html: `

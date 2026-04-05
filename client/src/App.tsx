@@ -17,6 +17,9 @@ import { PushPermissionBanner } from "@/components/push-permission-banner";
 import { PwaInstallPrompt }     from "@/components/pwa-install-prompt";
 import { CookieConsentBanner }  from "@/components/cookie-consent-banner";
 
+// ── Espace client reset password ─────────────────────────────────────────────
+import ClientResetPasswordPage from "@/pages/espace-client/reset-password";
+
 // ── Admin routes (lazy-loaded, code-split) ────────────────────────────────────
 import { AdminRoutes } from "@/routes/admin-routes";
 
@@ -177,9 +180,11 @@ function Router() {
           <Route path="/espace-client/ressources" component={EcRessources} />
           <Route path="/espace-client/securite" component={EcSecurite} />
           <Route path="/espace-client/abonnement" component={AbonnementPage} />
+          <Route path="/espace-client/reset-password" component={ClientResetPasswordPage} />
 
           {/* ── Devis public ────────────────────────────────────── */}
           <Route path="/devis/:reference" component={DevisPage} />
+
 
           {/* ── Analytics ───────────────────────────────────────── */}
           <Route path="/analytics" component={AnalyticsPage} />

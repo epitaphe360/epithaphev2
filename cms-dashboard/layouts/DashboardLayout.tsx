@@ -32,8 +32,14 @@ import {
   Phone,
   ChevronRight,
   Sparkles,
+  Paintbrush,
+  Layers,
   QrCode,
   Bell,
+  Download,
+  Navigation,
+  ClipboardList,
+  FolderKanban,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -68,7 +74,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Articles',      href: '/admin/articles',           icon: FileText,        group: 'content' },
     { name: 'Événements',    href: '/admin/events',             icon: Calendar,        group: 'content' },
     { name: 'Pages',         href: '/admin/pages',              icon: FileEdit,        group: 'content' },
+    { name: 'Éditeur Visuel',href: '/admin/visual-editor',      icon: Paintbrush,      group: 'content' },
     { name: 'Services',      href: '/admin/services',           icon: Briefcase,       group: 'content' },
+    { name: 'Solutions',     href: '/admin/solutions',          icon: Layers,          group: 'content' },
     { name: 'Références',    href: '/admin/references',         icon: Building2,       group: 'content' },
     { name: 'Études de cas', href: '/admin/case-studies',       icon: BookOpen,        group: 'content' },
     { name: 'Témoignages',   href: '/admin/testimonials',       icon: MessageSquare,   group: 'content' },
@@ -77,7 +85,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Newsletter',    href: '/admin/newsletter',         icon: Mail,            group: 'crm' },
     { name: 'Contacts',      href: '/admin/contacts',           icon: Phone,           group: 'crm' },
     { name: 'QR Codes',      href: '/admin/qr-codes',           icon: QrCode,          group: 'crm' },
-    { name: 'Push',           href: '/admin/push',               icon: Bell,            group: 'crm' },
+    { name: 'Push',          href: '/admin/push',               icon: Bell,            group: 'crm' },
+    { name: 'Ressources',    href: '/admin/resources',          icon: Download,        group: 'tools' },
+    { name: 'Navigation',    href: '/admin/menus',              icon: Navigation,      group: 'tools' },
+    { name: 'Clients',       href: '/admin/client-accounts',    icon: FolderKanban,    group: 'clients' },
+    { name: 'Audit Logs',    href: '/admin/audit-logs',         icon: ClipboardList,   group: 'settings' },
     { name: 'Catégories',    href: '/admin/categories',         icon: FolderTree,      group: 'settings' },
     { name: 'Médias',        href: '/admin/media',              icon: Image,           group: 'settings' },
     { name: 'Utilisateurs',  href: '/admin/users',              icon: User,            group: 'settings' },
@@ -88,6 +100,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { id: 'main',     label: null },
     { id: 'content',  label: 'Contenu' },
     { id: 'crm',      label: 'CRM' },
+    { id: 'tools',    label: 'Outils' },
+    { id: 'clients',  label: 'Espace Client' },
     { id: 'settings', label: 'Configuration' },
   ];
 

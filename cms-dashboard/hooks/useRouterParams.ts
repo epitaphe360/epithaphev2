@@ -4,42 +4,49 @@
 
 import { useLocation } from 'wouter';
 
+// Tous les segments d'URL admin qui contiennent un :id
+const EDIT_SEGMENTS = [
+  '/admin/articles/',
+  '/admin/events/',
+  '/admin/pages/',
+  '/admin/services/',
+  '/admin/references/',
+  '/admin/case-studies/',
+  '/admin/testimonials/',
+  '/admin/team/',
+  '/admin/categories/',
+  '/admin/users/',
+  '/admin/leads/',
+  '/admin/resources/',
+];
+
 /**
  * Hook compatibilité: simule useParams() de react-router-dom
  * avec le comportement de wouter
  */
 export function useParams() {
   const [currentPath] = useLocation();
-  
-  // Extrait les paramètres de l'URL actuelle
-  // Cela fonctionne avec les routes définie dans App.tsx
+
   const params: Record<string, string> = {};
-  
-  // Essayer d'extraire les params basés sur les patterns de route connus
-  // Pattern: /admin/articles/:id/edit
-  if (currentPath.includes('/admin/articles/') && currentPath.includes('/edit')) {
-    const match = currentPath.match(/\/admin\/articles\/([^/]+)/);
-    if (match) params.id = match[1];
+
+  // Pattern générique: /admin/<section>/:id[/edit]
+  for (const segment of EDIT_SEGMENTS) {
+    if (currentPath.includes(segment)) {
+      const escaped = segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const match = currentPath.match(new RegExp(escaped + '([^/]+)'));
+      if (match) {
+        params.id = match[1];
+        break;
+      }
+    }
   }
-  
-  // Pattern: /admin/events/:id/edit
-  if (currentPath.includes('/admin/events/') && currentPath.includes('/edit')) {
-    const match = currentPath.match(/\/admin\/events\/([^/]+)/);
-    if (match) params.id = match[1];
-  }
-  
-  // Pattern: /admin/pages/:id/edit
-  if (currentPath.includes('/admin/pages/') && currentPath.includes('/edit')) {
-    const match = currentPath.match(/\/admin\/pages\/([^/]+)/);
-    if (match) params.id = match[1];
-  }
-  
+
   // Pattern: /admin/visual-editor/edit/:pageId
   if (currentPath.includes('/admin/visual-editor/edit/')) {
     const match = currentPath.match(/\/admin\/visual-editor\/edit\/([^/]+)/);
     if (match) params.pageId = match[1];
   }
-  
+
   return params;
 }
 

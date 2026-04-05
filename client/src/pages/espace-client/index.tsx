@@ -187,7 +187,12 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
               className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
             {errors.password && <p className="text-destructive text-xs mt-1">{errors.password.message}</p>}
           </div>
-          <button type="button" onClick={() => alert('Contactez-nous à contact@epitaphe360.ma pour réinitialiser votre mot de passe.')} className="block text-xs text-primary hover:underline text-right cursor-pointer bg-transparent border-none p-0">Mot de passe oublié ?</button>
+          <a
+            href="/espace-client/reset-password"
+            className="block text-xs text-primary hover:underline text-right"
+          >
+            Mot de passe oublié ?
+          </a>
           <button type="submit" disabled={isSubmitting}
             className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}

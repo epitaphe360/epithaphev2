@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Loader2, ArrowRight, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Loader2, ArrowRight, Eye, EyeOff, Lock, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export const NewLoginPage: React.FC = () => {
@@ -45,17 +45,16 @@ export const NewLoginPage: React.FC = () => {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Identifiants incorrects');
 
-      login(data.token, {
-        id: data.user.id,
-        name: data.user.name ?? data.user.email,
-        email: data.user.email,
-        role: (data.user.role ?? 'ADMIN') as 'ADMIN' | 'EDITOR',
-      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Identifiants incorrects');
+      }
+
+      login(data.token, data.user);
       setLocation('/admin');
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
@@ -65,12 +64,12 @@ export const NewLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-wrap min-h-screen w-full flex items-center justify-center relative overflow-hidden" style={{ background: 'radial-gradient(ellipse at top, #0d0120 0%, #000005 60%)' }}>
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
 
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Gradient Orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#EC4899] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#E63946] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
 
@@ -83,7 +82,7 @@ export const NewLoginPage: React.FC = () => {
 
         {/* Logo & Header */}
         <div className="mb-10 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[#EC4899] to-[#f472b6] shadow-2xl shadow-[#EC4899]/50">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[#E63946] to-[#F08080] shadow-2xl shadow-[#E63946]/50">
             <span className="text-3xl font-bold text-white">E</span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
@@ -120,18 +119,18 @@ export const NewLoginPage: React.FC = () => {
                   Email
                 </label>
                 <div className="relative group">
-                  <div className={`absolute inset-0 bg-gradient-to-r from-[#EC4899] to-purple-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 ${emailFocused ? 'opacity-50' : ''}`}></div>
+                  <div className={`absolute inset-0 bg-gradient-to-r from-[#E63946] to-purple-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 ${emailFocused ? 'opacity-50' : ''}`}></div>
                   <div className="relative">
-                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${emailFocused ? 'text-[#EC4899]' : 'text-slate-500'}`} />
+                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${emailFocused ? 'text-[#E63946]' : 'text-slate-500'}`} />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onFocus={() => setEmailFocused(true)}
                       onBlur={() => setEmailFocused(false)}
-                      placeholder="votre@email.com"
+                      placeholder="admin@epitaph.ma"
                       required
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-white placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-[#EC4899]/50 focus:bg-white/10 transition-all duration-300"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-white placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-[#E63946]/50 focus:bg-white/10 transition-all duration-300"
                     />
                     {email && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -192,7 +191,7 @@ export const NewLoginPage: React.FC = () => {
                 disabled={loading || !canSubmit}
                 className={`w-full h-14 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 shadow-lg ${
                   canSubmit
-                    ? 'bg-gradient-to-r from-[#EC4899] to-[#f472b6] hover:shadow-[#EC4899]/50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] text-white'
+                    ? 'bg-gradient-to-r from-[#E63946] to-[#F08080] hover:shadow-[#E63946]/50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] text-white'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                 }`}
               >
@@ -209,29 +208,21 @@ export const NewLoginPage: React.FC = () => {
                 )}
               </button>
             </form>
-
-            {/* Accès rapide admin — DEV uniquement */}
-            {import.meta.env.DEV && (
-              <div className="mt-5 pt-5 border-t border-white/5">
-                <button
-                  type="button"
-                  onClick={() => setEmail('admin@epitaph.ma')}
-                  className="w-full flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-[#EC4899] py-2 rounded-lg hover:bg-white/5 transition-all duration-200 group"
-                  title="Pré-remplir l'email administrateur (DEV)"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                  <span>Dév — Pré-remplir email admin</span>
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Decorative Glow */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-[#EC4899]/20 to-purple-600/20 rounded-3xl blur-2xl -z-10 opacity-50"></div>
+          <div className="absolute -inset-4 bg-gradient-to-r from-[#E63946]/20 to-purple-600/20 rounded-3xl blur-2xl -z-10 opacity-50"></div>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-8 space-y-3">
+          <a
+            href="/admin/forgot-password"
+            onClick={(e) => { e.preventDefault(); setLocation('/admin/forgot-password'); }}
+            className="text-sm text-slate-400 hover:text-[#E63946] transition-colors"
+          >
+            Mot de passe oublié ?
+          </a>
           <p className="text-xs text-slate-500">
             © 2026 Epitaphe — Tous droits réservés
           </p>
@@ -240,8 +231,6 @@ export const NewLoginPage: React.FC = () => {
 
       {/* Custom CSS Animations */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;600;700&family=Cormorant+Garamond:wght@400;700&display=swap');
-        .login-wrap { font-family: 'Fira Sans', sans-serif; }
         @keyframes fadeInUp {
           from {
             opacity: 0;

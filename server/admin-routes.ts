@@ -1,11 +1,17 @@
 import type { Express } from "express";
 import rateLimit from "express-rate-limit";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { db } from "./db";
+import crypto from "crypto";
 import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
   services, clientReferences, caseStudies, testimonials, teamMembers,
   projectBriefs, newsletterSubscriptions, contactMessages, resources,
-  clientAccounts, clientProjects, clientMilestones, clientDocuments, scoringResults,
+  passwordResetTokens, qrCodes,
+  clientAccounts, clientProjects, clientMilestones, clientDocuments,
+  clientMessages as clientMessagesTable, scoringResults,
   insertArticleSchema, insertEventSchema, insertPageSchema,
   insertServiceSchema, insertClientReferenceSchema, insertCaseStudySchema,
   insertTestimonialSchema, insertTeamMemberSchema, insertResourceSchema,
@@ -13,7 +19,48 @@ import {
 } from "@shared/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, type AuthRequest } from "./lib/auth";
+import { sendAdminPasswordReset, sendAgencyMessageNotification } from "./lib/email";
 import { z } from "zod";
+
+// ── Multer — stockage local des médias uploadés ───────────────────────────────
+const UPLOAD_DIR = path.resolve(process.cwd(), "dist", "public", "uploads");
+
+// S'assurer que le répertoire existe au démarrage
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+  filename: (_req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${unique}${ext}`);
+  },
+});
+
+const ALLOWED_MIME = new Set([
+  "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+  "image/avif", "application/pdf",
+  "video/mp4", "video/webm",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/zip",
+]);
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 Mo max
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Type de fichier non autorisé : ${file.mimetype}`));
+    }
+  },
+});
 
 /**
  * Sanitize a search string for use in SQL LIKE patterns
@@ -134,6 +181,97 @@ export function registerAdminRoutes(app: Express) {
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: 'Erreur lors de la connexion' });
+    }
+  });
+
+  // ── Mot de passe oublié (admin) ─────────────────────────────────────────────
+  app.post('/api/admin/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body as { email?: string };
+      if (!email) return res.status(400).json({ error: 'Email requis' });
+
+      const [user] = await db.select({ id: users.id, email: users.email })
+        .from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+
+      // Toujours retourner 200 pour éviter l'énumération d'emails
+      if (!user) return res.json({ message: 'Si ce compte existe, un lien de réinitialisation a été envoyé.' });
+
+      const token = crypto.randomBytes(48).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
+
+      // Invalider les anciens tokens
+      await db.delete(passwordResetTokens)
+        .where(and(eq(passwordResetTokens.email, user.email), eq(passwordResetTokens.accountType, 'admin')));
+
+      await db.insert(passwordResetTokens).values({
+        token, email: user.email, accountType: 'admin', expiresAt,
+      });
+
+      sendAdminPasswordReset(user.email, token)
+        .catch(e => console.error("[EMAIL] Admin reset error:", e));
+
+      res.json({ message: 'Si ce compte existe, un lien de réinitialisation a été envoyé.' });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+
+  // ── Réinitialiser le mot de passe (admin) ────────────────────────────────────
+  app.post('/api/admin/reset-password', async (req, res) => {
+    try {
+      const { token, password } = req.body as { token?: string; password?: string };
+      if (!token || !password) return res.status(400).json({ error: 'Token et mot de passe requis' });
+
+      const pwCheck = validatePassword(password);
+      if (!pwCheck.valid) return res.status(422).json({ error: pwCheck.error });
+
+      const [resetRecord] = await db.select().from(passwordResetTokens)
+        .where(and(
+          eq(passwordResetTokens.token, token),
+          eq(passwordResetTokens.accountType, 'admin')
+        )).limit(1);
+
+      if (!resetRecord) return res.status(400).json({ error: 'Token invalide ou expiré' });
+      if (resetRecord.usedAt) return res.status(400).json({ error: 'Ce lien a déjà été utilisé' });
+      if (new Date() > resetRecord.expiresAt) return res.status(400).json({ error: 'Ce lien a expiré' });
+
+      const hashedPassword = await hashPassword(password);
+
+      await Promise.all([
+        db.update(users).set({ password: hashedPassword }).where(eq(users.email, resetRecord.email)),
+        db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.token, token)),
+      ]);
+
+      res.json({ message: 'Mot de passe réinitialisé avec succès' });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+
+  // ── Changer son propre mot de passe (admin authentifié) ─────────────────────
+  app.post('/api/admin/change-password', requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body as { currentPassword?: string; newPassword?: string };
+      if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Mot de passe actuel et nouveau requis' });
+
+      const pwCheck = validatePassword(newPassword);
+      if (!pwCheck.valid) return res.status(422).json({ error: pwCheck.error });
+
+      const [user] = await db.select().from(users).where(eq(users.id, req.user!.userId)).limit(1);
+      if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+
+      const isValid = await verifyPassword(currentPassword, user.password);
+      if (!isValid) return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
+
+      const hashedPassword = await hashPassword(newPassword);
+      await db.update(users).set({ password: hashedPassword }).where(eq(users.id, user.id));
+
+      res.json({ message: 'Mot de passe changé avec succès' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      res.status(500).json({ error: 'Erreur serveur' });
     }
   });
 
@@ -683,6 +821,76 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Upload media file
+  app.post('/api/admin/media', requireAuth, upload.single('file'), async (req: AuthRequest, res) => {
+    try {
+      const file = (req as any).file;
+      if (!file) {
+        return res.status(400).json({ error: 'Aucun fichier fourni' });
+      }
+
+      const { alt, caption, title, folder } = req.body as Record<string, string>;
+      const url = `/uploads/${file.filename}`;
+
+      const [newMedia] = await db.insert(media).values({
+        filename: file.filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url,
+        alt: alt || null,
+        caption: caption || null,
+        title: title || null,
+        folder: folder || '/',
+        uploadedBy: req.user?.userId,
+      }).returning();
+
+      res.status(201).json(newMedia);
+    } catch (error: any) {
+      console.error('Upload media error:', error);
+      if (error.message?.includes('Type de fichier')) {
+        return res.status(415).json({ error: error.message });
+      }
+      res.status(500).json({ error: "Erreur lors de l'upload du fichier" });
+    }
+  });
+
+  // Update media metadata
+  app.patch('/api/admin/media/:id', requireAuth, async (req, res) => {
+    try {
+      const { alt, caption, title, folder } = req.body as Record<string, string>;
+      const [updated] = await db.update(media)
+        .set({ alt, caption, title, folder, updatedAt: new Date() })
+        .where(eq(media.id, req.params.id))
+        .returning();
+      if (!updated) return res.status(404).json({ error: 'Média non trouvé' });
+      res.json(updated);
+    } catch (error) {
+      console.error('Update media error:', error);
+      res.status(500).json({ error: 'Erreur mise à jour média' });
+    }
+  });
+
+  // Delete media file
+  app.delete('/api/admin/media/:id', requireAuth, async (req, res) => {
+    try {
+      const [existing] = await db.select().from(media).where(eq(media.id, req.params.id)).limit(1);
+      if (!existing) return res.status(404).json({ error: 'Média non trouvé' });
+
+      // Supprimer le fichier physique si stocké localement
+      const filePath = path.join(UPLOAD_DIR, existing.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      await db.delete(media).where(eq(media.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete media error:', error);
+      res.status(500).json({ error: 'Erreur suppression média' });
+    }
+  });
+
   // ========================================
   // PAGES MANAGEMENT
   // ========================================
@@ -773,13 +981,33 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // Toggle page publish/draft status
+  app.put('/api/admin/pages/:id/status', requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body as { status?: string };
+      const normalized = status?.toUpperCase();
+      if (!normalized || !['PUBLISHED', 'DRAFT'].includes(normalized)) {
+        return res.status(400).json({ error: 'Status doit être "published" ou "draft"' });
+      }
+      const [updated] = await db.update(pages)
+        .set({ status: normalized, updatedAt: new Date() })
+        .where(eq(pages.id, req.params.id))
+        .returning();
+      if (!updated) return res.status(404).json({ error: 'Page non trouvée' });
+      res.json(updated);
+    } catch (error) {
+      console.error('Toggle page status error:', error);
+      res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
+    }
+  });
+
   // ========================================
   // AUDIT LOGS (Admin only)
   // ========================================
 
   app.get('/api/admin/audit-logs', requireAuth, requireAdmin, async (req, res) => {
     try {
-      const { entityType, entityId, userId, limit, offset } = req.query;
+      const { entityType, entityId, userId, action, limit, offset } = req.query;
 
       // Validate pagination parameters (default limit for audit logs is 100)
       const pagination = validatePagination(limit as string || '100', offset as string);
@@ -788,27 +1016,22 @@ export function registerAdminRoutes(app: Express) {
       }
 
       const conditions: any[] = [];
-      if (entityType) {
-        conditions.push(eq(auditLogs.entityType, entityType as string));
-      }
-      if (entityId) {
-        conditions.push(eq(auditLogs.entityId, entityId as string));
-      }
-      if (userId) {
-        conditions.push(eq(auditLogs.userId, userId as string));
-      }
+      if (entityType) conditions.push(eq(auditLogs.entityType, entityType as string));
+      if (entityId)   conditions.push(eq(auditLogs.entityId, entityId as string));
+      if (userId)     conditions.push(eq(auditLogs.userId, userId as string));
+      if (action && action !== 'all') conditions.push(eq(auditLogs.action, action as string));
 
       let query = db.select().from(auditLogs);
       if (conditions.length > 0) {
         query = query.where(and(...conditions)) as typeof query;
       }
 
-      const result = await query
-        .orderBy(desc(auditLogs.createdAt))
-        .limit(pagination.limit)
-        .offset(pagination.offset);
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(auditLogs.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(auditLogs),
+      ]);
 
-      res.json(result);
+      res.json({ data: result, total: Number(count) });
     } catch (error) {
       console.error('Get audit logs error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des logs' });
@@ -1719,87 +1942,145 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  // ========================================
-  // CLIENT ACCOUNTS MANAGEMENT (Espace Client)
-  // ========================================
-
-  app.get('/api/admin/clients', requireAuth, async (req, res) => {
+  // Répondre par email à un message de contact
+  app.post('/api/admin/contacts/:id/reply', requireAuth, async (req: AuthRequest, res) => {
     try {
-      const result = await db.select({
-        id: clientAccounts.id,
-        email: clientAccounts.email,
-        name: clientAccounts.name,
-        company: clientAccounts.company,
-        phone: clientAccounts.phone,
-        isActive: clientAccounts.isActive,
-        lastLoginAt: clientAccounts.lastLoginAt,
-        createdAt: clientAccounts.createdAt,
-      }).from(clientAccounts).orderBy(desc(clientAccounts.createdAt));
-      res.json({ data: result, total: result.length });
-    } catch (error) {
-      res.status(500).json({ error: 'Erreur comptes clients' });
-    }
-  });
+      const { replyBody } = req.body as { replyBody?: string };
+      if (!replyBody?.trim()) return res.status(400).json({ error: 'Le message de réponse est requis' });
 
-  app.get('/api/admin/clients/:id', requireAuth, async (req, res) => {
-    try {
-      const [client] = await db.select({
-        id: clientAccounts.id,
-        email: clientAccounts.email,
-        name: clientAccounts.name,
-        company: clientAccounts.company,
-        phone: clientAccounts.phone,
-        isActive: clientAccounts.isActive,
-        lastLoginAt: clientAccounts.lastLoginAt,
-        createdAt: clientAccounts.createdAt,
-      }).from(clientAccounts).where(eq(clientAccounts.id, parseInt(req.params.id, 10))).limit(1);
-      if (!client) return res.status(404).json({ error: 'Client non trouvé' });
-      // Récupérer aussi ses projets
-      const projects = await db.select().from(clientProjects)
-        .where(eq(clientProjects.clientId, parseInt(req.params.id, 10)))
-        .orderBy(desc(clientProjects.createdAt));
-      res.json({ ...client, projects });
-    } catch (error) {
-      res.status(500).json({ error: 'Erreur client' });
-    }
-  });
+      const [contact] = await db.select().from(contactMessages).where(eq(contactMessages.id, req.params.id)).limit(1);
+      if (!contact) return res.status(404).json({ error: 'Message introuvable' });
 
-  app.post('/api/admin/clients', requireAuth, requireAdmin, async (req, res) => {
-    try {
-      const { email, password, name, company, phone } = req.body;
-      if (!email || !password || !name) return res.status(400).json({ error: 'email, password et name requis' });
-      const passwordHash = await hashPassword(password);
-      const [newClient] = await db.insert(clientAccounts)
-        .values({ email, passwordHash, name, company, phone })
-        .returning({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name, company: clientAccounts.company });
-      res.status(201).json(newClient);
-    } catch (error: any) {
-      if (error?.code === '23505') return res.status(409).json({ error: 'Email déjà utilisé' });
-      res.status(500).json({ error: 'Erreur création client' });
-    }
-  });
+      const { sendMail } = await import('./lib/email');
+      const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const ok = await sendMail({
+        to: contact.email,
+        subject: `Re: Message de ${esc(contact.firstName ?? '')} ${esc(contact.lastName ?? '')} — Epitaphe360`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
+            <p style="color:#333;">${esc(replyBody.trim()).replace(/\n/g, '<br/>')}</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
+            <blockquote style="color:#888;border-left:3px solid #E63946;padding-left:12px;margin:0;">
+              <p><strong>Votre message original :</strong></p>
+              <p>${esc(contact.message ?? '')}</p>
+            </blockquote>
+            <p style="color:#aaa;font-size:12px;margin-top:24px;">Epitaphe360 · <a href="${process.env.FRONTEND_URL ?? 'https://epitaphe360.com'}" style="color:#E63946;">epitaphe360.com</a></p>
+          </div>
+        `,
+      });
 
-  app.put('/api/admin/clients/:id', requireAuth, requireAdmin, async (req, res) => {
-    try {
-      const { password, passwordHash: _, id: _id, createdAt: _c, ...updateData } = req.body;
-      if (password) updateData.passwordHash = await hashPassword(password);
-      const [updated] = await db.update(clientAccounts)
-        .set({ ...updateData, updatedAt: new Date() })
-        .where(eq(clientAccounts.id, parseInt(req.params.id, 10)))
-        .returning({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name, isActive: clientAccounts.isActive });
-      if (!updated) return res.status(404).json({ error: 'Client non trouvé' });
-      res.json(updated);
-    } catch (error) {
-      res.status(500).json({ error: 'Erreur mise à jour client' });
-    }
-  });
+      if (!ok) return res.status(500).json({ error: 'Échec envoi email' });
 
-  app.delete('/api/admin/clients/:id', requireAuth, requireAdmin, async (req, res) => {
-    try {
-      await db.delete(clientAccounts).where(eq(clientAccounts.id, parseInt(req.params.id, 10)));
+      // Marquer comme répondu
+      await db.update(contactMessages).set({ status: 'replied' }).where(eq(contactMessages.id, req.params.id));
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: 'Erreur suppression client' });
+      console.error('Contact reply error:', error);
+      res.status(500).json({ error: 'Erreur lors de l\'envoi de la réponse' });
+    }
+  });
+
+  // ========================================
+  // ESPACE CLIENT — Gestion des comptes clients (admin)
+  // ========================================
+
+  // Liste des comptes clients
+  app.get('/api/admin/client-accounts', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(
+          like(clientAccounts.name, `%${s}%`),
+          like(clientAccounts.email, `%${s}%`),
+          like(clientAccounts.company, `%${s}%`)
+        ));
+      }
+
+      let query = db.select({
+        id: clientAccounts.id,
+        email: clientAccounts.email,
+        name: clientAccounts.name,
+        company: clientAccounts.company,
+        phone: clientAccounts.phone,
+        isActive: clientAccounts.isActive,
+        lastLoginAt: clientAccounts.lastLoginAt,
+        createdAt: clientAccounts.createdAt,
+      }).from(clientAccounts);
+
+      if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
+      const [result, [{ count }]] = await Promise.all([
+        query.orderBy(desc(clientAccounts.createdAt)).limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql`count(*)` }).from(clientAccounts),
+      ]);
+      res.json({ data: result, total: Number(count) });
+    } catch (error) {
+      console.error('Client accounts list error:', error);
+      res.status(500).json({ error: 'Erreur récupération comptes clients' });
+    }
+  });
+
+  // Créer un compte client
+  app.post('/api/admin/client-accounts', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { email, name, company, phone, password } = req.body as Record<string, string>;
+      if (!email || !name || !password) {
+        return res.status(400).json({ error: 'email, name et password sont requis' });
+      }
+      const pwCheck = validatePassword(password);
+      if (!pwCheck.valid) return res.status(422).json({ error: pwCheck.error });
+
+      const passwordHash = await hashPassword(password);
+      const [account] = await db.insert(clientAccounts).values({
+        email, name, company: company || null, phone: phone || null, passwordHash, isActive: true,
+      }).returning();
+
+      const { passwordHash: _, ...safe } = account;
+      res.status(201).json(safe);
+    } catch (error: any) {
+      console.error('Create client account error:', error);
+      if (error.code === '23505') return res.status(409).json({ error: 'Email déjà utilisé' });
+      res.status(500).json({ error: 'Erreur création compte client' });
+    }
+  });
+
+  // Modifier un compte client
+  app.put('/api/admin/client-accounts/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { name, company, phone, isActive, password } = req.body as Record<string, any>;
+
+      const updateData: Record<string, any> = { name, company, phone, isActive, updatedAt: new Date() };
+
+      if (password) {
+        const pwCheck = validatePassword(password);
+        if (!pwCheck.valid) return res.status(422).json({ error: pwCheck.error });
+        updateData.passwordHash = await hashPassword(password);
+      }
+
+      const [updated] = await db.update(clientAccounts).set(updateData).where(eq(clientAccounts.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Compte client non trouvé' });
+      const { passwordHash: _, ...safe } = updated;
+      res.json(safe);
+    } catch (error) {
+      console.error('Update client account error:', error);
+      res.status(500).json({ error: 'Erreur mise à jour compte client' });
+    }
+  });
+
+  // Supprimer un compte client
+  app.delete('/api/admin/client-accounts/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await db.delete(clientAccounts).where(eq(clientAccounts.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression compte client' });
     }
   });
 
@@ -1850,26 +2131,31 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // ========================================
-  // CLIENT PROJECTS — CRUD complet
+  // ESPACE CLIENT — Gestion des projets (admin)
   // ========================================
 
+  // Liste des projets d'un client (ou tous)
   app.get('/api/admin/client-projects', requireAuth, async (req, res) => {
     try {
       const { clientId, status, limit, offset } = req.query;
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
-      let query = db.select().from(clientProjects);
+
       const conditions: any[] = [];
       if (clientId) conditions.push(eq(clientProjects.clientId, parseInt(clientId as string, 10)));
-      if (status) conditions.push(eq(clientProjects.status, status as string));
+      if (status && status !== 'all') conditions.push(eq(clientProjects.status, status as string));
+
+      let query = db.select().from(clientProjects);
       if (conditions.length > 0) query = query.where(and(...conditions)) as typeof query;
+
       const [result, [{ count }]] = await Promise.all([
         query.orderBy(desc(clientProjects.createdAt)).limit(pagination.limit).offset(pagination.offset),
         db.select({ count: sql`count(*)` }).from(clientProjects),
       ]);
       res.json({ data: result, total: Number(count) });
     } catch (error) {
-      res.status(500).json({ error: 'Erreur projets clients' });
+      console.error('Client projects list error:', error);
+      res.status(500).json({ error: 'Erreur récupération projets clients' });
     }
   });
 
@@ -1888,31 +2174,56 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/client-projects', requireAuth, requireAdmin, async (req, res) => {
+  // Créer un projet client
+  app.post('/api/admin/client-projects', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
     try {
-      const parsed = insertClientProjectSchema.safeParse(req.body);
-      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
-      const [project] = await db.insert(clientProjects).values(parsed.data).returning();
+      const { clientId, title, type, status, progress, managerName, managerEmail, startDate, endDate, description } = req.body;
+      if (!clientId || !title) return res.status(400).json({ error: 'clientId et title sont requis' });
+
+      const [project] = await db.insert(clientProjects).values({
+        clientId: parseInt(clientId, 10),
+        title, type: type || 'Projet',
+        status: status || 'en_cours',
+        progress: progress ?? 0,
+        managerName: managerName || null,
+        managerEmail: managerEmail || null,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        description: description || null,
+      }).returning();
+
       res.status(201).json(project);
     } catch (error) {
-      res.status(500).json({ error: 'Erreur création projet' });
+      console.error('Create client project error:', error);
+      res.status(500).json({ error: 'Erreur création projet client' });
     }
   });
 
+  // Modifier un projet client
   app.put('/api/admin/client-projects/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
-      const { id, createdAt, ...updateData } = req.body;
-      const [project] = await db.update(clientProjects)
-        .set({ ...updateData, updatedAt: new Date() })
-        .where(eq(clientProjects.id, parseInt(req.params.id, 10)))
-        .returning();
-      if (!project) return res.status(404).json({ error: 'Projet non trouvé' });
-      res.json(project);
+      const id = parseInt(req.params.id, 10);
+      const { title, type, status, progress, managerName, managerEmail, startDate, endDate, description } = req.body;
+
+      const [updated] = await db.update(clientProjects).set({
+        title, type, status, progress,
+        managerName: managerName || null,
+        managerEmail: managerEmail || null,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        description: description || null,
+        updatedAt: new Date(),
+      }).where(eq(clientProjects.id, id)).returning();
+
+      if (!updated) return res.status(404).json({ error: 'Projet non trouvé' });
+      res.json(updated);
     } catch (error) {
-      res.status(500).json({ error: 'Erreur mise à jour projet' });
+      console.error('Update client project error:', error);
+      res.status(500).json({ error: 'Erreur mise à jour projet client' });
     }
   });
 
+  // Supprimer un projet client
   app.delete('/api/admin/client-projects/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const pid = parseInt(req.params.id, 10);
@@ -1923,61 +2234,196 @@ export function registerAdminRoutes(app: Express) {
       await db.delete(clientProjects).where(eq(clientProjects.id, pid));
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: 'Erreur suppression projet' });
+      res.status(500).json({ error: 'Erreur suppression projet client' });
     }
   });
 
-  // Milestones
-  app.post('/api/admin/client-projects/:id/milestones', requireAuth, requireAdmin, async (req, res) => {
+  // ========================================
+  // ESPACE CLIENT — Jalons (admin)
+  // ========================================
+
+  app.get('/api/admin/client-projects/:projectId/milestones', requireAuth, async (req, res) => {
     try {
-      const parsed = insertClientMilestoneSchema.safeParse({ ...req.body, projectId: parseInt(req.params.id, 10) });
-      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
-      const [m] = await db.insert(clientMilestones).values(parsed.data).returning();
-      res.status(201).json(m);
+      const projectId = parseInt(req.params.projectId, 10);
+      const milestones = await db.select().from(clientMilestones)
+        .where(eq(clientMilestones.projectId, projectId))
+        .orderBy(clientMilestones.order);
+      res.json(milestones);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur jalons' });
+    }
+  });
+
+  app.post('/api/admin/client-projects/:projectId/milestones', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId, 10);
+      const { label, dueDate, status, order } = req.body;
+      if (!label) return res.status(400).json({ error: 'label requis' });
+      const [milestone] = await db.insert(clientMilestones).values({
+        projectId, label, dueDate: dueDate || null,
+        status: status || 'pending', order: order ?? 0,
+      }).returning();
+      res.status(201).json(milestone);
     } catch (error) {
       res.status(500).json({ error: 'Erreur création jalon' });
     }
   });
 
-  app.put('/api/admin/client-projects/:id/milestones/:mid', requireAuth, requireAdmin, async (req, res) => {
+  app.put('/api/admin/client-milestones/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
-      const { id, createdAt, ...updateData } = req.body;
-      const [m] = await db.update(clientMilestones).set(updateData)
-        .where(eq(clientMilestones.id, parseInt(req.params.mid, 10))).returning();
-      if (!m) return res.status(404).json({ error: 'Jalon non trouvé' });
-      res.json(m);
+      const id = parseInt(req.params.id, 10);
+      const { label, dueDate, status, order } = req.body;
+      const [updated] = await db.update(clientMilestones)
+        .set({ label, dueDate, status, order })
+        .where(eq(clientMilestones.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Jalon non trouvé' });
+      res.json(updated);
     } catch (error) {
       res.status(500).json({ error: 'Erreur mise à jour jalon' });
     }
   });
 
-  app.delete('/api/admin/client-projects/:id/milestones/:mid', requireAuth, requireAdmin, async (req, res) => {
+  app.delete('/api/admin/client-milestones/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
-      await db.delete(clientMilestones).where(eq(clientMilestones.id, parseInt(req.params.mid, 10)));
+      const id = parseInt(req.params.id, 10);
+      await db.delete(clientMilestones).where(eq(clientMilestones.id, id));
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Erreur suppression jalon' });
     }
   });
 
-  // Documents
-  app.post('/api/admin/client-projects/:id/documents', requireAuth, requireAdmin, async (req, res) => {
+  // ========================================
+  // ESPACE CLIENT — Documents livrables (admin)
+  // ========================================
+
+  app.get('/api/admin/client-projects/:projectId/documents', requireAuth, async (req, res) => {
     try {
-      const parsed = insertClientDocumentSchema.safeParse({ ...req.body, projectId: parseInt(req.params.id, 10) });
-      if (!parsed.success) return res.status(422).json({ error: parsed.error.flatten() });
-      const [doc] = await db.insert(clientDocuments).values(parsed.data).returning();
+      const projectId = parseInt(req.params.projectId, 10);
+      const docs = await db.select().from(clientDocuments)
+        .where(eq(clientDocuments.projectId, projectId))
+        .orderBy(desc(clientDocuments.uploadedAt));
+      res.json(docs);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur documents' });
+    }
+  });
+
+  app.post('/api/admin/client-projects/:projectId/documents', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId, 10);
+      const { name, fileType, fileSize, url } = req.body;
+      if (!name || !url) return res.status(400).json({ error: 'name et url requis' });
+      const [doc] = await db.insert(clientDocuments).values({
+        projectId, name, fileType: fileType || 'PDF', fileSize: fileSize || null, url,
+      }).returning();
       res.status(201).json(doc);
     } catch (error) {
       res.status(500).json({ error: 'Erreur ajout document' });
     }
   });
 
-  app.delete('/api/admin/client-projects/:id/documents/:did', requireAuth, requireAdmin, async (req, res) => {
+  app.delete('/api/admin/client-documents/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
-      await db.delete(clientDocuments).where(eq(clientDocuments.id, parseInt(req.params.did, 10)));
+      const id = parseInt(req.params.id, 10);
+      await db.delete(clientDocuments).where(eq(clientDocuments.id, id));
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Erreur suppression document' });
+    }
+  });
+
+  // ========================================
+  // ESPACE CLIENT — Messages (admin → client)
+  // ========================================
+
+  app.get('/api/admin/client-projects/:projectId/messages', requireAuth, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId, 10);
+      const messages = await db.select().from(clientMessagesTable)
+        .where(eq(clientMessagesTable.projectId, projectId))
+        .orderBy(clientMessagesTable.createdAt);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur messages' });
+    }
+  });
+
+  app.post('/api/admin/client-projects/:projectId/messages', requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId, 10);
+      const { clientId, content } = req.body;
+      if (!clientId || !content?.trim()) return res.status(400).json({ error: 'clientId et content requis' });
+      const parsedClientId = parseInt(clientId, 10);
+      const [msg] = await db.insert(clientMessagesTable).values({
+        projectId, clientId: parsedClientId,
+        senderRole: 'agency', content: content.trim(), isRead: false,
+      }).returning();
+      res.status(201).json(msg);
+
+      // Send email notification to client (non-blocking)
+      Promise.all([
+        db.select({ email: clientAccounts.email, name: clientAccounts.name })
+          .from(clientAccounts).where(eq(clientAccounts.id, parsedClientId)).limit(1),
+        db.select({ title: clientProjects.title })
+          .from(clientProjects).where(eq(clientProjects.id, projectId)).limit(1),
+      ]).then(([[client], [project]]) => {
+        if (client && project) {
+          sendAgencyMessageNotification({
+            to: client.email, clientName: client.name,
+            projectTitle: project.title, message: content.trim(),
+          }).catch(e => console.error('[EMAIL] Agency message notification error:', e));
+        }
+      }).catch(() => {});
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur envoi message' });
+    }
+  });
+
+  // ========================================
+  // QR CODES
+  // ========================================
+
+  app.get('/api/admin/qr-codes', requireAuth, async (req, res) => {
+    try {
+      const list = await db.select().from(qrCodes).orderBy(desc(qrCodes.createdAt));
+      res.json({ data: list, total: list.length });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération QR codes' });
+    }
+  });
+
+  app.post('/api/admin/qr-codes', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { label, targetPath, utmSource, utmMedium, utmCampaign, utmContent } = req.body;
+      if (!label || !targetPath || !utmSource || !utmMedium || !utmCampaign) {
+        return res.status(400).json({ error: 'Champs obligatoires manquants' });
+      }
+      // Generate QR code SVG
+      const QRCode = await import('qrcode');
+      const baseUrl = process.env.SITE_URL ?? process.env.FRONTEND_URL ?? 'https://epitaphe360.com';
+      const params = new URLSearchParams({
+        utm_source: utmSource, utm_medium: utmMedium,
+        utm_campaign: utmCampaign, ...(utmContent ? { utm_content: utmContent } : {}),
+      });
+      const fullUrl = `${baseUrl}${targetPath}?${params.toString()}`;
+      const svgData = await QRCode.toString(fullUrl, { type: 'svg' });
+      const [created] = await db.insert(qrCodes).values({
+        label, targetPath, utmSource, utmMedium, utmCampaign, utmContent: utmContent ?? null, svgData,
+      }).returning();
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('QR code create error:', error);
+      res.status(500).json({ error: 'Erreur création QR code' });
+    }
+  });
+
+  app.delete('/api/admin/qr-codes/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(qrCodes).where(eq(qrCodes.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression QR code' });
     }
   });
 }

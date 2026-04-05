@@ -1,253 +1,249 @@
-/**
- * Email service — Epitaphe 360
- * Wraps nodemailer with env-based SMTP configuration.
- * Falls back gracefully (console.log) when SMTP_HOST is not set.
- */
-import nodemailer from "nodemailer";
+// ========================================
+// Service Email — Nodemailer
+// ========================================
+// Configure via variables d'env :
+//   SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS
+//   EMAIL_FROM, EMAIL_FROM_NAME
+//   FRONTEND_URL (pour les liens dans les emails)
+// ========================================
 
-const isDev = !process.env.SMTP_HOST;
+import nodemailer, { type Transporter } from "nodemailer";
 
-const transporter = isDev
-  ? null
-  : nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT ?? "587"),
-      secure: process.env.SMTP_SECURE === "true",
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+// ── Configuration ─────────────────────────────────────────────────────────────
+const SMTP_HOST     = process.env.SMTP_HOST     || "smtp.gmail.com";
+const SMTP_PORT     = parseInt(process.env.SMTP_PORT || "587", 10);
+const SMTP_SECURE   = process.env.SMTP_SECURE === "true";
+const SMTP_USER     = process.env.SMTP_USER     || "";
+const SMTP_PASS     = process.env.SMTP_PASS     || "";
+const EMAIL_FROM    = process.env.EMAIL_FROM    || "noreply@epitaphe360.com";
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || "Epitaphe 360";
+const FRONTEND_URL  = process.env.FRONTEND_URL  || "https://epitaphe360.com";
 
-const FROM = process.env.EMAIL_FROM ?? "Epitaphe 360 <no-reply@epitaphe360.ma>";
-const ADMIN = process.env.EMAIL_ADMIN ?? "contact@epitaphe360.ma";
+// ── Transporter ───────────────────────────────────────────────────────────────
+let transporter: Transporter | null = null;
 
-/** Escape HTML to prevent XSS in email templates */
-function esc(str: string | undefined | null): string {
-  if (!str) return "";
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-}
-
-async function send(options: nodemailer.SendMailOptions): Promise<void> {
+function getTransporter(): Transporter {
   if (!transporter) {
-    // Dev fallback — log instead of sending
-    console.log("[EMAIL DEV]", options.subject, "→", options.to);
-    console.log(options.text ?? options.html ?? "");
-    return;
+    if (!SMTP_USER || !SMTP_PASS) {
+      console.warn("[EMAIL] SMTP_USER ou SMTP_PASS non configurés — emails désactivés");
+      // Retourne un transporter fictif qui log sans envoyer
+      return nodemailer.createTransport({ jsonTransport: true } as any);
+    }
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
   }
-  await transporter.sendMail({ from: FROM, ...options });
+  return transporter;
 }
 
-/* ── Emails newsletter ──────────────────────────────────────────────────── */
+// ── Envoi générique ────────────────────────────────────────────────────────────
+export async function sendMail(options: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<boolean> {
+  try {
+    const t = getTransporter();
+    const info = await t.sendMail({
+      from: `"${EMAIL_FROM_NAME}" <${EMAIL_FROM}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text || options.html.replace(/<[^>]+>/g, ""),
+    });
+    console.log(`[EMAIL] Envoyé à ${options.to}: ${options.subject} (${info.messageId})`);
+    return true;
+  } catch (err) {
+    console.error("[EMAIL] Erreur d'envoi:", err);
+    return false;
+  }
+}
 
-export async function sendNewsletterConfirmation(email: string): Promise<void> {
-  await send({
-    to: email,
-    subject: "Bienvenue dans la newsletter Epitaphe 360 ✅",
-    text: `Bonjour,\n\nVous êtes maintenant abonné(e) à la newsletter Epitaphe 360.\n\nVous recevrez nos dernières actualités, tendances et ressources directement dans votre boîte mail.\n\nÀ bientôt,\nL'équipe Epitaphe 360`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-        <h2 style="color:#d1295a">Bienvenue dans la newsletter Epitaphe 360 ✅</h2>
-        <p>Bonjour,</p>
-        <p>Vous êtes maintenant abonné(e) à la newsletter <strong>Epitaphe 360</strong>.</p>
-        <p>Vous recevrez nos dernières actualités, tendances et ressources directement dans votre boîte mail.</p>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
-        <p style="font-size:12px;color:#888">Pour vous désabonner, <a href="https://www.epitaphe360.ma/newsletter/unsubscribe?email=${encodeURIComponent(email)}">cliquez ici</a>.</p>
-      </div>
-    `,
+// ── HTML Escaping (XSS prevention for email templates) ─────────────────────────
+function esc(str: string | null | undefined): string {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Template de base ───────────────────────────────────────────────────────────
+function baseTemplate(title: string, content: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+  <style>
+    body { margin:0; padding:0; background:#f4f4f5; font-family:'Segoe UI',Arial,sans-serif; }
+    .wrapper { max-width:600px; margin:0 auto; padding:32px 16px; }
+    .card { background:#fff; border-radius:12px; padding:40px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .logo { font-size:24px; font-weight:800; color:#E63946; margin-bottom:32px; }
+    h1 { font-size:22px; font-weight:700; color:#111; margin:0 0 16px; }
+    p { font-size:15px; color:#444; line-height:1.6; margin:0 0 16px; }
+    .btn { display:inline-block; background:#E63946; color:#fff !important; text-decoration:none;
+           padding:14px 28px; border-radius:8px; font-weight:600; font-size:15px; margin:8px 0 24px; }
+    .footer { margin-top:32px; font-size:12px; color:#888; text-align:center; }
+    .divider { border:none; border-top:1px solid #eee; margin:24px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <div class="logo">Epitaphe 360</div>
+      ${content}
+    </div>
+    <div class="footer">
+      © ${new Date().getFullYear()} Epitaphe 360 · Tous droits réservés<br/>
+      <a href="${FRONTEND_URL}" style="color:#E63946;">${FRONTEND_URL}</a>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ========================================
+// EMAILS SPÉCIFIQUES
+// ========================================
+
+// ── 1. Confirmation newsletter ────────────────────────────────────────────────
+export async function sendNewsletterConfirmation(to: string): Promise<boolean> {
+  return sendMail({
+    to,
+    subject: "Bienvenue dans la newsletter Epitaphe 360 🎉",
+    html: baseTemplate("Bienvenue !", `
+      <h1>Bienvenue dans notre newsletter !</h1>
+      <p>Merci de vous être abonné(e) à la newsletter d'<strong>Epitaphe 360</strong>.</p>
+      <p>Vous recevrez désormais nos dernières actualités, études de cas et tendances en matière d'événementiel et de communication d'entreprise.</p>
+      <a href="${FRONTEND_URL}" class="btn">Découvrir notre univers</a>
+      <hr class="divider" />
+      <p style="font-size:13px;color:#888;">
+        Pour vous désabonner, <a href="${FRONTEND_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(to)}" style="color:#E63946;">cliquez ici</a>.
+      </p>
+    `),
   });
 }
 
-/* ── Emails brief projet ────────────────────────────────────────────────── */
+// ── 2. Reset mot de passe admin ───────────────────────────────────────────────
+export async function sendAdminPasswordReset(to: string, token: string): Promise<boolean> {
+  const link = `${FRONTEND_URL}/admin/reset-password?token=${token}`;
+  return sendMail({
+    to,
+    subject: "Réinitialisation de votre mot de passe — Epitaphe Admin",
+    html: baseTemplate("Réinitialisation du mot de passe", `
+      <h1>Réinitialisation de mot de passe</h1>
+      <p>Vous avez demandé la réinitialisation de votre mot de passe administrateur.</p>
+      <p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe. Ce lien est valable <strong>1 heure</strong>.</p>
+      <a href="${link}" class="btn">Réinitialiser mon mot de passe</a>
+      <hr class="divider" />
+      <p style="font-size:13px;color:#888;">
+        Si vous n'avez pas fait cette demande, ignorez cet email.<br/>
+        Lien : <a href="${link}" style="color:#E63946;">${link}</a>
+      </p>
+    `),
+  });
+}
 
-export async function sendBriefConfirmation(email: string, name: string, projectType: string): Promise<void> {
-  await send({
-    to: email,
+// ── 3. Reset mot de passe client ──────────────────────────────────────────────
+export async function sendClientPasswordReset(to: string, name: string, token: string): Promise<boolean> {
+  const link = `${FRONTEND_URL}/espace-client/reset-password?token=${token}`;
+  return sendMail({
+    to,
+    subject: "Réinitialisation de votre mot de passe — Espace Client",
+    html: baseTemplate("Réinitialisation du mot de passe", `
+      <h1>Bonjour ${esc(name)},</h1>
+      <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre Espace Client Epitaphe 360.</p>
+      <p>Cliquez sur le bouton ci-dessous. Ce lien est valable <strong>1 heure</strong>.</p>
+      <a href="${link}" class="btn">Réinitialiser mon mot de passe</a>
+      <hr class="divider" />
+      <p style="font-size:13px;color:#888;">
+        Si vous n'avez pas fait cette demande, ignorez cet email.<br/>
+        Lien : <a href="${link}" style="color:#E63946;">${link}</a>
+      </p>
+    `),
+  });
+}
+
+// ── 4. Notification admin — nouveau message de contact ────────────────────────
+export async function sendContactNotification(opts: {
+  adminEmail: string;
+  fromName: string;
+  fromEmail: string;
+  company?: string;
+  message: string;
+}): Promise<boolean> {
+  return sendMail({
+    to: opts.adminEmail,
+    subject: `Nouveau message de contact — ${opts.fromName}`,
+    html: baseTemplate("Nouveau message de contact", `
+      <h1>Nouveau message de contact</h1>
+      <p><strong>De :</strong> ${esc(opts.fromName)} (${esc(opts.fromEmail)})${opts.company ? ` — ${esc(opts.company)}` : ""}</p>
+      <hr class="divider" />
+      <p style="white-space:pre-wrap;">${esc(opts.message)}</p>
+      <hr class="divider" />
+      <a href="${FRONTEND_URL}/admin/contacts" class="btn">Voir dans l'admin</a>
+    `),
+  });
+}
+
+// ── 5. Confirmation client — brief projet reçu ───────────────────────────────
+export async function sendBriefConfirmation(to: string, name: string, projectType: string): Promise<boolean> {
+  return sendMail({
+    to,
     subject: "Votre brief a bien été reçu — Epitaphe 360",
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-        <h2 style="color:#d1295a">Votre brief a bien été reçu 🎉</h2>
-        <p>Bonjour ${esc(name)},</p>
-        <p>Nous avons bien reçu votre brief pour votre projet <strong>${esc(projectType)}</strong>.</p>
-        <p>Notre équipe va l'analyser et vous contactera dans les <strong>48 heures ouvrées</strong> pour organiser un premier échange.</p>
-        <p>En attendant, n'hésitez pas à nous joindre via WhatsApp ou par email.</p>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
-        <p style="font-size:12px;color:#888">Epitaphe 360 — Agence événementielle &amp; communication</p>
+    html: baseTemplate("Brief reçu", `
+      <h1>Merci ${esc(name)} !</h1>
+      <p>Nous avons bien reçu votre brief pour un projet de type <strong>${esc(projectType)}</strong>.</p>
+      <p>Notre équipe va analyser votre demande et vous contactera dans les <strong>48 heures ouvrées</strong>.</p>
+      <a href="${FRONTEND_URL}/contact" class="btn">Nous contacter</a>
+    `),
+  });
+}
+
+// ── 6. Notification interne — nouveau brief projet ───────────────────────────
+export async function sendBriefNotification(opts: {
+  adminEmail: string;
+  clientName: string;
+  clientEmail: string;
+  projectType: string;
+  budget?: string;
+  description?: string;
+}): Promise<boolean> {
+  return sendMail({
+    to: opts.adminEmail,
+    subject: `Nouveau brief projet — ${esc(opts.clientName)} (${esc(opts.projectType)})`,
+    html: baseTemplate("Nouveau brief projet", `
+      <h1>Nouveau brief reçu</h1>
+      <p><strong>Client :</strong> ${esc(opts.clientName)} (${esc(opts.clientEmail)})</p>
+      <p><strong>Type de projet :</strong> ${esc(opts.projectType)}</p>
+      ${opts.budget ? `<p><strong>Budget :</strong> ${esc(opts.budget)}</p>` : ""}
+      ${opts.description ? `<p><strong>Description :</strong> ${esc(opts.description)}</p>` : ""}
+      <hr class="divider" />
+      <a href="${FRONTEND_URL}/admin/leads" class="btn">Voir dans l'admin</a>
+    `),
+  });
+}
+
+// ── 7. Notification client — nouveau message de l'agence ─────────────────────
+export async function sendAgencyMessageNotification(opts: {
+  to: string;
+  clientName: string;
+  projectTitle: string;
+  message: string;
+}): Promise<boolean> {
+  return sendMail({
+    to: opts.to,
+    subject: `Nouveau message sur votre projet "${esc(opts.projectTitle)}"`,
+    html: baseTemplate("Nouveau message", `
+      <h1>Bonjour ${esc(opts.clientName)},</h1>
+      <p>Votre équipe projet vous a envoyé un nouveau message concernant <strong>${esc(opts.projectTitle)}</strong> :</p>
+      <div style="background:#f8f8f8;border-left:4px solid #E63946;padding:16px;border-radius:4px;margin:16px 0;">
+        <p style="margin:0;white-space:pre-wrap;">${esc(opts.message)}</p></p>
       </div>
-    `,
+      <a href="${FRONTEND_URL}/espace-client" class="btn">Voir dans mon espace</a>
+    `),
   });
-}
-
-export async function sendBriefNotificationToAdmin(data: {
-  name: string; email: string; company?: string; projectType: string; budget?: string; message?: string;
-}): Promise<void> {
-  await send({
-    to: ADMIN,
-    subject: `[Nouveau brief] ${data.name} — ${data.projectType}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-        <h2 style="color:#d1295a">Nouveau brief reçu</h2>
-        <table style="width:100%;border-collapse:collapse">
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Nom</td><td>${esc(data.name)}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Email</td><td>${esc(data.email)}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Société</td><td>${esc(data.company) ?? "—"}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Type de projet</td><td>${esc(data.projectType)}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Budget</td><td>${esc(data.budget) ?? "—"}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Message</td><td>${esc(data.message) ?? "—"}</td></tr>
-        </table>
-        <p style="margin-top:16px"><a href="https://www.epitaphe360.ma/admin/leads" style="background:#d1295a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Voir dans le CMS →</a></p>
-      </div>
-    `,
-  });
-}
-
-/* ── Emails formulaire contact ──────────────────────────────────────────── */
-
-export async function sendContactConfirmation(email: string, name: string): Promise<void> {
-  await send({
-    to: email,
-    subject: "Votre message a bien été reçu — Epitaphe 360",
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-        <h2 style="color:#d1295a">Message bien reçu ✅</h2>
-        <p>Bonjour ${esc(name)},</p>
-        <p>Merci pour votre message. Notre équipe vous contactera dans les plus brefs délais.</p>
-        <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
-        <p style="font-size:12px;color:#888">Epitaphe 360 — Agence événementielle &amp; communication</p>
-      </div>
-    `,
-  });
-}
-
-export async function sendContactNotificationToAdmin(data: {
-  name: string; email: string; subject: string; message: string;
-}): Promise<void> {
-  await send({
-    to: ADMIN,
-    subject: `[Contact] ${data.name} — ${data.subject}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-        <h2 style="color:#d1295a">Nouveau message de contact</h2>
-        <table style="width:100%;border-collapse:collapse">
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Nom</td><td>${esc(data.name)}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Email</td><td>${esc(data.email)}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Sujet</td><td>${esc(data.subject)}</td></tr>
-          <tr><td style="padding:6px 0;font-weight:bold;color:#555">Message</td><td style="white-space:pre-wrap">${esc(data.message)}</td></tr>
-        </table>
-        <p style="margin-top:16px"><a href="https://www.epitaphe360.ma/admin/contacts" style="background:#d1295a;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Voir dans le CMS →</a></p>
-      </div>
-    `,
-  });
-}
-
-/* ── Emails Scoring / Lead Gen ───────────────────────────────────────────────────────────── */
-
-export async function sendScoringResultEmail(email: string, name: string, data: { sourceTool: string, magicLinkUrl: string }): Promise<void> {
-  await send({
-    to: email,
-    subject: `Vos résultats d'audit ${data.sourceTool} sont prêts ! — Epitaphe 360`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:12px;">
-        <h2 style="color:#6366F1;margin-bottom:8px;">Votre diagnostic ${data.sourceTool} est prêt ! 🚀</h2>
-        <p>Bonjour <strong>${esc(name)}</strong>,</p>
-        <p>Merci d'avoir complété notre diagnostic <strong>${esc(data.sourceTool)}</strong>. L'analyse de vos réponses est terminée.</p>
-        <p>Pour des raisons de confidentialité, votre rapport détaillé et vos recommandations sont stockés dans votre Espace Privé Epitaphe360, généré à l'instant pour vous.</p>
-        
-        <div style="text-align: center; margin: 36px 0;">
-          <a href="${data.magicLinkUrl}" style="background-color: #6366F1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Découvrir mon plan d'action</a>
-        </div>
-        
-        <p style="font-size:14px;"><em>Ce bouton (Magic Link) vous connecte automatiquement et de façon sécurisée à votre Espace Client.</em></p>
-        <hr style="border:none;border-top:1px solid #eee;margin:32px 0" />
-        <p style="font-size:12px;color:#888;text-align:center;">
-          <strong>Epitaphe 360</strong> — Intelligence Stratégique & Audit<br/>
-          <a href="https://epitaphe360.ma" style="color:#888;">www.epitaphe360.ma</a>
-        </p>
-      </div>
-    `,
-  });
-}
-
-export async function sendScoringNotificationToAdmin(data: { name: string; email: string; company?: string; sourceTool: string }): Promise<void> {
-  await send({
-    to: ADMIN,
-    subject: `✨ [Lead Qualifié] Nouveau profil capturé via ${data.sourceTool}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background-color:#fafafa;border-radius:12px">
-        <h2 style="color:#111;margin-top:0;">⚡ Nouveau Lead Capturé (Email-Gate)</h2>
-        <div style="background:#fff;padding:20px;border-radius:8px;margin-top:16px;">
-          <table style="width:100%;border-collapse:collapse;font-size:15px;">
-            <tr><td style="padding:8px 0;color:#555;width:30%;"><strong>Nom</strong></td><td>${esc(data.name)}</td></tr>
-            <tr><td style="padding:8px 0;color:#555;"><strong>Email</strong></td><td><a href="mailto:${encodeURIComponent(data.email)}">${esc(data.email)}</a></td></tr>
-            <tr><td style="padding:8px 0;color:#555;"><strong>Société</strong></td><td>${esc(data.company) ?? "Non renseigné"}</td></tr>
-            <tr><td style="padding:8px 0;color:#555;"><strong>Outil Source</strong></td><td><span style="background:#e0e7ff;color:#4f46e5;padding:4px 8px;border-radius:4px;font-size:13px;font-weight:bold;">${esc(data.sourceTool)}</span></td></tr>
-          </table>
-        </div>
-        <p style="margin-top:24px;text-align:center;">
-          <a href="https://www.epitaphe360.ma/admin/clients" style="background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">Voir dans le Dashboard Admin →</a>
-        </p>
-      </div>
-    `,
-  });
-}
-
-// ── Utilitaires génériques ──────────────────────────────────────────────────
-
-/** Envoi générique — wraps le transporteur interne */
-export async function sendEmail(options: nodemailer.SendMailOptions): Promise<void> {
-  await send(options);
-}
-
-/** Confirmation de paiement / abonnement */
-export async function sendPaymentConfirmation(
-  email: string,
-  name: string,
-  data: {
-    type: "subscription" | "devis";
-    planName?: string;
-    amount: number;
-    currency?: string;
-    billingCycle?: string;
-    reference?: string;
-  }
-): Promise<void> {
-  const amountFormatted = (data.amount / 100).toLocaleString("fr-MA", {
-    style: "currency",
-    currency: data.currency ?? "MAD",
-    minimumFractionDigits: 0,
-  });
-
-  const subject =
-    data.type === "subscription"
-      ? `✅ Confirmation d'abonnement — ${data.planName ?? "Epitaphe360"}`
-      : `✅ Devis accepté — ${data.reference ?? ""}`.trim();
-
-  const bodyHtml =
-    data.type === "subscription"
-      ? `
-        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#fafafa;border-radius:12px">
-          <h2 style="color:#111;margin-top:0;">Bienvenue sur Epitaphe360 ${data.planName} !</h2>
-          <p>Bonjour ${name},</p>
-          <p>Votre abonnement <strong>${data.planName}</strong> est maintenant actif.</p>
-          <table style="width:100%;border-collapse:collapse;font-size:15px;margin-top:16px;">
-            <tr><td style="padding:6px 0;color:#555;"><strong>Plan</strong></td><td>${data.planName}</td></tr>
-            <tr><td style="padding:6px 0;color:#555;"><strong>Montant</strong></td><td>${amountFormatted} / ${data.billingCycle === "annual" ? "an" : "mois"}</td></tr>
-          </table>
-          <p style="margin-top:24px;">
-            <a href="https://www.epitaphe360.ma/espace-client/abonnement" style="background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Gérer mon abonnement →</a>
-          </p>
-        </div>`
-      : `
-        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#fafafa;border-radius:12px">
-          <h2 style="color:#111;margin-top:0;">Devis ${data.reference} accepté</h2>
-          <p>Bonjour ${name},</p>
-          <p>Nous avons bien reçu votre acceptation du devis <strong>${data.reference}</strong>.</p>
-          <p>Montant : <strong>${amountFormatted}</strong></p>
-          <p>Notre équipe vous contactera très prochainement pour démarrer votre projet.</p>
-          <p style="margin-top:24px;">
-            <a href="https://www.epitaphe360.ma/espace-client" style="background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Accéder à mon espace →</a>
-          </p>
-        </div>`;
-
-  await send({ from: FROM, to: email, subject, html: bodyHtml });
 }

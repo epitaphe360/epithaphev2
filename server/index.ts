@@ -45,6 +45,10 @@ if (fs.existsSync(staticPath)) {
     immutable: true
   }));
   app.use('/favicon.png', express.static(path.join(staticPath, 'favicon.png')));
+  // Exposer les médias uploadés
+  const uploadsPath = path.join(staticPath, 'uploads');
+  if (!fs.existsSync(uploadsPath)) fs.mkdirSync(uploadsPath, { recursive: true });
+  app.use('/uploads', express.static(uploadsPath));
 }
 
 declare module "http" {

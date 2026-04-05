@@ -19,7 +19,7 @@ import {
 } from "@shared/schema";
 import { requireClientAuth } from "./public-api-routes";
 import type { ClientAuthRequest } from "./public-api-routes";
-import { sendPaymentConfirmation } from "./lib/email";
+import { sendMail } from "./lib/email";
 import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
 
@@ -177,12 +177,10 @@ export function registerPaymentRoutes(app: Express) {
         .from(clientAccounts).where(eq(clientAccounts.id, clientId)).limit(1);
 
       if (account) {
-        sendPaymentConfirmation(account.email, account.name, {
-          type: "subscription",
-          planName: plan.name,
-          amount,
-          currency: plan.currency ?? "MAD",
-          billingCycle,
+        sendMail({
+          to: account.email,
+          subject: `Confirmation de paiement — Epitaphe 360`,
+          html: `<p>Bonjour ${account.name},</p><p>Votre abonnement <strong>${plan.name}</strong> (${amount / 100} ${plan.currency ?? "MAD"}/${billingCycle}) a bien été activé.</p><p>Merci de votre confiance !</p>`,
         }).catch(e => console.error("[email] payment confirmation:", e));
       }
 
@@ -477,7 +475,6 @@ export function registerPaymentRoutes(app: Express) {
 }
 
 // ─── Email helpers locaux ─────────────────────────────────────────────────────
-import { sendEmail } from "./lib/email";
 
 async function sendDevisEmail(email: string, name: string, data: {
   reference: string;
@@ -488,7 +485,7 @@ async function sendDevisEmail(email: string, name: string, data: {
   devisUrl: string;
 }) {
   const totalFormatted = (data.total / 100).toLocaleString("fr-MA") + " " + data.currency;
-  await sendEmail({
+  await sendMail({
     to: email,
     subject: `Votre devis ${data.reference} — Epitaphe360`,
     html: `

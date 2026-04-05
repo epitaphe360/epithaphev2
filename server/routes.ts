@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactMessageSchema, insertScoringResultSchema, scoringResults } from "@shared/schema";
-import { sendContactConfirmation, sendContactNotificationToAdmin, sendScoringResultEmail, sendScoringNotificationToAdmin } from "./lib/email";
+import { sendContactNotification, sendMail } from "./lib/email";
 import { registerAdminRoutes } from "./admin-routes";
 import { registerScoringRoutes } from './scoring-routes';
 import { registerClientPortalRoutes } from './client-portal-routes';
@@ -89,16 +89,14 @@ export async function registerRoutes(
     try {
       const validatedData = insertContactMessageSchema.parse(req.body);
       const message = await storage.createContactMessage(validatedData);
-      Promise.all([
-        sendContactConfirmation(validatedData.email, (validatedData.firstName + ' ' + validatedData.lastName).trim()),
-        sendContactNotificationToAdmin({
-          name: (validatedData.firstName + ' ' + validatedData.lastName).trim(),
-          email: validatedData.email,
-          subject: "Contact",
-          message: validatedData.message,
-        }),
-      ]).catch((e) => console.error("[email] contact:", e));
       res.status(201).json({ success: true, id: message.id });
+      sendContactNotification({
+        adminEmail: process.env.SMTP_USER ?? "admin@epitaph.ma",
+        fromName: `${validatedData.firstName} ${validatedData.lastName}`,
+        fromEmail: validatedData.email,
+        company: validatedData.company,
+        message: validatedData.message,
+      }).catch(e => console.error("[EMAIL] Contact notification error:", e));
     } catch (error) {
       console.error("[POST /api/contact]", error);
       res.status(400).json({ error: "Données de formulaire invalides" });
@@ -395,10 +393,11 @@ export async function registerRoutes(
       const magicLinkUrl = `${baseDomain}/espace-client?login_hint=${encodeURIComponent(email)}&magic_token=${magicToken}`;
 
       // Background Email Sending
-      Promise.all([
-        sendScoringResultEmail(email, name, { sourceTool, magicLinkUrl }),
-        sendScoringNotificationToAdmin({ name, email, company: companyName, sourceTool })
-      ]).catch(e => console.error("Erreur envoi email scoring:", e));
+      sendMail({
+        to: email,
+        subject: `Votre score ${sourceTool} — Epitaphe 360`,
+        html: `<p>Bonjour ${name},</p><p>Merci d'avoir utilisé notre outil <strong>${sourceTool}</strong>.</p><p><a href="${magicLinkUrl}">Accéder à votre espace client</a></p>`,
+      }).catch(e => console.error("Erreur envoi email scoring:", e));
 
       res.status(200).json({ success: true, clientId, message: "Lead capturé et compte préparé" });
     } catch (error) {

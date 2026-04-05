@@ -4,13 +4,14 @@
  *
  * Affiche : timeline jalons, documents, messagerie client ↔ agence
  */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation, useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRight, CheckCircle2, Circle, Clock, Download,
   FileText, MessageSquare, Send, AlertCircle, Loader2,
   BarChart2, Calendar, User, PauseCircle, LogOut, RefreshCw,
+  Paperclip, Check, CheckCheck, ExternalLink,
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -102,8 +103,10 @@ export default function ProjetDetail() {
   const [error, setError]     = useState<string | null>(null);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending]   = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<"jalons" | "documents" | "messages">("jalons");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef   = useRef<HTMLInputElement>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null;
 
@@ -134,8 +137,46 @@ export default function ProjetDetail() {
   useEffect(() => {
     if (activeTab === "messages") {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      // Mark agency messages as read
+      if (token && project?.id) {
+        fetch("/api/client/messages/read", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ projectId: project.id }),
+        }).catch(() => {});
+      }
     }
   }, [project?.messages, activeTab]);
+
+  async function uploadFile(file: File) {
+    if (!token || !project) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/client/messages/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      if (!res.ok) throw new Error("Échec upload");
+      const { url, name } = await res.json();
+      // Send as message with attachment link
+      const content = `📎 [${name}](${url})`;
+      const msgRes = await fetch("/api/client/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ projectId: project.id, content }),
+      });
+      if (!msgRes.ok) throw new Error("Échec envoi");
+      const msg = await msgRes.json();
+      setProject((p) => p ? { ...p, messages: [...p.messages, msg] } : p);
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function sendMessage() {
     if (!msgInput.trim() || !token || !project) return;
@@ -350,25 +391,58 @@ export default function ProjetDetail() {
                       <br />Posez votre première question ci-dessous.
                     </p>
                   )}
-                  {project.messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.senderRole === "client" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-xs md:max-w-sm rounded-2xl px-4 py-2.5 ${
-                        msg.senderRole === "client"
-                          ? "bg-[#C8A96E] text-white rounded-br-sm"
-                          : "bg-gray-100 text-gray-800 rounded-bl-sm"
-                      }`}>
-                        <p className="text-sm leading-relaxed">{msg.content}</p>
-                        <p className={`text-xs mt-1 ${msg.senderRole === "client" ? "text-white/60" : "text-gray-400"}`}>
-                          {fmtTime(msg.createdAt)}
-                        </p>
+                  {project.messages.map((msg) => {
+                    const isClient = msg.senderRole === "client";
+                    // Parse attachment link: 📎 [name](url)
+                    const attachMatch = msg.content.match(/^📎 \[(.+?)\]\((.+?)\)$/);
+                    return (
+                      <div key={msg.id} className={`flex ${isClient ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-xs md:max-w-sm rounded-2xl px-4 py-2.5 ${
+                          isClient
+                            ? "bg-[#C8A96E] text-white rounded-br-sm"
+                            : "bg-gray-100 text-gray-800 rounded-bl-sm"
+                        }`}>
+                          {attachMatch ? (
+                            <a href={attachMatch[2]} target="_blank" rel="noopener noreferrer"
+                              className={`flex items-center gap-2 text-sm underline underline-offset-2 ${isClient ? "text-white" : "text-[#C8A96E]"}`}>
+                              <Paperclip className="w-4 h-4 shrink-0" />
+                              {attachMatch[1]}
+                              <ExternalLink className="w-3 h-3 opacity-70" />
+                            </a>
+                          ) : (
+                            <p className="text-sm leading-relaxed">{msg.content}</p>
+                          )}
+                          <div className={`flex items-center gap-1 justify-end mt-1 ${isClient ? "text-white/60" : "text-gray-400"}`}>
+                            <span className="text-xs">{fmtTime(msg.createdAt)}</span>
+                            {isClient && (
+                              msg.isRead
+                                ? <CheckCheck className="w-3.5 h-3.5 text-white/80" />
+                                : <Check className="w-3.5 h-3.5" />
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Zone de saisie */}
-                <div className="border-t border-gray-100 p-4 flex gap-3">
+                <div className="border-t border-gray-100 p-4 flex gap-2">
+                  {/* Upload fichier */}
+                  <input ref={fileInputRef} type="file" className="hidden"
+                    accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx"
+                    onChange={(e) => { if (e.target.files?.[0]) uploadFile(e.target.files[0]); e.target.value = ""; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    title="Joindre un fichier"
+                    className="p-2.5 rounded-xl border border-gray-200 text-gray-400 hover:text-[#C8A96E] hover:border-[#C8A96E]/40 transition disabled:opacity-50"
+                  >
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                  </button>
                   <input
                     value={msgInput}
                     onChange={(e) => setMsgInput(e.target.value)}

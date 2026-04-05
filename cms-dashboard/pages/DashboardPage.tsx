@@ -161,8 +161,8 @@ export const DashboardPage: React.FC = () => {
     try {
       const { getApi } = await import('../lib/api');
       const api = getApi();
-      const res = await api.get('/admin/stats');
-      const s: DashboardStats = res.data;
+      const res = await api.stats.getDashboard();
+      const s: DashboardStats = res;
       setStats(s);
       setChartData(buildChartData(s.recentArticles ?? [], s.recentLeads ?? []));
     } catch {

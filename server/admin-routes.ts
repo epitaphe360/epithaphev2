@@ -1029,51 +1029,43 @@ export function registerAdminRoutes(app: Express) {
 
   app.get('/api/admin/stats', requireAuth, async (req, res) => {
     try {
-      const [
-        [articlesCount],
-        [eventsCount],
-        [pagesCount],
-        [leadsCount],
-        [newLeadsCount],
-        [refsCount],
-        [caseStudiesCount],
-        [testimonialsCount],
-        [teamMembersCount],
-        [servicesCount],
-        [newsletterCount],
-        [contactsCount],
-        recentLeads,
-        recentArticles,
-      ] = await Promise.all([
-        db.select({ count: sql<number>`count(*)::int` }).from(articles),
-        db.select({ count: sql<number>`count(*)::int` }).from(events),
-        db.select({ count: sql<number>`count(*)::int` }).from(pages),
-        db.select({ count: sql<number>`count(*)::int` }).from(projectBriefs),
-        db.select({ count: sql<number>`count(*)::int` }).from(projectBriefs).where(eq(projectBriefs.status, 'NEW')),
-        db.select({ count: sql<number>`count(*)::int` }).from(clientReferences),
-        db.select({ count: sql<number>`count(*)::int` }).from(caseStudies),
-        db.select({ count: sql<number>`count(*)::int` }).from(testimonials).where(eq(testimonials.isPublished, true)),
-        db.select({ count: sql<number>`count(*)::int` }).from(teamMembers),
-        db.select({ count: sql<number>`count(*)::int` }).from(services),
-        db.select({ count: sql<number>`count(*)::int` }).from(newsletterSubscriptions).where(eq(newsletterSubscriptions.status, 'ACTIVE')),
-        db.select({ count: sql<number>`count(*)::int` }).from(contactMessages),
+      // Single query for all counts (1 round-trip instead of 12)
+      const [counts] = await db.execute(sql`
+        SELECT
+          (SELECT count(*)::int FROM articles)             AS articles,
+          (SELECT count(*)::int FROM events)               AS events,
+          (SELECT count(*)::int FROM pages)                AS pages,
+          (SELECT count(*)::int FROM project_briefs)       AS leads,
+          (SELECT count(*)::int FROM project_briefs WHERE status = 'NEW') AS new_leads,
+          (SELECT count(*)::int FROM client_references)    AS references,
+          (SELECT count(*)::int FROM case_studies)          AS case_studies,
+          (SELECT count(*)::int FROM testimonials WHERE is_published = true) AS testimonials,
+          (SELECT count(*)::int FROM team_members)         AS team_members,
+          (SELECT count(*)::int FROM services)             AS services,
+          (SELECT count(*)::int FROM newsletter_subscriptions WHERE status = 'ACTIVE') AS newsletter,
+          (SELECT count(*)::int FROM contact_messages)     AS contacts
+      `);
+
+      // Only 2 extra queries for recent data (parallel)
+      const [recentLeads, recentArticles] = await Promise.all([
         db.select().from(projectBriefs).orderBy(desc(projectBriefs.createdAt)).limit(5),
         db.select().from(articles).orderBy(desc(articles.createdAt)).limit(5),
       ]);
 
+      const c = counts as Record<string, number>;
       res.json({
-        articles:      articlesCount?.count    ?? 0,
-        events:        eventsCount?.count       ?? 0,
-        pages:         pagesCount?.count        ?? 0,
-        leads:         leadsCount?.count        ?? 0,
-        newLeads:      newLeadsCount?.count     ?? 0,
-        references:    refsCount?.count         ?? 0,
-        caseStudies:   caseStudiesCount?.count  ?? 0,
-        testimonials:  testimonialsCount?.count ?? 0,
-        teamMembers:   teamMembersCount?.count  ?? 0,
-        services:      servicesCount?.count     ?? 0,
-        newsletter:    newsletterCount?.count   ?? 0,
-        contacts:      contactsCount?.count     ?? 0,
+        articles:      c.articles      ?? 0,
+        events:        c.events        ?? 0,
+        pages:         c.pages         ?? 0,
+        leads:         c.leads         ?? 0,
+        newLeads:      c.new_leads     ?? 0,
+        references:    c.references    ?? 0,
+        caseStudies:   c.case_studies  ?? 0,
+        testimonials:  c.testimonials  ?? 0,
+        teamMembers:   c.team_members  ?? 0,
+        services:      c.services      ?? 0,
+        newsletter:    c.newsletter    ?? 0,
+        contacts:      c.contacts      ?? 0,
         recentLeads,
         recentArticles,
       });

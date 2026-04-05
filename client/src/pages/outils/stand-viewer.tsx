@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, lazy } from "react";
 import { motion } from "framer-motion";
 import { Box, RotateCcw, ZoomIn, Maximize2, Info, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
@@ -6,7 +6,7 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { RevealSection } from "@/components/reveal-section";
 import { PageMeta } from "@/components/seo/page-meta";
-import { StandViewer3D as StandViewer } from "@/components/stand-viewer";
+const StandViewer = lazy(() => import("@/components/stand-viewer").then(m => ({ default: m.StandViewer3D })));
 
 const DEMO_STANDS = [
   {

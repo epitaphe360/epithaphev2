@@ -1,0 +1,103 @@
+{
+  "nav": {
+    "events": "Événements",
+    "brandArchitecture": "Architecture de Marque",
+    "laFabrique": "La Fabrique",
+    "references": "Références",
+    "blog": "Blog",
+    "resources": "Ressources",
+    "tools": "Outils",
+    "clientArea": "Espace Client",
+    "contact": "Contact",
+    "submitBrief": "Déposer un brief"
+  },
+  "home": {
+    "heroTitle": "L'ingénierie événementielle d'exception",
+    "heroSubtitle": "Nous concevons des expériences corporate qui marquent durablement les esprits et accélèrent vos objectifs business.",
+    "heroCta": "Déposer un brief",
+    "heroSecondary": "Découvrir nos réalisations",
+    "servicesTitle": "Nos expertises",
+    "servicesSubtitle": "Un écosystème complet pour vos ambitions",
+    "referencesTitle": "Ils nous font confiance",
+    "ctaTitle": "Prêt à transformer vos événements ?",
+    "ctaSubtitle": "Discutons de votre prochain projet"
+  },
+  "events": {
+    "conventions": "Conventions & Kickoffs",
+    "galas": "Soirées de gala",
+    "roadshows": "Roadshows & Tournées",
+    "exhibitions": "Salons & Expositions"
+  },
+  "brand": {
+    "employerBrand": "Marque Employeur",
+    "qhse": "Communication QHSE",
+    "customerExperience": "Expérience Clients"
+  },
+  "fabrique": {
+    "printing": "Impression grand format",
+    "woodwork": "Menuiserie & Décor",
+    "signage": "Signalétique",
+    "spaceDesign": "Aménagement Espace",
+    "madeIn": "100% Made in Epitaphe"
+  },
+  "tools": {
+    "vigilanceScore": "Vigilance-Score QHSE",
+    "calculator": "Calculateur La Fabrique",
+    "brief": "Déposer un brief"
+  },
+  "brief": {
+    "step1Title": "Votre secteur",
+    "step2Title": "Vos besoins",
+    "step3Title": "Votre projet",
+    "step4Title": "Vos coordonnées",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Envoyer le brief",
+    "successTitle": "Brief envoyé avec succès !",
+    "successMessage": "Notre équipe vous contactera sous 24h."
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "name": "Nom complet",
+    "email": "Email professionnel",
+    "phone": "Téléphone",
+    "company": "Entreprise",
+    "message": "Votre message",
+    "send": "Envoyer",
+    "success": "Message envoyé avec succès !",
+    "error": "Erreur lors de l'envoi. Réessayez."
+  },
+  "clientArea": {
+    "projects": "Mes projets",
+    "documents": "Mes documents",
+    "resources": "Mes ressources",
+    "account": "Mon compte",
+    "security": "Sécurité"
+  },
+  "footer": {
+    "description": "Agence de communication événementielle 360° — Casablanca, Maroc",
+    "legalNotice": "Mentions légales",
+    "privacyPolicy": "Politique de confidentialité",
+    "cookieSettings": "Paramètres des cookies",
+    "allRights": "Tous droits réservés"
+  },
+  "cookies": {
+    "title": "Nous respectons votre vie privée",
+    "description": "Nous utilisons des cookies pour améliorer votre expérience, analyser le trafic et personnaliser les contenus.",
+    "acceptAll": "Tout accepter",
+    "rejectAll": "Tout refuser",
+    "customize": "Personnaliser mes choix",
+    "necessary": "Cookies nécessaires",
+    "analytics": "Cookies analytiques",
+    "marketing": "Cookies marketing",
+    "save": "Enregistrer mes préférences"
+  },
+  "common": {
+    "learnMore": "En savoir plus",
+    "viewAll": "Voir tout",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "notFound": "Page non trouvée"
+  }
+}

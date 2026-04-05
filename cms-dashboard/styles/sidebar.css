@@ -27,9 +27,9 @@
   transform: translateX(2px);
 }
 
-/* Gradient background pour la sidebar */
+/* Gradient background pour la sidebar — OLED dark */
 .sidebar-gradient {
-  background: linear-gradient(180deg, #111827 0%, #1f2937 50%, #111827 100%);
+  background: linear-gradient(180deg, #020617 0%, #0B1121 50%, #020617 100%);
   position: relative;
 }
 
@@ -40,7 +40,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 

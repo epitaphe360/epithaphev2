@@ -1,3 +1,6 @@
+/* CDC §1.5.2 — Typography: Inter (corps) + Playfair Display (titres luxe) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -43,8 +46,8 @@
   --chart-3: 220 60% 50%;
   --chart-4: 270 48% 45%;
   --chart-5: 30 48% 45%;
-  --font-sans: Montserrat, sans-serif;
-  --font-serif: Georgia, serif;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: .375rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);

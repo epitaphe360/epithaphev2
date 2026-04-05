@@ -82,7 +82,7 @@ export const GeneralSettings: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Paramètres Généraux</h1>
@@ -100,7 +100,7 @@ export const GeneralSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Nom du site *
               </label>
               <Input
@@ -113,7 +113,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Description du site
               </label>
               <Textarea
@@ -126,7 +126,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 URL du site *
               </label>
               <Input
@@ -150,7 +150,7 @@ export const GeneralSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Email de contact
               </label>
               <Input
@@ -163,7 +163,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Téléphone de contact
               </label>
               <Input
@@ -187,7 +187,7 @@ export const GeneralSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Logo du site
               </label>
               {formData.logo ? (
@@ -207,7 +207,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Favicon
               </label>
               {formData.favicon ? (
@@ -227,7 +227,7 @@ export const GeneralSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Texte de copyright
               </label>
               <Input
@@ -253,3 +253,5 @@ export const GeneralSettings: React.FC = () => {
 };
 
 export default GeneralSettings;
+
+

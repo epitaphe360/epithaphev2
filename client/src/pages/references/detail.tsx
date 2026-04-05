@@ -205,7 +205,7 @@ export default function ReferenceDetailPage() {
               <div className={`grid grid-cols-2 md:grid-cols-${Math.min(kpis.length, 4)} gap-4 md:gap-6`}>
                 {kpis.map((kpi, i) => (
                   <motion.div
-                    key={i}
+                    key={kpi.label ?? i}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}

@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+﻿import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
@@ -24,7 +24,11 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      // Force une seule instance React (Ã©vite useState null)
+      "react": path.resolve(import.meta.dirname, "node_modules/react"),
+      "react-dom": path.resolve(import.meta.dirname, "node_modules/react-dom"),
     },
+    dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
@@ -33,18 +37,36 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'vendor-react': ['react', 'react-dom', 'wouter'],
+          'vendor-grapesjs': ['grapesjs'],
         }
       }
     }
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      'react-dom/client',
+      'three',
+      '@react-three/fiber',
+      '@react-three/drei',
+      'framer-motion',
+      'axios',
+      '@tanstack/react-query',
+      'wouter',
+      'react-helmet-async',
+    ],
   },
   server: {
     port: 3000,
     fs: {
       strict: true,
-      allow: ['..'], // ✅ Allow access to parent directory (cms-dashboard)
+      allow: ['..'], // âœ… Allow access to parent directory (cms-dashboard)
       deny: ["**/.*"],
     },
   },
 });
+

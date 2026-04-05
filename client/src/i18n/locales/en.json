@@ -1,0 +1,103 @@
+{
+  "nav": {
+    "events": "Events",
+    "brandArchitecture": "Brand Architecture",
+    "laFabrique": "The Workshop",
+    "references": "References",
+    "blog": "Blog",
+    "resources": "Resources",
+    "tools": "Tools",
+    "clientArea": "Client Area",
+    "contact": "Contact",
+    "submitBrief": "Submit a brief"
+  },
+  "home": {
+    "heroTitle": "Exceptional event engineering",
+    "heroSubtitle": "We design corporate experiences that leave a lasting impression and accelerate your business goals.",
+    "heroCta": "Submit a brief",
+    "heroSecondary": "Discover our work",
+    "servicesTitle": "Our expertise",
+    "servicesSubtitle": "A complete ecosystem for your ambitions",
+    "referencesTitle": "They trust us",
+    "ctaTitle": "Ready to transform your events?",
+    "ctaSubtitle": "Let's discuss your next project"
+  },
+  "events": {
+    "conventions": "Conventions & Kickoffs",
+    "galas": "Gala evenings",
+    "roadshows": "Roadshows & Tours",
+    "exhibitions": "Trade shows & Exhibitions"
+  },
+  "brand": {
+    "employerBrand": "Employer Branding",
+    "qhse": "QHSE Communication",
+    "customerExperience": "Customer Experience"
+  },
+  "fabrique": {
+    "printing": "Large format printing",
+    "woodwork": "Woodwork & Decor",
+    "signage": "Signage",
+    "spaceDesign": "Space Design",
+    "madeIn": "100% Made in Epitaphe"
+  },
+  "tools": {
+    "vigilanceScore": "QHSE Vigilance Score",
+    "calculator": "Workshop Calculator",
+    "brief": "Submit a brief"
+  },
+  "brief": {
+    "step1Title": "Your industry",
+    "step2Title": "Your needs",
+    "step3Title": "Your project",
+    "step4Title": "Your details",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit brief",
+    "successTitle": "Brief submitted successfully!",
+    "successMessage": "Our team will contact you within 24 hours."
+  },
+  "contact": {
+    "title": "Contact us",
+    "name": "Full name",
+    "email": "Professional email",
+    "phone": "Phone",
+    "company": "Company",
+    "message": "Your message",
+    "send": "Send",
+    "success": "Message sent successfully!",
+    "error": "Error sending message. Please retry."
+  },
+  "clientArea": {
+    "projects": "My projects",
+    "documents": "My documents",
+    "resources": "My resources",
+    "account": "My account",
+    "security": "Security"
+  },
+  "footer": {
+    "description": "360° event communication agency — Casablanca, Morocco",
+    "legalNotice": "Legal notice",
+    "privacyPolicy": "Privacy policy",
+    "cookieSettings": "Cookie settings",
+    "allRights": "All rights reserved"
+  },
+  "cookies": {
+    "title": "We respect your privacy",
+    "description": "We use cookies to improve your experience, analyze traffic and personalize content.",
+    "acceptAll": "Accept all",
+    "rejectAll": "Reject all",
+    "customize": "Customize my choices",
+    "necessary": "Necessary cookies",
+    "analytics": "Analytics cookies",
+    "marketing": "Marketing cookies",
+    "save": "Save my preferences"
+  },
+  "common": {
+    "learnMore": "Learn more",
+    "viewAll": "View all",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "notFound": "Page not found"
+  }
+}

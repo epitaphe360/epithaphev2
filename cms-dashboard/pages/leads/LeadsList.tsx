@@ -37,7 +37,7 @@ const STATUS_MAP: Record<string, { label: string; variant: 'success' | 'warning'
 
 const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
   low:    { label: 'Basse',   color: '#64748B' },
-  medium: { label: 'Moyenne', color: '#C8A96E' },
+  medium: { label: 'Moyenne', color: '#EC4899' },
   high:   { label: 'Haute',   color: '#EF4444' },
 };
 
@@ -84,24 +84,24 @@ function LeadDetailModal({ lead, onClose }: { lead: Lead; onClose: () => void })
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Statut</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]">
+              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#EC4899]">
               {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Assigné à</label>
             <input type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nom du commercial..."
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#EC4899]" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Notes internes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
+              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm resize-none focus:outline-none focus:border-[#EC4899]" />
           </div>
         </div>
         <div className="flex justify-end gap-3 p-6 border-t border-[#1E293B]">
           <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-[#334155] text-slate-300 hover:text-white text-sm transition-colors">Fermer</button>
-          <button onClick={save} disabled={saving} className="px-5 py-2.5 rounded-xl bg-[#C8A96E] text-black font-semibold hover:bg-[#DFC28F] text-sm transition-colors disabled:opacity-60">
+          <button onClick={save} disabled={saving} className="px-5 py-2.5 rounded-xl bg-[#EC4899] text-black font-semibold hover:bg-[#f472b6] text-sm transition-colors disabled:opacity-60">
             {saving ? 'Sauvegarde...' : 'Enregistrer'}
           </button>
         </div>
@@ -184,7 +184,7 @@ export function LeadsList() {
   const statusFilter = (
     <select
       onChange={(e) => setFilter('status', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#EC4899]"
     >
       <option value="">Tous les statuts</option>
       {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}

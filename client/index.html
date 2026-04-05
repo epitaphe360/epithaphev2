@@ -2,40 +2,70 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Epitaphe 360 - Agence de Communication 360° | Casablanca, Maroc</title>
-    <meta name="description" content="Epitaphe 360, agence de communication 360° à Casablanca. Digital, publicité, événementiel, contenu. Inspirez. Connectez. Marquez Durablement." />
-    <meta property="og:title" content="Epitaphe 360 - Agence de Communication 360°" />
-    <meta property="og:description" content="Agence de communication globale à Casablanca. 20 ans d'expérience en digital, publicité, événementiel et contenu." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5" />
+
+    <!-- ── SEO primaire ─────────────────────────────────────── -->
+    <title>Epitaphe 360 — Agence de Communication 360° | Casablanca, Maroc</title>
+    <meta name="description" content="Epitaphe 360, agence de communication 360° à Casablanca. Événementiels corporate, architecture de marque, signalétique &amp; BMI 360™ Scoring Intelligence. Inspirez. Connectez. Marquez Durablement." />
+    <meta name="keywords" content="agence communication Casablanca, événementiel Maroc, marque employeur, RSE Maroc, communication QHSE, BMI 360, scoring intelligence, Epitaphe 360" />
+    <meta name="author" content="Epitaphe 360" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://www.epitaphe360.ma/" />
+
+    <!-- ── Open Graph (LinkedIn, Facebook, WhatsApp) ──────── -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Epitaphe 360" />
+    <meta property="og:title" content="Epitaphe 360 — Agence de Communication 360°" />
+    <meta property="og:description" content="Agence de communication globale à Casablanca. 20 ans d'expérience en événementiel, architecture de marque et BMI 360™ Scoring Intelligence." />
+    <meta property="og:url" content="https://www.epitaphe360.ma/" />
+    <meta property="og:image" content="https://www.epitaphe360.ma/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Epitaphe 360 — Agence de Communication 360° au Maroc" />
+    <meta property="og:locale" content="fr_MA" />
+
+    <!-- ── Twitter / X Card ───────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@epitaphe360" />
+    <meta name="twitter:title" content="Epitaphe 360 — Agence de Communication 360°" />
+    <meta name="twitter:description" content="Agence de communication globale à Casablanca. BMI 360™ Scoring Intelligence." />
+    <meta name="twitter:image" content="https://www.epitaphe360.ma/og-image.png" />
+
+    <!-- ── Géolocalisation (local SEO Casablanca) ─────────── -->
+    <meta name="geo.region" content="MA-06" />
+    <meta name="geo.placename" content="Casablanca" />
+    <meta name="geo.position" content="33.5731;-7.5898" />
+    <meta name="ICBM" content="33.5731, -7.5898" />
+
+    <!-- ── Icônes & PWA ────────────────────────────────────── -->
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#d1295a" />
+    <meta name="theme-color" content="#E3001B" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Epitaphe360" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Muli:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ── Fonts — chargement non-bloquant (font-display:swap) ─ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" /></noscript>
     <!-- RSS Blog Feed -->
     <link rel="alternate" type="application/rss+xml" title="Epitaphe 360 — Blog" href="/blog/rss.xml" />
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <!-- ── Analytics — GA4 + Clarity chargés via analytics.ts après consentement cookie ── -->
+    <!-- Consent Mode v2 — deny by default (RGPD) -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX', { anonymize_ip: true });
-    </script>
-    <!-- Microsoft Clarity -->
-    <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "XXXXXXXXXX");
+      gtag('consent', 'default', {
+        analytics_storage:  'denied',
+        ad_storage:         'denied',
+        ad_user_data:       'denied',
+        ad_personalization: 'denied',
+        wait_for_update:    500,
+      });
     </script>
   </head>
   <body>

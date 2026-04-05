@@ -1,4 +1,4 @@
-export interface SolutionItem {
+﻿export interface SolutionItem {
   slug: string;
   label: string;
   description: string;
@@ -7,6 +7,8 @@ export interface SolutionItem {
   heroImage: string;
   needs: string[];
   content: string;
+  /** Sous-solutions associées (slugs) pour les pages métiers */
+  relatedSolutions?: string[];
 }
 
 export interface SolutionCategory {
@@ -58,17 +60,20 @@ export const solutionCategories: SolutionCategory[] = [
         slug: "stands-exposition",
         label: "Stands d'exposition",
         description: "Conception et réalisation de stands d'exposition sur mesure",
-        heroTitle: "Stands d'Exposition",
-        heroSubtitle: "Démarquez-vous dans les salons et foires",
+        heroTitle: "Be ergonomic !",
+        heroSubtitle: "Du design à la fabrication et pose de vos modules, Epitaphe 360 est outillée de compétences et de machines dernier cri.",
         heroImage: "https://epitaphe.ma/wp-content/uploads/2020/04/evenementiel.jpg",
         needs: [
-          "Stands modulaires",
-          "Stands sur mesure",
-          "Aménagement d'espaces",
-          "Mobilier d'exposition",
-          "Éclairage et signalétique"
+          "Maquettes 3D",
+          "Production d'éléments de Stands modulables",
+          "Fabrication de Stands et de PLV sur mesure",
+          "Branding & Habillage",
+          "Aménagement de stands : Planchers, Totems, Roll-up, Présentoirs, PLV…",
+          "Équipements numériques & tactiles : écran, tablette, borne interactive",
+          "Mobilier : Fauteuils, tables, chaises, comptoirs…",
+          "Lumière & sono"
         ],
-        content: "Nous concevons des stands d'exposition uniques qui captent l'attention et reflètent votre identité de marque. De la conception 3D à l'installation, nous gérons tout."
+        content: "Participer à un salon, une foire… demande de l'effort et de l'argent. Il est par conséquent important de réussir son stand d'exposition pour maximiser sa visibilité, attirer des visiteurs et avoir un bon retour sur investissement. Pour cela, votre stand doit être réfléchi pour attiser les curiosités, optimiser les espaces et véhiculer les bons messages à vos visiteurs. Du design à la fabrication et pose de vos modules, Epitaphe 360 est outillée de compétences et de machines dernier cri pour répondre à vos besoins les plus exigeants tout en respectant vos contraintes de temps et de budgets. Concepts personnalisés, produits modulaires en kits, PLV et éléments d'aménagement de stand… En plus de l'assistance graphique et technique, nous vous conseillons dans le choix des structures et matériaux à utiliser et vous accompagnons au mieux pour rendre votre stand fluide, visible et convivial."
       },
       {
         slug: "plv-ilv-banners",
@@ -279,18 +284,21 @@ export const solutionCategories: SolutionCategory[] = [
       {
         slug: "strategie-communication",
         label: "Stratégie de communication",
-        description: "Conseil et stratégie de communication globale",
-        heroTitle: "Stratégie de Communication",
-        heroSubtitle: "Une vision claire pour votre marque",
+        description: "Cherchez le bon conseil !",
+        heroTitle: "Cherchez le bon conseil !",
+        heroSubtitle: "La stratégie de communication est la clé pour vous positionner sur votre marché et vous ouvrir les portes de la notoriété et de la croissance.",
         heroImage: "https://epitaphe.ma/wp-content/uploads/2020/04/communication-globale-1.jpg",
         needs: [
-          "Audit de communication",
-          "Positionnement de marque",
-          "Plan de communication",
-          "Stratégie média",
-          "Conseil en image"
+          "Chartes graphique et rédactionnelle",
+          "Rapports d'activité",
+          "Événements institutionnels",
+          "Relations presse",
+          "Choix des leviers et canaux de communication",
+          "Optimisation des budgets",
+          "Exécution du plan de communication",
+          "Analytics et KPI's"
         ],
-        content: "Nous élaborons des stratégies de communication sur mesure alignées avec vos objectifs business. Analyse, conseil et accompagnement."
+        content: "Institutionnelle (corporate), publicitaire, commerciale, produit, interne… la stratégie de communication est la clé pour vous positionner sur votre marché et vous ouvrir les portes de la notoriété et de la croissance. Sous condition qu'elle soit bien réfléchie et bien adaptée à votre cible et à votre marché. Notre agence de communication Epitaphe 360, capitalise sur une expérience éprouvée de plus d'une décennie auprès de clients de différents secteurs d'activité. Nous pouvons vous accompagner dans l'élaboration de votre stratégie de communication et dans l'exécution de votre plan d'action tout en optimisant vos budgets."
       },
       {
         slug: "modelisation-campagne",
@@ -311,34 +319,35 @@ export const solutionCategories: SolutionCategory[] = [
       {
         slug: "redaction-contenus",
         label: "Rédaction de contenus",
-        description: "Création de contenus rédactionnels professionnels",
+        description: "Des mots qui portent votre message",
         heroTitle: "Rédaction de Contenus",
-        heroSubtitle: "Des mots qui portent votre message",
+        heroSubtitle: "Des contenus engageants qui parlent à votre audience.",
         heroImage: "https://epitaphe.ma/wp-content/uploads/2020/04/communication-globale-1.jpg",
         needs: [
           "Contenus web et SEO",
-          "Rédaction publicitaire",
-          "Storytelling de marque",
-          "Communiqués de presse",
-          "Contenus réseaux sociaux"
+          "Rédaction publicitaire et storytelling de marque",
+          "Communiqués de presse et relations presse",
+          "Contenus réseaux sociaux",
+          "Rapports d'activité et contenus dynamiques"
         ],
-        content: "Notre équipe de rédacteurs crée des contenus engageants qui parlent à votre audience. Ton, style et message adaptés à votre marque."
+        content: "Notre équipe de rédacteurs crée des contenus engageants qui parlent à votre audience. Ton, style et message adaptés à votre marque. Du storytelling de marque aux contenus SEO, des communiqués de presse aux posts réseaux sociaux, nous trouvons le bon mot et le bon format pour capter votre marché."
       },
       {
         slug: "conception-graphique",
         label: "Conception graphique",
-        description: "Design graphique et identité visuelle",
-        heroTitle: "Conception Graphique",
-        heroSubtitle: "Créativité au service de votre image",
+        description: "Cherchez la créativité !",
+        heroTitle: "Cherchez la créativité !",
+        heroSubtitle: "Le design graphique est un vrai levier pour asseoir votre visibilité sur le marché et promouvoir vos produits et services.",
         heroImage: "https://epitaphe.ma/wp-content/uploads/2020/04/communication-globale-1.jpg",
         needs: [
-          "Identité visuelle",
-          "Charte graphique",
-          "Supports print",
-          "Illustrations",
-          "Packaging design"
+          "La création d'identités visuelles (logos, chartes graphiques…)",
+          "La conception de plaquettes, dépliants, affiches, flyers…",
+          "La mise en page de vos catalogues, rapports, journaux internes…",
+          "Le branding de sièges, l'habillage de showrooms…",
+          "La conception de stands, Roll-up, panneaux publicitaires",
+          "La réalisation de bannières, posts, newsletters…"
         ],
-        content: "Design graphique créatif et professionnel. Nous donnons vie à vos idées avec des visuels percutants et cohérents."
+        content: "De nos jours, le design graphique est au cœur de toute démarche de communication, qu'elle soit classique ou digitale. Charte graphique, affiche publicitaire, flyers, catalogue, dépliant, habillage, Show room… vos conceptions graphiques doivent avoir un rendu alliant créativité et professionnalisme pour consolider votre image de marque. Agence de communication 360°, nous avons une vision globale qui nous permet non seulement de cerner vos besoins et votre environnement, mais aussi de réagir pertinemment à vos contraintes techniques, budgétaires et de temps."
       },
       {
         slug: "organisation-evenements-com",
@@ -407,18 +416,20 @@ export const solutionCategories: SolutionCategory[] = [
       {
         slug: "developpement-sites-web",
         label: "Développement des sites web",
-        description: "Conception et développement de sites internet",
-        heroTitle: "Développement de Sites Web",
-        heroSubtitle: "Des sites performants et esthétiques",
+        description: "Innovez pour vous positionner sur la toile !",
+        heroTitle: "Innovez pour vous positionner sur la toile !",
+        heroSubtitle: "Le secret demeure dans le respect de certains ingrédients fondamentaux. Votre site doit être professionnel, responsive, lisible, structuré, optimisé et référencé.",
         heroImage: "https://epitaphe.ma/wp-content/uploads/2020/04/digital-1.jpg",
         needs: [
-          "Sites vitrines",
-          "Sites e-commerce",
-          "Applications web",
-          "Refonte de site",
-          "Maintenance et évolution"
+          "Concevoir un Site web institutionnel",
+          "Réaliser un Site e-Commerce",
+          "Concevoir un site vitrine",
+          "Élaborer une plateforme de gestion d'événements",
+          "Réalité augmentée, Vidéos, Motion design",
+          "Développement, intégration, optimisation, référencement",
+          "Élaborer une plateforme digitale collaborative"
         ],
-        content: "Développement de sites web sur mesure, responsive et optimisés SEO. Design moderne et expérience utilisateur au cœur de nos créations."
+        content: "Beaucoup d'organisations investissent du temps et de l'argent pour la redynamisation ou le développement d'un site web, mais elles n'obtiennent pas de retour sur investissement satisfaisant. Que cela soit pour un site institutionnel, vitrine ou e-commerce, vous êtes tenus de suivre les nouvelles règles dictées par vos visiteurs. L'expérience Utilisateur doit être au cœur de toutes vos réflexions. Profitez de notre expertise pour maximiser la qualité de l'expérience utilisateur et être dans l'air du temps."
       }
     ]
   }
@@ -489,15 +500,32 @@ export const metiersData = [
     label: "Communication interne",
     description: "Gagnez en cohésion d'équipe !",
     heroTitle: "Gagnez en cohésion d'équipe !",
-    heroSubtitle: "La communication interne peut être un véritable atout pour l’information et la motivation de vos salariés.",
+    heroSubtitle: "La communication interne peut être un véritable atout pour l'information et la motivation de vos salariés. Journaux internes, Intranet, événements corporate… notre agence vous accompagne dans la mise en place d'une stratégie de communication interne efficace.",
     heroImage: "https://epitaphe.ma/wp-content/uploads/2020/05/bg-com-interne.jpg",
     needs: [
-      "Accompagnement dans toutes les étapes de réalisation de vos supports internes",
-      "Une équipe expérimentée à l’écoute de vos besoins",
-      "Un budget optimisé avec des prestations réalisées en interne",
-      "Des outils modernes pour digitaliser votre communication interne"
+      "Accompagnement dans toutes les étapes de réalisation de vos supports internes (journaux, newsletters, intranet)",
+      "Une équipe expérimentée à l'écoute de vos besoins en communication interne",
+      "Un budget optimisé avec des prestations réalisées en interne : rédaction, design, impression, diffusion",
+      "Des outils modernes pour digitaliser votre communication interne (intranet, emailing, vidéo)"
     ],
-    content: "Epitaphe 360 vous accompagne pas à pas aussi bien dans l’élaboration et l’impression de vos journaux et supports, que dans l’organisation de vos événements et la digitalisation de votre communication interne. Grâce à notre expertise, développez une culture d’appartenance forte au sein de votre entreprise."
+    content: "Epitaphe 360 vous accompagne pas à pas aussi bien dans l'élaboration et l'impression de vos journaux et supports, que dans l'organisation de vos événements et la digitalisation de votre communication interne. Grâce à notre expertise, développez une culture d'appartenance forte au sein de votre entreprise. Notre approche intégrée couvre la rédaction de contenus, le design graphique, l'impression et la diffusion de vos supports internes.",
+    relatedSolutions: ["journal-interne", "organisation-evenements-btob", "redaction-contenus"]
+  },
+  {
+    slug: "communication-digitale",
+    label: "Communication digitale",
+    description: "Gagnez des leads !",
+    heroTitle: "Gagnez des leads !",
+    heroSubtitle: "Référencement naturel, Réseaux sociaux, SEM, Emailing, Application mobile… Notre agence vous accompagne dans toutes les étapes de votre transformation digitale.",
+    heroImage: "https://epitaphe.ma/wp-content/uploads/2020/04/digital-1.jpg",
+    needs: [
+      "Être accompagné lors de votre transformation digitale avec une stratégie sur mesure",
+      "Maximiser votre visibilité en ligne grâce au référencement naturel (SEO) et payant (SEM)",
+      "Développer votre présence sur les réseaux sociaux et engager votre communauté",
+      "Créer des campagnes d'emailing performantes et mesurer leur impact"
+    ],
+    content: "Notre agence de communication digitale vous accompagne dans toutes les étapes de votre transformation numérique. Du développement de sites web au référencement naturel, en passant par la gestion de vos réseaux sociaux et la mise en place de campagnes d'emailing, nous vous aidons à maximiser votre présence en ligne et à générer des leads qualifiés.",
+    relatedSolutions: ["developpement-sites-web", "realite-augmentee-virtuelle", "strategie-communication"]
   }
 ];
 

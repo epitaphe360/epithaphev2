@@ -25,6 +25,9 @@ import {
   Bell,
   Zap,
   Paintbrush,
+  Target,
+  FolderKanban,
+  ClipboardList,
 } from 'lucide-react';
 import { useDashboardConfig } from '../config';
 
@@ -153,11 +156,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
     users: <Users className="w-5 h-5" />,
     notifications: <Bell className="w-5 h-5" />,
     qrcodes: <Zap className="w-5 h-5" />,
+    homepage: <Home className="w-5 h-5" />,
+    scoring: <Target className="w-5 h-5" />,
+    projects: <FolderKanban className="w-5 h-5" />,
+    forms: <ClipboardList className="w-5 h-5" />,
   };
 
   // Navigation enrichie
   const navigationItems = [
     { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
+    { href: '/admin/homepage', label: "Page d'accueil", icon: 'homepage' },
     { 
       href: '/admin/content', 
       label: 'Contenu', 
@@ -171,12 +179,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         { to: '/admin/testimonials', label: 'Témoignages' },
         { to: '/admin/references', label: 'Références clients' },
         { to: '/admin/services', label: 'Services' },
+        { to: '/admin/solutions', label: 'Solutions' },
         { to: '/admin/team', label: 'Équipe' },
       ]
     },
     { href: '/admin/visual-editor', label: 'Éditeur Visuel', icon: 'plasmic' },
     { href: '/admin/media', label: 'Médias', icon: 'media', badge: 12 },
     { href: '/admin/qr-codes', label: 'QR Codes', icon: 'qrcodes' },
+    { href: '/admin/menu', label: 'Menu navigation', icon: 'pages' },
+    { href: '/admin/appearance', label: 'Apparence', icon: 'paintbrush' },
     {
       href: '/admin/outils-phase2',
       label: 'Phase 2 — Outils',
@@ -196,9 +207,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         { to: '/admin/newsletter', label: 'Newsletter' },
       ]
     },
+    {
+      href: '/admin/espace-client',
+      label: 'Espace Client',
+      icon: 'projects',
+      children: [
+        { to: '/admin/clients', label: 'Comptes clients' },
+        { to: '/admin/client-projects', label: 'Projets clients' },
+      ]
+    },
+    { href: '/admin/scoring', label: 'Scoring BMI 360™', icon: 'scoring' },
+    {
+      href: '/admin/forms',
+      label: 'Formulaires',
+      icon: 'forms',
+      children: [
+        { to: '/admin/forms/brief', label: 'Options Brief' },
+        { to: '/admin/forms/scoring', label: 'Questions BMI 360™' },
+      ]
+    },
     { href: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
     { href: '/admin/users', label: 'Utilisateurs', icon: 'users' },
-    { href: '/admin/settings', label: 'Paramètres', icon: 'settings' },
+    {
+      href: '/admin/settings/general',
+      label: 'Paramètres',
+      icon: 'settings',
+      children: [
+        { to: '/admin/settings/general', label: 'Général' },
+        { to: '/admin/settings/seo', label: 'SEO' },
+        { to: '/admin/settings/integrations', label: 'Intégrations' },
+      ]
+    },
   ];
 
   return (

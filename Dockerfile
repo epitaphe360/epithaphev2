@@ -5,11 +5,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files first (better Docker caching)
-COPY package*.json ./
+# Install native build tools required by bcrypt (node-gyp)
+RUN apk add --no-cache python3 make g++
+
+# Force legacy peer deps globally (React 18 + @react-three/drei compat)
+RUN npm config set legacy-peer-deps true
+
+# Copy package files + .npmrc first (better Docker caching)
+COPY package*.json .npmrc ./
 
 # Install ALL dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy ALL source code needed for build
 COPY tsconfig.json ./
@@ -38,11 +44,17 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy package files
-COPY package*.json ./
+# Install native build tools required by bcrypt
+RUN apk add --no-cache python3 make g++
+
+# Force legacy peer deps globally (React 18 + @react-three/drei compat)
+RUN npm config set legacy-peer-deps true
+
+# Copy package files + .npmrc
+COPY package*.json .npmrc ./
 
 # Install ONLY production dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist

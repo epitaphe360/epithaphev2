@@ -5,12 +5,13 @@ import { StatsSection } from "@/components/stats-section";
 import { useParams, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { getSolutionBySlug } from "@/data/solutionsData";
+import { useSolutionsData } from "@/hooks/useSolutionsData";
 import { useService } from "@/hooks/useService";
 
 export default function SolutionPage() {
   const { slug } = useParams();
-  const fallbackSolution = slug ? getSolutionBySlug(slug) ?? null : null;
+  const { getDynamicSolutionBySlug, loading: hookLoading } = useSolutionsData();
+  const fallbackSolution = slug ? getDynamicSolutionBySlug(slug) ?? null : null;
   const { data: solution, loading } = useService(slug ?? "", fallbackSolution ?? {
     slug: slug ?? "",
     label: "",
@@ -24,7 +25,7 @@ export default function SolutionPage() {
 
   // Attendre la fin du chargement DB avant d'afficher 404
   // (le slug peut exister en DB mais pas dans les données hardcodées)
-  if (!loading && !fallbackSolution && !solution.label) {
+  if (!loading && !hookLoading && !fallbackSolution && !solution.label) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />

@@ -29,6 +29,10 @@ console.log('✅ Imports loaded successfully');
 const app = express();
 const httpServer = createServer(app);
 
+// REQUIRED for Railway (and any reverse proxy like Nginx, Heroku, etc.)
+// Without this, req.ip returns the proxy IP and rate limiting breaks
+app.set('trust proxy', 1);
+
 // Serve static assets FIRST before any other middleware
 // This prevents helmet, cors, rate-limit from interfering with static files
 import path from 'path';
@@ -69,11 +73,19 @@ const baseOrigins = corsEnv
   ? corsEnv.split(',')
   : ['http://localhost:5000', 'http://localhost:5173'];
 
-// Add the Railway backend domain to allowed origins (same-origin requests)
+// Add SITE_URL dynamically (Railway injects this if configured)
+const siteUrl = process.env.SITE_URL
+  || (process.env.RAILWAY_PUBLIC_DOMAIN
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+    : null);
+
 const allowedOrigins = [
   ...baseOrigins,
-  'https://epitaphe-backend-production.up.railway.app'
+  ...(siteUrl ? [siteUrl] : []),
 ];
+
+// Accepte tous les sous-domaines *.vercel.app (previews, staging, prod)
+const vercelPattern = /^https:\/\/.+\.vercel\.app$/;
 
 console.log('🌐 CORS allowed origins:', allowedOrigins);
 
@@ -81,6 +93,9 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like direct browser access, Postman, curl)
     if (!origin) return callback(null, true);
+
+    // Accept Vercel preview deployments
+    if (vercelPattern.test(origin)) return callback(null, true);
 
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
@@ -95,15 +110,37 @@ app.use(cors({
 }));
 
 // Security headers with Helmet
+// Disable CSP in development (Vite HMR needs ws:, inline scripts, etc.)
+const isDev = process.env.NODE_ENV === "development";
 app.use(helmet({
-  contentSecurityPolicy: {
+  contentSecurityPolicy: isDev ? false : {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrc: [
+        "'self'", "'unsafe-inline'", "'unsafe-eval'",
+        "https://www.googletagmanager.com",
+        "https://www.google-analytics.com",
+        "https://www.clarity.ms",
+        "https://c.clarity.ms",
+      ],
+      scriptSrcElem: [
+        "'self'", "'unsafe-inline'",
+        "https://www.googletagmanager.com",
+        "https://www.google-analytics.com",
+        "https://www.clarity.ms",
+        "https://c.clarity.ms",
+      ],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:", "blob:", "https://www.google-analytics.com", "https://www.googletagmanager.com"],
+      connectSrc: [
+        "'self'",
+        "https://www.google-analytics.com",
+        "https://analytics.google.com",
+        "https://www.clarity.ms",
+        "https://c.clarity.ms",
+        "https://e.clarity.ms",
+      ],
       frameSrc: ["'self'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],

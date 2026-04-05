@@ -1,39 +1,61 @@
-import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram } from "lucide-react";
+import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/useSettings";
+import { Link } from "wouter";
+import { resetCookieConsent } from "@/components/cookie-consent-banner";
 
-const footerLinks = {
-  services: [
-    { label: "Digital", href: "#services" },
-    { label: "Publicité", href: "#services" },
-    { label: "Contenu", href: "#services" },
-    { label: "Événementiel", href: "#services" },
-  ],
-  company: [
-    { label: "À propos", href: "#about" },
-    { label: "Références", href: "#portfolio" },
-    { label: "Blog", href: "#blog" },
-    { label: "Contact", href: "#contact" },
-  ],
-};
+const defaultServicesLinks = [
+  { label: "Événements", href: "/evenements" },
+  { label: "Architecture de Marque", href: "/architecture-de-marque" },
+  { label: "La Fabrique", href: "/la-fabrique" },
+  { label: "Outils", href: "/outils/vigilance-score" },
+];
+
+const defaultCompanyLinks = [
+  { label: "Références", href: "/nos-references" },
+  { label: "Blog", href: "/blog" },
+  { label: "Ressources", href: "/ressources" },
+  { label: "Contact", href: "/contact" },
+];
 
 export function Footer() {
   const { settings } = useSettings("footer", {
-    footer_address: "Casablanca, Maroc",
-    footer_phone: "+212 5 22 XX XX XX",
-    footer_email: "contact@epitaphe.ma",
-    footer_description: "Agence de communication 360° à Casablanca. Inspirez. Connectez. Marquez Durablement.",
+    footer_address: "Rez de chaussée Immeuble 7-9 Rue Bussang, Casablanca - Maroc",
+    footer_phone: "+212 662 744 741",
+    footer_email: "info@epitaphe.ma",
+    footer_description: "Agence de communication 360° à Casablanca. Basée au Maroc depuis plus de 20 ans, nous accompagnons les entreprises dans leur stratégie de communication globale.",
     footer_linkedin: "",
-    footer_facebook: "",
+    footer_facebook: "https://www.facebook.com/epitaphe360",
     footer_instagram: "",
+    footer_links_services: JSON.stringify(defaultServicesLinks),
+    footer_links_company: JSON.stringify(defaultCompanyLinks),
   });
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+  const { settings: siteIdentity } = useSettings("site_identity", {
+    logo_white_url: "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png"
+  });
+
+  const parsedServicesLinks = (() => {
+    try {
+      return typeof settings.footer_links_services === "string" 
+        ? JSON.parse(settings.footer_links_services) 
+        : defaultServicesLinks;
+    } catch (e) {
+      return defaultServicesLinks;
     }
-  };
+  })();
+
+  const parsedCompanyLinks = (() => {
+    try {
+      return typeof settings.footer_links_company === "string"
+        ? JSON.parse(settings.footer_links_company)
+        : defaultCompanyLinks;
+    } catch (e) {
+      return defaultCompanyLinks;
+    }
+  })();
+
+  const logoUrl = siteIdentity.logo_white_url || "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png";
 
   return (
     <footer
@@ -45,7 +67,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <div className="mb-4">
               <img
-                src="https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png"
+                src={logoUrl}
                 alt="Epitaphe 360"
                 className="h-10 w-auto brightness-0 invert"
                 data-testid="img-footer-logo"
@@ -94,15 +116,15 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-background mb-4">Nos services</h4>
             <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
+              {parsedServicesLinks.map((link: any) => (
                 <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
+                  <Link
+                    href={link.href}
                     className="text-sm text-background/70 hover:text-primary transition-colors"
                     data-testid={`link-footer-${link.label.toLowerCase()}`}
                   >
                     {link.label}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -111,15 +133,15 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-background mb-4">L'agence</h4>
             <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
+              {parsedCompanyLinks.map((link: any) => (
                 <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
+                  <Link
+                    href={link.href}
                     className="text-sm text-background/70 hover:text-primary transition-colors"
                     data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {link.label}
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -154,17 +176,26 @@ export function Footer() {
               © {new Date().getFullYear()} Epitaphe 360. Tous droits réservés.
             </p>
             <div className="flex gap-6">
-              <button 
+              <Link 
+                href="/mentions-legales"
                 className="text-sm text-background/50 hover:text-primary transition-colors"
                 data-testid="link-mentions-legales"
               >
                 Mentions légales
-              </button>
-              <button 
+              </Link>
+              <Link 
+                href="/politique-confidentialite"
                 className="text-sm text-background/50 hover:text-primary transition-colors"
                 data-testid="link-politique-confidentialite"
               >
                 Politique de confidentialité
+              </Link>
+              <button
+                onClick={resetCookieConsent}
+                className="text-sm text-background/50 hover:text-primary transition-colors flex items-center gap-1"
+                data-testid="link-cookie-settings"
+              >
+                <Cookie className="w-3 h-3" /> Paramètres cookies
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { AnimatedSection } from "@/components/animated-section";
 
 const services = [
   {
@@ -26,6 +27,11 @@ const services = [
     title: "Communication interne",
     image: "https://epitaphe.ma/wp-content/uploads/2020/05/com-interne.jpg",
   },
+  {
+    id: "communication-digitale",
+    title: "Communication digitale",
+    image: "https://epitaphe.ma/wp-content/uploads/2020/04/digital-1.jpg",
+  },
 ];
 
 export function ServicesSection() {
@@ -36,7 +42,7 @@ export function ServicesSection() {
       data-testid="section-services"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-16">
+        <AnimatedSection variant="fadeUp" className="text-center mb-16">
           <h2
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4"
             data-testid="text-services-title"
@@ -46,7 +52,7 @@ export function ServicesSection() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Une expertise complète pour accompagner vos projets de A à Z
           </p>
-        </div>
+        </AnimatedSection>
 
         <div className="overflow-hidden">
           <div className="flex animate-services-scroll">

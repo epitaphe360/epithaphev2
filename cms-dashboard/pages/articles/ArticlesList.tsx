@@ -71,7 +71,7 @@ export function ArticlesList() {
   const statusFilter = (
     <select
       onChange={(e) => setFilter("status", e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#EC4899]"
     >
       <option value="">Tous les statuts</option>
       <option value="draft">Brouillon</option>

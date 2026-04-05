@@ -3,7 +3,7 @@
 // ========================================
 
 import React, { useState, useEffect } from 'react';
-import { Save, Mail, Share2, Code } from 'lucide-react';
+import { Save, Mail, Share2, Code, BarChart3 } from 'lucide-react';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Input, Textarea } from '../../components/Input';
@@ -31,6 +31,9 @@ export const IntegrationSettings: React.FC = () => {
     mailchimpApiKey: '',
     stripePublicKey: '',
     customScripts: '',
+    // Analytics
+    ga4Id: '',
+    clarityId: '',
   });
 
   const toast = useToast();
@@ -70,7 +73,7 @@ export const IntegrationSettings: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Paramètres d'Intégration</h1>
@@ -92,7 +95,7 @@ export const IntegrationSettings: React.FC = () => {
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Hôte SMTP
                 </label>
                 <Input
@@ -103,7 +106,7 @@ export const IntegrationSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Port
                 </label>
                 <Input
@@ -117,7 +120,7 @@ export const IntegrationSettings: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Nom d'utilisateur
                 </label>
                 <Input
@@ -128,7 +131,7 @@ export const IntegrationSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Mot de passe
                 </label>
                 <Input
@@ -143,7 +146,7 @@ export const IntegrationSettings: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Email d'expédition
                 </label>
                 <Input
@@ -155,7 +158,7 @@ export const IntegrationSettings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-200 mb-2">
                   Nom d'expédition
                 </label>
                 <Input
@@ -179,7 +182,7 @@ export const IntegrationSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Facebook
               </label>
               <Input
@@ -192,7 +195,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Twitter (X)
               </label>
               <Input
@@ -205,7 +208,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Instagram
               </label>
               <Input
@@ -218,7 +221,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 LinkedIn
               </label>
               <Input
@@ -231,7 +234,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 YouTube
               </label>
               <Input
@@ -245,6 +248,47 @@ export const IntegrationSettings: React.FC = () => {
           </div>
         </Card>
 
+        {/* Analytics & Tracking */}
+        <Card>
+          <div className="p-6 border-b border-[#1E293B]">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Analytics &amp; Tracking
+            </h2>
+          </div>
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Google Analytics 4 — Measurement ID
+              </label>
+              <Input
+                name="ga4Id"
+                value={formData.ga4Id}
+                onChange={handleChange}
+                placeholder="G-XXXXXXXXXX"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Remplace la variable d'environnement VITE_GA4_ID (format&nbsp;: G-XXXXXXX)
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Microsoft Clarity — Project ID
+              </label>
+              <Input
+                name="clarityId"
+                value={formData.clarityId}
+                onChange={handleChange}
+                placeholder="xxxxxxxxxx"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Remplace la variable d'environnement VITE_CLARITY_ID
+              </p>
+            </div>
+          </div>
+        </Card>
+
         {/* External Services */}
         <Card>
           <div className="p-6 border-b border-[#1E293B]">
@@ -254,7 +298,7 @@ export const IntegrationSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Disqus Shortname (Commentaires)
               </label>
               <Input
@@ -266,7 +310,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Mailchimp API Key (Newsletter)
               </label>
               <Input
@@ -278,7 +322,7 @@ export const IntegrationSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Stripe Public Key (Paiements)
               </label>
               <Input
@@ -300,7 +344,7 @@ export const IntegrationSettings: React.FC = () => {
             </h2>
           </div>
           <div className="p-6">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-200 mb-2">
               Scripts HTML personnalisés (Head)
             </label>
             <Textarea
@@ -330,3 +374,5 @@ export const IntegrationSettings: React.FC = () => {
 };
 
 export default IntegrationSettings;
+
+

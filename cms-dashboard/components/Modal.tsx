@@ -78,7 +78,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       <div
         className={`
-          relative w-full mx-4 bg-[#0B1121] rounded-xl shadow-2xl
+          relative w-full mx-4 bg-[#0B1121] rounded-xl shadow-2xl border border-[#1E293B]
           transform transition-all duration-300
           animate-in fade-in zoom-in-95
           ${sizeStyles[finalSize]}
@@ -111,7 +111,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-[#020617] border-t border-[#1E293B] rounded-b-xl">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-[#0D0F1E] border-t border-[#1E293B] rounded-b-xl">
             {footer}
           </div>
         )}
@@ -163,7 +163,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </>
       }
     >
-      <p className="text-slate-400">{message}</p>
+      <p className="text-slate-300">{message}</p>
     </Modal>
   );
 };
@@ -201,7 +201,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
         <Button onClick={onClose}>OK</Button>
       }
     >
-      <p className={`${iconColors[type]}`}>{message}</p>
+      <p className={`text-sm ${iconColors[type]}`}>{message}</p>
     </Modal>
   );
 };

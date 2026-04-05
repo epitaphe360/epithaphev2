@@ -1,5 +1,5 @@
 // ========================================
-// CMS Dashboard - UI Components: Button (Dark Theme)
+// CMS Dashboard - UI Components: Button
 // ========================================
 
 import React from 'react';
@@ -15,11 +15,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  primary:   'bg-[#E63946] text-white hover:bg-[#cc2f3b] focus:ring-[#E63946]/50',
-  secondary: 'bg-[#1E293B] text-slate-300 hover:bg-[#334155] hover:text-white border border-[#334155] focus:ring-[#334155]',
-  danger:    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-  ghost:     'text-slate-400 hover:bg-[#1E293B] hover:text-white focus:ring-[#334155]',
-  outline:   'border border-[#334155] text-slate-300 hover:bg-[#1E293B] hover:text-white focus:ring-[#334155]',
+  primary: 'bg-[#EC4899] text-white hover:bg-[#db2777] focus:ring-[#EC4899]',
+  secondary: 'bg-[#1E293B] text-slate-200 hover:bg-[#334155] focus:ring-slate-500',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+  ghost: 'text-slate-400 hover:bg-[#1E293B] focus:ring-slate-500',
+  outline: 'border border-[#334155] text-slate-300 hover:bg-[#1E293B] focus:ring-slate-500',
 };
 
 const sizeStyles = {
@@ -45,9 +45,9 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       className={`
-        inline-flex items-center justify-center gap-2 font-medium rounded-xl
+        inline-flex items-center justify-center gap-2 font-medium rounded-lg
         transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#020617]
+        focus:outline-none focus:ring-2 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantStyles[variant]}
         ${sizeStyles[size]}
@@ -91,9 +91,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
   return (
     <button
       className={`
-        inline-flex items-center justify-center rounded-xl
+        inline-flex items-center justify-center rounded-lg
         transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#020617]
+        focus:outline-none focus:ring-2 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variantStyles[variant]}
         ${iconSizeStyles[size]}
@@ -108,3 +108,4 @@ export const IconButton: React.FC<IconButtonProps> = ({
 };
 
 export default Button;
+

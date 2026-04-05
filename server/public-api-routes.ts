@@ -1,6 +1,13 @@
 import type { Express, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import { db } from "./db";
 import { z } from "zod";
+import {
+  sendNewsletterConfirmation,
+  sendBriefConfirmation,
+  sendBriefNotificationToAdmin,
+  sendEmail,
+} from "./lib/email";
 import {
   newsletterSubscriptions,
   projectBriefs,
@@ -85,7 +92,78 @@ function formatDateRFC822(date: Date | string | null): string {
 // PUBLIC API ROUTES
 // ========================================
 
+// Rate limiters pour les endpoints publics sensibles
+const clientLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 10,
+  message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const newsletterLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1h
+  max: 5,
+  message: { error: 'Trop de demandes. Réessayez plus tard.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const briefLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1h
+  max: 5,
+  message: { error: 'Trop de briefs envoyés. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const leadMagnetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1h
+  max: 5,
+  message: { error: 'Trop de téléchargements. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const webauthnLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Trop de tentatives WebAuthn. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/** Type étendu de Request avec l'identité client injectée par requireClientAuth */
+export interface ClientAuthRequest extends Request {
+  clientId: number;
+  clientEmail: string;
+}
+
+/** Middleware — vérifie le JWT client (exporté pour réutilisation dans d'autres modules) */
+export function requireClientAuth(req: Request, res: Response, next: () => void): void {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Non autorisé" });
+    return;
+  }
+  try {
+    const secret = process.env.JWT_SECRET!;
+    const token = authHeader.slice(7);
+    const payload = jwt.verify(token, secret) as { clientId: number; email: string };
+    (req as any).clientId = payload.clientId;
+    (req as any).clientEmail = payload.email;
+    next();
+  } catch {
+    res.status(401).json({ error: "Token invalide ou expiré" });
+  }
+}
+
 export function registerPublicApiRoutes(app: Express): void {
+  // Vérifier JWT_SECRET au démarrage
+  if (!process.env.JWT_SECRET) {
+    throw new Error('[public-api-routes] JWT_SECRET est manquant dans .env — démarrage annulé.');
+  }
+
   // ========================================
   // NEWSLETTER SUBSCRIPTION
   // ========================================
@@ -94,7 +172,7 @@ export function registerPublicApiRoutes(app: Express): void {
    * POST /api/newsletter/subscribe
    * Subscribe to newsletter
    */
-  app.post("/api/newsletter/subscribe", async (req: Request, res: Response) => {
+  app.post("/api/newsletter/subscribe", newsletterLimiter, async (req: Request, res: Response) => {
     try {
       // Check if newsletter feature is enabled
       const isEnabled = process.env.ENABLE_NEWSLETTER !== "false";
@@ -160,8 +238,8 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // TODO: Send welcome email via SMTP/Mailchimp
-      // await sendWelcomeEmail(newSubscription.email);
+      // Email de bienvenue envoyé de façon asynchrone
+      sendNewsletterConfirmation(newSubscription.email).catch((e) => console.error("[email] newsletter:", e));
 
       res.status(201).json({
         success: true,
@@ -240,7 +318,7 @@ export function registerPublicApiRoutes(app: Express): void {
    * POST /api/project-brief
    * Submit a project brief from configurator
    */
-  app.post("/api/project-brief", async (req: Request, res: Response) => {
+  app.post("/api/project-brief", briefLimiter, async (req: Request, res: Response) => {
     try {
       // Check if configurator feature is enabled
       const isEnabled = process.env.ENABLE_PROJECT_CONFIGURATOR !== "false";
@@ -266,11 +344,22 @@ export function registerPublicApiRoutes(app: Express): void {
         })
         .returning();
 
-      // TODO: Send notification email to team
-      // await sendProjectBriefNotification(newBrief);
-
-      // TODO: Send confirmation email to client
-      // await sendProjectBriefConfirmation(newBrief.email, newBrief);
+      // Emails asynchrones — on ne bloque pas la réponse
+      Promise.all([
+        sendBriefNotificationToAdmin({
+          name: `${newBrief.firstName} ${newBrief.lastName}`,
+          email: newBrief.email,
+          company: (newBrief as any).company,
+          projectType: (newBrief as any).projectType ?? "Projet",
+          budget: (newBrief as any).budget,
+          message: (newBrief as any).description,
+        }),
+        sendBriefConfirmation(
+          newBrief.email,
+          `${newBrief.firstName} ${newBrief.lastName}`,
+          (newBrief as any).projectType ?? "Projet",
+        ),
+      ]).catch((e) => console.error("[email] brief:", e));
 
       res.status(201).json({
         success: true,
@@ -664,30 +753,67 @@ Disallow: /
   // ESPACE CLIENT — Auth + Portail
   // ========================================
 
-  const CLIENT_JWT_SECRET = process.env.JWT_SECRET || "epitaphe-client-secret";
+  // JWT_SECRET validé au démarrage (cf. vérification en haut de registerPublicApiRoutes)
+  const CLIENT_JWT_SECRET = process.env.JWT_SECRET!;
   const CLIENT_JWT_EXPIRES = "30d";
 
-  /** Middleware — vérifie le JWT client */
-  function requireClientAuth(req: Request, res: Response, next: () => void) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Non autorisé" });
-    }
+  /**
+   * POST /api/client/magic-login
+   * Authentifie un client via le magic link reçu par email (après scoring)
+   */
+  app.post("/api/client/magic-login", clientLoginLimiter, async (req: Request, res: Response) => {
     try {
-      const token = authHeader.slice(7);
-      const payload = jwt.verify(token, CLIENT_JWT_SECRET) as { clientId: number; email: string };
-      (req as any).clientId = payload.clientId;
-      next();
-    } catch {
-      return res.status(401).json({ error: "Token invalide ou expiré" });
+      const { email, token: magicToken } = req.body as { email?: string; token?: string };
+      if (!email || !magicToken) {
+        return res.status(400).json({ error: "Lien invalide" });
+      }
+
+      const [account] = await db
+        .select()
+        .from(clientAccounts)
+        .where(eq(clientAccounts.email, email.toLowerCase().trim()))
+        .limit(1);
+
+      if (!account) {
+        return res.status(401).json({ error: "Compte introuvable" });
+      }
+
+      // Vérification du token magique (format: `{id}-welcome`)
+      if (magicToken !== `${account.id}-welcome`) {
+        return res.status(401).json({ error: "Lien invalide ou expiré" });
+      }
+
+      // Activer le compte si ce n'est pas déjà fait
+      await db.update(clientAccounts)
+        .set({ isActive: true, lastLoginAt: new Date() })
+        .where(eq(clientAccounts.id, account.id));
+
+      const token = jwt.sign(
+        { clientId: account.id, email: account.email },
+        CLIENT_JWT_SECRET,
+        { expiresIn: CLIENT_JWT_EXPIRES }
+      );
+
+      return res.json({
+        token,
+        client: {
+          id: account.id,
+          name: account.name,
+          company: account.company,
+          email: account.email,
+        },
+      });
+    } catch (error) {
+      console.error("Client magic login error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
     }
-  }
+  });
 
   /**
    * POST /api/client/login
    * Authentifie un client et retourne un JWT
    */
-  app.post("/api/client/login", async (req: Request, res: Response) => {
+  app.post("/api/client/login", clientLoginLimiter, async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body as { email?: string; password?: string };
       if (!email || !password) {
@@ -927,7 +1053,7 @@ Disallow: /
     documentSlug: z.string().min(1),
   });
 
-  app.post("/api/leads/lead-magnet", async (req: Request, res: Response) => {
+  app.post("/api/leads/lead-magnet", leadMagnetLimiter, async (req: Request, res: Response) => {
     try {
       const { email, documentSlug } = leadMagnetSchema.parse(req.body);
 
@@ -947,8 +1073,42 @@ Disallow: /
         });
       }
 
-      // TODO: Déclencher l'envoi email via un service (Resend, Brevo, etc.)
-      // Pour l'instant, retour succès immédiat
+      // Envoyer l'email de téléchargement
+      const resource = await db
+        .select({ title: resources.title, downloadUrl: resources.downloadUrl })
+        .from(resources)
+        .where(eq(resources.title, documentSlug))
+        .limit(1);
+
+      const downloadUrl = resource[0]?.downloadUrl ?? null;
+      const resourceTitle = resource[0]?.title ?? documentSlug;
+      const siteUrl = process.env.SITE_URL ?? "https://www.epitaphe360.ma";
+
+      sendEmail({
+        to: email.toLowerCase(),
+        subject: `📥 Votre ressource "${resourceTitle}" — Epitaphe360`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#fafafa;border-radius:12px">
+            <h2 style="color:#111;margin-top:0;">Votre ressource est prête !</h2>
+            <p>Merci pour votre intérêt. Vous pouvez télécharger <strong>${resourceTitle}</strong> en cliquant sur le bouton ci-dessous.</p>
+            ${downloadUrl
+              ? `<p style="text-align:center;margin:24px 0;">
+                  <a href="${downloadUrl}" style="background:#111;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
+                    Télécharger maintenant →
+                  </a>
+                </p>`
+              : `<p style="text-align:center;margin:24px 0;">
+                  <a href="${siteUrl}/ressources" style="background:#111;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
+                    Accéder aux ressources →
+                  </a>
+                </p>`
+            }
+            <p style="font-size:12px;color:#999;margin-top:24px;">
+              Epitaphe360 · <a href="${siteUrl}" style="color:#999;">${siteUrl}</a>
+            </p>
+          </div>`,
+      }).catch(e => console.error("[email] lead-magnet:", e));
+
       return res.status(200).json({ success: true, documentSlug });
     } catch (error: any) {
       if (error?.name === "ZodError") {
@@ -994,7 +1154,7 @@ Disallow: /
       let clientAccountId: number | null = null;
       if (authHeader?.startsWith("Bearer ")) {
         try {
-          const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET ?? "secret") as any;
+          const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET!) as any;
           if (payload.clientId) clientAccountId = payload.clientId;
         } catch { /* anonyme */ }
       }
@@ -1156,7 +1316,7 @@ Disallow: /
    * Générer un challenge d'authentification biométrique
    * (body: { email })
    */
-  app.post("/api/client/webauthn/auth-challenge", async (req: Request, res: Response) => {
+  app.post("/api/client/webauthn/auth-challenge", webauthnLimiter, async (req: Request, res: Response) => {
     try {
       const { email } = req.body as { email?: string };
       if (!email) return res.status(400).json({ error: "email requis" });
@@ -1204,7 +1364,7 @@ Disallow: /
    * POST /api/client/webauthn/auth-verify
    * Vérifier l'authentification biométrique → retourne JWT
    */
-  app.post("/api/client/webauthn/auth-verify", async (req: Request, res: Response) => {
+  app.post("/api/client/webauthn/auth-verify", webauthnLimiter, async (req: Request, res: Response) => {
     try {
       const { email, response } = req.body as { email?: string; response?: any };
       if (!email || !response) return res.status(400).json({ error: "email et response requis" });
@@ -1261,7 +1421,7 @@ Disallow: /
       // Émettre un JWT
       const token = jwt.sign(
         { clientId: account.id, email: account.email },
-        process.env.JWT_SECRET ?? "secret",
+        process.env.JWT_SECRET!,
         { expiresIn: "7d" }
       );
 

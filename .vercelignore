@@ -1,0 +1,20 @@
+# Fichiers serveur — Vercel ne sert que le frontend statique
+# L'API tourne sur Railway (proxy transparent via vercel.json rewrites)
+
+server/
+migrations/
+script/
+attached_assets/
+dist/
+
+# Docker / Railway
+Dockerfile
+railway.json
+Procfile
+
+# Config TS server
+tsconfig.build.json
+
+# Docs markdown
+*.md
+!README.md

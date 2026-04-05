@@ -118,7 +118,7 @@ export const UsersList: React.FC = () => {
       header: 'Utilisateur',
       render: (user) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#334155] rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#1E293B] rounded-full flex items-center justify-center">
             <User className="w-5 h-5 text-slate-400" />
           </div>
           <div>
@@ -150,14 +150,14 @@ export const UsersList: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleEdit(user)}
-            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
+            className="p-2 text-slate-500 hover:text-[#EC4899] hover:bg-[#EC4899]/10 rounded-lg"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleDelete(user.id)}
-            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/100/10 rounded-lg"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -168,7 +168,7 @@ export const UsersList: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -211,7 +211,7 @@ export const UsersList: React.FC = () => {
       ) : filteredUsers.length === 0 ? (
         <Card>
           <div className="p-8 text-center">
-            <Shield className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+            <Shield className="w-12 h-12 text-slate-600 mx-auto mb-4" />
             <p className="text-slate-500 mb-4">
               {search || roleFilter !== 'all' ? 'Aucun utilisateur trouvé' : 'Aucun utilisateur pour le moment'}
             </p>
@@ -237,3 +237,5 @@ export const UsersList: React.FC = () => {
 };
 
 export default UsersList;
+
+

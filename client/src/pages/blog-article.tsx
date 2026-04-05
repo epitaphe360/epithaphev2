@@ -2,9 +2,10 @@ import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { ContactSection } from "@/components/contact-section";
 import { useParams, Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { useState, useEffect } from "react";
 
 const blogArticles: Record<string, {
   title: string;
@@ -284,7 +285,56 @@ Epitaphe 360 vous accompagne de la conception à l'installation de votre enseign
 
 export default function BlogArticlePage() {
   const { slug } = useParams();
-  const article = slug ? blogArticles[slug] : null;
+  const [article, setArticle] = useState<{
+    title: string;
+    excerpt: string;
+    image: string;
+    categories: string[];
+    content: string;
+    isHtml?: boolean;
+  } | null | undefined>(undefined); // undefined = loading, null = not found
+
+  useEffect(() => {
+    if (!slug) { setArticle(null); return; }
+    fetch(`/api/articles/slug/${encodeURIComponent(slug)}`)
+      .then((r) => {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then((data) => {
+        if (data && data.title) {
+          setArticle({
+            title: data.title,
+            excerpt: data.excerpt ?? "",
+            image: data.featuredImage ?? data.featured_image ?? "",
+            categories: data.tags ?? [],
+            content: data.content ?? "",
+            isHtml: true,
+          });
+        } else {
+          // Fallback to hardcoded
+          const fallback = slug ? blogArticles[slug] : null;
+          setArticle(fallback ?? null);
+        }
+      })
+      .catch(() => {
+        const fallback = slug ? blogArticles[slug] : null;
+        setArticle(fallback ?? null);
+      });
+  }, [slug]);
+
+  // Loading
+  if (article === undefined) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="pt-32 pb-16 flex justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!article) {
     return (
@@ -344,7 +394,10 @@ export default function BlogArticlePage() {
           </Link>
 
           <div className="prose prose-lg dark:prose-invert max-w-none" data-testid="content-article-body">
-            {article.content.split('\n\n').map((paragraph, idx) => {
+            {article.isHtml ? (
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }} />
+            ) : (
+              article.content.split('\n\n').map((paragraph, idx) => {
               if (paragraph.startsWith('## ')) {
                 return <h2 key={idx} className="text-2xl font-bold mt-8 mb-4">{paragraph.replace('## ', '')}</h2>;
               }
@@ -372,7 +425,8 @@ export default function BlogArticlePage() {
                 );
               }
               return <p key={idx} className="text-muted-foreground leading-relaxed my-4">{paragraph}</p>;
-            })}
+            })
+            )}
           </div>
         </div>
       </article>

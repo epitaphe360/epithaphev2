@@ -1,5 +1,5 @@
 // ========================================
-// CMS Dashboard - UI Components: Card (Dark Theme)
+// CMS Dashboard - UI Components: Card
 // ========================================
 
 import React from 'react';
@@ -28,7 +28,7 @@ export const Card: React.FC<CardProps> = ({
     <div
       className={`
         bg-[#0B1121] rounded-xl border border-[#1E293B]
-        ${hover ? 'hover:border-[#334155] transition-colors cursor-pointer' : ''}
+        ${hover ? 'hover:border-[#EC4899]/30 transition-shadow cursor-pointer' : ''}
         ${paddingStyles[padding]}
         ${className}
       `}
@@ -79,7 +79,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`px-6 py-4 bg-[#020617] border-t border-[#1E293B] rounded-b-xl ${className}`}>
+    <div className={`px-6 py-4 bg-[#0D0F1E] border-t border-[#1E293B] rounded-b-xl ${className}`}>
       {children}
     </div>
   );
@@ -118,3 +118,5 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
 };
 
 export default Card;
+
+

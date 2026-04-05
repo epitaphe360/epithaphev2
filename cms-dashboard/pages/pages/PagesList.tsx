@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from '../../hooks/useRouterParams';
+import { Link } from 'wouter';
 import { Plus, Edit, Trash2, Eye, GripVertical, Paintbrush } from 'lucide-react';
 import { Card, CardContent } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -87,9 +88,9 @@ export const PagesList: React.FC = () => {
       render: (pageItem) => {
         const template = pageItem.template || 'DEFAULT';
         const getTemplateColor = () => {
-          if (template === 'GRAPES_JS') return 'warning';
-          if (['HOME', 'REFERENCES', 'BLOG_LIST', 'SOLUTIONS', 'CONTACT'].includes(template)) return 'default';
-          return 'default';
+          if (template === 'GRAPES_JS') return 'purple';
+          if (['HOME', 'REFERENCES', 'BLOG_LIST', 'SOLUTIONS', 'CONTACT'].includes(template)) return 'blue';
+          return 'gray';
         };
 
         return (
@@ -107,24 +108,20 @@ export const PagesList: React.FC = () => {
     {
       key: 'updatedAt',
       header: 'Modifié',
-      render: (pageItem) => (
-        <span className="text-slate-400 text-xs">
-          {new Date(pageItem.updatedAt).toLocaleDateString('fr-FR')}
-        </span>
-      ),
+      render: (pageItem) => new Date(pageItem.updatedAt).toLocaleDateString('fr-FR'),
     },
     {
       key: 'actions',
       header: '',
-      width: '140px',
+      width: '120px',
       render: (pageItem) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               window.open(`/${pageItem.slug}`, '_blank');
             }}
-            className="p-2 text-slate-500 hover:text-white hover:bg-[#1E293B] rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-200 hover:bg-[#0D0F1E] rounded-lg"
             title="Voir"
           >
             <Eye className="w-4 h-4" />
@@ -134,7 +131,7 @@ export const PagesList: React.FC = () => {
               e.stopPropagation();
               navigate(`/admin/visual-editor/edit/${pageItem.id}`);
             }}
-            className="p-2 text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-purple-400 hover:bg-purple-500/100/10 rounded-lg"
             title="Éditeur visuel GrapesJS"
           >
             <Paintbrush className="w-4 h-4" />
@@ -144,7 +141,7 @@ export const PagesList: React.FC = () => {
               e.stopPropagation();
               navigate(`/admin/pages/${pageItem.id}/edit`);
             }}
-            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-[#EC4899] hover:bg-[#EC4899]/10 rounded-lg"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
@@ -154,7 +151,7 @@ export const PagesList: React.FC = () => {
               e.stopPropagation();
               setDeleteId(pageItem.id);
             }}
-            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/100/10 rounded-lg"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -165,19 +162,19 @@ export const PagesList: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Pages du site</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Gérez toutes les pages — y compris Événements, Architecture de Marque, La Fabrique, etc.
-          </p>
+          <h1 className="text-2xl font-bold text-white">Pages</h1>
+          <p className="text-slate-400">Gérez les pages de votre site</p>
         </div>
-        <Button onClick={() => navigate('/admin/pages/new')}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvelle page
-        </Button>
+        <Link to="/admin/pages/new">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvelle page
+          </Button>
+        </Link>
       </div>
 
       {/* Filters */}
@@ -230,3 +227,5 @@ export const PagesList: React.FC = () => {
 };
 
 export default PagesList;
+
+

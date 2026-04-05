@@ -126,8 +126,8 @@ export function QRCodesList() {
       {/* En-tête */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#C8A96E]/10 rounded-xl">
-            <QrCode className="w-6 h-6 text-[#C8A96E]" />
+          <div className="p-2.5 bg-[#EC4899]/10 rounded-xl">
+            <QrCode className="w-6 h-6 text-[#EC4899]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">QR Codes</h1>
@@ -136,7 +136,7 @@ export function QRCodesList() {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#C8A96E] text-white rounded-xl text-sm font-medium hover:bg-[#b8965e] transition shadow-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#EC4899] text-white rounded-xl text-sm font-medium hover:bg-[#b8965e] transition shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Nouveau QR Code
@@ -145,14 +145,14 @@ export function QRCodesList() {
 
       {/* Erreur */}
       {error && (
-        <div className="flex items-center gap-2 p-4 bg-red-500/10 rounded-xl text-red-600 text-sm mb-6">
+        <div className="flex items-center gap-2 p-4 bg-red-50 rounded-xl text-red-600 text-sm mb-6">
           <AlertCircle className="w-5 h-5 shrink-0" /> {error}
         </div>
       )}
 
       {/* Formulaire de création */}
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-[#0B1121] rounded-2xl border border-[#1E293B] shadow-sm p-6 mb-6">
+        <form onSubmit={handleCreate} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
           <h2 className="font-semibold text-white mb-5">Créer un QR Code</h2>
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
             <div className="sm:col-span-2">
@@ -161,7 +161,7 @@ export function QRCodesList() {
                 required value={form.label}
                 onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
                 placeholder="ex: Gitex 2025 — Stand B12"
-                className="w-full rounded-xl border border-[#1E293B] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A96E]/30 focus:border-[#C8A96E] transition bg-[#0B1121] text-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/30 focus:border-[#EC4899] transition"
               />
             </div>
             <div>
@@ -170,7 +170,7 @@ export function QRCodesList() {
                 required value={form.targetPath}
                 onChange={(e) => setForm((f) => ({ ...f, targetPath: e.target.value }))}
                 placeholder="/evenements/salons"
-                className="w-full rounded-xl border border-[#1E293B] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A96E]/30 focus:border-[#C8A96E] transition bg-[#0B1121] text-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/30 focus:border-[#EC4899] transition"
               />
             </div>
             <div>
@@ -179,7 +179,7 @@ export function QRCodesList() {
                 required value={form.utmSource}
                 onChange={(e) => setForm((f) => ({ ...f, utmSource: e.target.value }))}
                 placeholder="qrcode"
-                className="w-full rounded-xl border border-[#1E293B] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A96E]/30 focus:border-[#C8A96E] transition bg-[#0B1121] text-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/30 focus:border-[#EC4899] transition"
               />
             </div>
             <div>
@@ -187,7 +187,7 @@ export function QRCodesList() {
               <select
                 value={form.utmMedium}
                 onChange={(e) => setForm((f) => ({ ...f, utmMedium: e.target.value }))}
-                className="w-full rounded-xl border border-[#1E293B] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A96E]/30 focus:border-[#C8A96E] transition bg-[#0B1121] text-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/30 focus:border-[#EC4899] transition bg-white"
               >
                 {UTM_MEDIUM_OPTIONS.map((m) => <option key={m}>{m}</option>)}
               </select>
@@ -198,7 +198,7 @@ export function QRCodesList() {
                 required value={form.utmCampaign}
                 onChange={(e) => setForm((f) => ({ ...f, utmCampaign: e.target.value }))}
                 placeholder="gitex-2025"
-                className="w-full rounded-xl border border-[#1E293B] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A96E]/30 focus:border-[#C8A96E] transition bg-[#0B1121] text-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/30 focus:border-[#EC4899] transition"
               />
             </div>
             <div>
@@ -207,17 +207,17 @@ export function QRCodesList() {
                 value={form.utmContent}
                 onChange={(e) => setForm((f) => ({ ...f, utmContent: e.target.value }))}
                 placeholder="stand-b12"
-                className="w-full rounded-xl border border-[#1E293B] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A96E]/30 focus:border-[#C8A96E] transition bg-[#0B1121] text-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/30 focus:border-[#EC4899] transition"
               />
             </div>
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => setShowForm(false)}
-              className="flex-1 py-2.5 rounded-xl border border-[#1E293B] text-sm text-slate-400 hover:bg-[#1E293B]/50 transition font-medium">
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-400 hover:bg-[#0D0F1E] transition font-medium">
               Annuler
             </button>
             <button type="submit" disabled={creating}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#C8A96E] text-white text-sm font-medium hover:bg-[#b8965e] transition disabled:opacity-60">
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#EC4899] text-white text-sm font-medium hover:bg-[#b8965e] transition disabled:opacity-60">
               {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Générer le QR Code
             </button>
@@ -228,7 +228,7 @@ export function QRCodesList() {
       {/* Liste */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-[#C8A96E]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#EC4899]" />
         </div>
       ) : items.length === 0 ? (
         <div className="text-center py-20 text-slate-500">
@@ -238,17 +238,17 @@ export function QRCodesList() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <div key={item.id} className={`bg-[#0B1121] rounded-2xl border shadow-sm overflow-hidden ${!item.isActive ? "opacity-50" : "border-[#1E293B]"}`}>
+            <div key={item.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${!item.isActive ? "opacity-50" : "border-gray-100"}`}>
               {/* Preview SVG (chargée via /api/admin/qr-codes/:id/svg) */}
-              <div className="bg-[#020617] flex items-center justify-center h-40 border-b border-[#1E293B] relative overflow-hidden">
+              <div className="bg-[#0D0F1E] flex items-center justify-center h-40 border-b border-gray-100 relative overflow-hidden">
                 {preview?.id === item.id ? (
                   <img src={`/api/admin/qr-codes/${item.id}/svg`} alt={item.label} className="w-32 h-32" />
                 ) : (
-                  <div className="flex flex-col items-center text-slate-500 gap-2">
+                  <div className="flex flex-col items-center text-gray-300 gap-2">
                     <QrCode className="w-12 h-12" />
                     <button
                       onClick={() => setPreview({ id: item.id, svgUrl: `/api/admin/qr-codes/${item.id}/svg` })}
-                      className="text-xs text-[#C8A96E] hover:underline"
+                      className="text-xs text-[#EC4899] hover:underline"
                     >
                       Aperçu
                     </button>
@@ -256,7 +256,7 @@ export function QRCodesList() {
                 )}
                 {!item.isActive && (
                   <div className="absolute inset-0 bg-[#1E293B]/80 flex items-center justify-center">
-                    <span className="text-xs font-medium text-slate-500 bg-[#0B1121] px-3 py-1 rounded-full shadow">Désactivé</span>
+                    <span className="text-xs font-medium text-slate-500 bg-[#0D0F1E] px-3 py-1 rounded-full shadow">Désactivé</span>
                   </div>
                 )}
               </div>
@@ -264,7 +264,7 @@ export function QRCodesList() {
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <p className="font-semibold text-white text-sm leading-tight">{item.label}</p>
-                  <div className="flex items-center gap-1 text-xs text-[#C8A96E] bg-[#C8A96E]/10 px-2 py-0.5 rounded-full ml-2 shrink-0">
+                  <div className="flex items-center gap-1 text-xs text-[#EC4899] bg-[#EC4899]/10 px-2 py-0.5 rounded-full ml-2 shrink-0">
                     <BarChart2 className="w-3 h-3" />
                     {item.scanCount}
                   </div>
@@ -278,13 +278,13 @@ export function QRCodesList() {
                 </p>
 
                 {/* Lien de scan avec copie */}
-                <div className="mt-3 p-2 bg-[#020617] rounded-lg flex items-center gap-2">
+                <div className="mt-3 p-2 bg-[#0D0F1E] rounded-lg flex items-center gap-2">
                   <code className="text-[10px] text-slate-500 truncate flex-1">
                     {APP_URL}/qr/{item.id}
                   </code>
                   <button
                     onClick={() => handleCopy(`${APP_URL}/qr/${item.id}`, item.id)}
-                    className="shrink-0 p-1 text-slate-500 hover:text-[#C8A96E] transition"
+                    className="shrink-0 p-1 text-slate-500 hover:text-[#EC4899] transition"
                     title="Copier le lien"
                   >
                     {copied === item.id
@@ -299,7 +299,7 @@ export function QRCodesList() {
                   <button
                     onClick={() => handleDownload(item.id)}
                     title="Télécharger le SVG"
-                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-[#020617] text-slate-400 hover:bg-[#1E293B] transition text-xs font-medium"
+                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg bg-[#0D0F1E] text-slate-400 hover:bg-[#1E293B] transition text-xs font-medium"
                   >
                     <Download className="w-3.5 h-3.5" />
                     SVG
@@ -308,7 +308,7 @@ export function QRCodesList() {
                     href={buildUrl(item)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 py-2 px-3 rounded-lg bg-[#020617] text-slate-400 hover:bg-[#1E293B] transition text-xs font-medium"
+                    className="flex items-center gap-1 py-2 px-3 rounded-lg bg-[#0D0F1E] text-slate-400 hover:bg-[#1E293B] transition text-xs font-medium"
                     title="Tester l'URL"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -317,7 +317,7 @@ export function QRCodesList() {
                     <button
                       onClick={() => handleDelete(item.id)}
                       title="Désactiver"
-                      className="p-2 rounded-lg bg-[#020617] text-slate-500 hover:bg-red-500/10 hover:text-red-500 transition text-xs"
+                      className="p-2 rounded-lg bg-[#0D0F1E] text-slate-500 hover:bg-red-50 hover:text-red-500 transition text-xs"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -331,3 +331,4 @@ export function QRCodesList() {
     </div>
   );
 }
+

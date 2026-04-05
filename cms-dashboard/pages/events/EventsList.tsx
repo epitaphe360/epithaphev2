@@ -91,11 +91,11 @@ export const EventsList: React.FC = () => {
       header: 'Événement',
       render: (event) => (
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-12 h-12 bg-[#E63946]/10 rounded-lg flex flex-col items-center justify-center">
-            <span className="text-xs text-[#E63946] font-medium">
+          <div className="flex-shrink-0 w-12 h-12 bg-[#EC4899]/15 rounded-lg flex flex-col items-center justify-center">
+            <span className="text-xs text-[#EC4899] font-medium">
               {new Date(event.startDate).toLocaleDateString('fr-FR', { month: 'short' })}
             </span>
-            <span className="text-lg font-bold text-[#E63946]">
+            <span className="text-lg font-bold text-[#f472b6]">
               {new Date(event.startDate).getDate()}
             </span>
           </div>
@@ -149,7 +149,7 @@ export const EventsList: React.FC = () => {
               e.stopPropagation();
               window.open(`/evenements/${event.slug}`, '_blank');
             }}
-            className="p-2 text-slate-500 hover:text-slate-300 hover:bg-[#1E293B] rounded-lg"
+            className="p-2 text-slate-500 hover:text-slate-200 hover:bg-[#0D0F1E] rounded-lg"
             title="Voir"
           >
             <Eye className="w-4 h-4" />
@@ -159,7 +159,7 @@ export const EventsList: React.FC = () => {
               e.stopPropagation();
               navigate(`/admin/events/${event.id}/edit`);
             }}
-            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
+            className="p-2 text-slate-500 hover:text-[#EC4899] hover:bg-[#EC4899]/10 rounded-lg"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
@@ -169,7 +169,7 @@ export const EventsList: React.FC = () => {
               e.stopPropagation();
               setDeleteId(event.id);
             }}
-            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/100/10 rounded-lg"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -255,3 +255,5 @@ export const EventsList: React.FC = () => {
 };
 
 export default EventsList;
+
+

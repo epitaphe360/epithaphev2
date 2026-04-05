@@ -43,10 +43,10 @@ const toastIcons = {
 };
 
 const toastStyles = {
-  success: 'border-emerald-500/20 bg-emerald-500/10',
-  error: 'border-red-500/20 bg-red-500/10',
-  warning: 'border-amber-500/20 bg-amber-500/10',
-  info: 'border-blue-500/20 bg-blue-500/10',
+  success: 'border-green-800/50 bg-[#0B1121]',
+  error: 'border-red-800/50 bg-[#0B1121]',
+  warning: 'border-yellow-800/50 bg-[#0B1121]',
+  info: 'border-blue-800/50 bg-[#0B1121]',
 };
 
 interface ToastItemProps {
@@ -140,3 +140,33 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 };
 
 export default ToastProvider;
+
+// ─── Composant Toast inline (usage standalone sans provider) ──────────────────
+interface InlineToastProps {
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  onClose: () => void;
+}
+
+export const Toast: React.FC<InlineToastProps> = ({ message, type, onClose }) => {
+  React.useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div
+      className={`
+        fixed bottom-4 right-4 z-50 flex items-center gap-3 p-4 rounded-lg border shadow-lg
+        animate-in slide-in-from-right fade-in duration-300 max-w-sm
+        ${toastStyles[type]}
+      `}
+    >
+      {toastIcons[type]}
+      <p className="flex-1 text-sm font-medium text-white">{message}</p>
+      <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};

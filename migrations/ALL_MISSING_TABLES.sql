@@ -232,6 +232,30 @@ CREATE INDEX IF NOT EXISTS idx_client_ref_slug ON client_references(slug);
 CREATE INDEX IF NOT EXISTS idx_case_studies_slug ON case_studies(slug);
 CREATE INDEX IF NOT EXISTS idx_team_members_published ON team_members(is_published);
 
+-- ============================================================
+-- TABLE : resources (téléchargeables depuis la page /ressources)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS resources (
+  id              SERIAL PRIMARY KEY,
+  title           TEXT NOT NULL,
+  description     TEXT,
+  category        VARCHAR(80)  NOT NULL DEFAULT 'guide',
+  format          VARCHAR(30)  DEFAULT 'PDF',
+  file_size       VARCHAR(20),
+  download_url    TEXT,
+  thumbnail_url   TEXT,
+  access_level    VARCHAR(20)  DEFAULT 'client',
+  tags            JSONB        DEFAULT '[]',
+  is_new          BOOLEAN      DEFAULT false,
+  is_published    BOOLEAN      DEFAULT true,
+  sort_order      INTEGER      DEFAULT 0,
+  download_count  INTEGER      DEFAULT 0,
+  created_at      TIMESTAMP    DEFAULT NOW() NOT NULL,
+  updated_at      TIMESTAMP    DEFAULT NOW() NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_resources_published ON resources(is_published);
+CREATE INDEX IF NOT EXISTS idx_resources_category  ON resources(category);
+
 -- Triggers updated_at pour les nouvelles tables
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -278,7 +302,10 @@ $$;
 --   client_accounts, client_projects, client_milestones,
 --   client_documents, client_messages,
 --   newsletter_subscriptions, project_briefs, services,
---   client_references, case_studies, testimonials, team_members
+--   client_references, case_studies, testimonials, team_members,
+--   resources
+--
+-- TOTAL : 23 tables — 0 mock en production
 --
 -- TOTAL : 22 tables — 0 mock en production
 -- ============================================================

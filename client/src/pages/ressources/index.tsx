@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileText, Download, Search, Filter, BookOpen,
-  Video, Image, BarChart2, ArrowRight, ExternalLink
+  Video, Image, BarChart2, ArrowRight, ExternalLink, Loader2
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -243,8 +243,38 @@ export default function RessourcesPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("tous");
   const [search, setSearch] = useState("");
   const [gatedResource, setGatedResource] = useState<Resource | null>(null);
+  const [apiResources, setApiResources] = useState<Resource[] | null>(null);
+  const [loadingRes, setLoadingRes] = useState(true);
 
-  const filtered = RESOURCES.filter((r) => {
+  useEffect(() => {
+    fetch("/api/resources/public")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data: any[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setApiResources(
+            data.map((r) => ({
+              id: String(r.id),
+              title: r.title,
+              description: r.description ?? "",
+              category: (r.category as Category) ?? "guides",
+              format: (r.format as Resource["format"]) ?? "PDF",
+              size: r.fileSize ?? undefined,
+              downloadUrl: r.downloadUrl ?? undefined,
+              isGated: r.accessLevel === "client",
+              featured: false,
+              tags: Array.isArray(r.tags) ? r.tags : [],
+              date: r.createdAt ? String(r.createdAt).slice(0, 10) : new Date().toISOString().slice(0, 10),
+            }))
+          );
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingRes(false));
+  }, []);
+
+  const displayResources = loadingRes ? RESOURCES : (apiResources ?? RESOURCES);
+
+  const filtered = displayResources.filter((r) => {
     const matchCat = activeCategory === "tous" || r.category === activeCategory;
     const matchSearch = !search || r.title.toLowerCase().includes(search.toLowerCase()) ||
       r.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
@@ -337,16 +367,16 @@ export default function RessourcesPage() {
             )}
           </div>
         </section>
-        {/* Lead Magnet — CDC 4.6 */}
+        {/* Lead Magnet ï¿½ CDC 4.6 */}
         <LeadMagnetSection
-          title="Guide complet : Réussir votre prochain événement d'entreprise"
-          description="10 étapes clés pour organiser un événement impactant, du briefing à l'évaluation post-événement. Téléchargé par +500 responsables marketing au Maroc."
+          title="Guide complet : Rï¿½ussir votre prochain ï¿½vï¿½nement d'entreprise"
+          description="10 ï¿½tapes clï¿½s pour organiser un ï¿½vï¿½nement impactant, du briefing ï¿½ l'ï¿½valuation post-ï¿½vï¿½nement. Tï¿½lï¿½chargï¿½ par +500 responsables marketing au Maroc."
           documentSlug="guide-evenement-entreprise"
           bulletPoints={[
-            "Checklist complète de 47 points de contrôle",
-            "Templates de brief et de rétroplanning",
+            "Checklist complï¿½te de 47 points de contrï¿½le",
+            "Templates de brief et de rï¿½troplanning",
             "Exemples de dispositifs marquants (budgets inclus)",
-            "Erreurs les plus courantes et comment les éviter",
+            "Erreurs les plus courantes et comment les ï¿½viter",
           ]}
         />
 

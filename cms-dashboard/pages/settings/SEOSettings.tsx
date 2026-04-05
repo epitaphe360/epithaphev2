@@ -73,7 +73,7 @@ export const SEOSettings: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Paramètres SEO</h1>
@@ -91,7 +91,7 @@ export const SEOSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Titre Meta
               </label>
               <Input
@@ -107,7 +107,7 @@ export const SEOSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Description Meta
               </label>
               <Textarea
@@ -124,7 +124,7 @@ export const SEOSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Mots-clés Meta
               </label>
               <Input
@@ -139,7 +139,7 @@ export const SEOSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Image Open Graph
               </label>
               {formData.ogImage ? (
@@ -169,7 +169,7 @@ export const SEOSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Google Analytics ID
               </label>
               <Input
@@ -181,7 +181,7 @@ export const SEOSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Google Search Console ID
               </label>
               <Input
@@ -203,7 +203,7 @@ export const SEOSettings: React.FC = () => {
           </div>
           <div className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-200 mb-2">
                 Contenu robots.txt
               </label>
               <Textarea
@@ -223,9 +223,9 @@ export const SEOSettings: React.FC = () => {
                 name="sitemapEnabled"
                 checked={formData.sitemapEnabled}
                 onChange={handleChange}
-                className="w-4 h-4 text-[#E63946] border-[#334155] rounded focus:ring-[#E63946]"
+                className="w-4 h-4 text-[#EC4899] border-[#334155] rounded focus:ring-[#EC4899]"
               />
-              <label htmlFor="sitemapEnabled" className="ml-2 text-sm text-slate-300">
+              <label htmlFor="sitemapEnabled" className="ml-2 text-sm text-slate-200">
                 Activer la génération automatique du sitemap
               </label>
             </div>
@@ -245,3 +245,5 @@ export const SEOSettings: React.FC = () => {
 };
 
 export default SEOSettings;
+
+

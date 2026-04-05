@@ -219,6 +219,43 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
         <p className="text-xs text-muted-foreground text-center mt-5">
           Pas encore de compte ? Contactez votre chargé de compte.
         </p>
+
+        {/* Boutons de test — connexion rapide */}
+        <div className="mt-6 pt-4 border-t border-border">
+          <p className="text-xs text-muted-foreground text-center mb-3 font-medium">🔧 Accès test</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                // Seed le client test puis pré-remplit le formulaire
+                await fetch("/api/dev/seed-test-client").catch(() => {});
+                const form = document.querySelector('form') as HTMLFormElement;
+                const emailInput = form?.querySelector('input[type=email]') as HTMLInputElement;
+                const passInput = form?.querySelector('input[type=password]') as HTMLInputElement;
+                if (emailInput && passInput) {
+                  // Utiliser les setters natifs pour déclencher react-hook-form
+                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                  nativeInputValueSetter?.call(emailInput, 'client@test.com');
+                  emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  nativeInputValueSetter?.call(passInput, 'client123');
+                  passInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  // Soumettre après un court délai
+                  setTimeout(() => form?.requestSubmit(), 300);
+                }
+              }}
+              className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <User className="w-3.5 h-3.5" /> Client Test
+            </button>
+            <button
+              type="button"
+              onClick={() => { window.location.href = '/admin'; }}
+              className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Shield className="w-3.5 h-3.5" /> Admin Test
+            </button>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
@@ -306,7 +343,7 @@ function ProjectDetail({ project, token, onBack }: { project: Project; token: st
             ) : (
               <div className="space-y-3">
                 {project.milestones.map((m, i) => (
-                  <div key={i} className="flex items-center gap-4">
+                  <div key={m.label ?? i} className="flex items-center gap-4">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
                       m.status === "done" ? "bg-green-100 text-green-600" : m.status === "active" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                     }`}>
@@ -332,7 +369,7 @@ function ProjectDetail({ project, token, onBack }: { project: Project; token: st
             ) : (
               <div className="space-y-3">
                 {project.documents.map((doc, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
+                  <div key={doc.url ?? doc.name ?? i} className="flex items-center gap-3 p-3 bg-muted/40 rounded-xl hover:bg-muted transition-colors">
                     <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
@@ -383,7 +420,7 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
     setError("");
     try {
       const raw = await apiGet<any[]>("/api/client/projects", token);
-      setProjects(raw.map(mapProject));
+      setProjects(Array.isArray(raw) ? raw.map(mapProject) : []);
     } catch (e: any) {
       setError(e.message ?? "Erreur de chargement");
     } finally {
@@ -522,19 +559,53 @@ function ClientDashboard({ clientInfo, token, onLogout }: { clientInfo: ClientIn
 export default function EspaceClientPage() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
-  const [checking, setChecking] = useState(!!token);
+  const [checking, setChecking] = useState(true);
+  const [magicError, setMagicError] = useState("");
 
-  /* Vérifier token existant au montage */
+  /* Vérifier token existant et gérer magic link au montage */
   useEffect(() => {
-    if (!token) { setChecking(false); return; }
-    apiGet<ClientInfo>("/api/client/me", token)
+    const params = new URLSearchParams(window.location.search);
+    const loginHint = params.get("login_hint");
+    const magicToken = params.get("magic_token");
+
+    if (loginHint && magicToken) {
+      // Effacer les params de l'URL sans rechargement
+      window.history.replaceState({}, "", "/espace-client");
+
+      fetch("/api/client/magic-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginHint, token: magicToken }),
+      })
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.token) {
+            localStorage.setItem(TOKEN_KEY, json.token);
+            setToken(json.token);
+            setClientInfo(json.client);
+          } else {
+            setMagicError(json.error ?? "Lien invalide ou expiré");
+          }
+          setChecking(false);
+        })
+        .catch(() => {
+          setMagicError("Erreur de connexion, veuillez vous connecter manuellement");
+          setChecking(false);
+        });
+      return;
+    }
+
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    if (!storedToken) { setChecking(false); return; }
+
+    apiGet<ClientInfo>("/api/client/me", storedToken)
       .then((info) => { setClientInfo(info); setChecking(false); })
       .catch(() => {
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setChecking(false);
       });
-  }, [token]);
+  }, []);
 
   const handleLogin = (newToken: string, client: ClientInfo) => {
     setToken(newToken);
@@ -564,7 +635,16 @@ export default function EspaceClientPage() {
         ) : token && clientInfo ? (
           <ClientDashboard clientInfo={clientInfo} token={token} onLogout={handleLogout} />
         ) : (
-          <LoginScreen onLogin={handleLogin} />
+          <>
+            {magicError && (
+              <div className="max-w-sm mx-auto mt-8 px-4">
+                <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 text-center">
+                  <p className="text-destructive text-sm font-medium">{magicError}</p>
+                </div>
+              </div>
+            )}
+            <LoginScreen onLogin={handleLogin} />
+          </>
         )}
       </main>
       <Footer />

@@ -225,48 +225,49 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
           Pas encore de compte ? Contactez votre chargé de compte.
         </p>
 
-        {/* Boutons de test — connexion rapide */}
-        <div className="mt-6 pt-4 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center mb-3 font-medium">🔧 Accès test</p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const res = await fetch("/api/dev/auto-login-client", { method: "POST" });
-                  if (!res.ok) throw new Error("Échec auto-login client");
-                  const json = await res.json();
-                  localStorage.setItem(TOKEN_KEY, json.token);
-                  onLogin(json.token, json.client);
-                } catch (e) {
-                  alert("Auto-login client échoué. Vérifiez que le serveur dev tourne.");
-                }
-              }}
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
-            >
-              <User className="w-3.5 h-3.5" /> Client Test
-            </button>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const res = await fetch("/api/dev/auto-login-admin", { method: "POST" });
-                  if (!res.ok) throw new Error("Échec auto-login admin");
-                  const json = await res.json();
-                  // Stocker dans le store admin (même format que cms-auth-storage)
-                  const authData = { state: { user: json.user, token: json.token, isAuthenticated: true, isLoading: false }, version: 0 };
-                  localStorage.setItem("cms-auth-storage", JSON.stringify(authData));
-                  window.location.href = "/admin";
-                } catch (e) {
-                  alert("Auto-login admin échoué. Vérifiez que le serveur dev tourne.");
-                }
-              }}
-              className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
-            >
-              <Shield className="w-3.5 h-3.5" /> Admin Test
-            </button>
+        {/* Boutons de test — connexion rapide (développement uniquement) */}
+        {import.meta.env.DEV && (
+          <div className="mt-6 pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground text-center mb-3 font-medium">🔧 Accès test (dev)</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/dev/auto-login-client", { method: "POST" });
+                    if (!res.ok) throw new Error("Échec auto-login client");
+                    const json = await res.json();
+                    localStorage.setItem(TOKEN_KEY, json.token);
+                    onLogin(json.token, json.client);
+                  } catch (e) {
+                    alert("Auto-login client échoué. Vérifiez que le serveur dev tourne.");
+                  }
+                }}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <User className="w-3.5 h-3.5" /> Client Test
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/dev/auto-login-admin", { method: "POST" });
+                    if (!res.ok) throw new Error("Échec auto-login admin");
+                    const json = await res.json();
+                    const authData = { state: { user: json.user, token: json.token, isAuthenticated: true, isLoading: false }, version: 0 };
+                    localStorage.setItem("cms-auth-storage", JSON.stringify(authData));
+                    window.location.href = "/admin";
+                  } catch (e) {
+                    alert("Auto-login admin échoué. Vérifiez que le serveur dev tourne.");
+                  }
+                }}
+                className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Shield className="w-3.5 h-3.5" /> Admin Test
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </motion.div>
     </div>
   );

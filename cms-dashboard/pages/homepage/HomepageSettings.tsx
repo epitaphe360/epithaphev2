@@ -91,8 +91,8 @@ const DEFAULT: HomepageConfig = {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Card>
-      <div className="px-5 py-4 border-b border-slate-700">
-        <h3 className="font-semibold text-white text-sm uppercase tracking-wide">{title}</h3>
+      <div className="px-5 py-4 border-b border-gray-200">
+        <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">{title}</h3>
       </div>
       <CardContent className="p-5 space-y-4">{children}</CardContent>
     </Card>
@@ -102,7 +102,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-400 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
       {children}
     </div>
   );
@@ -163,18 +163,18 @@ export const HomepageSettings: React.FC = () => {
     });
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400">Chargement…</div>;
+  if (loading) return <div className="flex items-center justify-center h-64 text-gray-500">Chargement…</div>;
 
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Home className="w-6 h-6 text-blue-400" />
             Page d'accueil
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-gray-500 text-sm mt-1">
             Tout le contenu visible sur <code className="text-blue-300">/</code> — modifiable sans toucher au code
           </p>
         </div>
@@ -221,8 +221,8 @@ export const HomepageSettings: React.FC = () => {
       <Section title="Compteurs de crédibilité (bande chiffres)">
         <div className="grid grid-cols-2 gap-4">
           {cfg.stats.map((s, i) => (
-            <div key={i} className="border border-slate-700 rounded-lg p-3 space-y-2">
-              <p className="text-xs text-slate-400 font-medium">Stat #{i + 1}</p>
+            <div key={i} className="border border-gray-200 rounded-lg p-3 space-y-2">
+              <p className="text-xs text-gray-500 font-medium">Stat #{i + 1}</p>
               <div className="grid grid-cols-3 gap-2">
                 <Field label="Valeur (chiffre)">
                   <Input type="number" value={s.val} onChange={e => {
@@ -265,7 +265,7 @@ export const HomepageSettings: React.FC = () => {
           <Textarea value={cfg.about.description} onChange={e => set('about.description', e.target.value)} rows={3} />
         </Field>
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-2">Points forts (bullets)</label>
+          <label className="block text-xs font-medium text-gray-500 mb-2">Points forts (bullets)</label>
           <div className="space-y-2">
             {cfg.about.bullets.map((b, i) => (
               <div key={i} className="flex gap-2">
@@ -306,7 +306,7 @@ export const HomepageSettings: React.FC = () => {
       <Section title="Grille Expertises (4 cartes)">
         <div className="space-y-3">
           {cfg.services.map((s, i) => (
-            <div key={i} className="border border-slate-700 rounded-lg p-3 grid grid-cols-3 gap-3 items-end">
+            <div key={i} className="border border-gray-200 rounded-lg p-3 grid grid-cols-3 gap-3 items-end">
               <Field label="Image (URL)">
                 <Input value={s.img} onChange={e => {
                   const sv = [...cfg.services]; sv[i] = { ...sv[i], img: e.target.value };
@@ -338,13 +338,13 @@ export const HomepageSettings: React.FC = () => {
       <Section title="Barre clients (logos texto)">
         <div className="flex flex-wrap gap-2">
           {cfg.clients.map((c, i) => (
-            <div key={i} className="flex items-center gap-1 bg-slate-800 rounded px-2 py-1">
+            <div key={i} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1">
               <input value={c} onChange={e => {
                 const cl = [...cfg.clients]; cl[i] = e.target.value;
                 setCfg(p => ({ ...p, clients: cl }));
-              }} className="bg-transparent text-white text-sm w-32 outline-none" />
+              }} className="bg-transparent text-gray-900 text-sm w-32 outline-none" />
               <button onClick={() => setCfg(p => ({ ...p, clients: p.clients.filter((_, j) => j !== i) }))}
-                className="text-slate-500 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                className="text-gray-500 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
             </div>
           ))}
           <button onClick={() => setCfg(p => ({ ...p, clients: [...p.clients, 'Nouveau client'] }))}
@@ -358,7 +358,7 @@ export const HomepageSettings: React.FC = () => {
       <Section title="Portfolio (4 projets en avant)">
         <div className="space-y-3">
           {cfg.portfolio.map((p, i) => (
-            <div key={i} className="border border-slate-700 rounded-lg p-3 grid grid-cols-3 gap-3 items-end">
+            <div key={i} className="border border-gray-200 rounded-lg p-3 grid grid-cols-3 gap-3 items-end">
               <Field label="Nom client">
                 <Input value={p.client} onChange={e => {
                   const po = [...cfg.portfolio]; po[i] = { ...po[i], client: e.target.value };

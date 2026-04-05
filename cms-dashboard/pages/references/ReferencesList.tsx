@@ -54,11 +54,11 @@ export function ReferencesList() {
           {r.logo ? (
             <img src={r.logo} alt={r.name} className="w-8 h-8 object-contain rounded bg-white/5 p-1" />
           ) : (
-            <div className="w-8 h-8 rounded bg-[#1E293B] flex items-center justify-center text-slate-400 text-xs font-bold">
+            <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold">
               {r.name.charAt(0)}
             </div>
           )}
-          <span className="font-medium text-white">{r.name}</span>
+          <span className="font-medium text-gray-900">{r.name}</span>
         </div>
       ),
     },
@@ -77,7 +77,7 @@ export function ReferencesList() {
             </span>
           ))}
           {(r.sectors?.length ?? 0) > 3 && (
-            <span className="text-xs text-slate-500">+{r.sectors!.length - 3}</span>
+            <span className="text-xs text-gray-500">+{r.sectors!.length - 3}</span>
           )}
         </div>
       ),
@@ -98,7 +98,7 @@ export function ReferencesList() {
       key: 'updatedAt',
       label: 'Modifié',
       width: '130px',
-      render: (r) => <span className="text-slate-400 text-xs">{new Date(r.updatedAt).toLocaleDateString('fr-FR')}</span>,
+      render: (r) => <span className="text-gray-500 text-xs">{new Date(r.updatedAt).toLocaleDateString('fr-FR')}</span>,
     },
   ];
 
@@ -110,7 +110,7 @@ export function ReferencesList() {
   const sectorFilter = (
     <select
       onChange={(e) => setFilter('sector', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]"
     >
       <option value="">Tous les secteurs</option>
       {Object.keys(SECTOR_COLORS).map((s) => <option key={s} value={s}>{s}</option>)}

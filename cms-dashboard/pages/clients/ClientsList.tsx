@@ -38,7 +38,7 @@ export function ClientsList() {
   const load = () => {
     setLoading(true);
     fetch("/api/admin/clients")
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then((json) => setClients(json.data ?? json))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -112,8 +112,8 @@ export function ClientsList() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Users className="w-6 h-6 text-[#C8A96E]" />
-          <h1 className="text-xl font-bold text-white">Comptes Espace Client</h1>
-          <span className="text-sm text-slate-400">({clients.length})</span>
+          <h1 className="text-xl font-bold text-gray-900">Comptes Espace Client</h1>
+          <span className="text-sm text-gray-500">({clients.length})</span>
         </div>
         <button onClick={openCreate}
           className="flex items-center gap-2 bg-[#C8A96E] text-[#0B1121] px-4 py-2 rounded-xl font-semibold text-sm hover:bg-[#b89355] transition-colors">
@@ -138,7 +138,7 @@ export function ClientsList() {
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-[#C8A96E]" /></div>
       ) : clients.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-gray-500">
           <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>Aucun compte client encore créé.</p>
           <p className="text-xs mt-1">Cliquez sur "Nouveau client" pour en créer un.</p>
@@ -147,7 +147,7 @@ export function ClientsList() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1E2D4A] text-slate-400">
+              <tr className="border-b border-[#1E2D4A] text-gray-500">
                 <th className="text-left py-3 px-4 font-medium">Nom</th>
                 <th className="text-left py-3 px-4 font-medium">Email</th>
                 <th className="text-left py-3 px-4 font-medium">Société</th>
@@ -159,10 +159,10 @@ export function ClientsList() {
             <tbody>
               {clients.map((c) => (
                 <tr key={c.id} className="border-b border-[#1E2D4A]/50 hover:bg-[#1E2D4A]/30 transition-colors">
-                  <td className="py-3 px-4 font-medium text-white">{c.name}</td>
-                  <td className="py-3 px-4 text-slate-300">{c.email}</td>
-                  <td className="py-3 px-4 text-slate-400">{c.company ?? "—"}</td>
-                  <td className="py-3 px-4 text-slate-400 text-xs">
+                  <td className="py-3 px-4 font-medium text-gray-900">{c.name}</td>
+                  <td className="py-3 px-4 text-gray-600">{c.email}</td>
+                  <td className="py-3 px-4 text-gray-500">{c.company ?? "—"}</td>
+                  <td className="py-3 px-4 text-gray-500 text-xs">
                     {c.lastLoginAt ? new Date(c.lastLoginAt).toLocaleDateString("fr-FR") : "Jamais"}
                   </td>
                   <td className="py-3 px-4">
@@ -177,11 +177,11 @@ export function ClientsList() {
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
                       <button onClick={() => openEdit(c)} title="Modifier"
-                        className="p-1.5 rounded-lg hover:bg-[#1E2D4A] text-slate-400 hover:text-[#C8A96E] transition-colors">
+                        className="p-1.5 rounded-lg hover:bg-[#1E2D4A] text-gray-500 hover:text-[#C8A96E] transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button onClick={() => del(c.id)} title="Supprimer"
-                        className="p-1.5 rounded-lg hover:bg-red-900/30 text-slate-400 hover:text-red-400 transition-colors">
+                        className="p-1.5 rounded-lg hover:bg-red-900/30 text-gray-500 hover:text-red-400 transition-colors">
                         {deleting === c.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                       </button>
                     </div>
@@ -196,62 +196,62 @@ export function ClientsList() {
       {/* Formulaire modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={closeForm}>
-          <div className="bg-[#0B1121] border border-[#334155] rounded-2xl p-6 w-full max-w-lg shadow-2xl"
+          <div className="bg-white border border-gray-300 rounded-2xl p-6 w-full max-w-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-white font-bold text-lg">
+              <h2 className="text-gray-900 font-bold text-lg">
                 {editing ? "Modifier le client" : "Nouveau compte client"}
               </h2>
-              <button onClick={closeForm} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={closeForm} className="text-gray-500 hover:text-gray-700"><X className="w-5 h-5" /></button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Nom complet *</label>
+                <label className="block text-xs text-gray-500 mb-1">Nom complet *</label>
                 <input value={form.name ?? ""} onChange={(e) => set("name", e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#0D1527] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                  className="w-full px-3 py-2.5 bg-[#0D1527] border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Email *</label>
+                <label className="block text-xs text-gray-500 mb-1">Email *</label>
                 <input type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#0D1527] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                  className="w-full px-3 py-2.5 bg-[#0D1527] border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">
+                <label className="block text-xs text-gray-500 mb-1">
                   Mot de passe {editing ? "(laisser vide = inchangé)" : "*"}
                 </label>
                 <div className="relative">
                   <input type={showPass ? "text" : "password"} value={form.password ?? ""} onChange={(e) => set("password", e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#0D1527] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E] pr-10" />
+                    className="w-full px-3 py-2.5 bg-[#0D1527] border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E] pr-10" />
                   <button type="button" onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Société</label>
+                  <label className="block text-xs text-gray-500 mb-1">Société</label>
                   <input value={form.company ?? ""} onChange={(e) => set("company", e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#0D1527] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                    className="w-full px-3 py-2.5 bg-[#0D1527] border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Téléphone</label>
+                  <label className="block text-xs text-gray-500 mb-1">Téléphone</label>
                   <input value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#0D1527] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                    className="w-full px-3 py-2.5 bg-[#0D1527] border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="isActiveCheck" checked={form.isActive ?? true}
                   onChange={(e) => set("isActive", e.target.checked)}
                   className="w-4 h-4 accent-[#C8A96E]" />
-                <label htmlFor="isActiveCheck" className="text-sm text-slate-300">Compte actif (peut se connecter)</label>
+                <label htmlFor="isActiveCheck" className="text-sm text-gray-600">Compte actif (peut se connecter)</label>
               </div>
             </div>
 
             <div className="flex gap-3 mt-6">
               <button onClick={closeForm}
-                className="flex-1 px-4 py-2.5 border border-[#334155] rounded-xl text-slate-300 text-sm hover:bg-[#1E2D4A] transition-colors">
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-gray-600 text-sm hover:bg-[#1E2D4A] transition-colors">
                 Annuler
               </button>
               <button onClick={save} disabled={saving}

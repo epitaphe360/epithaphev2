@@ -1,7 +1,7 @@
 // ========================================
 // CMS Dashboard — Layout Premium
-// Skill: UI/UX Pro Max → OLED Dark + Fira Sans
-// Palette: #020617 bg · #0F172A sidebar · #EC4899 magenta brand
+// Skill: UI/UX Pro Max → Light Clean + Fira Sans
+// Palette: #F8FAFC bg · #FFFFFF sidebar · #EC4899 magenta brand
 // Typography: Fira Sans (precision data) + Cormorant Garamond (headings)
 // ========================================
 
@@ -120,12 +120,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
           [data-admin-page="true"] code, [data-admin-page="true"] .font-mono { font-family: 'Fira Code', monospace !important; }
         `}</style>
 
-        <div className="min-h-screen" style={{ background: '#020617' }}>
+        <div className="min-h-screen" style={{ background: '#F8FAFC' }}>
           {/* Mobile sidebar backdrop */}
           {sidebarOpen && (
             <div
               className="fixed inset-0 z-40 backdrop-blur-sm lg:hidden"
-              style={{ background: 'rgba(0,0,0,0.75)' }}
+              style={{ background: 'rgba(0,0,0,0.3)' }}
               onClick={() => setSidebarOpen(false)}
             />
           )}
@@ -134,13 +134,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
           <aside
             className={`fixed top-0 left-0 z-50 h-full w-64 flex flex-col transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
             style={{
-              background: 'linear-gradient(180deg, #0D0F1E 0%, #0A0C19 100%)',
-              borderRight: '1px solid rgba(236,72,153,0.12)',
-              boxShadow: '4px 0 32px rgba(0,0,0,0.6), 1px 0 0 rgba(236,72,153,0.08)',
+              background: '#FFFFFF',
+              borderRight: '1px solid #E2E8F0',
+              boxShadow: '2px 0 8px rgba(0,0,0,0.05)',
             }}
           >
             {/* Logo */}
-            <div className="flex items-center justify-between h-16 px-6" style={{ borderBottom: '1px solid rgba(236,72,153,0.1)' }}>
+            <div className="flex items-center justify-between h-16 px-6" style={{ borderBottom: '1px solid #E2E8F0' }}>
               <a
                 href="/admin"
                 onClick={(e) => { e.preventDefault(); setLocation('/admin'); }}
@@ -156,11 +156,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
                   E
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="text-white font-bold text-base tracking-tight">Epitaphe</span>
-                  <span className="text-[10px] font-medium tracking-[0.2em] uppercase" style={{ color: 'rgba(236,72,153,0.75)' }}>360 CMS</span>
+                  <span className="text-gray-900 font-bold text-base tracking-tight">Epitaphe</span>
+                  <span className="text-[10px] font-medium tracking-[0.2em] uppercase" style={{ color: '#EC4899' }}>360 CMS</span>
                 </div>
               </a>
-              <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-500 hover:text-white transition-colors">
+              <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-400 hover:text-gray-700 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -174,7 +174,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
                     {label && (
                       <p
                         className="px-3 py-1 text-[10px] font-bold tracking-[0.18em] uppercase mb-1"
-                        style={{ color: 'rgba(255,255,255,0.25)' }}
+                        style={{ color: '#94A3B8' }}
                       >
                         {label}
                       </p>
@@ -189,16 +189,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
                           onClick={(e) => { e.preventDefault(); setLocation(item.href); setSidebarOpen(false); }}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden"
                           style={active ? {
-                            background: 'linear-gradient(135deg, rgba(236,72,153,0.2), rgba(190,24,93,0.15))',
+                            background: 'linear-gradient(135deg, rgba(236,72,153,0.1), rgba(190,24,93,0.08))',
                             borderLeft: '2px solid #EC4899',
-                            color: '#FFFFFF',
-                            boxShadow: 'inset 0 0 20px rgba(236,72,153,0.08)',
+                            color: '#1E293B',
+                            boxShadow: 'inset 0 0 20px rgba(236,72,153,0.05)',
                           } : {
-                            color: 'rgba(255,255,255,0.45)',
+                            color: '#64748B',
                             borderLeft: '2px solid transparent',
                           }}
-                          onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.9)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}}
-                          onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}}
+                          onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = '#1E293B'; (e.currentTarget as HTMLElement).style.background = '#F1F5F9'; }}}
+                          onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = '#64748B'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}}
                         >
                           <Icon
                             className="w-[17px] h-[17px] flex-shrink-0 transition-colors"
@@ -215,31 +215,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
             </nav>
 
             {/* User footer */}
-            <div className="p-3" style={{ borderTop: '1px solid rgba(236,72,153,0.1)' }}>
+            <div className="p-3" style={{ borderTop: '1px solid #E2E8F0' }}>
               <div
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1"
-                style={{ background: 'rgba(255,255,255,0.03)' }}
+                style={{ background: '#F8FAFC' }}
               >
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{
-                    background: 'rgba(236,72,153,0.12)',
-                    border: '1px solid rgba(236,72,153,0.25)',
+                    background: 'rgba(236,72,153,0.08)',
+                    border: '1px solid rgba(236,72,153,0.2)',
                   }}
                 >
                   <User className="w-4 h-4" style={{ color: '#EC4899' }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
-                  <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>{user?.email}</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">{user?.name}</p>
+                  <p className="text-xs truncate" style={{ color: '#94A3B8' }}>{user?.email}</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#F87171'; (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                style={{ color: '#94A3B8' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#EF4444'; (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.05)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#94A3B8'; (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
                 <LogOut className="w-4 h-4" />
                 <span>Déconnexion</span>
@@ -253,8 +253,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
             <header
               className="h-16 sticky top-0 z-30"
               style={{
-                background: 'rgba(2,6,23,0.88)',
-                borderBottom: '1px solid rgba(236,72,153,0.1)',
+                background: 'rgba(248,250,252,0.92)',
+                borderBottom: '1px solid #E2E8F0',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
               }}
@@ -263,9 +263,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
                 <button
                   onClick={() => setSidebarOpen(true)}
                   className="lg:hidden transition-colors"
-                  style={{ color: 'rgba(255,255,255,0.5)' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'}
+                  style={{ color: '#64748B' }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#1E293B'}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#64748B'}
                 >
                   <Menu className="w-5 h-5" />
                 </button>
@@ -277,18 +277,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
                       className="w-1.5 h-1.5 rounded-full animate-pulse"
                       style={{ background: '#22C55E', boxShadow: '0 0 6px #22C55E' }}
                     />
-                    <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Production</span>
+                    <span className="text-xs font-medium" style={{ color: '#64748B' }}>Production</span>
                   </div>
 
                   <div
                     className="h-5 w-px"
-                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                    style={{ background: '#E2E8F0' }}
                   />
 
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5" style={{ color: '#EC4899' }} />
-                    <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                      Bienvenue, <span className="font-semibold text-white">{user?.name}</span>
+                    <span className="text-sm" style={{ color: '#64748B' }}>
+                      Bienvenue, <span className="font-semibold text-gray-900">{user?.name}</span>
                     </span>
                   </div>
                 </div>

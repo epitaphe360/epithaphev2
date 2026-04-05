@@ -13,14 +13,10 @@ export function registerClientPortalRoutes(app: Express) {
   app.get("/api/portal/reports", requireClientAuth as any, async (req, res) => {
     try {
       const clientId = req.clientId!;
-      // scoringResults n'a pas de clientId — on retourne les résultats liés via sessionId
+      // scoringResults n'a pas de clientId — impossible de filtrer par client
       // TODO: ajouter une colonne client_id à scoring_results pour un lien direct
-      const reports = await db
-        .select()
-        .from(scoringResults)
-        .orderBy(desc(scoringResults.createdAt))
-        .limit(10);
-      res.json(reports);
+      // En attendant, retourner un tableau vide pour éviter la fuite de données
+      res.json([]);
     } catch (error) {
       console.error("[GET /api/portal/reports]", error);
       res.status(500).json({ error: "Erreur portail" });

@@ -90,8 +90,8 @@ export function AuditLogsPage() {
           <ClipboardList className="w-6 h-6 text-[#E63946]" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white">Audit Logs</h1>
-          <p className="text-slate-400 text-sm">{total} action{total !== 1 ? 's' : ''} enregistrée{total !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
+          <p className="text-gray-500 text-sm">{total} action{total !== 1 ? 's' : ''} enregistrée{total !== 1 ? 's' : ''}</p>
         </div>
       </div>
 
@@ -105,7 +105,7 @@ export function AuditLogsPage() {
         <select
           value={actionFilter}
           onChange={(e) => handleActionChange(e.target.value)}
-          className="px-3 py-2 bg-[#0B1121] border border-[#1E293B] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/40"
+          className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/40"
         >
           <option value="all">Toutes les actions</option>
           <option value="CREATE">Créations</option>
@@ -115,7 +115,7 @@ export function AuditLogsPage() {
         <select
           value={entityFilter}
           onChange={(e) => handleEntityChange(e.target.value)}
-          className="px-3 py-2 bg-[#0B1121] border border-[#1E293B] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/40"
+          className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/40"
         >
           <option value="all">Tous les types</option>
           {Object.entries(ENTITY_LABELS).map(([key, label]) => (
@@ -130,7 +130,7 @@ export function AuditLogsPage() {
           <div className="w-8 h-8 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : items.length === 0 ? (
-        <div className="text-center py-20 text-slate-500">
+        <div className="text-center py-20 text-gray-500">
           <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p>Aucun log trouvé</p>
         </div>
@@ -139,26 +139,26 @@ export function AuditLogsPage() {
           {items.map((log) => (
             <div
               key={log.id}
-              className="bg-[#0B1121] border border-[#1E293B] rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3"
+              className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3"
             >
               <Badge variant={ACTION_COLORS[log.action] ?? 'default'} className="shrink-0 w-28 justify-center">
                 {ACTION_LABELS[log.action] ?? log.action}
               </Badge>
 
-              <div className="flex items-center gap-2 text-sm text-slate-300 min-w-0">
-                <Tag className="w-4 h-4 text-slate-500 shrink-0" />
+              <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                <Tag className="w-4 h-4 text-gray-500 shrink-0" />
                 <span className="font-medium">{ENTITY_LABELS[log.entityType] ?? log.entityType}</span>
-                <span className="text-slate-500 font-mono text-xs truncate">#{String(log.entityId).slice(0, 8)}</span>
+                <span className="text-gray-500 font-mono text-xs truncate">#{String(log.entityId).slice(0, 8)}</span>
               </div>
 
               {log.userId && (
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
                   <User className="w-4 h-4 shrink-0" />
                   <span className="font-mono text-xs">{String(log.userId).slice(0, 8)}</span>
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-sm text-slate-500 ml-auto shrink-0">
+              <div className="flex items-center gap-2 text-sm text-gray-500 ml-auto shrink-0">
                 <Clock className="w-4 h-4" />
                 <span>{fmtDate(log.createdAt)}</span>
               </div>
@@ -173,17 +173,17 @@ export function AuditLogsPage() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 0}
-            className="p-2 rounded-lg border border-[#1E293B] text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-gray-500">
             Page {page + 1} / {totalPages}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= totalPages - 1}
-            className="p-2 rounded-lg border border-[#1E293B] text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

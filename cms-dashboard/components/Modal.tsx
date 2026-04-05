@@ -78,7 +78,7 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       <div
         className={`
-          relative w-full mx-4 bg-[#0B1121] rounded-xl shadow-2xl border border-[#1E293B]
+          relative w-full mx-4 bg-white rounded-xl shadow-2xl border border-gray-200
           transform transition-all duration-300
           animate-in fade-in zoom-in-95
           ${sizeStyles[finalSize]}
@@ -86,19 +86,19 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 border-b border-[#1E293B]">
+          <div className="flex items-start justify-between p-6 border-b border-gray-200">
             <div>
               {title && (
-                <h2 className="text-xl font-semibold text-white">{title}</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
               )}
               {description && (
-                <p className="text-sm text-slate-400 mt-1">{description}</p>
+                <p className="text-sm text-gray-500 mt-1">{description}</p>
               )}
             </div>
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-1 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-[#1E293B]"
+                className="p-1 text-gray-400 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -111,7 +111,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-[#0D0F1E] border-t border-[#1E293B] rounded-b-xl">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
             {footer}
           </div>
         )}
@@ -163,7 +163,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </>
       }
     >
-      <p className="text-slate-300">{message}</p>
+      <p className="text-gray-600">{message}</p>
     </Modal>
   );
 };

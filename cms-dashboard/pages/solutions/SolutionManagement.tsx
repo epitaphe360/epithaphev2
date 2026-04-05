@@ -26,8 +26,8 @@ export const SolutionManagement: React.FC = () => {
 
   const loadSolutions = async () => {
     try {
-      const data = await get('/api/admin/solutions');
-      setSolutions(data);
+      const res = await get('/api/admin/solutions');
+      setSolutions(Array.isArray(res) ? res : res.data ?? []);
     } catch (error) {
       console.error('Erreur chargement solutions:', error);
     }
@@ -35,8 +35,9 @@ export const SolutionManagement: React.FC = () => {
 
   const loadCategories = async () => {
     try {
-      const data = await get('/api/admin/solutions/categories');
-      setCategories(data);
+      const res = await get('/api/admin/solutions/categories');
+      const cats = Array.isArray(res) ? res : res.data ?? [];
+      setCategories(cats.map((c: any) => typeof c === 'string' ? c : c.label ?? c.slug ?? ''));
     } catch (error) {
       console.error('Erreur chargement catégories:', error);
     }
@@ -118,10 +119,10 @@ export const SolutionManagement: React.FC = () => {
       header: 'Besoins couverts',
       render: (solution: Solution) => (
         <div className="text-sm">
-          {solution.needs.slice(0, 3).map((need, index) => (
+          {(solution.needs ?? []).slice(0, 3).map((need, index) => (
             <div key={index} className="truncate">{need}</div>
           ))}
-          {solution.needs.length > 3 && (
+          {(solution.needs ?? []).length > 3 && (
             <div className="text-gray-500">+{solution.needs.length - 3} autres</div>
           )}
         </div>

@@ -36,7 +36,7 @@ export function PushBroadcastPage() {
 
   useEffect(() => {
     fetch("/api/admin/push/subscribers")
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(setStats)
       .catch(() => {});
   }, []);
@@ -86,22 +86,22 @@ export function PushBroadcastPage() {
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(236,72,153,0.15)' }}>
                 <Bell className="w-5 h-5 text-[#EC4899]" />
               </div>
-              <h3 className="text-white font-bold text-lg">Confirmer l'envoi</h3>
+              <h3 className="text-gray-900 font-bold text-lg">Confirmer l'envoi</h3>
             </div>
-            <p className="text-slate-300 text-sm mb-2">
-              Vous allez envoyer <strong className="text-white">"{form.title}"</strong> à :
+            <p className="text-gray-600 text-sm mb-2">
+              Vous allez envoyer <strong className="text-gray-900">"{form.title}"</strong> à :
             </p>
             <p className="text-[#EC4899] text-sm font-semibold mb-4">
-              {form.categories.includes('all') ? 'Tous les abonnés' : form.categories.map(c => CATEGORIES.find(x=>x.id===c)?.label).join(', ')}
+              {form.categories.includes('all') ? 'Tous les abonnés' : form.categories.map(c => CATEGORIES.find(x=>x.id===c)?.label).filter(Boolean).join(', ')}
             </p>
-            <p className="text-slate-500 text-xs mb-6">Cette action est irréversible et sera envoyée immédiatement.</p>
+            <p className="text-gray-500 text-xs mb-6">Cette action est irréversible et sera envoyée immédiatement.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl border border-[#334155] text-slate-300 hover:text-white text-sm font-semibold transition-colors">
+                className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-700 text-sm font-semibold transition-colors">
                 Annuler
               </button>
               <button onClick={send}
-                className="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all"
+                className="flex-1 py-2.5 rounded-xl text-gray-900 text-sm font-bold transition-all"
                 style={{ background: '#EC4899', boxShadow: '0 0 20px rgba(236,72,153,0.35)' }}>
                 Envoyer maintenant
               </button>
@@ -115,8 +115,8 @@ export function PushBroadcastPage() {
           <Bell className="w-5 h-5 text-[#EC4899]" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">Push Broadcast</h1>
-          <p className="text-slate-500 text-sm">Envoyer une notification à vos abonnés</p>
+          <h1 className="text-xl font-bold text-gray-900">Push Broadcast</h1>
+          <p className="text-gray-500 text-sm">Envoyer une notification à vos abonnés</p>
         </div>
       </div>
 
@@ -125,8 +125,8 @@ export function PushBroadcastPage() {
         <div className="rounded-xl p-4 mb-6 flex items-center gap-3" style={{ background: 'rgba(236,72,153,0.08)', border: '1px solid rgba(236,72,153,0.2)' }}>
           <Users className="w-5 h-5 text-[#EC4899]" />
           <div>
-            <p className="text-sm font-semibold text-white">{stats.total} abonné{stats.total !== 1 ? "s" : ""} au total</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-sm font-semibold text-gray-900">{stats.total} abonné{stats.total !== 1 ? "s" : ""} au total</p>
+            <p className="text-xs text-gray-500">
               {Object.entries(stats.byCategory).map(([k, v]) => `${k}: ${v}`).join(" · ")}
             </p>
           </div>
@@ -135,7 +135,7 @@ export function PushBroadcastPage() {
 
       {/* Catégories */}
       <div className="mb-5">
-        <label className="block text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wider">Catégories visées *</label>
+        <label className="block text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wider">Catégories visées *</label>
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((cat) => (
             <button key={cat.id} type="button" onClick={() => toggleCat(cat.id)}
@@ -152,10 +152,10 @@ export function PushBroadcastPage() {
 
       {/* Title */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Titre *</label>
+        <label className="block text-sm font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Titre *</label>
         <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
           placeholder="Ex: Nouveau rapport disponible"
-          className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none transition-all"
+          className="w-full px-4 py-2.5 rounded-xl text-sm text-gray-900 outline-none transition-all"
           style={{ background: 'rgba(13,15,30,0.9)', border: '1px solid rgba(255,255,255,0.1)' }}
           onFocus={e => (e.target.style.border = '1px solid rgba(236,72,153,0.5)')}
           onBlur={e => (e.target.style.border = '1px solid rgba(255,255,255,0.1)')}
@@ -164,11 +164,11 @@ export function PushBroadcastPage() {
 
       {/* Body */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Message *</label>
+        <label className="block text-sm font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Message *</label>
         <textarea value={form.body} onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
           placeholder="Ex: Votre rapport mensuel est disponible dans votre espace client."
           rows={3}
-          className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none resize-none transition-all"
+          className="w-full px-4 py-2.5 rounded-xl text-sm text-gray-900 outline-none resize-none transition-all"
           style={{ background: 'rgba(13,15,30,0.9)', border: '1px solid rgba(255,255,255,0.1)' }}
           onFocus={e => (e.target.style.border = '1px solid rgba(236,72,153,0.5)')}
           onBlur={e => (e.target.style.border = '1px solid rgba(255,255,255,0.1)')}
@@ -177,10 +177,10 @@ export function PushBroadcastPage() {
 
       {/* URL */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">URL (optionnel)</label>
+        <label className="block text-sm font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">URL (optionnel)</label>
         <input value={form.url} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
           placeholder="https://epitaphe360.com/espace-client"
-          className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none transition-all"
+          className="w-full px-4 py-2.5 rounded-xl text-sm text-gray-900 outline-none transition-all"
           style={{ background: 'rgba(13,15,30,0.9)', border: '1px solid rgba(255,255,255,0.1)' }}
           onFocus={e => (e.target.style.border = '1px solid rgba(236,72,153,0.5)')}
           onBlur={e => (e.target.style.border = '1px solid rgba(255,255,255,0.1)')}
@@ -190,14 +190,14 @@ export function PushBroadcastPage() {
       {/* Prévisualisation */}
       {(form.title || form.body) && (
         <div className="rounded-xl p-4 mb-5" style={{ background: 'rgba(13,15,30,0.8)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <p className="text-xs text-slate-500 uppercase tracking-wider mb-3 font-semibold">Aperçu notification</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">Aperçu notification</p>
           <div className="flex gap-3 items-start">
             <div className="w-8 h-8 rounded-lg bg-[#EC4899] flex items-center justify-center shrink-0">
-              <Bell className="w-4 h-4 text-white" />
+              <Bell className="w-4 h-4 text-gray-900" />
             </div>
             <div>
-              <p className="text-white text-sm font-semibold">{form.title || 'Titre…'}</p>
-              <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">{form.body || 'Message…'}</p>
+              <p className="text-gray-900 text-sm font-semibold">{form.title || 'Titre…'}</p>
+              <p className="text-gray-500 text-xs mt-0.5 line-clamp-2">{form.body || 'Message…'}</p>
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ export function PushBroadcastPage() {
       <button
         onClick={confirmAndSend}
         disabled={sending || !form.categories.length || !form.title || !form.body}
-        className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-40"
+        className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm text-gray-900 transition-all disabled:opacity-40"
         style={{ background: '#EC4899', boxShadow: '0 0 25px rgba(236,72,153,0.35)' }}
       >
         {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

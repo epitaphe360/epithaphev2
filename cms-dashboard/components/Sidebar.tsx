@@ -55,11 +55,11 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
           className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 group ${
             currentIsActive 
               ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-white/5'
           }`}
         >
           <div className="flex items-center gap-3">
-            <span className={`transition-all duration-200 ${currentIsActive ? 'text-blue-400' : 'group-hover:text-white'}`}>
+            <span className={`transition-all duration-200 ${currentIsActive ? 'text-blue-400' : 'group-hover:text-gray-700'}`}>
               {icon}
             </span>
             {!isCollapsed && (
@@ -86,7 +86,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
                 className={`block px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
                   location === child.to
                     ? 'text-blue-400 font-medium bg-blue-500/10'
-                    : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'
+                    : 'text-slate-500 hover:text-gray-700 hover:bg-white/5'
                 }`}
               >
                 {child.label}
@@ -104,12 +104,12 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
       className={`flex items-center justify-between p-3 rounded-xl transition-all duration-200 group mb-1 ${
         currentIsActive 
           ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
-          : 'text-slate-400 hover:text-white hover:bg-white/5'
+          : 'text-gray-500 hover:text-gray-700 hover:bg-white/5'
       }`}
       title={isCollapsed ? label : ''}
     >
       <div className="flex items-center gap-3">
-        <span className={`transition-all duration-200 ${currentIsActive ? 'text-blue-400' : 'group-hover:text-white'}`}>
+        <span className={`transition-all duration-200 ${currentIsActive ? 'text-blue-400' : 'group-hover:text-gray-700'}`}>
           {icon}
         </span>
         {!isCollapsed && (
@@ -117,7 +117,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
         )}
       </div>
       {!isCollapsed && badge !== undefined && badge > 0 && (
-        <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/20">
+        <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500 text-gray-900 rounded-full shadow-lg shadow-blue-500/20">
           {badge}
         </span>
       )}
@@ -245,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-[#0B1121] rounded-lg border border-[#1E293B] shadow-lg text-white hover:text-blue-400 transition-colors"
+        className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-white rounded-lg border border-gray-200 shadow-lg text-gray-900 hover:text-blue-400 transition-colors"
       >
         {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -263,8 +263,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         className={`
           fixed md:static inset-y-0 left-0 z-50
           flex flex-col flex-shrink-0
-          bg-[#0B1121]
-          border-r border-[#1E293B]
+          bg-white
+          border-r border-gray-200
           transition-all duration-300 ease-in-out
           ${isCollapsed ? 'w-20' : 'w-72'}
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -272,26 +272,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         `}
       >
         {/* Header Section */}
-        <div className={`flex items-center justify-between h-20 p-6 border-b border-[#1E293B] ${isCollapsed ? 'px-4 justify-center' : ''}`}>
+        <div className={`flex items-center justify-between h-20 p-6 border-b border-gray-200 ${isCollapsed ? 'px-4 justify-center' : ''}`}>
           {!isCollapsed && (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
-                <Zap className="w-6 h-6 text-white" />
+                <Zap className="w-6 h-6 text-gray-900" />
               </div>
               <div className="overflow-hidden">
-                <h1 className="text-white font-bold text-lg tracking-tight truncate">{config.branding.name}</h1>
+                <h1 className="text-gray-900 font-bold text-lg tracking-tight truncate">{config.branding.name}</h1>
                 <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">Premium Panel</p>
               </div>
             </div>
           )}
           {isCollapsed && (
              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/20">
-               <Zap className="w-6 h-6 text-white" />
+               <Zap className="w-6 h-6 text-gray-900" />
              </div>
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`hidden md:flex p-1.5 hover:bg-white/5 rounded-lg transition-colors text-slate-500 hover:text-white absolute right-[-12px] top-8 bg-[#0B1121] border border-[#1E293B] z-50`}
+            className={`hidden md:flex p-1.5 hover:bg-white/5 rounded-lg transition-colors text-slate-500 hover:text-gray-700 absolute right-[-12px] top-8 bg-white border border-gray-200 z-50`}
             title={isCollapsed ? 'Étendre le menu' : 'Réduire le menu'}
           >
             {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
@@ -323,21 +323,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         </nav>
 
         {/* User Profile Section */}
-        <div className={`p-4 border-t border-[#1E293B] bg-[#020617]/50 ${isCollapsed ? 'px-2' : 'px-6'}`}>
+        <div className={`p-4 border-t border-gray-200 bg-gray-50/50 ${isCollapsed ? 'px-2' : 'px-6'}`}>
           {!isCollapsed && (
-            <div className="flex items-center gap-3 mb-4 p-3 bg-[#1E293B]/30 rounded-xl border border-[#1E293B]/50 hover:bg-[#1E293B]/50 transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3 mb-4 p-3 bg-gray-100/30 rounded-xl border border-gray-200/50 hover:bg-gray-100/50 transition-colors cursor-pointer group">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-[#0B1121]">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center ring-2 ring-[#FFFFFF]">
                   {user.avatar ? (
                     <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
                   ) : (
-                    <User className="w-5 h-5 text-white" />
+                    <User className="w-5 h-5 text-gray-900" />
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[#0B1121]"></div>
+                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[#FFFFFF]"></div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white text-sm truncate group-hover:text-blue-400 transition-colors">{user.name}</p>
+                <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-blue-400 transition-colors">{user.name}</p>
                 <p className="text-xs text-slate-500 truncate">Admin</p>
               </div>
             </div>
@@ -345,7 +345,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
           
           <button
             onClick={onLogout}
-            className={`w-full flex items-center justify-center gap-2 p-2.5 text-rose-400 hover:text-white hover:bg-rose-500/10 rounded-xl transition-all duration-200 border border-transparent hover:border-rose-500/20 ${
+            className={`w-full flex items-center justify-center gap-2 p-2.5 text-rose-400 hover:text-gray-700 hover:bg-rose-500/10 rounded-xl transition-all duration-200 border border-transparent hover:border-rose-500/20 ${
               isCollapsed ? 'px-2' : ''
             }`}
             title={isCollapsed ? 'Déconnexion' : ''}

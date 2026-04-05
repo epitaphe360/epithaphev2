@@ -43,10 +43,10 @@ const toastIcons = {
 };
 
 const toastStyles = {
-  success: 'border-green-800/50 bg-[#0B1121]',
-  error: 'border-red-800/50 bg-[#0B1121]',
-  warning: 'border-yellow-800/50 bg-[#0B1121]',
-  info: 'border-blue-800/50 bg-[#0B1121]',
+  success: 'border-green-800/50 bg-white',
+  error: 'border-red-800/50 bg-white',
+  warning: 'border-yellow-800/50 bg-white',
+  info: 'border-blue-800/50 bg-white',
 };
 
 interface ToastItemProps {
@@ -73,7 +73,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
       <div className="flex-1 min-w-0">
         <p className="font-medium text-white">{toast.title}</p>
         {toast.message && (
-          <p className="text-sm text-slate-400 mt-1">{toast.message}</p>
+          <p className="text-sm text-gray-500 mt-1">{toast.message}</p>
         )}
       </div>
 

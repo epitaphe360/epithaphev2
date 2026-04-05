@@ -56,14 +56,14 @@ function LeadDetailModal({ lead, onClose }: { lead: Lead; onClose: () => void })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto bg-[#0B1121] border border-[#1E293B] rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-[#1E293B]">
-          <h2 className="text-lg font-bold text-white">Lead — {lead.firstName} {lead.lastName}</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-white" /></button>
+      <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">Lead — {lead.firstName} {lead.lastName}</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-500 hover:text-gray-700" /></button>
         </div>
         <div className="p-6 space-y-4">
           {/* Info principale */}
-          <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-[#020617] border border-[#1E293B]">
+          <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-gray-50 border border-gray-200">
             <InfoRow label="Email"     value={lead.email} />
             <InfoRow label="Téléphone" value={lead.phone ?? '—'} />
             <InfoRow label="Entreprise" value={lead.company ?? '—'} />
@@ -74,33 +74,33 @@ function LeadDetailModal({ lead, onClose }: { lead: Lead; onClose: () => void })
           </div>
 
           {lead.description && (
-            <div className="p-4 rounded-xl bg-[#020617] border border-[#1E293B]">
-              <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Description du projet</p>
-              <p className="text-slate-300 text-sm leading-relaxed">{lead.description}</p>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Description du projet</p>
+              <p className="text-gray-600 text-sm leading-relaxed">{lead.description}</p>
             </div>
           )}
 
           {/* Gestion */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Statut</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Statut</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]">
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]">
               {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Assigné à</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Assigné à</label>
             <input type="text" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} placeholder="Nom du commercial..."
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Notes internes</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Notes internes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
           </div>
         </div>
-        <div className="flex justify-end gap-3 p-6 border-t border-[#1E293B]">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-[#334155] text-slate-300 hover:text-white text-sm transition-colors">Fermer</button>
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-700 text-sm transition-colors">Fermer</button>
           <button onClick={save} disabled={saving} className="px-5 py-2.5 rounded-xl bg-[#C8A96E] text-black font-semibold hover:bg-[#DFC28F] text-sm transition-colors disabled:opacity-60">
             {saving ? 'Sauvegarde...' : 'Enregistrer'}
           </button>
@@ -113,8 +113,8 @@ function LeadDetailModal({ lead, onClose }: { lead: Lead; onClose: () => void })
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="text-sm text-white">{value}</p>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm text-gray-900">{value}</p>
     </div>
   );
 }
@@ -173,27 +173,27 @@ export function LeadsList() {
       label: 'Contact',
       render: (l) => (
         <div>
-          <p className="font-medium text-white">{l.firstName} {l.lastName}</p>
-          <p className="text-xs text-slate-500">{l.email}</p>
+          <p className="font-medium text-gray-900">{l.firstName} {l.lastName}</p>
+          <p className="text-xs text-gray-500">{l.email}</p>
         </div>
       ),
     },
     {
       key: 'company',
       label: 'Entreprise',
-      render: (l) => <span className="text-slate-300">{l.company ?? '—'}</span>,
+      render: (l) => <span className="text-gray-600">{l.company ?? '—'}</span>,
     },
     {
       key: 'projectType',
       label: 'Type',
       width: '140px',
-      render: (l) => <span className="text-slate-400 text-sm">{l.projectType ?? l.hubInterest ?? '—'}</span>,
+      render: (l) => <span className="text-gray-500 text-sm">{l.projectType ?? l.hubInterest ?? '—'}</span>,
     },
     {
       key: 'budget',
       label: 'Budget',
       width: '100px',
-      render: (l) => <span className="text-slate-400 text-sm">{l.budget ?? '—'}</span>,
+      render: (l) => <span className="text-gray-500 text-sm">{l.budget ?? '—'}</span>,
     },
     {
       key: 'status',
@@ -208,7 +208,7 @@ export function LeadsList() {
       key: 'createdAt',
       label: 'Reçu le',
       width: '120px',
-      render: (l) => <span className="text-slate-400 text-xs">{new Date(l.createdAt).toLocaleDateString('fr-FR')}</span>,
+      render: (l) => <span className="text-gray-500 text-xs">{new Date(l.createdAt).toLocaleDateString('fr-FR')}</span>,
     },
   ];
 
@@ -221,21 +221,21 @@ export function LeadsList() {
     <div className="flex items-center gap-3 flex-wrap">
       <select
         onChange={(e) => setFilter('status', e.target.value || undefined)}
-        className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none"
+        className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none"
       >
         <option value="">Tous les statuts</option>
         {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
       </select>
 
       {selected.size > 0 && (
-        <div className="flex items-center gap-2 bg-[#1E293B] border border-[#E63946]/30 rounded-xl px-3 py-1.5">
-          <span className="text-xs text-slate-400">{selected.size} sélectionné(s)</span>
+        <div className="flex items-center gap-2 bg-gray-100 border border-[#E63946]/30 rounded-xl px-3 py-1.5">
+          <span className="text-xs text-gray-500">{selected.size} sélectionné(s)</span>
           <button onClick={() => bulkStatus('contacted')} disabled={bulkLoading}
             className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Contacté</button>
           <button onClick={() => bulkStatus('won')} disabled={bulkLoading}
             className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Gagné</button>
           <button onClick={() => bulkStatus('lost')} disabled={bulkLoading}
-            className="text-xs text-slate-400 hover:text-white transition-colors">Perdu</button>
+            className="text-xs text-gray-500 hover:text-gray-700 transition-colors">Perdu</button>
           <button onClick={bulkDelete} disabled={bulkLoading}
             className="text-xs text-rose-400 hover:text-rose-300 transition-colors">Supprimer</button>
         </div>
@@ -247,7 +247,7 @@ export function LeadsList() {
     <>
       {items.length > 0 && (
         <div className="px-6 pt-4">
-          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" checked={selected.size === items.length && items.length > 0}
               onChange={toggleAll} className="w-4 h-4 rounded accent-[#E63946]" />
             Tout sélectionner

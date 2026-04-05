@@ -35,7 +35,7 @@ export function PaymentsList() {
   useEffect(() => {
     fetch("/api/admin/payments", { headers })
       .then(r => r.ok ? r.json() : Promise.reject("Erreur"))
-      .then(setPayments)
+      .then(json => setPayments(Array.isArray(json) ? json : json.data ?? []))
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
   }, []);

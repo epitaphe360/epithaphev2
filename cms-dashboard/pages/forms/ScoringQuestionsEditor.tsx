@@ -358,13 +358,13 @@ function QuestionRow({
   const cancel = () => { setDraft(q); setEditing(false); };
 
   return (
-    <div className="border border-[#1E293B] rounded-lg bg-[#0F1629] mb-2">
+    <div className="border border-gray-200 rounded-lg bg-[#0F1629] mb-2">
       <div className="flex items-start gap-3 p-3">
         <div className="flex flex-col gap-0.5 mt-1 flex-shrink-0">
-          <button onClick={() => onMove('up')} disabled={idx === 0} className="p-0.5 text-slate-600 hover:text-white disabled:opacity-30 transition-colors">
+          <button onClick={() => onMove('up')} disabled={idx === 0} className="p-0.5 text-slate-600 hover:text-gray-700 disabled:opacity-30 transition-colors">
             <ChevronUp className="w-3 h-3" />
           </button>
-          <button onClick={() => onMove('down')} disabled={idx === total - 1} className="p-0.5 text-slate-600 hover:text-white disabled:opacity-30 transition-colors">
+          <button onClick={() => onMove('down')} disabled={idx === total - 1} className="p-0.5 text-slate-600 hover:text-gray-700 disabled:opacity-30 transition-colors">
             <ChevronDown className="w-3 h-3" />
           </button>
         </div>
@@ -375,38 +375,38 @@ function QuestionRow({
               <textarea
                 value={draft.text}
                 onChange={e => setDraft(d => ({ ...d, text: e.target.value }))}
-                className="w-full bg-[#1E293B] border border-[#334155] text-white text-sm rounded-lg p-2 resize-none focus:outline-none focus:border-blue-500"
+                className="w-full bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg p-2 resize-none focus:outline-none focus:border-blue-500"
                 rows={3}
                 autoFocus
               />
               <div className="flex flex-wrap gap-2">
                 <div className="flex items-center gap-1">
-                  <label className="text-xs text-slate-400">Pilier ID:</label>
+                  <label className="text-xs text-gray-500">Pilier ID:</label>
                   <input
                     value={draft.pillar} onChange={e => setDraft(d => ({ ...d, pillar: e.target.value }))}
-                    className="w-16 bg-[#1E293B] border border-[#334155] text-white text-xs rounded p-1"
+                    className="w-16 bg-gray-100 border border-gray-300 text-gray-900 text-xs rounded p-1"
                   />
                 </div>
                 <div className="flex items-center gap-1">
-                  <label className="text-xs text-slate-400">Label pilier:</label>
+                  <label className="text-xs text-gray-500">Label pilier:</label>
                   <input
                     value={draft.pillarLabel} onChange={e => setDraft(d => ({ ...d, pillarLabel: e.target.value }))}
-                    className="w-32 bg-[#1E293B] border border-[#334155] text-white text-xs rounded p-1"
+                    className="w-32 bg-gray-100 border border-gray-300 text-gray-900 text-xs rounded p-1"
                   />
                 </div>
                 <div className="flex items-center gap-1">
-                  <label className="text-xs text-slate-400">Poids:</label>
+                  <label className="text-xs text-gray-500">Poids:</label>
                   <select
                     value={draft.weight}
                     onChange={e => setDraft(d => ({ ...d, weight: Number(e.target.value) as 1 | 2 | 3 }))}
-                    className="bg-[#1E293B] border border-[#334155] text-white text-xs rounded p-1"
+                    className="bg-gray-100 border border-gray-300 text-gray-900 text-xs rounded p-1"
                   >
                     <option value={1}>1 — Faible</option>
                     <option value={2}>2 — Normal</option>
                     <option value={3}>3 — Fort</option>
                   </select>
                 </div>
-                <label className="flex items-center gap-1 text-xs text-slate-400 cursor-pointer">
+                <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
                   <input
                     type="checkbox" checked={!!draft.reverseScored}
                     onChange={e => setDraft(d => ({ ...d, reverseScored: e.target.checked }))}
@@ -416,8 +416,8 @@ function QuestionRow({
                 </label>
               </div>
               <div className="flex gap-2">
-                <button onClick={save} className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-500 transition-colors">Valider</button>
-                <button onClick={cancel} className="px-3 py-1 bg-[#1E293B] text-slate-400 text-xs rounded hover:text-white transition-colors">Annuler</button>
+                <button onClick={save} className="px-3 py-1 bg-blue-600 text-gray-900 text-xs rounded hover:bg-blue-500 transition-colors">Valider</button>
+                <button onClick={cancel} className="px-3 py-1 bg-gray-100 text-gray-500 text-xs rounded hover:text-gray-700 transition-colors">Annuler</button>
               </div>
             </div>
           ) : (
@@ -427,14 +427,14 @@ function QuestionRow({
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#1E293B', color: '#94A3B8' }}>
                     {q.pillarLabel}
                   </span>
-                  <span className="text-[10px] text-slate-500">
-                    poids: <strong className="text-slate-300">{q.weight}</strong>
+                  <span className="text-[10px] text-gray-500">
+                    poids: <strong className="text-gray-600">{q.weight}</strong>
                     {q.reverseScored && <span className="ml-1 text-yellow-400/70">↩ inversé</span>}
                   </span>
                 </div>
-                <p className="text-sm text-slate-200 leading-relaxed">{q.text}</p>
+                <p className="text-sm text-gray-700 leading-relaxed">{q.text}</p>
               </div>
-              <button onClick={() => setEditing(true)} className="px-2 py-1 text-xs text-slate-400 hover:text-white bg-[#1E293B] rounded flex-shrink-0 transition-colors">
+              <button onClick={() => setEditing(true)} className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 bg-gray-100 rounded flex-shrink-0 transition-colors">
                 Éditer
               </button>
             </div>
@@ -482,16 +482,16 @@ function AddQuestionForm({
         value={text}
         onChange={e => setText(e.target.value)}
         placeholder="Saisir le texte de la question..."
-        className="w-full bg-[#0F1629] border border-[#1E293B] text-white text-sm rounded-lg p-3 resize-none focus:outline-none focus:border-blue-500 mb-3"
+        className="w-full bg-[#0F1629] border border-gray-200 text-gray-900 text-sm rounded-lg p-3 resize-none focus:outline-none focus:border-blue-500 mb-3"
         rows={2}
       />
       <div className="flex flex-wrap gap-3 mb-3">
         <div className="flex items-center gap-1">
-          <label className="text-xs text-slate-400">Pilier:</label>
+          <label className="text-xs text-gray-500">Pilier:</label>
           <select
             value={pillar}
             onChange={e => handlePillarChange(e.target.value)}
-            className="bg-[#0F1629] border border-[#1E293B] text-white text-xs rounded p-1"
+            className="bg-[#0F1629] border border-gray-200 text-gray-900 text-xs rounded p-1"
           >
             {pillars.map(p => <option key={p.id} value={p.id}>{p.label} ({p.id})</option>)}
             <option value="NOUVEAU">Nouveau pilier...</option>
@@ -500,21 +500,21 @@ function AddQuestionForm({
         {pillar === 'NOUVEAU' && (
           <>
             <input value={pillar === 'NOUVEAU' ? '' : pillar} onChange={e => setPillar(e.target.value)}
-              placeholder="ID (ex: X)" className="w-20 bg-[#0F1629] border border-[#1E293B] text-white text-xs rounded p-1" />
+              placeholder="ID (ex: X)" className="w-20 bg-[#0F1629] border border-gray-200 text-gray-900 text-xs rounded p-1" />
             <input value={pillarLabel} onChange={e => setPillarLabel(e.target.value)}
-              placeholder="Label pilier" className="w-36 bg-[#0F1629] border border-[#1E293B] text-white text-xs rounded p-1" />
+              placeholder="Label pilier" className="w-36 bg-[#0F1629] border border-gray-200 text-gray-900 text-xs rounded p-1" />
           </>
         )}
         <div className="flex items-center gap-1">
-          <label className="text-xs text-slate-400">Poids:</label>
+          <label className="text-xs text-gray-500">Poids:</label>
           <select value={weight} onChange={e => setWeight(Number(e.target.value) as 1 | 2 | 3)}
-            className="bg-[#0F1629] border border-[#1E293B] text-white text-xs rounded p-1">
+            className="bg-[#0F1629] border border-gray-200 text-gray-900 text-xs rounded p-1">
             <option value={1}>1 — Faible</option>
             <option value={2}>2 — Normal</option>
             <option value={3}>3 — Fort</option>
           </select>
         </div>
-        <label className="flex items-center gap-1 text-xs text-slate-400 cursor-pointer">
+        <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
           <input type="checkbox" checked={reverseScored} onChange={e => setReverseScored(e.target.checked)} className="rounded" />
           Score inversé
         </label>
@@ -704,8 +704,8 @@ export function ScoringQuestionsEditor() {
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Questions Scoring BMI 360™</h1>
-          <p className="text-slate-400 mt-1">Gérez les questions de chaque outil de diagnostic.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Questions Scoring BMI 360™</h1>
+          <p className="text-gray-500 mt-1">Gérez les questions de chaque outil de diagnostic.</p>
         </div>
         <Button onClick={saveAll} disabled={saving} className="bg-gradient-to-r from-blue-600 to-purple-600">
           <Save className="w-4 h-4 mr-2" />
@@ -721,9 +721,9 @@ export function ScoringQuestionsEditor() {
           { label: 'Piliers total', val: Object.values(allQuestions).reduce((s, a) => s + new Set(a.map(q => q.pillar)).size, 0) },
           { label: 'Outils en DB', val: Object.keys(dbLoaded).length },
         ].map(s => (
-          <div key={s.label} className="bg-[#0F1629] border border-[#1E293B] rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-white">{s.val}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{s.label}</p>
+          <div key={s.label} className="bg-[#0F1629] border border-gray-200 rounded-xl p-3 text-center">
+            <p className="text-xl font-bold text-gray-900">{s.val}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
@@ -736,8 +736,8 @@ export function ScoringQuestionsEditor() {
             onClick={() => setActiveToolIdx(idx)}
             className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
               activeToolIdx === idx
-                ? 'text-white border-opacity-50'
-                : 'bg-[#0F1629] text-slate-400 border-[#1E293B] hover:text-white hover:border-[#334155]'
+                ? 'text-gray-900 border-opacity-50'
+                : 'bg-[#0F1629] text-gray-500 border-gray-200 hover:text-gray-700 hover:border-gray-300'
             }`}
             style={activeToolIdx === idx ? { backgroundColor: `${tool.color}25`, borderColor: `${tool.color}60`, color: tool.color } : {}}
           >
@@ -758,12 +758,12 @@ export function ScoringQuestionsEditor() {
           {/* Header outil */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: activeTool.color }}></span>
                 {activeTool.name}
-                <span className="text-xs text-slate-500 font-normal">Modèle {activeTool.model}</span>
+                <span className="text-xs text-gray-500 font-normal">Modèle {activeTool.model}</span>
               </h2>
-              <p className="text-sm text-slate-400 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 {questions.length} questions · {pillars.length} piliers ·&nbsp;
                 {dbLoaded[activeTool.id]
                   ? <span className="text-green-400">✓ sauvegardé en base</span>
@@ -811,8 +811,8 @@ export function ScoringQuestionsEditor() {
               <div key={p.id} id={`pilier-${p.id}`} className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: activeTool.color }}></div>
-                  <h3 className="text-sm font-bold text-slate-200">{p.label}</h3>
-                  <span className="text-xs text-slate-500">{p.count} question{p.count > 1 ? 's' : ''}</span>
+                  <h3 className="text-sm font-bold text-gray-700">{p.label}</h3>
+                  <span className="text-xs text-gray-500">{p.count} question{p.count > 1 ? 's' : ''}</span>
                 </div>
                 {pillarQs.map(({ q, i }) => (
                   <QuestionRow

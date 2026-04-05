@@ -26,7 +26,10 @@ export function PlansList() {
 
   async function fetchPlans() {
     const res = await fetch("/api/admin/plans", { headers });
-    if (res.ok) setPlans(await res.json());
+    if (res.ok) {
+      const json = await res.json();
+      setPlans(Array.isArray(json) ? json : json.data ?? []);
+    }
     setLoading(false);
   }
 
@@ -105,7 +108,7 @@ export function PlansList() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={saveEdit} className="bg-black text-white px-4 py-1.5 rounded-lg text-sm">
+                  <button onClick={saveEdit} className="bg-black text-gray-900 px-4 py-1.5 rounded-lg text-sm">
                     Enregistrer
                   </button>
                   <button onClick={() => { setEditingId(null); setEditForm({}); }} className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-lg text-sm">

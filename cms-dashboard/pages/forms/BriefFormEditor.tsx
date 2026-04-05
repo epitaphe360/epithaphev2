@@ -82,16 +82,16 @@ function StringList({
 
   return (
     <div className="mb-6">
-      <h3 className="text-sm font-semibold text-slate-300 mb-3">{title}</h3>
+      <h3 className="text-sm font-semibold text-gray-600 mb-3">{title}</h3>
       <div className="space-y-2 mb-3">
         {items.map((item, idx) => (
-          <div key={idx} className="flex items-center gap-2 bg-[#0F1629] border border-[#1E293B] rounded-lg px-3 py-2">
+          <div key={idx} className="flex items-center gap-2 bg-[#0F1629] border border-gray-200 rounded-lg px-3 py-2">
             <GripVertical className="w-4 h-4 text-slate-600 flex-shrink-0" />
-            <span className="flex-1 text-sm text-slate-200">{item}</span>
-            <button onClick={() => moveUp(idx)} className="p-1 text-slate-500 hover:text-white transition-colors" title="Monter">
+            <span className="flex-1 text-sm text-gray-700">{item}</span>
+            <button onClick={() => moveUp(idx)} className="p-1 text-gray-500 hover:text-gray-700 transition-colors" title="Monter">
               <ChevronUp className="w-3 h-3" />
             </button>
-            <button onClick={() => moveDown(idx)} className="p-1 text-slate-500 hover:text-white transition-colors" title="Descendre">
+            <button onClick={() => moveDown(idx)} className="p-1 text-gray-500 hover:text-gray-700 transition-colors" title="Descendre">
               <ChevronDown className="w-3 h-3" />
             </button>
             <button onClick={() => remove(idx)} className="p-1 text-red-400 hover:text-red-300 transition-colors">
@@ -148,17 +148,17 @@ function NeedsList({
 
   return (
     <div className="mb-6">
-      <h3 className="text-sm font-semibold text-slate-300 mb-3">Besoins / Services</h3>
+      <h3 className="text-sm font-semibold text-gray-600 mb-3">Besoins / Services</h3>
       <div className="space-y-2 mb-3">
         {items.map((item, idx) => (
-          <div key={idx} className="flex items-center gap-2 bg-[#0F1629] border border-[#1E293B] rounded-lg px-3 py-2">
+          <div key={idx} className="flex items-center gap-2 bg-[#0F1629] border border-gray-200 rounded-lg px-3 py-2">
             <GripVertical className="w-4 h-4 text-slate-600 flex-shrink-0" />
-            <code className="text-xs text-slate-500 w-36 flex-shrink-0">{item.value}</code>
-            <span className="flex-1 text-sm text-slate-200">{item.label}</span>
-            <button onClick={() => moveUp(idx)} className="p-1 text-slate-500 hover:text-white transition-colors">
+            <code className="text-xs text-gray-500 w-36 flex-shrink-0">{item.value}</code>
+            <span className="flex-1 text-sm text-gray-700">{item.label}</span>
+            <button onClick={() => moveUp(idx)} className="p-1 text-gray-500 hover:text-gray-700 transition-colors">
               <ChevronUp className="w-3 h-3" />
             </button>
-            <button onClick={() => moveDown(idx)} className="p-1 text-slate-500 hover:text-white transition-colors">
+            <button onClick={() => moveDown(idx)} className="p-1 text-gray-500 hover:text-gray-700 transition-colors">
               <ChevronDown className="w-3 h-3" />
             </button>
             <button onClick={() => remove(idx)} className="p-1 text-red-400 hover:text-red-300 transition-colors">
@@ -184,7 +184,7 @@ function NeedsList({
           <Plus className="w-4 h-4 mr-1" /> Ajouter
         </Button>
       </div>
-      <p className="text-xs text-slate-500 mt-1">La clé est générée automatiquement depuis le libellé si laissé vide.</p>
+      <p className="text-xs text-gray-500 mt-1">La clé est générée automatiquement depuis le libellé si laissé vide.</p>
     </div>
   );
 }
@@ -269,7 +269,7 @@ export function BriefFormEditor() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-48 text-slate-400">
+      <div className="flex items-center justify-center h-48 text-gray-500">
         <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mr-2" />
         Chargement...
       </div>
@@ -288,8 +288,8 @@ export function BriefFormEditor() {
 
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Formulaire de Brief</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900">Formulaire de Brief</h1>
+          <p className="text-gray-500 mt-1">
             Gérez les options du formulaire "/contact/brief" — secteurs, besoins, budgets et délais.
           </p>
         </div>
@@ -312,9 +312,9 @@ export function BriefFormEditor() {
           { label: 'Tranches budget', count: budgets.length, color: 'green' },
           { label: 'Délais', count: timelines.length, color: 'yellow' },
         ].map(s => (
-          <div key={s.label} className="bg-[#0F1629] border border-[#1E293B] rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">{s.count}</p>
-            <p className="text-xs text-slate-400 mt-1">{s.label}</p>
+          <div key={s.label} className="bg-[#0F1629] border border-gray-200 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-gray-900">{s.count}</p>
+            <p className="text-xs text-gray-500 mt-1">{s.label}</p>
           </div>
         ))}
       </div>

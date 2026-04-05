@@ -51,15 +51,15 @@ export function TestimonialsList() {
       label: 'Auteur',
       render: (t) => (
         <div>
-          <p className="font-medium text-white">{t.authorName}</p>
-          <p className="text-xs text-slate-500">{[t.authorTitle, t.companyName].filter(Boolean).join(' • ')}</p>
+          <p className="font-medium text-gray-900">{t.authorName}</p>
+          <p className="text-xs text-gray-500">{[t.authorTitle, t.companyName].filter(Boolean).join(' • ')}</p>
         </div>
       ),
     },
     {
       key: 'quote',
       label: 'Citation',
-      render: (t) => <span className="text-slate-400 text-sm italic line-clamp-2">"{t.quote.slice(0, 100)}{t.quote.length > 100 ? '…' : ''}"</span>,
+      render: (t) => <span className="text-gray-500 text-sm italic line-clamp-2">"{t.quote.slice(0, 100)}{t.quote.length > 100 ? '…' : ''}"</span>,
     },
     {
       key: 'rating',
@@ -88,7 +88,7 @@ export function TestimonialsList() {
   const publishedFilter = (
     <select
       onChange={(e) => setFilter('isPublished', e.target.value === '' ? undefined : e.target.value === 'true')}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]"
     >
       <option value="">Tous</option>
       <option value="true">Publiés</option>

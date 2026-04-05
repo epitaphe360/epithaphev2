@@ -68,8 +68,8 @@ export function ResourcesList() {
   const load = () => {
     setLoading(true);
     fetch("/api/admin/resources")
-      .then((r) => r.json())
-      .then(setResources)
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then((json) => setResources(Array.isArray(json) ? json : json.data ?? []))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   };

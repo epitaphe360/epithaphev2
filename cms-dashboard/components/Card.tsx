@@ -27,7 +27,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`
-        bg-[#0B1121] rounded-xl border border-[#1E293B]
+        bg-white rounded-xl border border-gray-200
         ${hover ? 'hover:border-[#EC4899]/30 transition-shadow cursor-pointer' : ''}
         ${paddingStyles[padding]}
         ${className}
@@ -50,7 +50,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   actions,
 }) => {
   return (
-    <div className={`flex items-center justify-between px-6 py-4 border-b border-[#1E293B] ${className}`}>
+    <div className={`flex items-center justify-between px-6 py-4 border-b border-gray-200 ${className}`}>
       <div className="flex-1">{children}</div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
@@ -79,7 +79,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`px-6 py-4 bg-[#0D0F1E] border-t border-[#1E293B] rounded-b-xl ${className}`}>
+    <div className={`px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl ${className}`}>
       {children}
     </div>
   );
@@ -95,7 +95,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   className = '',
 }) => {
   return (
-    <h3 className={`text-lg font-semibold text-white ${className}`}>
+    <h3 className={`text-lg font-semibold text-gray-900 ${className}`}>
       {children}
     </h3>
   );
@@ -111,7 +111,7 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
   className = '',
 }) => {
   return (
-    <p className={`text-sm text-slate-400 mt-1 ${className}`}>
+    <p className={`text-sm text-gray-500 mt-1 ${className}`}>
       {children}
     </p>
   );

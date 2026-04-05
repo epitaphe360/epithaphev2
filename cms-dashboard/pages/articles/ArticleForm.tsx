@@ -499,7 +499,7 @@ export const ArticleForm: React.FC = () => {
                 onChange={(content) => setFormData((prev) => ({ ...prev, content }))}
               />
               <div className="flex items-center justify-between mt-1">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-gray-500">
                   {formData.content.replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length} mots
                 </p>
                 {autoSaveAt && formData.status === 'DRAFT' && (

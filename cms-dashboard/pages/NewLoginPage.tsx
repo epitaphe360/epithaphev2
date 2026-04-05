@@ -48,11 +48,14 @@ export const NewLoginPage: React.FC = () => {
         body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || 'Identifiants incorrects');
+        const errorData = res.headers.get('content-type')?.includes('application/json')
+          ? await res.json()
+          : { error: `Erreur serveur (${res.status})` };
+        throw new Error(errorData.error || 'Identifiants incorrects');
       }
+
+      const data = await res.json();
 
       login(data.token, data.user);
       setLocation('/admin');
@@ -83,12 +86,12 @@ export const NewLoginPage: React.FC = () => {
         {/* Logo & Header */}
         <div className="mb-10 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[#E63946] to-[#F08080] shadow-2xl shadow-[#E63946]/50">
-            <span className="text-3xl font-bold text-white">E</span>
+            <span className="text-3xl font-bold text-gray-900">E</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
             Bienvenue
           </h1>
-          <p className="text-slate-400 text-sm font-medium">
+          <p className="text-gray-500 text-sm font-medium">
             Connectez-vous à votre espace administrateur
           </p>
         </div>
@@ -115,13 +118,13 @@ export const NewLoginPage: React.FC = () => {
 
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Email
                 </label>
                 <div className="relative group">
                   <div className={`absolute inset-0 bg-gradient-to-r from-[#E63946] to-purple-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 ${emailFocused ? 'opacity-50' : ''}`}></div>
                   <div className="relative">
-                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${emailFocused ? 'text-[#E63946]' : 'text-slate-500'}`} />
+                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${emailFocused ? 'text-[#E63946]' : 'text-gray-500'}`} />
                     <input
                       type="email"
                       value={email}
@@ -130,7 +133,7 @@ export const NewLoginPage: React.FC = () => {
                       onBlur={() => setEmailFocused(false)}
                       placeholder="admin@epitaph.ma"
                       required
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-white placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-[#E63946]/50 focus:bg-white/10 transition-all duration-300"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-gray-900 placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-[#E63946]/50 focus:bg-white/10 transition-all duration-300"
                     />
                     {email && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -147,13 +150,13 @@ export const NewLoginPage: React.FC = () => {
 
               {/* Password Input */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Mot de passe
                 </label>
                 <div className="relative group">
                   <div className={`absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 ${passwordFocused ? 'opacity-50' : ''}`}></div>
                   <div className="relative">
-                    <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${passwordFocused ? 'text-purple-400' : 'text-slate-500'}`} />
+                    <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${passwordFocused ? 'text-purple-400' : 'text-gray-500'}`} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
@@ -162,12 +165,12 @@ export const NewLoginPage: React.FC = () => {
                       onBlur={() => setPasswordFocused(false)}
                       placeholder="••••••••"
                       required
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-white placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all duration-300"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-gray-900 placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all duration-300"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -191,8 +194,8 @@ export const NewLoginPage: React.FC = () => {
                 disabled={loading || !canSubmit}
                 className={`w-full h-14 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 shadow-lg ${
                   canSubmit
-                    ? 'bg-gradient-to-r from-[#E63946] to-[#F08080] hover:shadow-[#E63946]/50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] text-white'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-[#E63946] to-[#F08080] hover:shadow-[#E63946]/50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] text-gray-900'
+                    : 'bg-gray-100 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {loading ? (
@@ -219,11 +222,11 @@ export const NewLoginPage: React.FC = () => {
           <a
             href="/admin/forgot-password"
             onClick={(e) => { e.preventDefault(); setLocation('/admin/forgot-password'); }}
-            className="text-sm text-slate-400 hover:text-[#E63946] transition-colors"
+            className="text-sm text-gray-500 hover:text-[#E63946] transition-colors"
           >
             Mot de passe oublié ?
           </a>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-gray-500">
             © 2026 Epitaphe — Tous droits réservés
           </p>
         </div>

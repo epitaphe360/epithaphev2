@@ -75,8 +75,8 @@ export function ServicesList() {
       label: 'Titre',
       render: (s) => (
         <div>
-          <p className="font-medium text-white">{s.title}</p>
-          <p className="text-slate-500 text-xs mt-0.5">/services/{s.slug}</p>
+          <p className="font-medium text-gray-900">{s.title}</p>
+          <p className="text-gray-500 text-xs mt-0.5">/services/{s.slug}</p>
         </div>
       ),
     },
@@ -104,14 +104,14 @@ export function ServicesList() {
       key: 'featured',
       label: 'Mis en avant',
       width: '110px',
-      render: (s) => s.featured ? <Badge variant="success">Oui</Badge> : <span className="text-slate-500">—</span>,
+      render: (s) => s.featured ? <Badge variant="success">Oui</Badge> : <span className="text-gray-500">—</span>,
     },
     {
       key: 'updatedAt',
       label: 'Modifié le',
       width: '140px',
       render: (s) => (
-        <span className="text-slate-400 text-xs">
+        <span className="text-gray-500 text-xs">
           {new Date(s.updatedAt).toLocaleDateString('fr-FR')}
         </span>
       ),
@@ -126,7 +126,7 @@ export function ServicesList() {
   const hubFilter = (
     <select
       onChange={(e) => setFilter('hub', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]"
     >
       <option value="">Tous les hubs</option>
       {Object.entries(HUB_LABELS).map(([k, v]) => (
@@ -138,7 +138,7 @@ export function ServicesList() {
   const statusFilter = (
     <select
       onChange={(e) => setFilter('status', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]"
     >
       <option value="">Tous les statuts</option>
       <option value="PUBLISHED">Publié</option>

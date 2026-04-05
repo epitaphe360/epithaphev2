@@ -112,11 +112,11 @@ export function ScoringResultsList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <BarChart3 className="w-6 h-6 text-blue-400" />
             Résultats Scoring BMI 360™
           </h1>
-          <p className="text-slate-400 text-sm mt-1">{total} résultat{total !== 1 ? 's' : ''} au total</p>
+          <p className="text-gray-500 text-sm mt-1">{total} résultat{total !== 1 ? 's' : ''} au total</p>
         </div>
         <Button variant="secondary" onClick={exportCSV}>
           <Download className="w-4 h-4 mr-2" /> Exporter CSV
@@ -129,9 +129,9 @@ export function ScoringResultsList() {
           {stats.map(s => (
             <Card key={s.toolId}>
               <CardContent className="p-4">
-                <p className="text-xs text-slate-400 mb-1">{TOOL_LABELS[s.toolId] ?? s.toolId}</p>
-                <p className="text-2xl font-bold text-white">{s.count}</p>
-                <p className="text-xs text-slate-400 mt-1">Score moyen : <span className="text-blue-300 font-semibold">{s.avgScore}/100</span></p>
+                <p className="text-xs text-gray-500 mb-1">{TOOL_LABELS[s.toolId] ?? s.toolId}</p>
+                <p className="text-2xl font-bold text-gray-900">{s.count}</p>
+                <p className="text-xs text-gray-500 mt-1">Score moyen : <span className="text-blue-300 font-semibold">{s.avgScore}/100</span></p>
               </CardContent>
             </Card>
           ))}
@@ -140,11 +140,11 @@ export function ScoringResultsList() {
 
       {/* Filtre */}
       <div className="flex items-center gap-3">
-        <Filter className="w-4 h-4 text-slate-400" />
+        <Filter className="w-4 h-4 text-gray-500" />
         <select
           value={filterTool}
           onChange={e => { setFilterTool(e.target.value); setPage(0); }}
-          className="bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm"
+          className="bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm"
         >
           <option value="">Tous les outils</option>
           {Object.entries(TOOL_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -155,8 +155,8 @@ export function ScoringResultsList() {
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-700">
-              <tr className="text-left text-slate-400">
+            <thead className="border-b border-gray-200">
+              <tr className="text-left text-gray-500">
                 <th className="px-4 py-3">Outil</th>
                 <th className="px-4 py-3">Entreprise</th>
                 <th className="px-4 py-3">Secteur</th>
@@ -169,27 +169,27 @@ export function ScoringResultsList() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-500">Chargement…</td></tr>
+                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">Chargement…</td></tr>
               ) : results.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-500">Aucun résultat</td></tr>
+                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">Aucun résultat</td></tr>
               ) : results.map(r => (
-                <tr key={r.id} className="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
+                <tr key={r.id} className="border-b border-gray-200 hover:bg-gray-100 transition-colors">
                   <td className="px-4 py-3 font-medium text-blue-300">{TOOL_LABELS[r.toolId] ?? r.toolId}</td>
-                  <td className="px-4 py-3 text-white">{r.companyName || <span className="text-slate-500">—</span>}</td>
-                  <td className="px-4 py-3 text-slate-300">{r.sector || '—'}</td>
-                  <td className="px-4 py-3 text-slate-300">{r.companySize || '—'}</td>
+                  <td className="px-4 py-3 text-gray-900">{r.companyName || <span className="text-gray-500">—</span>}</td>
+                  <td className="px-4 py-3 text-gray-600">{r.sector || '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">{r.companySize || '—'}</td>
                   <td className="px-4 py-3">
-                    <span className="font-bold text-white">{r.globalScore}</span>
-                    <span className="text-slate-500">/100</span>
+                    <span className="font-bold text-gray-900">{r.globalScore}</span>
+                    <span className="text-gray-500">/100</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${maturityColor(r.maturityLevel)}`}>
                       {MATURITY_LABELS[r.maturityLevel] ?? `Niveau ${r.maturityLevel}`}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-slate-400">{new Date(r.createdAt).toLocaleDateString('fr-MA')}</td>
+                  <td className="px-4 py-3 text-gray-500">{new Date(r.createdAt).toLocaleDateString('fr-MA')}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => deleteResult(r.id)} className="text-slate-500 hover:text-red-400 transition-colors">
+                    <button onClick={() => deleteResult(r.id)} className="text-gray-500 hover:text-red-400 transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
@@ -200,8 +200,8 @@ export function ScoringResultsList() {
         </div>
         {/* Pagination */}
         {total > LIMIT && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-700">
-            <p className="text-sm text-slate-400">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+            <p className="text-sm text-gray-500">
               {page * LIMIT + 1}–{Math.min((page + 1) * LIMIT, total)} sur {total}
             </p>
             <div className="flex gap-2">

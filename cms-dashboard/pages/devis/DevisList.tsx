@@ -43,8 +43,8 @@ export function DevisList() {
       setLoading(true);
       const res = await fetch("/api/admin/devis", { headers });
       if (!res.ok) throw new Error("Erreur chargement devis");
-      const data = await res.json();
-      setDevisList(data);
+      const json = await res.json();
+      setDevisList(Array.isArray(json) ? json : json.data ?? []);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -93,7 +93,7 @@ export function DevisList() {
         </div>
         <a
           href="/admin/devis/new"
-          className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+          className="bg-black text-gray-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
         >
           + Nouveau devis
         </a>
@@ -107,7 +107,7 @@ export function DevisList() {
             onClick={() => setFilter(key)}
             className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
               filter === key
-                ? "bg-black text-white border-black"
+                ? "bg-black text-gray-900 border-black"
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
             }`}
           >

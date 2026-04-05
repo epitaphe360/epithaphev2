@@ -41,11 +41,11 @@ function statusBadge(s: string) {
   const map: Record<string, string> = {
     en_cours: 'bg-green-500/20 text-green-300',
     en_attente: 'bg-yellow-500/20 text-yellow-300',
-    termine: 'bg-slate-500/20 text-slate-300',
+    termine: 'bg-slate-500/20 text-gray-600',
     en_pause: 'bg-orange-500/20 text-orange-300',
   };
   const label: Record<string, string> = { en_cours: 'En cours', en_attente: 'En attente', termine: 'Terminé', en_pause: 'En pause' };
-  return <span className={`px-2 py-0.5 rounded text-xs font-medium ${map[s] ?? 'bg-slate-600 text-slate-300'}`}>{label[s] ?? s}</span>;
+  return <span className={`px-2 py-0.5 rounded text-xs font-medium ${map[s] ?? 'bg-slate-600 text-gray-600'}`}>{label[s] ?? s}</span>;
 }
 
 const emptyProject = (): Partial<Project> => ({
@@ -178,11 +178,11 @@ export function ClientProjectsAdmin() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <FolderOpen className="w-6 h-6 text-blue-400" />
             Projets Espace Client
           </h1>
-          <p className="text-slate-400 text-sm mt-1">{total} projet{total !== 1 ? 's' : ''} au total</p>
+          <p className="text-gray-500 text-sm mt-1">{total} projet{total !== 1 ? 's' : ''} au total</p>
         </div>
         <Button onClick={() => { setEditing(null); setForm(emptyProject()); setShowForm(true); }}>
           <Plus className="w-4 h-4 mr-2" /> Nouveau projet
@@ -192,12 +192,12 @@ export function ClientProjectsAdmin() {
       {/* Filtres */}
       <div className="flex gap-3 flex-wrap">
         <select value={filterClient} onChange={e => { setFilterClient(e.target.value); setPage(0); }}
-          className="bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm">
+          className="bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm">
           <option value="">Tous les clients</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.company ? ` — ${c.company}` : ''}</option>)}
         </select>
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(0); }}
-          className="bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm">
+          className="bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm">
           <option value="">Tous les statuts</option>
           {STATUS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
@@ -206,21 +206,21 @@ export function ClientProjectsAdmin() {
       {/* Liste */}
       <div className="space-y-3">
         {loading ? (
-          <Card><CardContent className="py-12 text-center text-slate-500">Chargement…</CardContent></Card>
+          <Card><CardContent className="py-12 text-center text-gray-500">Chargement…</CardContent></Card>
         ) : projects.length === 0 ? (
-          <Card><CardContent className="py-12 text-center text-slate-500">Aucun projet</CardContent></Card>
+          <Card><CardContent className="py-12 text-center text-gray-500">Aucun projet</CardContent></Card>
         ) : projects.map(p => (
           <Card key={p.id}>
             <div className="p-4">
               {/* Row header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <button onClick={() => toggleExpand(p.id)} className="text-slate-400 hover:text-white transition-colors flex-shrink-0">
+                  <button onClick={() => toggleExpand(p.id)} className="text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0">
                     {expanded === p.id ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   </button>
                   <div className="min-w-0">
-                    <p className="font-semibold text-white truncate">{p.title}</p>
-                    <p className="text-xs text-slate-400">{clientName(p.clientId)} · {p.type}</p>
+                    <p className="font-semibold text-gray-900 truncate">{p.title}</p>
+                    <p className="text-xs text-gray-500">{clientName(p.clientId)} · {p.type}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
@@ -229,12 +229,12 @@ export function ClientProjectsAdmin() {
                     <div className="w-24 h-1.5 bg-slate-700 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-500 rounded-full" style={{ width: `${p.progress}%` }} />
                     </div>
-                    <span className="text-xs text-slate-400">{p.progress}%</span>
+                    <span className="text-xs text-gray-500">{p.progress}%</span>
                   </div>
                   {statusBadge(p.status)}
                   <button onClick={() => { setEditing(p); setForm({ ...p }); setShowForm(true); }}
-                    className="text-slate-400 hover:text-white p-1"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => deleteProject(p.id)} className="text-slate-400 hover:text-red-400 p-1">
+                    className="text-gray-500 hover:text-gray-700 p-1"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => deleteProject(p.id)} className="text-gray-500 hover:text-red-400 p-1">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -242,7 +242,7 @@ export function ClientProjectsAdmin() {
 
               {/* Manager + dates */}
               {(p.managerName || p.startDate) && (
-                <div className="mt-2 ml-7 flex gap-4 text-xs text-slate-500">
+                <div className="mt-2 ml-7 flex gap-4 text-xs text-gray-500">
                   {p.managerName && <span>Chef de projet : {p.managerName}</span>}
                   {p.startDate && <span>Début : {new Date(p.startDate).toLocaleDateString('fr-MA')}</span>}
                   {p.endDate && <span>Fin : {new Date(p.endDate).toLocaleDateString('fr-MA')}</span>}
@@ -252,11 +252,11 @@ export function ClientProjectsAdmin() {
 
             {/* Expanded: milestones + docs */}
             {expanded === p.id && expandedData && (
-              <div className="border-t border-slate-700 p-4 space-y-5 bg-slate-900/30">
+              <div className="border-t border-gray-200 p-4 space-y-5 bg-gray-50">
                 {/* Jalons */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                       <Flag className="w-4 h-4 text-blue-400" /> Jalons ({expandedData.milestones.length})
                     </h4>
                     <button onClick={() => { setMilestoneProjectId(p.id); setMilestoneForm({ label: '', dueDate: '', status: 'pending', order: 0 }); setShowMilestone(true); }}
@@ -265,18 +265,18 @@ export function ClientProjectsAdmin() {
                     </button>
                   </div>
                   {expandedData.milestones.length === 0 ? (
-                    <p className="text-xs text-slate-500">Aucun jalon</p>
+                    <p className="text-xs text-gray-500">Aucun jalon</p>
                   ) : (
                     <div className="space-y-2">
                       {expandedData.milestones.map(m => (
-                        <div key={m.id} className="flex items-center gap-3 bg-slate-800/50 rounded-lg px-3 py-2">
+                        <div key={m.id} className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2">
                           <select value={m.status} onChange={e => updateMilestoneStatus(p.id, m.id, e.target.value)}
-                            className="bg-transparent text-xs text-slate-300 border border-slate-600 rounded px-1 py-0.5">
+                            className="bg-transparent text-xs text-gray-600 border border-slate-600 rounded px-1 py-0.5">
                             {MILESTONE_STATUS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                           </select>
-                          <span className="text-sm text-white flex-1">{m.label}</span>
-                          {m.dueDate && <span className="text-xs text-slate-400">{m.dueDate}</span>}
-                          <button onClick={() => deleteMilestone(p.id, m.id)} className="text-slate-500 hover:text-red-400">
+                          <span className="text-sm text-gray-900 flex-1">{m.label}</span>
+                          {m.dueDate && <span className="text-xs text-gray-500">{m.dueDate}</span>}
+                          <button onClick={() => deleteMilestone(p.id, m.id)} className="text-gray-500 hover:text-red-400">
                             <X className="w-3 h-3" />
                           </button>
                         </div>
@@ -288,7 +288,7 @@ export function ClientProjectsAdmin() {
                 {/* Documents */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                       <FileText className="w-4 h-4 text-green-400" /> Documents ({expandedData.documents.length})
                     </h4>
                     <button onClick={() => { setDocProjectId(p.id); setDocForm({ name: '', fileType: 'PDF', fileSize: '', url: '' }); setShowDoc(true); }}
@@ -297,15 +297,15 @@ export function ClientProjectsAdmin() {
                     </button>
                   </div>
                   {expandedData.documents.length === 0 ? (
-                    <p className="text-xs text-slate-500">Aucun document</p>
+                    <p className="text-xs text-gray-500">Aucun document</p>
                   ) : (
                     <div className="space-y-2">
                       {expandedData.documents.map(d => (
-                        <div key={d.id} className="flex items-center gap-3 bg-slate-800/50 rounded-lg px-3 py-2">
-                          <span className="text-xs font-bold text-slate-400 w-10">{d.fileType}</span>
+                        <div key={d.id} className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2">
+                          <span className="text-xs font-bold text-gray-500 w-10">{d.fileType}</span>
                           <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-300 hover:underline flex-1 truncate">{d.name}</a>
-                          {d.fileSize && <span className="text-xs text-slate-500">{d.fileSize}</span>}
-                          <button onClick={() => deleteDoc(p.id, d.id)} className="text-slate-500 hover:text-red-400">
+                          {d.fileSize && <span className="text-xs text-gray-500">{d.fileSize}</span>}
+                          <button onClick={() => deleteDoc(p.id, d.id)} className="text-gray-500 hover:text-red-400">
                             <X className="w-3 h-3" />
                           </button>
                         </div>
@@ -322,7 +322,7 @@ export function ClientProjectsAdmin() {
       {/* Pagination */}
       {total > LIMIT && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-400">{page * LIMIT + 1}–{Math.min((page + 1) * LIMIT, total)} sur {total}</p>
+          <p className="text-sm text-gray-500">{page * LIMIT + 1}–{Math.min((page + 1) * LIMIT, total)} sur {total}</p>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setPage(p => p - 1)} disabled={page === 0}>Précédent</Button>
             <Button variant="secondary" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * LIMIT >= total}>Suivant</Button>
@@ -333,69 +333,69 @@ export function ClientProjectsAdmin() {
       {/* ─── Modal Projet ─────────────────────────────────────────────── */}
       {showForm && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
-          <div className="bg-[#0F1928] border border-slate-700 rounded-2xl w-full max-w-lg my-8">
-            <div className="flex items-center justify-between p-5 border-b border-slate-700">
-              <h2 className="text-lg font-bold text-white">{editing ? 'Modifier le projet' : 'Nouveau projet'}</h2>
-              <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+          <div className="bg-[#0F1928] border border-gray-200 rounded-2xl w-full max-w-lg my-8">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900">{editing ? 'Modifier le projet' : 'Nouveau projet'}</h2>
+              <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-700"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Client *</label>
+                <label className="block text-xs text-gray-500 mb-1">Client *</label>
                 <select value={form.clientId ?? ''} onChange={e => setForm(f => ({ ...f, clientId: parseInt(e.target.value) }))}
-                  className="w-full bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                  className="w-full bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm">
                   <option value="">Choisir un client…</option>
                   {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.company ? ` — ${c.company}` : ''}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Titre du projet *</label>
+                <label className="block text-xs text-gray-500 mb-1">Titre du projet *</label>
                 <Input value={form.title ?? ''} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="ex: Convention Annuelle 2026" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Type</label>
+                  <label className="block text-xs text-gray-500 mb-1">Type</label>
                   <Input value={form.type ?? ''} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} placeholder="Événement, Stand…" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Statut</label>
+                  <label className="block text-xs text-gray-500 mb-1">Statut</label>
                   <select value={form.status ?? 'en_cours'} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                    className="w-full bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                    className="w-full bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm">
                     {STATUS_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Avancement ({form.progress ?? 0}%)</label>
+                <label className="block text-xs text-gray-500 mb-1">Avancement ({form.progress ?? 0}%)</label>
                 <input type="range" min={0} max={100} value={form.progress ?? 0}
                   onChange={e => setForm(f => ({ ...f, progress: parseInt(e.target.value) }))}
                   className="w-full accent-blue-500" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Chef de projet</label>
+                  <label className="block text-xs text-gray-500 mb-1">Chef de projet</label>
                   <Input value={form.managerName ?? ''} onChange={e => setForm(f => ({ ...f, managerName: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Email chef de projet</label>
+                  <label className="block text-xs text-gray-500 mb-1">Email chef de projet</label>
                   <Input type="email" value={form.managerEmail ?? ''} onChange={e => setForm(f => ({ ...f, managerEmail: e.target.value }))} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Date de début</label>
+                  <label className="block text-xs text-gray-500 mb-1">Date de début</label>
                   <Input type="date" value={form.startDate?.slice(0, 10) ?? ''} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Date de fin</label>
+                  <label className="block text-xs text-gray-500 mb-1">Date de fin</label>
                   <Input type="date" value={form.endDate?.slice(0, 10) ?? ''} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Description</label>
+                <label className="block text-xs text-gray-500 mb-1">Description</label>
                 <Textarea value={form.description ?? ''} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-5 border-t border-slate-700">
+            <div className="flex justify-end gap-3 p-5 border-t border-gray-200">
               <Button variant="secondary" onClick={() => setShowForm(false)}>Annuler</Button>
               <Button onClick={saveProject} disabled={!form.title || !form.clientId}>Enregistrer</Button>
             </div>
@@ -406,31 +406,31 @@ export function ClientProjectsAdmin() {
       {/* ─── Modal Jalon ──────────────────────────────────────────────── */}
       {showMilestone && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0F1928] border border-slate-700 rounded-2xl w-full max-w-sm">
-            <div className="flex items-center justify-between p-4 border-b border-slate-700">
-              <h3 className="font-bold text-white">Ajouter un jalon</h3>
-              <button onClick={() => setShowMilestone(false)}><X className="w-5 h-5 text-slate-400" /></button>
+          <div className="bg-[#0F1928] border border-gray-200 rounded-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="font-bold text-gray-900">Ajouter un jalon</h3>
+              <button onClick={() => setShowMilestone(false)}><X className="w-5 h-5 text-gray-500" /></button>
             </div>
             <div className="p-4 space-y-3">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Label *</label>
+                <label className="block text-xs text-gray-500 mb-1">Label *</label>
                 <Input value={milestoneForm.label} onChange={e => setMilestoneForm(f => ({ ...f, label: e.target.value }))} placeholder="ex: Validation brief créatif" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Date (affiché)</label>
+                  <label className="block text-xs text-gray-500 mb-1">Date (affiché)</label>
                   <Input value={milestoneForm.dueDate} onChange={e => setMilestoneForm(f => ({ ...f, dueDate: e.target.value }))} placeholder="ex: 15 Mar" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Statut</label>
+                  <label className="block text-xs text-gray-500 mb-1">Statut</label>
                   <select value={milestoneForm.status} onChange={e => setMilestoneForm(f => ({ ...f, status: e.target.value }))}
-                    className="w-full bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                    className="w-full bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm">
                     {MILESTONE_STATUS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-4 border-t border-slate-700">
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
               <Button variant="secondary" onClick={() => setShowMilestone(false)}>Annuler</Button>
               <Button onClick={saveMilestone} disabled={!milestoneForm.label}>Ajouter</Button>
             </div>
@@ -441,35 +441,35 @@ export function ClientProjectsAdmin() {
       {/* ─── Modal Document ───────────────────────────────────────────── */}
       {showDoc && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0F1928] border border-slate-700 rounded-2xl w-full max-w-sm">
-            <div className="flex items-center justify-between p-4 border-b border-slate-700">
-              <h3 className="font-bold text-white">Ajouter un document</h3>
-              <button onClick={() => setShowDoc(false)}><X className="w-5 h-5 text-slate-400" /></button>
+          <div className="bg-[#0F1928] border border-gray-200 rounded-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="font-bold text-gray-900">Ajouter un document</h3>
+              <button onClick={() => setShowDoc(false)}><X className="w-5 h-5 text-gray-500" /></button>
             </div>
             <div className="p-4 space-y-3">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Nom du document *</label>
+                <label className="block text-xs text-gray-500 mb-1">Nom du document *</label>
                 <Input value={docForm.name} onChange={e => setDocForm(f => ({ ...f, name: e.target.value }))} placeholder="ex: Rapport Final Q2" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Type</label>
+                  <label className="block text-xs text-gray-500 mb-1">Type</label>
                   <select value={docForm.fileType} onChange={e => setDocForm(f => ({ ...f, fileType: e.target.value }))}
-                    className="w-full bg-[#1E293B] text-white border border-slate-600 rounded-lg px-3 py-2 text-sm">
+                    className="w-full bg-gray-100 text-gray-900 border border-slate-600 rounded-lg px-3 py-2 text-sm">
                     {['PDF','PPT','WORD','XLSX','ZIP','IMG'].map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Taille (affiché)</label>
+                  <label className="block text-xs text-gray-500 mb-1">Taille (affiché)</label>
                   <Input value={docForm.fileSize} onChange={e => setDocForm(f => ({ ...f, fileSize: e.target.value }))} placeholder="ex: 2.4 Mo" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">URL du fichier *</label>
+                <label className="block text-xs text-gray-500 mb-1">URL du fichier *</label>
                 <Input value={docForm.url} onChange={e => setDocForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." />
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-4 border-t border-slate-700">
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
               <Button variant="secondary" onClick={() => setShowDoc(false)}>Annuler</Button>
               <Button onClick={saveDoc} disabled={!docForm.name || !docForm.url}>Ajouter</Button>
             </div>

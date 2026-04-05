@@ -69,42 +69,42 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
 
   const textarea = (label: string, key: keyof CaseStudy, rows = 3) => (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1.5">{label}</label>
+      <label className="block text-sm font-medium text-gray-600 mb-1.5">{label}</label>
       <textarea value={(form[key] as string) ?? ''} onChange={(e) => set(key, e.target.value)} rows={rows}
-        className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
+        className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
     </div>
   );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0B1121] border border-[#1E293B] rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-[#1E293B]">
-          <h2 className="text-lg font-bold text-white">{form.id ? 'Modifier l\'étude' : 'Nouvelle étude de cas'}</h2>
-          <button onClick={() => onClose(false)}><X className="w-5 h-5 text-slate-400 hover:text-white" /></button>
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-2xl">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">{form.id ? 'Modifier l\'étude' : 'Nouvelle étude de cas'}</h2>
+          <button onClick={() => onClose(false)}><X className="w-5 h-5 text-gray-500 hover:text-gray-700" /></button>
         </div>
         <div className="p-6 space-y-5">
           {/* Identité */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Titre <span className="text-[#C8A96E]">*</span></label>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">Titre <span className="text-[#C8A96E]">*</span></label>
               <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Slug</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">Slug</label>
               <input type="text" value={form.slug} onChange={(e) => set('slug', e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Client</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Client</label>
             <input type="text" value={form.clientName} onChange={(e) => set('clientName', e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Image principale (URL)</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Image principale (URL)</label>
             <input type="text" value={form.featuredImage} onChange={(e) => set('featuredImage', e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
           </div>
 
           {/* Contenu */}
@@ -115,7 +115,7 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
           {/* KPIs */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-slate-300">KPIs & Métriques</label>
+              <label className="text-sm font-medium text-gray-600">KPIs & Métriques</label>
               <button type="button" onClick={addKPI} className="text-xs flex items-center gap-1 text-[#C8A96E] hover:text-[#DFC28F]">
                 <Plus className="w-3 h-3" /> Ajouter
               </button>
@@ -123,10 +123,10 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
             {form.kpis.map((kpi, i) => (
               <div key={i} className="flex gap-2 mb-2">
                 <input placeholder="Libellé (ex: Gain de temps)" value={kpi.label} onChange={(e) => setKPI(i, 'label', e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
                 <input placeholder="Valeur (ex: +40%)" value={kpi.value} onChange={(e) => setKPI(i, 'value', e.target.value)}
-                  className="w-32 px-3 py-2 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
-                <button type="button" onClick={() => removeKPI(i)} className="p-2 text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                  className="w-32 px-3 py-2 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
+                <button type="button" onClick={() => removeKPI(i)} className="p-2 text-gray-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
           </div>
@@ -134,7 +134,7 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
           {/* Gallery */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-slate-300">Galerie d'images (URLs)</label>
+              <label className="text-sm font-medium text-gray-600">Galerie d'images (URLs)</label>
               <button type="button" onClick={addGalleryUrl} className="text-xs flex items-center gap-1 text-[#C8A96E] hover:text-[#DFC28F]">
                 <Plus className="w-3 h-3" /> Ajouter URL
               </button>
@@ -142,8 +142,8 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
             {form.gallery.map((url, i) => (
               <div key={i} className="flex gap-2 mb-2">
                 <input placeholder="https://..." value={url} onChange={(e) => setGallery(i, e.target.value)}
-                  className="flex-1 px-3 py-2 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
-                <button type="button" onClick={() => removeGallery(i)} className="p-2 text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
+                <button type="button" onClick={() => removeGallery(i)} className="p-2 text-gray-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
           </div>
@@ -151,9 +151,9 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
           {/* Status + Options */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Statut</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">Statut</label>
               <select value={form.status} onChange={(e) => set('status', e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]">
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]">
                 <option value="draft">Brouillon</option>
                 <option value="published">Publié</option>
                 <option value="archived">Archivé</option>
@@ -162,25 +162,25 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
             <div className="flex items-center mt-7">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.isFeatured} onChange={(e) => set('isFeatured', e.target.checked)} className="w-4 h-4 accent-[#C8A96E]" />
-                <span className="text-sm text-slate-300">À la une</span>
+                <span className="text-sm text-gray-600">À la une</span>
               </label>
             </div>
           </div>
 
           {/* SEO */}
-          <div className="border-t border-[#1E293B] pt-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-3">SEO</p>
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">SEO</p>
             <div className="space-y-3">
               <input placeholder="Meta titre" type="text" value={form.metaTitle} onChange={(e) => set('metaTitle', e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]" />
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
               <textarea placeholder="Meta description" value={form.metaDescription} onChange={(e) => set('metaDescription', e.target.value)} rows={2}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm resize-none focus:outline-none focus:border-[#C8A96E]" />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 p-6 border-t border-[#1E293B]">
-          <button onClick={() => onClose(false)} className="px-5 py-2.5 rounded-xl border border-[#334155] text-slate-300 hover:text-white text-sm transition-colors">Annuler</button>
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+          <button onClick={() => onClose(false)} className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-700 text-sm transition-colors">Annuler</button>
           <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C8A96E] text-black font-semibold hover:bg-[#DFC28F] text-sm transition-colors disabled:opacity-60">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? 'Sauvegarde...' : 'Sauvegarder'}

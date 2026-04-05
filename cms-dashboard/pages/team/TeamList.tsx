@@ -48,13 +48,13 @@ export function TeamList() {
           {m.photo ? (
             <img src={m.photo} alt={m.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-[#1E293B]" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-[#1E293B] flex items-center justify-center text-slate-300 text-sm font-bold">
+            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-sm font-bold">
               {m.name.charAt(0)}
             </div>
           )}
           <div>
-            <p className="font-medium text-white">{m.name}</p>
-            <p className="text-xs text-slate-500">{m.email ?? ''}</p>
+            <p className="font-medium text-gray-900">{m.name}</p>
+            <p className="text-xs text-gray-500">{m.email ?? ''}</p>
           </div>
         </div>
       ),
@@ -62,7 +62,7 @@ export function TeamList() {
     {
       key: 'position',
       label: 'Poste',
-      render: (m) => <span className="text-slate-300">{m.position}</span>,
+      render: (m) => <span className="text-gray-600">{m.position}</span>,
     },
     {
       key: 'department',
@@ -90,7 +90,7 @@ export function TeamList() {
   const deptFilter = (
     <select
       onChange={(e) => setFilter('department', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]"
     >
       <option value="">Tous les dépts.</option>
       {Object.keys(DEPT_COLORS).map((d) => <option key={d} value={d}>{d}</option>)}

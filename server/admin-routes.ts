@@ -300,10 +300,14 @@ export function registerAdminRoutes(app: Express) {
         .limit(pagination.limit)
         .offset(pagination.offset);
 
-      // Get total count for pagination
-      const [{ count }] = await db.select({ count: sql`count(*)` }).from(articles);
+      // Get total count for pagination (with same filters)
+      let countQuery = db.select({ count: sql`count(*)` }).from(articles);
+      if (conditions.length > 0) {
+        countQuery = countQuery.where(and(...conditions)) as typeof countQuery;
+      }
+      const [{ count }] = await countQuery;
 
-      res.json({ data: result, total: Number(count) });
+      res.json({ data: result, total: Number(count ?? 0) });
     } catch (error) {
       console.error('Get articles error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des articles' });
@@ -460,10 +464,14 @@ export function registerAdminRoutes(app: Express) {
         .limit(pagination.limit)
         .offset(pagination.offset);
 
-      // Get total count for pagination
-      const [{ count }] = await db.select({ count: sql`count(*)` }).from(events);
+      // Get total count for pagination (with same filters)
+      let countQuery = db.select({ count: sql`count(*)` }).from(events);
+      if (conditions.length > 0) {
+        countQuery = countQuery.where(and(...conditions)) as typeof countQuery;
+      }
+      const [{ count }] = await countQuery;
 
-      res.json({ data: result, total: Number(count) });
+      res.json({ data: result, total: Number(count ?? 0) });
     } catch (error) {
       console.error('Get events error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des événements' });
@@ -784,10 +792,14 @@ export function registerAdminRoutes(app: Express) {
         .limit(pagination.limit)
         .offset(pagination.offset);
 
-      // Get total count for pagination
-      const [{ count }] = await db.select({ count: sql`count(*)` }).from(media);
+      // Get total count for pagination (with same filters)
+      let countQuery = db.select({ count: sql`count(*)` }).from(media);
+      if (conditions.length > 0) {
+        countQuery = countQuery.where(and(...conditions)) as typeof countQuery;
+      }
+      const [{ count }] = await countQuery;
 
-      res.json({ data: result, total: Number(count) });
+      res.json({ data: result, total: Number(count ?? 0) });
     } catch (error) {
       console.error('Get media error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des médias' });

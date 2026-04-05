@@ -193,23 +193,23 @@ export const AppearanceSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Apparence</h1>
-        <p className="text-slate-400">Gérez l\'identité visuelle, la navigation et le pied de page du site</p>
+        <h1 className="text-2xl font-bold text-gray-900">Apparence</h1>
+        <p className="text-gray-500">Gérez l\'identité visuelle, la navigation et le pied de page du site</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Site Identity */}
         <Card>
-          <div className="p-6 border-b border-[#1E293B]">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <ImageIcon className="w-5 h-5" />
               Identité du Site
             </h2>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Logo principal (URL ou upload)
               </label>
               <div className="flex gap-4 mb-2">
@@ -222,7 +222,7 @@ export const AppearanceSettings: React.FC = () => {
                 />
               </div>
               {siteIdentity.logo_url ? (
-                <div className="mt-2 text-slate-400 text-sm mb-4">Aperçu direct:</div>
+                <div className="mt-2 text-gray-500 text-sm mb-4">Aperçu direct:</div>
               ) : null}
               {siteIdentity.logo_url ? (
                 <ImagePreview
@@ -238,7 +238,7 @@ export const AppearanceSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Logo blanc / sombre (URL ou upload)
               </label>
               <div className="flex gap-4 mb-2">
@@ -251,10 +251,10 @@ export const AppearanceSettings: React.FC = () => {
                 />
               </div>
               {siteIdentity.logo_white_url ? (
-                <div className="mt-2 text-slate-400 text-sm mb-4">Aperçu direct:</div>
+                <div className="mt-2 text-gray-500 text-sm mb-4">Aperçu direct:</div>
               ) : null}
               {siteIdentity.logo_white_url ? (
-                <div className="bg-slate-800 p-2 rounded inline-block">
+                <div className="bg-gray-100 p-2 rounded inline-block">
                   <ImagePreview
                     src={siteIdentity.logo_white_url}
                     onRemove={() => setSiteIdentity(prev => ({ ...prev, logo_white_url: '' }))}
@@ -272,14 +272,14 @@ export const AppearanceSettings: React.FC = () => {
 
         {/* Navigation Config */}
         <Card>
-          <div className="p-6 border-b border-[#1E293B]">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Navigation className="w-5 h-5" />
               Navigation Principale (JSON)
             </h2>
           </div>
           <div className="p-6">
-            <label className="block text-sm font-medium text-slate-200 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Éléments du Menu (Tableau JSON)
             </label>
             <Textarea
@@ -289,7 +289,7 @@ export const AppearanceSettings: React.FC = () => {
               onChange={handleNavChange}
               placeholder={'[\n  {\n    "label": "Accueil",\n    "href": "/"\n  }\n]'}
             />
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-gray-500 mt-2">
               Format attendu : Un tableau d'objets avec propriétés (ex: label, href, subItems). Le code s'assurera qu'il s'agit bien d'un JSON valide.
             </p>
           </div>
@@ -297,15 +297,15 @@ export const AppearanceSettings: React.FC = () => {
 
         {/* Footer Config */}
         <Card>
-          <div className="p-6 border-b border-[#1E293B]">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <LinkIcon className="w-5 h-5" />
               Pied de page (Liens JSON)
             </h2>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Liens "Nos Services" (Tableau JSON)
               </label>
               <Textarea
@@ -319,7 +319,7 @@ export const AppearanceSettings: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Liens "Notre Entreprise" (Tableau JSON)
               </label>
               <Textarea
@@ -336,15 +336,15 @@ export const AppearanceSettings: React.FC = () => {
 
         {/* Solutions Config */}
         <Card>
-          <div className="p-6 border-b border-[#1E293B]">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Layout className="w-5 h-5" />
               Données des Solutions (JSON)
             </h2>
           </div>
           <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Catégories de Solutions (Tableau JSON)
               </label>
               <Textarea
@@ -355,13 +355,13 @@ export const AppearanceSettings: React.FC = () => {
                 onChange={handleSolutionsChange}
                 placeholder={'[\n  {\n    "slug": "evenementiel",\n    "label": "Événementiel",\n    "items": [...]\n  }\n]'}
               />
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 Définition de l'attribut <b>solutionCategories</b>. Laisser vide pour utiliser les données codées en dur (fallback).
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Données Métiers (Tableau JSON)
               </label>
               <Textarea
@@ -372,7 +372,7 @@ export const AppearanceSettings: React.FC = () => {
                 onChange={handleSolutionsChange}
                 placeholder={'[\n  {\n    "slug": "evenementiel",\n    "label": "Événementiel",\n    "items": [...]\n  }\n]'}
               />
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-gray-500 mt-2">
                 Définition de l'attribut <b>metiersData</b>. Laisser vide pour utiliser les données codées en dur (fallback).
               </p>
             </div>

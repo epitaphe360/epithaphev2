@@ -94,15 +94,15 @@ export function Table<T extends Record<string, any>>({
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead className={stickyHeader ? 'sticky top-0 z-10' : ''}>
-          <tr className="bg-[#0D0F1E] border-b border-[#1E293B]">
+          <tr className="bg-gray-50 border-b border-gray-200">
             {columns.map((column) => (
               <th
                 key={String(column.key)}
                 className={`
-                  px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider
+                  text-xs font-semibold text-gray-500 uppercase tracking-wider
                   ${column.align === 'center' ? 'text-center' : ''}
                   ${column.align === 'right' ? 'text-right' : 'text-left'}
-                  ${column.sortable ? 'cursor-pointer hover:bg-[#1E293B]' : ''}
+                  ${column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''}
                 `}
                 style={{ width: column.width }}
                 onClick={() => handleSort(column)}
@@ -122,13 +122,13 @@ export function Table<T extends Record<string, any>>({
             {actions && <th className="px-4 py-3 w-12"></th>}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#1E293B]">
+        <tbody className="divide-y divide-gray-100">
           {data.map((item, index) => (
             <tr
               key={getRowKey(item, index)}
               className={`
-                ${onRowClick ? 'cursor-pointer hover:bg-[#0D0F1E]' : ''}
-                ${striped && index % 2 === 1 ? 'bg-[#0A0C19]' : 'bg-transparent'}
+                ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
+                ${striped && index % 2 === 1 ? 'bg-gray-50/50' : 'bg-transparent'}
               `}
               onClick={() => onRowClick?.(item)}
             >
@@ -136,7 +136,7 @@ export function Table<T extends Record<string, any>>({
                 <td
                   key={String(column.key)}
                   className={`
-                    px-4 py-4 text-sm text-slate-200
+                    px-4 py-4 text-sm text-gray-700
                     ${column.align === 'center' ? 'text-center' : ''}
                     ${column.align === 'right' ? 'text-right' : ''}
                   `}
@@ -147,7 +147,7 @@ export function Table<T extends Record<string, any>>({
                 </td>
               ))}
               {actions && (
-                <td className="px-4 py-4 text-sm text-slate-200 text-right">
+                <td className="px-4 py-4 text-sm text-gray-700 text-right">
                   {typeof actions === 'function' ? actions(item) : (
                     <div className="flex justify-end gap-2">
                       {actions.filter(a => !a.condition || a.condition(item)).map((action, i) => {

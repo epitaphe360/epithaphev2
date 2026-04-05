@@ -46,9 +46,9 @@ export function NewsletterList() {
       label: 'Email',
       render: (s) => (
         <div>
-          <p className="text-white">{s.email}</p>
+          <p className="text-gray-900">{s.email}</p>
           {(s.firstName || s.lastName) && (
-            <p className="text-xs text-slate-500">{[s.firstName, s.lastName].filter(Boolean).join(' ')}</p>
+            <p className="text-xs text-gray-500">{[s.firstName, s.lastName].filter(Boolean).join(' ')}</p>
           )}
         </div>
       ),
@@ -57,7 +57,7 @@ export function NewsletterList() {
       key: 'source',
       label: 'Source',
       width: '130px',
-      render: (s) => <span className="text-slate-400 text-sm">{s.source ?? '—'}</span>,
+      render: (s) => <span className="text-gray-500 text-sm">{s.source ?? '—'}</span>,
     },
     {
       key: 'status',
@@ -71,7 +71,7 @@ export function NewsletterList() {
       key: 'createdAt',
       label: 'Inscrit le',
       width: '130px',
-      render: (s) => <span className="text-slate-400 text-xs">{new Date(s.createdAt).toLocaleDateString('fr-FR')}</span>,
+      render: (s) => <span className="text-gray-500 text-xs">{new Date(s.createdAt).toLocaleDateString('fr-FR')}</span>,
     },
   ];
 
@@ -80,7 +80,7 @@ export function NewsletterList() {
       label: 'Toggle',
       icon: (item: Subscriber) => item.status === 'active'
         ? <ToggleRight className="w-4 h-4 text-green-400" />
-        : <ToggleLeft className="w-4 h-4 text-slate-400" />,
+        : <ToggleLeft className="w-4 h-4 text-gray-500" />,
       onClick: toggleStatus,
     },
     { label: 'Supprimer', icon: <Trash2 className="w-4 h-4" />, onClick: handleDelete, variant: 'danger' },
@@ -89,7 +89,7 @@ export function NewsletterList() {
   const statusFilter = (
     <select
       onChange={(e) => setFilter('status', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#EC4899]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#EC4899]"
     >
       <option value="">Tous les statuts</option>
       <option value="active">Actifs</option>

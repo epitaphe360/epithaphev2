@@ -61,15 +61,15 @@ export function ListPage<T extends { id: string }>({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">{title}</h1>
-          {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}
+          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+          {subtitle && <p className="text-gray-500 text-sm mt-1">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-3">
           {onRefresh && (
             <button
               onClick={onRefresh}
               disabled={loading}
-              className="p-2 rounded-xl bg-[#1E293B] border border-[#334155] text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-xl bg-gray-100 border border-gray-300 text-gray-500 hover:text-gray-700 transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -87,13 +87,13 @@ export function ListPage<T extends { id: string }>({
       <div className="flex flex-col sm:flex-row gap-3">
         {onSearch && (
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
             <input
               type="text"
               placeholder="Rechercher..."
               value={searchValue}
               onChange={handleSearch}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
             />
           </div>
         )}
@@ -108,27 +108,27 @@ export function ListPage<T extends { id: string }>({
       )}
 
       {/* Stats bar */}
-      <div className="text-sm text-slate-400">
+      <div className="text-sm text-gray-500">
         {loading ? 'Chargement...' : `${total} élément${total !== 1 ? 's' : ''} au total`}
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl overflow-hidden border border-[#1E293B] bg-[#0B1121]">
+      <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#1E293B]">
+              <tr className="border-b border-gray-200">
                 {columns.map((col) => (
                   <th
                     key={col.key}
                     style={{ width: col.width }}
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
                   >
                     {col.label}
                   </th>
                 ))}
                 {actions.length > 0 && (
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider w-32">
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">
                     Actions
                   </th>
                 )}
@@ -137,15 +137,15 @@ export function ListPage<T extends { id: string }>({
             <tbody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-[#1E293B]/50">
+                  <tr key={i} className="border-b border-gray-200/50">
                     {columns.map((col) => (
                       <td key={col.key} className="px-4 py-4">
-                        <div className="h-4 bg-[#1E293B] rounded animate-pulse" />
+                        <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
                     ))}
                     {actions.length > 0 && (
                       <td className="px-4 py-4">
-                        <div className="h-4 bg-[#1E293B] rounded animate-pulse w-20 ml-auto" />
+                        <div className="h-4 bg-gray-100 rounded animate-pulse w-20 ml-auto" />
                       </td>
                     )}
                   </tr>
@@ -160,10 +160,10 @@ export function ListPage<T extends { id: string }>({
                 items.map((item) => (
                   <tr
                     key={item.id}
-                    className="border-b border-[#1E293B]/50 hover:bg-[#1E293B]/30 transition-colors"
+                    className="border-b border-gray-200/50 hover:bg-gray-100/30 transition-colors"
                   >
                     {columns.map((col) => (
-                      <td key={col.key} className="px-4 py-3.5 text-sm text-slate-300">
+                      <td key={col.key} className="px-4 py-3.5 text-sm text-gray-600">
                         {col.render ? col.render(item) : (item as any)[col.key] ?? '—'}
                       </td>
                     ))}
@@ -180,7 +180,7 @@ export function ListPage<T extends { id: string }>({
                                 className={`p-1.5 rounded-lg transition-colors ${
                                   action.variant === 'danger'
                                     ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300'
-                                    : 'text-slate-400 hover:bg-[#334155] hover:text-white'
+                                    : 'text-gray-500 hover:bg-[#CBD5E1] hover:text-gray-700'
                                 }`}
                               >
                                 {typeof action.icon === 'function' ? (action.icon as (item: T) => React.ReactNode)(item) : action.icon}
@@ -200,14 +200,14 @@ export function ListPage<T extends { id: string }>({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-gray-500">
             Page {page + 1} sur {totalPages}
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => onPageChange(page - 1)}
               disabled={page === 0}
-              className="p-2 rounded-lg bg-[#1E293B] border border-[#334155] text-slate-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -220,7 +220,7 @@ export function ListPage<T extends { id: string }>({
                   className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
                     p === page
                       ? 'bg-[#C8A96E] text-black'
-                      : 'bg-[#1E293B] border border-[#334155] text-slate-400 hover:text-white'
+                      : 'bg-gray-100 border border-gray-300 text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   {p + 1}
@@ -230,7 +230,7 @@ export function ListPage<T extends { id: string }>({
             <button
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages - 1}
-              className="p-2 rounded-lg bg-[#1E293B] border border-[#334155] text-slate-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg bg-gray-100 border border-gray-300 text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

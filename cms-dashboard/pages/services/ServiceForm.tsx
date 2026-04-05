@@ -93,15 +93,15 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
 
   const field = (label: string, key: keyof Service, type = 'text', required = false) => (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-1.5">
+      <label className="block text-sm font-medium text-gray-600 mb-1.5">
         {label} {required && <span className="text-[#C8A96E]">*</span>}
       </label>
       <input
         type={type}
         value={(form[key] as string) ?? ''}
         onChange={(e) => handleChange(key, e.target.value)}
-        className={`w-full px-3 py-2.5 bg-[#0B1121] border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm ${
-          errors[key] ? 'border-red-500' : 'border-[#334155]'
+        className={`w-full px-3 py-2.5 bg-white border rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm ${
+          errors[key] ? 'border-red-500' : 'border-gray-300'
         }`}
       />
       {errors[key] && <p className="text-red-400 text-xs mt-1">{errors[key]}</p>}
@@ -110,13 +110,13 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0B1121] border border-[#1E293B] rounded-2xl shadow-2xl">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#1E293B]">
-          <h2 className="text-lg font-bold text-white">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">
             {form.id ? 'Modifier le service' : 'Nouveau service'}
           </h2>
-          <button onClick={() => onClose(false)} className="p-2 text-slate-400 hover:text-white transition-colors">
+          <button onClick={() => onClose(false)} className="p-2 text-gray-500 hover:text-gray-700 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -125,13 +125,13 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
         <div className="p-6 space-y-5">
           {/* Hub selector */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">
               Hub <span className="text-[#C8A96E]">*</span>
             </label>
             <select
               value={form.hub}
               onChange={(e) => handleChange('hub', e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
             >
               {HUB_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
@@ -142,24 +142,24 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
 
           {/* Accroche */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Accroche stratégique</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Accroche stratégique</label>
             <textarea
               value={form.accroche ?? ''}
               onChange={(e) => handleChange('accroche', e.target.value)}
               rows={2}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm resize-none"
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm resize-none"
               placeholder="Message clé du service (max. 180 caractères)"
             />
           </div>
 
           {/* Contenu */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Contenu détaillé</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Contenu détaillé</label>
             <textarea
               value={form.body ?? ''}
               onChange={(e) => handleChange('body', e.target.value)}
               rows={6}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm resize-none font-mono"
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm resize-none font-mono"
               placeholder="Contenu HTML/Markdown..."
             />
           </div>
@@ -169,11 +169,11 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
           {/* Status + Featured + Order */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Statut</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">Statut</label>
               <select
                 value={form.status}
                 onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
               >
                 <option value="DRAFT">Brouillon</option>
                 <option value="PUBLISHED">Publié</option>
@@ -188,32 +188,32 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
                   onChange={(e) => handleChange('featured', e.target.checked)}
                   className="w-4 h-4 accent-[#C8A96E]"
                 />
-                <span className="text-sm text-slate-300">Mis en avant</span>
+                <span className="text-sm text-gray-600">Mis en avant</span>
               </label>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Ordre</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1.5">Ordre</label>
               <input
                 type="number"
                 value={form.order}
                 onChange={(e) => handleChange('order', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
+                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm"
               />
             </div>
           </div>
 
           {/* SEO */}
-          <div className="pt-2 border-t border-[#1E293B]">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">SEO</p>
+          <div className="pt-2 border-t border-gray-200">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">SEO</p>
             <div className="space-y-4">
               {field('Meta Title', 'metaTitle')}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Meta Description</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1.5">Meta Description</label>
                 <textarea
                   value={form.metaDescription ?? ''}
                   onChange={(e) => handleChange('metaDescription', e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm resize-none"
+                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:border-[#C8A96E] transition-colors text-sm resize-none"
                   placeholder="Description pour les moteurs de recherche (max. 160 car.)"
                 />
               </div>
@@ -222,10 +222,10 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-[#1E293B]">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={() => onClose(false)}
-            className="px-5 py-2.5 rounded-xl border border-[#334155] text-slate-300 hover:text-white hover:border-slate-400 transition-colors text-sm"
+            className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-700 hover:border-slate-400 transition-colors text-sm"
           >
             Annuler
           </button>

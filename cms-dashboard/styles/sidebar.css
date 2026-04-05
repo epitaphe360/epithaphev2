@@ -27,10 +27,11 @@
   transform: translateX(2px);
 }
 
-/* Gradient background pour la sidebar — OLED dark */
+/* Gradient background pour la sidebar — Light clean */
 .sidebar-gradient {
-  background: linear-gradient(180deg, #020617 0%, #0B1121 50%, #020617 100%);
+  background: #FFFFFF;
   position: relative;
+  border-right: 1px solid #E2E8F0;
 }
 
 .sidebar-gradient::before {
@@ -40,7 +41,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+  background: none;
   pointer-events: none;
 }
 

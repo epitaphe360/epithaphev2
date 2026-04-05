@@ -22,8 +22,8 @@ export const PageManagement: React.FC = () => {
     try {
       const response = await fetch('/api/admin/pages');
       if (response.ok) {
-        const data = await response.json();
-        setPages(data);
+        const json = await response.json();
+        setPages(Array.isArray(json) ? json : json.data ?? []);
       }
     } catch (error) {
       console.error('Erreur chargement pages:', error);

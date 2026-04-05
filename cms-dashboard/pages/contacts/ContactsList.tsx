@@ -61,38 +61,38 @@ function ContactModal({ contact, onClose }: { contact: Contact; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-[#0B1121] border border-[#1E293B] rounded-2xl shadow-2xl max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-2xl bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#1E293B]">
-          <h2 className="text-lg font-bold text-white">Message de {contact.firstName} {contact.lastName}</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-white" /></button>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">Message de {[contact.firstName, contact.lastName].filter(Boolean).join(' ') || 'Contact'}</h2>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-500 hover:text-gray-700" /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {/* Infos contact */}
-          <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-[#020617] border border-[#1E293B] text-sm">
-            <div><p className="text-xs text-slate-500">Email</p><p className="text-white">{contact.email}</p></div>
-            <div><p className="text-xs text-slate-500">Téléphone</p><p className="text-white">{contact.phone ?? '—'}</p></div>
-            <div><p className="text-xs text-slate-500">Entreprise</p><p className="text-white">{contact.company ?? '—'}</p></div>
-            <div><p className="text-xs text-slate-500">Sujet</p><p className="text-white">{contact.subject ?? '—'}</p></div>
+          <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm">
+            <div><p className="text-xs text-gray-500">Email</p><p className="text-gray-900">{contact.email}</p></div>
+            <div><p className="text-xs text-gray-500">Téléphone</p><p className="text-gray-900">{contact.phone ?? '—'}</p></div>
+            <div><p className="text-xs text-gray-500">Entreprise</p><p className="text-gray-900">{contact.company ?? '—'}</p></div>
+            <div><p className="text-xs text-gray-500">Sujet</p><p className="text-gray-900">{contact.subject ?? '—'}</p></div>
             <div className="col-span-2">
-              <p className="text-xs text-slate-500">Reçu le</p>
-              <p className="text-white">{new Date(contact.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-xs text-gray-500">Reçu le</p>
+              <p className="text-gray-900">{new Date(contact.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
 
           {/* Message original */}
           {contact.message && (
-            <div className="p-4 rounded-xl bg-[#020617] border border-[#1E293B]">
-              <p className="text-xs text-slate-500 mb-2">Message reçu</p>
-              <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{contact.message}</p>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+              <p className="text-xs text-gray-500 mb-2">Message reçu</p>
+              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{contact.message}</p>
             </div>
           )}
 
           {/* Zone de réponse */}
-          <div className="rounded-xl border border-[#334155] overflow-hidden">
-            <div className="bg-[#0f172a] px-4 py-2 border-b border-[#334155] flex items-center justify-between">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Répondre à {contact.email}</p>
+          <div className="rounded-xl border border-gray-300 overflow-hidden">
+            <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Répondre à {contact.email}</p>
               {replySent && (
                 <span className="flex items-center gap-1 text-xs text-emerald-400">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Email envoyé
@@ -104,14 +104,14 @@ function ContactModal({ contact, onClose }: { contact: Contact; onClose: () => v
               onChange={(e) => setReplyBody(e.target.value)}
               placeholder="Rédigez votre réponse ici…"
               rows={5}
-              className="w-full px-4 py-3 bg-[#020617] text-slate-200 text-sm resize-none focus:outline-none placeholder-slate-600"
+              className="w-full px-4 py-3 bg-gray-50 text-gray-700 text-sm resize-none focus:outline-none placeholder-slate-600"
             />
             {replyError && <p className="px-4 pb-2 text-xs text-rose-400">{replyError}</p>}
             <div className="flex justify-end px-4 pb-3">
               <button
                 onClick={sendReply}
                 disabled={replySending || !replyBody.trim()}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E63946] text-white font-semibold text-sm hover:bg-[#c8313d] transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E63946] text-gray-900 font-semibold text-sm hover:bg-[#c8313d] transition-colors disabled:opacity-50"
               >
                 {replySending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {replySending ? 'Envoi…' : 'Envoyer'}
@@ -121,18 +121,18 @@ function ContactModal({ contact, onClose }: { contact: Contact; onClose: () => v
 
           {/* Statut */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Statut</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1.5">Statut</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#0B1121] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#E63946]">
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#E63946]">
               {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
             </select>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-[#1E293B]">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-[#334155] text-slate-300 hover:text-white text-sm transition-colors">Fermer</button>
-          <button onClick={save} disabled={saving} className="px-5 py-2.5 rounded-xl bg-[#1E293B] text-white font-semibold hover:bg-[#334155] text-sm transition-colors disabled:opacity-60">
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-700 text-sm transition-colors">Fermer</button>
+          <button onClick={save} disabled={saving} className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-900 font-semibold hover:bg-gray-200 text-sm transition-colors disabled:opacity-60">
             {saving ? 'Sauvegarde...' : 'Enregistrer le statut'}
           </button>
         </div>
@@ -197,8 +197,8 @@ export function ContactsList() {
       label: 'Contact',
       render: (c) => (
         <div>
-          <p className="font-medium text-white">{[c.firstName, c.lastName].filter(Boolean).join(' ') || '—'}</p>
-          <p className="text-xs text-slate-500">{c.email}</p>
+          <p className="font-medium text-gray-900">{[c.firstName, c.lastName].filter(Boolean).join(' ') || '—'}</p>
+          <p className="text-xs text-gray-500">{c.email}</p>
         </div>
       ),
     },
@@ -206,12 +206,12 @@ export function ContactsList() {
       key: 'company',
       label: 'Entreprise',
       width: '160px',
-      render: (c) => <span className="text-slate-400">{c.company ?? '—'}</span>,
+      render: (c) => <span className="text-gray-500">{c.company ?? '—'}</span>,
     },
     {
       key: 'message',
       label: 'Message',
-      render: (c) => <span className="text-slate-400 text-sm">{(c.message ?? '').slice(0, 80)}{(c.message?.length ?? 0) > 80 ? '…' : ''}</span>,
+      render: (c) => <span className="text-gray-500 text-sm">{(c.message ?? '').slice(0, 80)}{(c.message?.length ?? 0) > 80 ? '…' : ''}</span>,
     },
     {
       key: 'status',
@@ -226,7 +226,7 @@ export function ContactsList() {
       key: 'createdAt',
       label: 'Reçu le',
       width: '120px',
-      render: (c) => <span className="text-slate-400 text-xs">{new Date(c.createdAt).toLocaleDateString('fr-FR')}</span>,
+      render: (c) => <span className="text-gray-500 text-xs">{new Date(c.createdAt).toLocaleDateString('fr-FR')}</span>,
     },
   ];
 
@@ -239,19 +239,19 @@ export function ContactsList() {
     <div className="flex items-center gap-3 flex-wrap">
       <select
         onChange={(e) => setFilter('status', e.target.value || undefined)}
-        className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none"
+        className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none"
       >
         <option value="">Tous les statuts</option>
         {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
       </select>
 
       {selected.size > 0 && (
-        <div className="flex items-center gap-2 bg-[#1E293B] border border-[#E63946]/30 rounded-xl px-3 py-1.5">
-          <span className="text-xs text-slate-400">{selected.size} sélectionné(s)</span>
+        <div className="flex items-center gap-2 bg-gray-100 border border-[#E63946]/30 rounded-xl px-3 py-1.5">
+          <span className="text-xs text-gray-500">{selected.size} sélectionné(s)</span>
           <button onClick={() => bulkStatus('read')} disabled={bulkLoading}
             className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Marquer Lu</button>
           <button onClick={() => bulkStatus('archived')} disabled={bulkLoading}
-            className="text-xs text-slate-400 hover:text-white transition-colors">Archiver</button>
+            className="text-xs text-gray-500 hover:text-gray-700 transition-colors">Archiver</button>
           <button onClick={bulkDelete} disabled={bulkLoading}
             className="text-xs text-rose-400 hover:text-rose-300 transition-colors">Supprimer</button>
         </div>
@@ -264,7 +264,7 @@ export function ContactsList() {
       {/* Select all header */}
       {items.length > 0 && (
         <div className="px-6 pt-4">
-          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" checked={selected.size === items.length && items.length > 0}
               onChange={toggleAll} className="w-4 h-4 rounded accent-[#E63946]" />
             Tout sélectionner

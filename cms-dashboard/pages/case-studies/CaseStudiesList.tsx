@@ -45,15 +45,15 @@ export function CaseStudiesList() {
       label: 'Titre',
       render: (c) => (
         <div>
-          <p className="font-medium text-white">{c.title}</p>
-          <p className="text-xs text-slate-500">{c.slug}</p>
+          <p className="font-medium text-gray-900">{c.title}</p>
+          <p className="text-xs text-gray-500">{c.slug}</p>
         </div>
       ),
     },
     {
       key: 'clientName',
       label: 'Client',
-      render: (c) => <span className="text-slate-300">{c.clientName ?? '—'}</span>,
+      render: (c) => <span className="text-gray-600">{c.clientName ?? '—'}</span>,
     },
     {
       key: 'status',
@@ -74,7 +74,7 @@ export function CaseStudiesList() {
       key: 'publishedAt',
       label: 'Publié le',
       width: '130px',
-      render: (c) => <span className="text-slate-400 text-xs">{c.publishedAt ? new Date(c.publishedAt).toLocaleDateString('fr-FR') : '—'}</span>,
+      render: (c) => <span className="text-gray-500 text-xs">{c.publishedAt ? new Date(c.publishedAt).toLocaleDateString('fr-FR') : '—'}</span>,
     },
   ];
 
@@ -86,7 +86,7 @@ export function CaseStudiesList() {
   const statusFilter = (
     <select
       onChange={(e) => setFilter('status', e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#C8A96E]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]"
     >
       <option value="">Tous les statuts</option>
       <option value="draft">Brouillon</option>

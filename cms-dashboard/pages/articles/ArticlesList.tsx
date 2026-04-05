@@ -44,8 +44,8 @@ export function ArticlesList() {
       label: "Article",
       render: (a) => (
         <div>
-          <p className="font-medium text-white">{a.title}</p>
-          <p className="text-xs text-slate-500">{a.slug}</p>
+          <p className="font-medium text-gray-900">{a.title}</p>
+          <p className="text-xs text-gray-500">{a.slug}</p>
         </div>
       ),
     },
@@ -59,7 +59,7 @@ export function ArticlesList() {
       key: "createdAt",
       label: "Créé le",
       width: "130px",
-      render: (a) => <span className="text-slate-400 text-xs">{new Date(a.createdAt).toLocaleDateString("fr-FR")}</span>,
+      render: (a) => <span className="text-gray-500 text-xs">{new Date(a.createdAt).toLocaleDateString("fr-FR")}</span>,
     },
   ];
 
@@ -71,7 +71,7 @@ export function ArticlesList() {
   const statusFilter = (
     <select
       onChange={(e) => setFilter("status", e.target.value || undefined)}
-      className="px-3 py-2.5 bg-[#1E293B] border border-[#334155] rounded-xl text-white text-sm focus:outline-none focus:border-[#EC4899]"
+      className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#EC4899]"
     >
       <option value="">Tous les statuts</option>
       <option value="draft">Brouillon</option>

@@ -119,8 +119,8 @@ export function ClientAccountsPage() {
             <FolderKanban className="w-6 h-6 text-[#E63946]" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Comptes Clients</h1>
-            <p className="text-slate-400 text-sm">{total} compte{total !== 1 ? 's' : ''} au total</p>
+            <h1 className="text-2xl font-bold text-gray-900">Comptes Clients</h1>
+            <p className="text-gray-500 text-sm">{total} compte{total !== 1 ? 's' : ''} au total</p>
           </div>
         </div>
         <Button onClick={openCreate} variant="primary">
@@ -170,26 +170,26 @@ export function ClientAccountsPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Nom *</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Nom *</label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Jean Dupont" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Email *</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Email *</label>
               <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="jean@exemple.com" disabled={!!editing} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Entreprise</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Entreprise</label>
               <Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Acme Corp" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Téléphone</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Téléphone</label>
               <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+33 6 00 00 00 00" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               {editing ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe *'}
             </label>
             <Input

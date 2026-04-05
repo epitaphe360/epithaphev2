@@ -10,7 +10,7 @@
 /// <reference path="./types.d.ts" />
 import type { Express, Request, Response } from "express";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 import {
   subscriptionPlans,
   clientSubscriptions,
@@ -363,7 +363,11 @@ export function registerPaymentRoutes(app: Express) {
       let query = db.select().from(devis).orderBy(desc(devis.createdAt)).$dynamic();
       if (status) query = query.where(eq(devis.status, status));
       const rows = await query.limit(Number(limit)).offset(Number(offset));
-      res.json({ data: rows, total: rows.length });
+      // Count total (with same filters)
+      let countQ = db.select({ count: sql`count(*)` }).from(devis).$dynamic();
+      if (status) countQ = countQ.where(eq(devis.status, status));
+      const [{ count }] = await countQ;
+      res.json({ data: rows, total: Number(count ?? 0) });
     } catch (error) {
       res.status(500).json({ error: "Erreur serveur" });
     }
@@ -556,7 +560,14 @@ export function registerPaymentRoutes(app: Express) {
       if (type) q = q.where(eq(payments.type, type));
       if (status) q = q.where(eq(payments.status, status));
       const rows = await q.limit(Number(limit)).offset(Number(offset));
-      res.json({ data: rows, total: rows.length });
+      // Count total (with same filters)
+      const countConditions: any[] = [];
+      if (type) countConditions.push(eq(payments.type, type));
+      if (status) countConditions.push(eq(payments.status, status));
+      let cq = db.select({ count: sql`count(*)` }).from(payments).$dynamic();
+      if (countConditions.length > 0) cq = cq.where(and(...countConditions));
+      const [{ count }] = await cq;
+      res.json({ data: rows, total: Number(count ?? 0) });
     } catch (error) {
       res.status(500).json({ error: "Erreur serveur" });
     }

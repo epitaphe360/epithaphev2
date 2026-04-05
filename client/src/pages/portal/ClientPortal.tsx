@@ -16,8 +16,8 @@ export default function ClientPortal() {
           fetch('/api/portal/reports'),
           fetch('/api/portal/invoices')
         ]);
-        const repData = await repRes.json();
-        const invData = await invRes.json();
+        const repData = repRes.ok ? await repRes.json() : [];
+        const invData = invRes.ok ? await invRes.json() : [];
         setReports(Array.isArray(repData) ? repData : []);
         setInvoices(Array.isArray(invData) ? invData : []);
       } catch(e) {

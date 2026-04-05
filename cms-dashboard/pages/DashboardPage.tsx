@@ -63,15 +63,15 @@ interface ChartPoint {
 
 const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#E63946', delay }: any) => (
   <div
-    className="group relative overflow-hidden rounded-3xl bg-[#0B1121] border border-[#1E293B] p-5 transition-all duration-500 hover:border-[#E63946]/30 hover:shadow-2xl hover:shadow-[#E63946]/10"
+    className="group relative overflow-hidden rounded-3xl bg-white border border-gray-200 p-5 transition-all duration-500 hover:border-[#E63946]/30 hover:shadow-2xl hover:shadow-[#E63946]/10"
     style={{ animation: `fadeInUp 0.6s ease-out ${delay}s backwards` }}
   >
     <div className="absolute top-0 right-0 p-5 opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-500">
-      <Icon className="w-20 h-20 text-white transform translate-x-4 -translate-y-4" />
+      <Icon className="w-20 h-20 text-gray-900 transform translate-x-4 -translate-y-4" />
     </div>
     <div className="relative z-10">
       <div className="flex items-center justify-between mb-3">
-        <div className="p-2 rounded-2xl bg-[#1E293B]/50 border border-[#334155]/40 text-[#E63946] group-hover:bg-[#E63946] group-hover:text-white transition-colors">
+        <div className="p-2 rounded-2xl bg-gray-100/50 border border-gray-300/40 text-[#E63946] group-hover:bg-[#E63946] group-hover:text-gray-700 transition-colors">
           <Icon className="w-[18px] h-[18px]" />
         </div>
         {trend !== undefined && (
@@ -85,11 +85,11 @@ const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#E63946',
           </div>
         )}
       </div>
-      <h3 className="text-slate-400 text-xs font-semibold tracking-[0.12em] uppercase mb-1">{title}</h3>
+      <h3 className="text-gray-500 text-xs font-semibold tracking-[0.12em] uppercase mb-1">{title}</h3>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl md:text-3xl font-bold text-white tracking-tight">{value}</span>
+        <span className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{value}</span>
       </div>
-      <p className="text-slate-500 text-xs mt-3 flex items-center gap-2">
+      <p className="text-gray-500 text-xs mt-3 flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full bg-[#E63946]/80"></span>
         {subtext}
       </p>
@@ -100,11 +100,11 @@ const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#E63946',
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#0f172a]/95 backdrop-blur-xl border border-gray-700/50 p-4 rounded-xl shadow-2xl">
+      <div className="bg-white/95 backdrop-blur-xl border border-gray-200 p-4 rounded-xl shadow-2xl">
         <p className="text-gray-400 text-xs mb-2 font-medium uppercase tracking-wider">{label}</p>
         <div className="space-y-1">
           {payload[0] && (
-            <p className="text-white text-sm font-bold flex items-center gap-2">
+            <p className="text-gray-900 text-sm font-bold flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#E63946]"></span>
               {payload[0].value} Articles
             </p>
@@ -174,7 +174,7 @@ export const DashboardPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020617]">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center">
           <div className="w-16 h-16 border-2 border-[#E63946]/20 border-t-[#E63946] rounded-full animate-spin" />
           <p className="mt-4 text-[#E63946]/50 text-xs font-bold uppercase tracking-widest animate-pulse">Chargement du tableau de bord</p>
@@ -189,7 +189,7 @@ export const DashboardPage: React.FC = () => {
     : 0;
 
   return (
-    <div className="min-h-full p-4 md:p-6 lg:p-8 text-slate-200 fade-in">
+    <div className="min-h-full p-4 md:p-6 lg:p-8 text-gray-700 fade-in">
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(20px); }
@@ -204,19 +204,19 @@ export const DashboardPage: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8 md:mb-10">
           <div>
             <h2 className="text-[#E63946] font-bold text-xs uppercase tracking-widest mb-2">Vue d'ensemble</h2>
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
               Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F08080] to-[#E63946]">Agence</span>
             </h1>
           </div>
-          <div className="flex items-center gap-2 bg-[#0B1121] p-1 rounded-2xl border border-[#1E293B]">
+          <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-gray-200">
             {['7J', '30J', '90J', '1A'].map((period) => (
               <button
                 key={period}
                 onClick={() => setSelectedPeriod(period)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
                   selectedPeriod === period
-                    ? 'bg-[#E63946] text-white shadow-lg shadow-[#E63946]/20'
-                    : 'text-slate-500 hover:text-white hover:bg-[#1E293B]'
+                    ? 'bg-[#E63946] text-gray-900 shadow-lg shadow-[#E63946]/20'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 {period}
@@ -237,17 +237,17 @@ export const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
 
           {/* Chart */}
-          <div className="xl:col-span-3 rounded-3xl bg-[#0B1121] border border-[#1E293B] p-5 md:p-6">
+          <div className="xl:col-span-3 rounded-3xl bg-white border border-gray-200 p-5 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-base md:text-lg font-bold text-white">Activité — 14 derniers jours</h3>
-                <p className="text-slate-500 text-sm mt-1">Articles créés et leads reçus</p>
+                <h3 className="text-base md:text-lg font-bold text-gray-900">Activité — 14 derniers jours</h3>
+                <p className="text-gray-500 text-sm mt-1">Articles créés et leads reçus</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className="flex items-center gap-2 text-xs font-medium text-slate-400">
+                <span className="flex items-center gap-2 text-xs font-medium text-gray-500">
                   <span className="w-2 h-2 rounded-full bg-[#E63946]"></span> Articles
                 </span>
-                <span className="flex items-center gap-2 text-xs font-medium text-slate-400">
+                <span className="flex items-center gap-2 text-xs font-medium text-gray-500">
                   <span className="w-2 h-2 rounded-full bg-purple-500"></span> Leads
                 </span>
               </div>
@@ -278,8 +278,8 @@ export const DashboardPage: React.FC = () => {
 
           {/* Content counts */}
           <div className="xl:col-span-1 space-y-4">
-            <div className="rounded-3xl bg-[#0B1121] border border-[#1E293B] p-5">
-              <h3 className="text-sm font-bold text-white mb-4">Inventaire Contenu</h3>
+            <div className="rounded-3xl bg-white border border-gray-200 p-5">
+              <h3 className="text-sm font-bold text-gray-900 mb-4">Inventaire Contenu</h3>
               <div className="space-y-3">
                 {[
                   { label: 'Services', value: s?.services ?? 0, icon: Layers },
@@ -289,17 +289,17 @@ export const DashboardPage: React.FC = () => {
                   { label: 'Pages', value: s?.pages ?? 0, icon: Globe },
                 ].map(({ label, value, icon: Icon }) => (
                   <div key={label} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-gray-500">
                       <Icon className="w-3.5 h-3.5 text-slate-600" />
                       {label}
                     </div>
-                    <span className="text-white font-bold">{value}</span>
+                    <span className="text-gray-900 font-bold">{value}</span>
                   </div>
                 ))}
               </div>
             </div>
             <Link href="/admin/articles/new">
-              <button className="w-full py-3.5 bg-[#E63946] hover:bg-[#c8313d] text-white rounded-2xl font-bold tracking-wide transition-all shadow-lg shadow-[#E63946]/20 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+              <button className="w-full py-3.5 bg-[#E63946] hover:bg-[#c8313d] text-gray-900 rounded-2xl font-bold tracking-wide transition-all shadow-lg shadow-[#E63946]/20 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
                 <Plus className="w-5 h-5" /> NOUVEL ARTICLE
               </button>
             </Link>
@@ -310,30 +310,30 @@ export const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 pb-8">
 
           {/* Recent leads */}
-          <div className="rounded-3xl bg-[#0B1121] border border-[#1E293B] overflow-hidden">
-            <div className="p-6 border-b border-[#1E293B] flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Derniers Leads</h3>
+          <div className="rounded-3xl bg-white border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Derniers Leads</h3>
               <Link href="/admin/leads">
-                <span className="text-xs text-slate-500 hover:text-[#E63946] transition-colors cursor-pointer">Voir tout →</span>
+                <span className="text-xs text-gray-500 hover:text-[#E63946] transition-colors cursor-pointer">Voir tout →</span>
               </Link>
             </div>
-            <div className="divide-y divide-[#1E293B]">
+            <div className="divide-y divide-[#E2E8F0]">
               {(s?.recentLeads ?? []).length === 0 ? (
-                <div className="p-6 text-center text-slate-500 text-sm">Aucun lead récent</div>
+                <div className="p-6 text-center text-gray-500 text-sm">Aucun lead récent</div>
               ) : (
                 (s?.recentLeads ?? []).slice(0, 5).map((lead: any, i: number) => (
-                  <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-[#1E293B]/40 transition">
+                  <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-gray-100/40 transition">
                     <div className="w-8 h-8 rounded-full bg-[#E63946]/20 flex items-center justify-center shrink-0">
                       <Users className="w-4 h-4 text-[#E63946]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-medium truncate">{lead.name ?? lead.email ?? 'Lead'}</p>
-                      <p className="text-xs text-slate-500 truncate">{lead.projectType ?? lead.email ?? ''}</p>
+                      <p className="text-sm text-gray-900 font-medium truncate">{lead.name ?? lead.email ?? 'Lead'}</p>
+                      <p className="text-xs text-gray-500 truncate">{lead.projectType ?? lead.email ?? ''}</p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       lead.status === 'NEW' ? 'bg-amber-500/10 text-amber-400' :
                       lead.status === 'WON' ? 'bg-emerald-500/10 text-emerald-400' :
-                      'bg-slate-700 text-slate-400'
+                      'bg-slate-700 text-gray-500'
                     }`}>{lead.status ?? 'NEW'}</span>
                   </div>
                 ))
@@ -342,31 +342,31 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Recent articles */}
-          <div className="rounded-3xl bg-[#0B1121] border border-[#1E293B] overflow-hidden">
-            <div className="p-6 border-b border-[#1E293B] flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Derniers Articles</h3>
+          <div className="rounded-3xl bg-white border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Derniers Articles</h3>
               <Link href="/admin/articles">
-                <span className="text-xs text-slate-500 hover:text-[#E63946] transition-colors cursor-pointer">Voir tout →</span>
+                <span className="text-xs text-gray-500 hover:text-[#E63946] transition-colors cursor-pointer">Voir tout →</span>
               </Link>
             </div>
-            <div className="divide-y divide-[#1E293B]">
+            <div className="divide-y divide-[#E2E8F0]">
               {(s?.recentArticles ?? []).length === 0 ? (
-                <div className="p-6 text-center text-slate-500 text-sm">Aucun article récent</div>
+                <div className="p-6 text-center text-gray-500 text-sm">Aucun article récent</div>
               ) : (
                 (s?.recentArticles ?? []).slice(0, 5).map((article: any, i: number) => (
-                  <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-[#1E293B]/40 transition">
+                  <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-gray-100/40 transition">
                     <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
                       <Newspaper className="w-4 h-4 text-blue-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-medium truncate">{article.title}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm text-gray-900 font-medium truncate">{article.title}</p>
+                      <p className="text-xs text-gray-500">
                         {article.createdAt ? format(parseISO(article.createdAt), 'dd MMM yyyy', { locale: fr }) : ''}
                       </p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       article.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400' :
-                      'bg-slate-700 text-slate-400'
+                      'bg-slate-700 text-gray-500'
                     }`}>{article.status === 'PUBLISHED' ? 'Publié' : 'Brouillon'}</span>
                   </div>
                 ))

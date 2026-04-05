@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Loader2, Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { post } from '../lib/api';
+import { getApi } from '../lib/api';
 
 export const ResetPasswordPage: React.FC = () => {
   const [, setLocation] = useLocation();
@@ -27,7 +27,7 @@ export const ResetPasswordPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      await post('/api/admin/reset-password', { token, password });
+      await getApi().post('/admin/reset-password', { token, password });
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Erreur serveur');

@@ -2,7 +2,6 @@
 // Admin — Gestion des comptes clients (Espace Client)
 // ========================================
 import React, { useState } from 'react';
-import { useApi } from '../../hooks/useApi';
 import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { useToast } from '../../components/Toast';
 import { Button } from '../../components/Button';
@@ -10,7 +9,7 @@ import { Input } from '../../components/Input';
 import { Modal } from '../../components/Modal';
 import { Badge } from '../../components/Badge';
 import { Table } from '../../components/Table';
-import { post, put, del } from '../../lib/api';
+import { getApi } from '../../lib/api';
 import {
   Users, Plus, Pencil, Trash2, FolderKanban, CheckCircle, XCircle,
 } from 'lucide-react';
@@ -29,7 +28,7 @@ interface ClientAccount {
 const EMPTY_FORM = { email: '', name: '', company: '', phone: '', password: '' };
 
 export function ClientAccountsPage() {
-  const { addToast } = useToast();
+  const toast = useToast();
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<ClientAccount | null>(null);
@@ -37,10 +36,13 @@ export function ClientAccountsPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
 
-  const { data, total, loading, refresh } = usePaginatedList<ClientAccount>(
-    '/api/admin/client-accounts',
-    { search }
-  );
+  const { items: data, total, loading, refetch, setSearch: setListSearch } =
+    usePaginatedList<ClientAccount>({ endpoint: '/admin/client-accounts', limit: 20 });
+
+  function handleSearch(value: string) {
+    setSearch(value);
+    setListSearch(value);
+  }
 
   function openCreate() {
     setEditing(null);
@@ -56,26 +58,26 @@ export function ClientAccountsPage() {
 
   async function handleSave() {
     if (!form.email || !form.name) {
-      addToast('Email et nom sont requis', 'error');
+      toast.error('Email et nom sont requis');
       return;
     }
     if (!editing && !form.password) {
-      addToast('Mot de passe requis pour un nouveau compte', 'error');
+      toast.error('Mot de passe requis pour un nouveau compte');
       return;
     }
     setSaving(true);
     try {
       if (editing) {
-        await put(`/api/admin/client-accounts/${editing.id}`, form);
-        addToast('Compte mis à jour', 'success');
+        await getApi().put(`/admin/client-accounts/${editing.id}`, form);
+        toast.success('Compte mis à jour');
       } else {
-        await post('/api/admin/client-accounts', form);
-        addToast('Compte créé', 'success');
+        await getApi().post('/admin/client-accounts', form);
+        toast.success('Compte créé');
       }
       setShowModal(false);
-      refresh();
+      refetch();
     } catch (e: any) {
-      addToast(e.message || 'Erreur', 'error');
+      toast.error(e.message || 'Erreur');
     } finally {
       setSaving(false);
     }
@@ -85,29 +87,29 @@ export function ClientAccountsPage() {
     if (!confirm('Supprimer ce compte client ?')) return;
     setDeleting(id);
     try {
-      await del(`/api/admin/client-accounts/${id}`);
-      addToast('Compte supprimé', 'success');
-      refresh();
+      await getApi().delete(`/admin/client-accounts/${id}`);
+      toast.success('Compte supprimé');
+      refetch();
     } catch {
-      addToast('Erreur suppression', 'error');
+      toast.error('Erreur suppression');
     } finally {
       setDeleting(null);
     }
   }
 
   const columns = [
-    { key: 'name', label: 'Nom' },
-    { key: 'email', label: 'Email' },
-    { key: 'company', label: 'Entreprise', render: (v: string | null) => v || '—' },
-    { key: 'isActive', label: 'Statut', render: (v: boolean) =>
-      v
+    { key: 'name', header: 'Nom' },
+    { key: 'email', header: 'Email' },
+    { key: 'company', header: 'Entreprise', render: (row: ClientAccount) => row.company || '—' },
+    { key: 'isActive', header: 'Statut', render: (row: ClientAccount) =>
+      row.isActive
         ? <Badge variant="success"><CheckCircle className="w-3 h-3 mr-1 inline" />Actif</Badge>
         : <Badge variant="danger"><XCircle className="w-3 h-3 mr-1 inline" />Inactif</Badge>
     },
-    { key: 'lastLoginAt', label: 'Dernière connexion', render: (v: string | null) =>
-      v ? new Date(v).toLocaleDateString('fr-FR') : 'Jamais'
+    { key: 'lastLoginAt', header: 'Dernière connexion', render: (row: ClientAccount) =>
+      row.lastLoginAt ? new Date(row.lastLoginAt).toLocaleDateString('fr-FR') : 'Jamais'
     },
-    { key: 'createdAt', label: 'Créé le', render: (v: string) => new Date(v).toLocaleDateString('fr-FR') },
+    { key: 'createdAt', header: 'Créé le', render: (row: ClientAccount) => new Date(row.createdAt).toLocaleDateString('fr-FR') },
   ];
 
   return (
@@ -132,7 +134,7 @@ export function ClientAccountsPage() {
       <Input
         placeholder="Rechercher par nom, email ou entreprise..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
       />
 
       {/* Tableau */}
@@ -155,7 +157,7 @@ export function ClientAccountsPage() {
 
       {/* Modal Créer / Modifier */}
       <Modal
-        open={showModal}
+        isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={editing ? 'Modifier le compte client' : 'Nouveau compte client'}
         footer={

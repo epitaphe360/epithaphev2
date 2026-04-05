@@ -24,7 +24,7 @@ export const MenuManagement: React.FC = () => {
 
   const loadNavigations = async () => {
     try {
-      const data = await get('/api/admin/navigations');
+      const data = await get('/admin/navigations');
       setNavigations(data);
     } catch (error) {
       console.error('Erreur chargement navigations:', error);
@@ -34,9 +34,9 @@ export const MenuManagement: React.FC = () => {
   const saveNavigation = async (navigation: NavigationStructure) => {
     try {
       if (navigation.id) {
-        await put(`/api/admin/navigations/${navigation.id}`, navigation);
+        await put(`/admin/navigations/${navigation.id}`, navigation);
       } else {
-        await post('/api/admin/navigations', navigation);
+        await post('/admin/navigations', navigation);
       }
       loadNavigations();
     } catch (error) {

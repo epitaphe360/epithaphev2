@@ -24,8 +24,8 @@ export const BlogManagement: React.FC = () => {
 
   const loadPosts = async () => {
     try {
-      const data = await get(`/api/admin/posts?status=${filter}`);
-      setPosts(data);
+      const data = await get('/admin/articles', { status: filter !== 'all' ? filter : undefined });
+      setPosts(Array.isArray(data) ? data : data?.data ?? []);
     } catch (error) {
       console.error('Erreur chargement articles:', error);
     }
@@ -58,9 +58,9 @@ export const BlogManagement: React.FC = () => {
   const savePost = async (postData: BlogPost) => {
     try {
       if (postData.id) {
-        await put(`/api/admin/posts/${postData.id}`, postData);
+        await put(`/admin/articles/${postData.id}`, postData);
       } else {
-        await post('/api/admin/posts', postData);
+        await post('/admin/articles', postData);
       }
       loadPosts();
       setIsModalOpen(false);
@@ -73,7 +73,7 @@ export const BlogManagement: React.FC = () => {
     if (!confirm('Supprimer cet article ?')) return;
     
     try {
-      await deleteApi(`/api/admin/posts/${postId}`);
+      await deleteApi(`/admin/articles/${postId}`);
       loadPosts();
     } catch (error) {
       console.error('Erreur suppression article:', error);
@@ -83,7 +83,7 @@ export const BlogManagement: React.FC = () => {
   const toggleStatus = async (postId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     try {
-      await put(`/api/admin/posts/${postId}/status`, { status: newStatus });
+      await put(`/admin/articles/${postId}`, { status: newStatus });
       loadPosts();
     } catch (error) {
       console.error('Erreur changement statut:', error);

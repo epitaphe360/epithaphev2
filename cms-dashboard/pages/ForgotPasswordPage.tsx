@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Loader2, Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { post } from '../lib/api';
+import { getApi } from '../lib/api';
 
 export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ export const ForgotPasswordPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      await post('/api/admin/forgot-password', { email });
+      await getApi().post('/admin/forgot-password', { email });
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Erreur serveur');

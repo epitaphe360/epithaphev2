@@ -51,6 +51,10 @@ const HomepageSettings      = lazy(() => import("../../../cms-dashboard/pages/ho
 const AppearanceSettings    = lazy(() => import("../../../cms-dashboard/pages/appearance/AppearanceSettings").then(m => ({ default: m.AppearanceSettings })));
 const BriefFormEditor       = lazy(() => import("../../../cms-dashboard/pages/forms/BriefFormEditor").then(m => ({ default: m.BriefFormEditor })));
 const ScoringQuestionsEditor = lazy(() => import("../../../cms-dashboard/pages/forms/ScoringQuestionsEditor").then(m => ({ default: m.ScoringQuestionsEditor })));
+const ClientAccountsPage    = lazy(() => import("../../../cms-dashboard/pages/client-accounts/ClientAccountsPage").then(m => ({ default: m.ClientAccountsPage })));
+const AuditLogsPage         = lazy(() => import("../../../cms-dashboard/pages/audit-logs/AuditLogsPage").then(m => ({ default: m.AuditLogsPage })));
+const ForgotPasswordPage    = lazy(() => import("../../../cms-dashboard/pages/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage     = lazy(() => import("../../../cms-dashboard/pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
 
 // ─── ProtectedRoute ───────────────────────────────────────────────────────────
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -86,6 +90,8 @@ export function AdminRoutes() {
   return (
     <>
       <Route path="/admin/login" component={NewLoginPage} />
+      <Route path="/admin/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/admin/reset-password" component={ResetPasswordPage} />
 
       {/* Dashboard */}
       <Route path="/admin">
@@ -263,6 +269,9 @@ export function AdminRoutes() {
       <Route path="/admin/clients">
         {() => <AdminPage><ClientsList /></AdminPage>}
       </Route>
+      <Route path="/admin/client-accounts">
+        {() => <AdminPage><ClientAccountsPage /></AdminPage>}
+      </Route>
 
       {/* Projets clients (alias sidebar) */}
       <Route path="/admin/client-projects">
@@ -280,6 +289,9 @@ export function AdminRoutes() {
       {/* Legacy routes */}
       <Route path="/admin/menus">
         {() => <AdminPage><MenuManagement /></AdminPage>}
+      </Route>
+      <Route path="/admin/audit-logs">
+        {() => <AdminPage><AuditLogsPage /></AdminPage>}
       </Route>
       <Route path="/admin/blog">
         {() => <AdminPage><BlogManagement /></AdminPage>}

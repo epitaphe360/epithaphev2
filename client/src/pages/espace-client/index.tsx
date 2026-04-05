@@ -233,13 +233,18 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
                 type="button"
                 onClick={async () => {
                   try {
+                    console.log("[dev] POST /api/dev/auto-login-client");
                     const res = await fetch("/api/dev/auto-login-client", { method: "POST" });
-                    if (!res.ok) throw new Error("Échec auto-login client");
-                    const json = await res.json();
+                    console.log("[dev] status:", res.status, res.statusText);
+                    const text = await res.text();
+                    console.log("[dev] body:", text);
+                    if (!res.ok) throw new Error(`HTTP ${res.status} — ${text}`);
+                    const json = JSON.parse(text);
                     localStorage.setItem(TOKEN_KEY, json.token);
                     onLogin(json.token, json.client);
-                  } catch (e) {
-                    alert("Auto-login client échoué. Vérifiez que le serveur dev tourne.");
+                  } catch (e: any) {
+                    console.error("[dev] auto-login-client ERREUR:", e);
+                    alert("Auto-login client échoué.\n\nErreur : " + e.message);
                   }
                 }}
                 className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
@@ -250,14 +255,19 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
                 type="button"
                 onClick={async () => {
                   try {
+                    console.log("[dev] POST /api/dev/auto-login-admin");
                     const res = await fetch("/api/dev/auto-login-admin", { method: "POST" });
-                    if (!res.ok) throw new Error("Échec auto-login admin");
-                    const json = await res.json();
+                    console.log("[dev] status:", res.status, res.statusText);
+                    const text = await res.text();
+                    console.log("[dev] body:", text);
+                    if (!res.ok) throw new Error(`HTTP ${res.status} — ${text}`);
+                    const json = JSON.parse(text);
                     const authData = { state: { user: json.user, token: json.token, isAuthenticated: true, isLoading: false }, version: 0 };
                     localStorage.setItem("cms-auth-storage", JSON.stringify(authData));
                     window.location.href = "/admin";
-                  } catch (e) {
-                    alert("Auto-login admin échoué. Vérifiez que le serveur dev tourne.");
+                  } catch (e: any) {
+                    console.error("[dev] auto-login-admin ERREUR:", e);
+                    alert("Auto-login admin échoué.\n\nErreur : " + e.message);
                   }
                 }}
                 className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"

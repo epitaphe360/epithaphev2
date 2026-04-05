@@ -150,7 +150,7 @@ export function registerDevRoutes(app: Express) {
       });
     } catch (error: any) {
       console.error("Auto-login client error:", error);
-      res.status(500).json({ error: "Erreur interne du serveur" });
+      res.status(500).json({ error: error?.message ?? String(error), stack: error?.stack });
     }
   });
 
@@ -180,7 +180,7 @@ export function registerDevRoutes(app: Express) {
       res.json({ token, user: userData });
     } catch (error: any) {
       console.error("Auto-login admin error:", error);
-      res.status(500).json({ error: "Erreur interne du serveur" });
+      res.status(500).json({ error: error?.message ?? String(error), stack: error?.stack });
     }
   });
 }

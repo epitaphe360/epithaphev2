@@ -7,8 +7,8 @@ import { eq } from "drizzle-orm";
 import { generateToken } from "./lib/auth";
 
 export function registerDevRoutes(app: Express) {
-  // Guard: dev routes only in non-production
-  if (process.env.NODE_ENV === "production") return;
+  // Guard: routes dev désactivées sauf si ENABLE_DEV_ROUTES=true
+  if (!process.env.ENABLE_DEV_ROUTES) return;
 
   app.get("/api/dev/seed", async (req, res) => {
     try {

@@ -97,7 +97,7 @@ export const BlogManagement: React.FC = () => {
       render: (post: BlogPost) => (
         <div>
           <div className="font-medium">{post.title}</div>
-          <div className="text-sm text-gray-500 mt-1">{post.excerpt}</div>
+          <div className="text-sm text-slate-500 mt-1">{post.excerpt}</div>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="info">{post.category}</Badge>
             {post.tags.slice(0, 3).map(tag => (
@@ -271,14 +271,14 @@ const BlogPostForm: React.FC<{
       <div className="flex border-b">
         <button
           type="button"
-          className={`px-4 py-2 font-medium ${activeTab === 'content' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 font-medium ${activeTab === 'content' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-slate-500'}`}
           onClick={() => setActiveTab('content')}
         >
           Contenu
         </button>
         <button
           type="button"
-          className={`px-4 py-2 font-medium ${activeTab === 'seo' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 font-medium ${activeTab === 'seo' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-slate-500'}`}
           onClick={() => setActiveTab('seo')}
         >
           SEO
@@ -334,7 +334,7 @@ const BlogPostForm: React.FC<{
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Contenu
             </label>
             <RichTextEditor
@@ -346,13 +346,13 @@ const BlogPostForm: React.FC<{
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Statut
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                className="w-full border border-[#334155] rounded-lg px-3 py-2"
               >
                 <option value="draft">Brouillon</option>
                 <option value="published">Publié</option>

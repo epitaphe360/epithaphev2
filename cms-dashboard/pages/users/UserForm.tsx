@@ -63,15 +63,15 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
 
   return (
     <Modal isOpen={true} onClose={onCancel}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-[#0B1121] rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
+        <div className="px-6 py-4 border-b border-[#1E293B] flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-white">
             {user ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
           </h2>
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-slate-500 hover:text-slate-400 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -82,7 +82,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
           <div className="px-6 py-4 space-y-4">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Nom complet *
               </label>
               <Input
@@ -96,7 +96,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Email *
               </label>
               <Input
@@ -111,7 +111,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Mot de passe {!user && '*'}
               </label>
               <Input
@@ -123,7 +123,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
                 required={!user}
               />
               {user && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Laisser vide si vous ne voulez pas changer le mot de passe
                 </p>
               )}
@@ -131,7 +131,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Rôle *
               </label>
               <Select
@@ -149,7 +149,7 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
+          <div className="px-6 py-4 bg-[#020617] border-t border-[#1E293B] flex items-center justify-end gap-3">
             <Button type="button" variant="secondary" onClick={onCancel}>
               Annuler
             </Button>

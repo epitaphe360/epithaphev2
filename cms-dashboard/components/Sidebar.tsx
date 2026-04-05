@@ -52,7 +52,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
           className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 group ${
             currentIsActive 
               ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              : 'text-slate-400 hover:text-white hover:bg-[#0B1121]/5'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -83,7 +83,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
                 className={`block px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
                   location === child.to
                     ? 'text-blue-400 font-medium bg-blue-500/10'
-                    : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'
+                    : 'text-slate-500 hover:text-slate-200 hover:bg-[#0B1121]/5'
                 }`}
               >
                 {child.label}
@@ -101,7 +101,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, badge, children, isC
       className={`flex items-center justify-between p-3 rounded-xl transition-all duration-200 group mb-1 ${
         currentIsActive 
           ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
-          : 'text-slate-400 hover:text-white hover:bg-white/5'
+          : 'text-slate-400 hover:text-white hover:bg-[#0B1121]/5'
       }`}
       title={isCollapsed ? label : ''}
     >
@@ -252,7 +252,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`hidden md:flex p-1.5 hover:bg-white/5 rounded-lg transition-colors text-slate-500 hover:text-white absolute right-[-12px] top-8 bg-[#0B1121] border border-[#1E293B] z-50`}
+            className={`hidden md:flex p-1.5 hover:bg-[#0B1121]/5 rounded-lg transition-colors text-slate-500 hover:text-white absolute right-[-12px] top-8 bg-[#0B1121] border border-[#1E293B] z-50`}
             title={isCollapsed ? 'Étendre le menu' : 'Réduire le menu'}
           >
             {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}

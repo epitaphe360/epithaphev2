@@ -143,7 +143,7 @@ export const MenuManagement: React.FC = () => {
       render: (nav: NavigationStructure) => (
         <div>
           <div className="font-medium">{nav.name}</div>
-          <div className="text-sm text-gray-500">{nav.location}</div>
+          <div className="text-sm text-slate-500">{nav.location}</div>
         </div>
       )
     },
@@ -220,7 +220,7 @@ export const MenuManagement: React.FC = () => {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`p-4 border rounded-lg mb-2 bg-white ${
+                          className={`p-4 border rounded-lg mb-2 bg-[#0B1121] ${
                             snapshot.isDragging ? 'shadow-lg' : ''
                           }`}
                         >
@@ -230,11 +230,11 @@ export const MenuManagement: React.FC = () => {
                                 {...provided.dragHandleProps}
                                 className="cursor-grab"
                               >
-                                <GripVertical size={20} className="text-gray-400" />
+                                <GripVertical size={20} className="text-slate-500" />
                               </div>
                               <div>
                                 <div className="font-medium">{link.label}</div>
-                                <div className="text-sm text-gray-500">{link.href}</div>
+                                <div className="text-sm text-slate-500">{link.href}</div>
                                 {link.hasSubmenu && (
                                   <Badge variant="info" className="mt-1">
                                     {link.submenu?.length || 0} sous-menus

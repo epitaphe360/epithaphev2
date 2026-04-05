@@ -194,7 +194,7 @@ export default function GrapesJSEditor() {
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="bg-[#0B1121] border-b border-[#1E293B] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -206,7 +206,7 @@ export default function GrapesJSEditor() {
           </Button>
           <div>
             <h2 className="font-semibold">{pageData?.name || "Chargement..."}</h2>
-            <p className="text-sm text-gray-500">{pageData?.path}</p>
+            <p className="text-sm text-slate-500">{pageData?.path}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

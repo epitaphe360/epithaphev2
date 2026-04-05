@@ -91,18 +91,18 @@ export const EventsList: React.FC = () => {
       header: 'Événement',
       render: (event) => (
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex flex-col items-center justify-center">
-            <span className="text-xs text-primary-600 font-medium">
+          <div className="flex-shrink-0 w-12 h-12 bg-[#E63946]/10 rounded-lg flex flex-col items-center justify-center">
+            <span className="text-xs text-[#E63946] font-medium">
               {new Date(event.startDate).toLocaleDateString('fr-FR', { month: 'short' })}
             </span>
-            <span className="text-lg font-bold text-primary-700">
+            <span className="text-lg font-bold text-[#E63946]">
               {new Date(event.startDate).getDate()}
             </span>
           </div>
           <div>
-            <p className="font-medium text-gray-900">{event.title}</p>
+            <p className="font-medium text-white">{event.title}</p>
             {event.location && (
-              <p className="text-sm text-gray-500 flex items-center gap-1">
+              <p className="text-sm text-slate-500 flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {event.location}
               </p>
@@ -116,8 +116,8 @@ export const EventsList: React.FC = () => {
       header: 'Date & Heure',
       render: (event) => (
         <div>
-          <p className="text-sm text-gray-900">{formatDate(event.startDate)}</p>
-          <p className="text-sm text-gray-500 flex items-center gap-1">
+          <p className="text-sm text-white">{formatDate(event.startDate)}</p>
+          <p className="text-sm text-slate-500 flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {formatTime(event.startDate)}
           </p>
@@ -133,7 +133,7 @@ export const EventsList: React.FC = () => {
       key: 'capacity',
       header: 'Capacité',
       render: (event) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-slate-400">
           {event.registrations || 0} / {event.capacity || '∞'}
         </span>
       ),
@@ -149,7 +149,7 @@ export const EventsList: React.FC = () => {
               e.stopPropagation();
               window.open(`/evenements/${event.slug}`, '_blank');
             }}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-slate-500 hover:text-slate-300 hover:bg-[#1E293B] rounded-lg"
             title="Voir"
           >
             <Eye className="w-4 h-4" />
@@ -159,7 +159,7 @@ export const EventsList: React.FC = () => {
               e.stopPropagation();
               navigate(`/admin/events/${event.id}/edit`);
             }}
-            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
@@ -169,7 +169,7 @@ export const EventsList: React.FC = () => {
               e.stopPropagation();
               setDeleteId(event.id);
             }}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -184,8 +184,8 @@ export const EventsList: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Événements</h1>
-          <p className="text-gray-600">Gérez vos événements</p>
+          <h1 className="text-2xl font-bold text-white">Événements</h1>
+          <p className="text-slate-400">Gérez vos événements</p>
         </div>
         <Link to="/admin/events/new">
           <Button>

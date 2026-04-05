@@ -71,7 +71,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-slate-300 mb-2">
           {label}
         </label>
       )}
@@ -85,8 +85,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
           transition-all duration-200
           ${isDragging
-            ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+            ? 'border-[#E63946] bg-[#E63946]/5'
+            : 'border-[#334155] hover:border-[#C8A96E] hover:bg-[#1E293B]/50'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           ${error ? 'border-red-500' : ''}
@@ -104,16 +104,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
         {isUploading ? (
           <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
-            <p className="text-sm text-gray-600">Upload en cours...</p>
+            <Loader2 className="w-10 h-10 text-[#E63946] animate-spin" />
+            <p className="text-sm text-slate-400">Upload en cours...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <Upload className="w-10 h-10 text-gray-400" />
-            <p className="text-sm text-gray-600">
-              <span className="text-primary-600 font-medium">Cliquez</span> ou glissez-déposez
+            <Upload className="w-10 h-10 text-slate-500" />
+            <p className="text-sm text-slate-400">
+              <span className="text-[#E63946] font-medium">Cliquez</span> ou glissez-déposez
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-slate-500">
               {accept.includes('image') ? 'PNG, JPG, GIF' : 'Tous les fichiers'} jusqu'à {maxSize}MB
             </p>
           </div>
@@ -202,8 +202,8 @@ export const MediaGrid: React.FC<MediaGridProps> = ({
               relative group aspect-square rounded-lg overflow-hidden cursor-pointer
               border-2 transition-all
               ${isSelected
-                ? 'border-primary-500 ring-2 ring-primary-200'
-                : 'border-transparent hover:border-gray-300'
+                ? 'border-[#E63946] ring-2 ring-[#E63946]/30'
+                : 'border-transparent hover:border-[#334155]'
               }
             `}
           >
@@ -214,9 +214,9 @@ export const MediaGrid: React.FC<MediaGridProps> = ({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
-                <File className="w-8 h-8 text-gray-400" />
-                <p className="text-xs text-gray-500 mt-1 truncate px-2">
+              <div className="w-full h-full flex flex-col items-center justify-center bg-[#1E293B]">
+                <File className="w-8 h-8 text-slate-500" />
+                <p className="text-xs text-slate-500 mt-1 truncate px-2">
                   {item.filename}
                 </p>
               </div>
@@ -229,8 +229,8 @@ export const MediaGrid: React.FC<MediaGridProps> = ({
                   absolute top-2 left-2 w-5 h-5 rounded-full border-2
                   flex items-center justify-center transition-all
                   ${isSelected
-                    ? 'bg-primary-600 border-primary-600'
-                    : 'bg-white/80 border-gray-300'
+                    ? 'bg-[#E63946] border-[#E63946]'
+                    : 'bg-[#0B1121]/80 border-[#334155]'
                   }
                 `}
               >

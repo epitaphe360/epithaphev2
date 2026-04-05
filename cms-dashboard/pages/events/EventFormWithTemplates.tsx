@@ -237,9 +237,9 @@ export const EventFormWithTemplates: React.FC = () => {
                   id="replayAvailable"
                   checked={templateData.replayAvailable || false}
                   onChange={(e) => setTemplateData({ ...templateData, replayAvailable: e.target.checked })}
-                  className="rounded border-gray-300"
+                  className="rounded border-[#334155]"
                 />
-                <label htmlFor="replayAvailable" className="text-sm text-gray-700">
+                <label htmlFor="replayAvailable" className="text-sm text-slate-300">
                   Replay disponible après l'événement
                 </label>
               </div>
@@ -473,12 +473,12 @@ export const EventFormWithTemplates: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/events')}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-[#1E293B] rounded-lg"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-white">
               {isEditing ? 'Modifier l\'événement' : 'Nouvel événement'}
             </h1>
           </div>

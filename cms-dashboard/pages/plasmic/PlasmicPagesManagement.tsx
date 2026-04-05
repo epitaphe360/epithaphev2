@@ -130,7 +130,7 @@ export default function VisualEditorManagement() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">Éditeur Visuel GrapesJS</h1>
-          <p className="text-gray-600">
+          <p className="text-slate-400">
             Créez et gérez vos pages avec l'éditeur visuel drag & drop
           </p>
         </div>
@@ -147,7 +147,7 @@ export default function VisualEditorManagement() {
             <Code className="w-4 h-4" />
             Comment utiliser GrapesJS
           </h3>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+          <ol className="list-decimal list-inside space-y-1 text-sm text-slate-300">
             <li>Cliquez sur "Nouvelle Page" pour créer une page</li>
             <li>Cliquez sur "Éditer" pour ouvrir l'éditeur visuel intégré</li>
             <li>Utilisez le drag & drop pour construire votre page</li>
@@ -161,40 +161,40 @@ export default function VisualEditorManagement() {
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-[#020617]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Nom
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Chemin
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Dernière modification
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-[#0B1121] divide-y divide-gray-200">
               {pages.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                     Aucune page créée. Commencez par créer votre première page !
                   </td>
                 </tr>
               ) : (
                 pages.map((page) => (
-                  <tr key={page.id} className="hover:bg-gray-50">
+                  <tr key={page.id} className="hover:bg-[#020617]">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{page.name}</div>
+                      <div className="font-medium text-white">{page.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                      <code className="text-sm bg-[#1E293B] px-2 py-1 rounded">
                         {page.path}
                       </code>
                     </td>
@@ -205,7 +205,7 @@ export default function VisualEditorManagement() {
                         {page.status === "published" ? "Publié" : "Brouillon"}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {new Date(page.lastModified).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -277,7 +277,7 @@ export default function VisualEditorManagement() {
               placeholder="ex: /landing-special"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Le chemin où la page sera accessible sur votre site
             </p>
           </div>
@@ -292,7 +292,7 @@ export default function VisualEditorManagement() {
                   status: e.target.value as "draft" | "published",
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#334155] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="draft">Brouillon</option>
               <option value="published">Publié</option>

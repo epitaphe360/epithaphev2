@@ -56,7 +56,7 @@ export const PageForm: React.FC = () => {
     heroTitle: '', heroSubtitle: '', pitchTitle: '', pitchBody: '',
     serviceBlocks: [], ctaTitle: '', ctaBody: '',
   });
-  
+
   const [formData, setFormData] = useState<PageFormData>({
     title: '',
     slug: '',
@@ -193,24 +193,24 @@ export const PageForm: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E63946]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/admin/pages')}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-[#1E293B] rounded-lg"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-white">
               {isEditing ? 'Modifier la page' : 'Nouvelle page'}
             </h1>
           </div>
@@ -288,24 +288,24 @@ export const PageForm: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {formData.sections.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-slate-500">
                     Aucune section. Cliquez sur "Ajouter une section" pour commencer.
                   </div>
                 ) : (
                   formData.sections.map((section, index) => (
                     <div
                       key={section.id || index}
-                      className="border border-gray-200 rounded-lg p-4 space-y-4"
+                      className="border border-[#1E293B] rounded-lg p-4 space-y-4"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                          <GripVertical className="w-4 h-4 text-slate-500 cursor-grab" />
                           <span className="font-medium">Section {index + 1}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => removeSection(index)}
-                          className="p-1 text-red-500 hover:bg-red-50 rounded"
+                          className="p-1 text-red-500 hover:bg-red-500/10 rounded"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -371,12 +371,12 @@ export const PageForm: React.FC = () => {
       {/* Template Selector Modal */}
       {showTemplateSelector && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Choisir un modèle</h2>
+          <div className="bg-[#0B1121] rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b border-[#1E293B] flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-white">Choisir un modèle</h2>
               <button
                 onClick={() => setShowTemplateSelector(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-slate-500 hover:text-white"
               >
                 ×
               </button>
@@ -387,21 +387,21 @@ export const PageForm: React.FC = () => {
                   <button
                     key={template.id}
                     onClick={() => applyTemplate(template.id)}
-                    className="text-left p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    className="text-left p-4 border border-[#1E293B] rounded-lg hover:border-blue-500 hover:bg-blue-500/10 transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                      <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                      <FileText className="w-5 h-5 text-blue-400" />
+                      <h3 className="font-semibold text-white">{template.name}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-                    <div className="text-xs text-gray-500">
+                    <p className="text-sm text-slate-400 mb-3">{template.description}</p>
+                    <div className="text-xs text-slate-500">
                       {template.sections.length} section{template.sections.length > 1 ? 's' : ''}
                     </div>
                   </button>
                 ))}
               </div>
             </div>
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+            <div className="p-4 bg-[#020617] border-t border-[#1E293B] flex justify-end">
               <Button variant="secondary" onClick={() => setShowTemplateSelector(false)}>
                 Annuler
               </Button>

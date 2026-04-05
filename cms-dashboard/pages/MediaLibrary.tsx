@@ -118,8 +118,8 @@ export const MediaLibrary: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Médiathèque</h1>
-          <p className="text-gray-600">Gérez vos images et fichiers</p>
+          <h1 className="text-2xl font-bold text-white">Médiathèque</h1>
+          <p className="text-slate-400">Gérez vos images et fichiers</p>
         </div>
         <div className="flex items-center gap-3">
           {selectedIds.length > 0 && (
@@ -156,16 +156,16 @@ export const MediaLibrary: React.FC = () => {
                 { value: 'document', label: 'Documents' },
               ]}
             />
-            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+            <div className="flex border border-[#334155] rounded-lg overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100' : ''}`}
+                className={`p-2 ${viewMode === 'grid' ? 'bg-[#1E293B]' : ''}`}
               >
                 <Grid className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 ${viewMode === 'list' ? 'bg-gray-100' : ''}`}
+                className={`p-2 ${viewMode === 'list' ? 'bg-[#1E293B]' : ''}`}
               >
                 <List className="w-5 h-5" />
               </button>
@@ -179,12 +179,12 @@ export const MediaLibrary: React.FC = () => {
         <CardContent className="p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#E63946]" />
             </div>
           ) : media.length === 0 ? (
             <div className="text-center py-12">
-              <Upload className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">Aucun média trouvé</p>
+              <Upload className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+              <p className="text-slate-500">Aucun média trouvé</p>
               <Button variant="secondary" className="mt-4" onClick={() => setShowUpload(true)}>
                 Uploader des fichiers
               </Button>
@@ -233,32 +233,32 @@ export const MediaLibrary: React.FC = () => {
                   className="w-full rounded-lg"
                 />
               ) : (
-                <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-400">{selected.type}</span>
+                <div className="w-full h-48 bg-[#1E293B] rounded-lg flex items-center justify-center">
+                  <span className="text-slate-500">{selected.type}</span>
                 </div>
               )}
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Nom du fichier</label>
-                <p className="text-gray-900">{selected.filename}</p>
+                <label className="text-sm font-medium text-slate-500">Nom du fichier</label>
+                <p className="text-white">{selected.filename}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Type</label>
-                <p className="text-gray-900">{selected.type}</p>
+                <label className="text-sm font-medium text-slate-500">Type</label>
+                <p className="text-white">{selected.type}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Taille</label>
-                <p className="text-gray-900">{formatFileSize(selected.size || 0)}</p>
+                <label className="text-sm font-medium text-slate-500">Taille</label>
+                <p className="text-white">{formatFileSize(selected.size || 0)}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">URL</label>
+                <label className="text-sm font-medium text-slate-500">URL</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={selected.url}
                     readOnly
-                    className="flex-1 text-sm bg-gray-50 border rounded px-2 py-1"
+                    className="flex-1 text-sm bg-[#020617] border rounded px-2 py-1"
                   />
                   <Button size="sm" variant="secondary" onClick={() => copyUrl(selected.url)}>
                     Copier

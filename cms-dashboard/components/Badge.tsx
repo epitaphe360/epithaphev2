@@ -15,19 +15,19 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  default: 'bg-gray-100 text-gray-700',
-  primary: 'bg-primary-100 text-primary-700',
-  secondary: 'bg-gray-200 text-gray-800',
-  success: 'bg-green-100 text-green-700',
-  warning: 'bg-yellow-100 text-yellow-700',
-  danger: 'bg-red-100 text-red-700',
-  info: 'bg-blue-100 text-blue-700',
+  default: 'bg-[#1E293B] text-slate-300',
+  primary: 'bg-[#E63946]/10 text-[#E63946]',
+  secondary: 'bg-[#334155] text-slate-200',
+  success: 'bg-emerald-500/15 text-emerald-400',
+  warning: 'bg-amber-500/15 text-amber-400',
+  danger: 'bg-red-500/15 text-red-400',
+  info: 'bg-blue-500/15 text-blue-400',
 };
 
 const dotColors = {
-  default: 'bg-gray-500',
-  primary: 'bg-primary-500',
-  secondary: 'bg-gray-600',
+  default: 'bg-slate-500',
+  primary: 'bg-[#E63946]',
+  secondary: 'bg-slate-400',
   success: 'bg-green-500',
   warning: 'bg-yellow-500',
   danger: 'bg-red-500',
@@ -125,7 +125,7 @@ export const CountBadge: React.FC<CountBadgeProps> = ({
     <span
       className={`
         inline-flex items-center justify-center min-w-5 h-5 text-xs font-bold text-white rounded-full px-1.5
-        ${variant === 'danger' ? 'bg-red-500' : 'bg-primary-500'}
+        ${variant === 'danger' ? 'bg-red-500' : 'bg-[#E63946]'}
       `}
     >
       {displayCount}

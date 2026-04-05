@@ -62,15 +62,15 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
   return (
     <Modal isOpen onClose={onCancel}>
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg">
+      <div className="bg-[#0B1121] rounded-xl shadow-xl w-full max-w-lg">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="flex items-center justify-between p-6 border-b border-[#1E293B]">
+          <h2 className="text-xl font-bold text-white">
             {category ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
           </h2>
           <button
             onClick={onCancel}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-[#1E293B] rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -113,7 +113,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           />
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1E293B]">
             <Button type="button" variant="secondary" onClick={onCancel}>
               Annuler
             </Button>

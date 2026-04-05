@@ -55,8 +55,8 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     className={`
       p-2 rounded-lg transition-colors
       ${active
-        ? 'bg-primary-100 text-primary-700'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        ? 'bg-[#E63946]/10 text-[#E63946]'
+        : 'text-slate-400 hover:bg-[#1E293B] hover:text-white'
       }
     `}
   >
@@ -64,7 +64,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
   </button>
 );
 
-const ToolbarDivider = () => <div className="w-px h-6 bg-gray-300 mx-1" />;
+const ToolbarDivider = () => <div className="w-px h-6 bg-[#334155] mx-1" />;
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
@@ -121,21 +121,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-slate-300 mb-2">
           {label}
         </label>
       )}
-      
+
       <div
         className={`
           border rounded-xl overflow-hidden transition-all
-          ${isFocused ? 'border-primary-500 ring-2 ring-primary-100' : 'border-gray-300'}
+          ${isFocused ? 'border-[#C8A96E] ring-2 ring-[#C8A96E]/20' : 'border-[#334155]'}
           ${error ? 'border-red-500 ring-2 ring-red-100' : ''}
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-0.5 p-2 bg-gray-50 border-b border-gray-200">
+        <div className="flex flex-wrap items-center gap-0.5 p-2 bg-[#020617] border-b border-[#1E293B]">
           <ToolbarButton
             icon={<Undo className="w-4 h-4" />}
             onClick={() => execCommand('undo')}
@@ -146,9 +146,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => execCommand('redo')}
             title="Rétablir"
           />
-          
+
           <ToolbarDivider />
-          
+
           <ToolbarButton
             icon={<Heading1 className="w-4 h-4" />}
             onClick={() => execCommand('formatBlock', 'h1')}
@@ -164,9 +164,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => execCommand('formatBlock', 'h3')}
             title="Titre 3"
           />
-          
+
           <ToolbarDivider />
-          
+
           <ToolbarButton
             icon={<Bold className="w-4 h-4" />}
             onClick={() => execCommand('bold')}
@@ -182,9 +182,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => execCommand('underline')}
             title="Souligné"
           />
-          
+
           <ToolbarDivider />
-          
+
           <ToolbarButton
             icon={<AlignLeft className="w-4 h-4" />}
             onClick={() => execCommand('justifyLeft')}
@@ -200,9 +200,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => execCommand('justifyRight')}
             title="Aligner à droite"
           />
-          
+
           <ToolbarDivider />
-          
+
           <ToolbarButton
             icon={<List className="w-4 h-4" />}
             onClick={() => execCommand('insertUnorderedList')}
@@ -213,9 +213,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => execCommand('insertOrderedList')}
             title="Liste numérotée"
           />
-          
+
           <ToolbarDivider />
-          
+
           <ToolbarButton
             icon={<Quote className="w-4 h-4" />}
             onClick={() => execCommand('formatBlock', 'blockquote')}
@@ -226,9 +226,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => execCommand('formatBlock', 'pre')}
             title="Code"
           />
-          
+
           <ToolbarDivider />
-          
+
           <ToolbarButton
             icon={<Link className="w-4 h-4" />}
             onClick={insertLink}
@@ -249,7 +249,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onPaste={handlePaste}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className="prose prose-sm max-w-none p-4 focus:outline-none"
+          className="prose prose-sm max-w-none p-4 focus:outline-none bg-[#0B1121] text-white"
           style={{
             minHeight,
             maxHeight,
@@ -297,21 +297,21 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-slate-300 mb-2">
           {label}
         </label>
       )}
-      
-      <div className="border border-gray-300 rounded-xl overflow-hidden">
+
+      <div className="border border-[#334155] rounded-xl overflow-hidden">
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-gray-50">
+        <div className="flex border-b border-[#1E293B] bg-[#020617]">
           <button
             type="button"
             onClick={() => setPreview(false)}
             className={`px-4 py-2 text-sm font-medium ${
               !preview
-                ? 'text-primary-700 border-b-2 border-primary-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-[#E63946] border-b-2 border-[#E63946]'
+                : 'text-slate-500 hover:text-white'
             }`}
           >
             Écrire
@@ -321,8 +321,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             onClick={() => setPreview(true)}
             className={`px-4 py-2 text-sm font-medium ${
               preview
-                ? 'text-primary-700 border-b-2 border-primary-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-[#E63946] border-b-2 border-[#E63946]'
+                : 'text-slate-500 hover:text-white'
             }`}
           >
             Aperçu
@@ -332,7 +332,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         {/* Content */}
         {preview ? (
           <div
-            className="prose prose-sm max-w-none p-4 min-h-[200px]"
+            className="prose prose-sm max-w-none p-4 min-h-[200px] bg-[#0B1121] text-white"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(value) }}
           />
         ) : (
@@ -341,7 +341,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             rows={rows}
-            className="w-full p-4 resize-none focus:outline-none font-mono text-sm"
+            className="w-full p-4 resize-none focus:outline-none font-mono text-sm bg-[#0B1121] text-white border-[#334155] focus:border-[#C8A96E]"
           />
         )}
       </div>

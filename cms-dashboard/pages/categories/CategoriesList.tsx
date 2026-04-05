@@ -99,12 +99,12 @@ export const CategoriesList: React.FC = () => {
       header: 'Nom',
       render: (cat) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-            <FolderOpen className="w-5 h-5 text-primary-600" />
+          <div className="w-10 h-10 bg-[#E63946]/10 rounded-lg flex items-center justify-center">
+            <FolderOpen className="w-5 h-5 text-[#E63946]" />
           </div>
           <div>
-            <p className="font-medium text-gray-900">{cat.name}</p>
-            <p className="text-sm text-gray-500">/{cat.slug}</p>
+            <p className="font-medium text-white">{cat.name}</p>
+            <p className="text-sm text-slate-500">/{cat.slug}</p>
           </div>
         </div>
       ),
@@ -113,7 +113,7 @@ export const CategoriesList: React.FC = () => {
       key: 'description',
       header: 'Description',
       render: (cat) => (
-        <p className="text-sm text-gray-600 truncate max-w-xs">
+        <p className="text-sm text-slate-400 truncate max-w-xs">
           {cat.description || '-'}
         </p>
       ),
@@ -131,7 +131,7 @@ export const CategoriesList: React.FC = () => {
       key: 'count',
       header: 'Éléments',
       render: (cat) => (
-        <span className="text-sm text-gray-600">{cat.count}</span>
+        <span className="text-sm text-slate-400">{cat.count}</span>
       ),
     },
     {
@@ -142,14 +142,14 @@ export const CategoriesList: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleEdit(cat)}
-            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleDelete(cat.id)}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -160,12 +160,12 @@ export const CategoriesList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Catégories</h1>
-          <p className="text-gray-600">Gérez les catégories d'articles et d'événements</p>
+          <h1 className="text-2xl font-bold text-white">Catégories</h1>
+          <p className="text-slate-400">Gérez les catégories d'articles et d'événements</p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="w-4 h-4 mr-2" />
@@ -185,13 +185,13 @@ export const CategoriesList: React.FC = () => {
       {/* Table */}
       {loading ? (
         <Card>
-          <div className="p-8 text-center text-gray-500">Chargement...</div>
+          <div className="p-8 text-center text-slate-500">Chargement...</div>
         </Card>
       ) : filteredCategories.length === 0 ? (
         <Card>
           <div className="p-8 text-center">
-            <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">
+            <FolderOpen className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+            <p className="text-slate-500 mb-4">
               {search ? 'Aucune catégorie trouvée' : 'Aucune catégorie pour le moment'}
             </p>
             <Button onClick={handleAdd}>Créer votre première catégorie</Button>

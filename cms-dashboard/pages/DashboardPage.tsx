@@ -101,14 +101,14 @@ const StatCard = ({ title, value, subtext, trend, icon: Icon, delay }: any) => (
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#0f172a]/95 backdrop-blur-xl border border-gray-700/50 p-4 rounded-xl shadow-2xl">
-        <p className="text-gray-400 text-xs mb-2 font-medium uppercase tracking-wider">{label}</p>
+      <div className="bg-[#0f172a]/95 backdrop-blur-xl border border-[#334155] p-4 rounded-xl shadow-2xl">
+        <p className="text-slate-500 text-xs mb-2 font-medium uppercase tracking-wider">{label}</p>
         <div className="space-y-1">
           <p className="text-white text-sm font-bold flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#E63946]"></span>
             {payload[0].value.toLocaleString()} Vues
           </p>
-          <p className="text-gray-300 text-sm font-medium flex items-center gap-2">
+          <p className="text-slate-300 text-sm font-medium flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-purple-500"></span>
             {payload[1].value.toLocaleString()} Visiteurs
           </p>

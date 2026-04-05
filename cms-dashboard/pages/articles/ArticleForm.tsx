@@ -149,7 +149,7 @@ export const ArticleForm: React.FC = () => {
               <CardTitle>Options Galerie</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-slate-400 mb-4">
                 Ajoutez plusieurs images dans le contenu principal avec l'éditeur
               </p>
             </CardContent>
@@ -252,7 +252,7 @@ export const ArticleForm: React.FC = () => {
                 value={templateData.intervieweeTitle || ''}
                 onChange={(e) => setTemplateData({ ...templateData, intervieweeTitle: e.target.value })}
               />
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-slate-400">
                 Ajoutez les questions et réponses dans le contenu principal
               </p>
             </CardContent>

@@ -52,7 +52,7 @@ export function ReferencesList() {
       render: (r) => (
         <div className="flex items-center gap-3">
           {r.logo ? (
-            <img src={r.logo} alt={r.name} className="w-8 h-8 object-contain rounded bg-white/5 p-1" />
+            <img src={r.logo} alt={r.name} className="w-8 h-8 object-contain rounded bg-[#0B1121]/5 p-1" />
           ) : (
             <div className="w-8 h-8 rounded bg-[#1E293B] flex items-center justify-center text-slate-400 text-xs font-bold">
               {r.name.charAt(0)}

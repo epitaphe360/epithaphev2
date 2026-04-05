@@ -108,7 +108,7 @@ export const SolutionManagement: React.FC = () => {
       render: (solution: Solution) => (
         <div>
           <div className="font-medium">{solution.label}</div>
-          <div className="text-sm text-gray-500">{solution.description}</div>
+          <div className="text-sm text-slate-500">{solution.description}</div>
           <Badge variant="info" className="mt-1">{solution.category}</Badge>
         </div>
       )
@@ -122,7 +122,7 @@ export const SolutionManagement: React.FC = () => {
             <div key={index} className="truncate">{need}</div>
           ))}
           {solution.needs.length > 3 && (
-            <div className="text-gray-500">+{solution.needs.length - 3} autres</div>
+            <div className="text-slate-500">+{solution.needs.length - 3} autres</div>
           )}
         </div>
       )
@@ -281,21 +281,21 @@ const SolutionForm: React.FC<{
       <div className="flex border-b">
         <button
           type="button"
-          className={`px-4 py-2 font-medium ${activeTab === 'content' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 font-medium ${activeTab === 'content' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-slate-500'}`}
           onClick={() => setActiveTab('content')}
         >
           Contenu
         </button>
         <button
           type="button"
-          className={`px-4 py-2 font-medium ${activeTab === 'hero' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 font-medium ${activeTab === 'hero' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-slate-500'}`}
           onClick={() => setActiveTab('hero')}
         >
           Section Hero
         </button>
         <button
           type="button"
-          className={`px-4 py-2 font-medium ${activeTab === 'seo' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+          className={`px-4 py-2 font-medium ${activeTab === 'seo' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-slate-500'}`}
           onClick={() => setActiveTab('seo')}
         >
           SEO
@@ -321,13 +321,13 @@ const SolutionForm: React.FC<{
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Catégorie
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                className="w-full border border-[#334155] rounded-lg px-3 py-2"
                 required
               >
                 <option value="">Sélectionner une catégorie</option>
@@ -365,7 +365,7 @@ const SolutionForm: React.FC<{
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Contenu détaillé
             </label>
             <RichTextEditor

@@ -118,12 +118,12 @@ export const UsersList: React.FC = () => {
       header: 'Utilisateur',
       render: (user) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-            <User className="w-5 h-5 text-gray-600" />
+          <div className="w-10 h-10 bg-[#334155] rounded-full flex items-center justify-center">
+            <User className="w-5 h-5 text-slate-400" />
           </div>
           <div>
-            <p className="font-medium text-gray-900">{user.name}</p>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="font-medium text-white">{user.name}</p>
+            <p className="text-sm text-slate-500">{user.email}</p>
           </div>
         </div>
       ),
@@ -137,7 +137,7 @@ export const UsersList: React.FC = () => {
       key: 'lastLogin',
       header: 'Dernière connexion',
       render: (user) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-slate-400">
           {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('fr-FR') : 'Jamais'}
         </span>
       ),
@@ -150,14 +150,14 @@ export const UsersList: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleEdit(user)}
-            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleDelete(user.id)}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />
@@ -168,12 +168,12 @@ export const UsersList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Utilisateurs</h1>
-          <p className="text-gray-600">Gérez les utilisateurs et leurs permissions</p>
+          <h1 className="text-2xl font-bold text-white">Utilisateurs</h1>
+          <p className="text-slate-400">Gérez les utilisateurs et leurs permissions</p>
         </div>
         <Button onClick={handleAdd}>
           <Plus className="w-4 h-4 mr-2" />
@@ -206,13 +206,13 @@ export const UsersList: React.FC = () => {
       {/* Table */}
       {loading ? (
         <Card>
-          <div className="p-8 text-center text-gray-500">Chargement...</div>
+          <div className="p-8 text-center text-slate-500">Chargement...</div>
         </Card>
       ) : filteredUsers.length === 0 ? (
         <Card>
           <div className="p-8 text-center">
-            <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">
+            <Shield className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+            <p className="text-slate-500 mb-4">
               {search || roleFilter !== 'all' ? 'Aucun utilisateur trouvé' : 'Aucun utilisateur pour le moment'}
             </p>
             <Button onClick={handleAdd}>Créer le premier utilisateur</Button>

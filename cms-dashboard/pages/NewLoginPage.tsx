@@ -42,23 +42,20 @@ export const NewLoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+      });
 
-      if (email === 'admin@epitaph.ma' && password === 'admin123') {
-        const mockUser = {
-          id: '1',
-          name: 'Administrateur',
-          email: 'admin@epitaph.ma',
-          role: 'ADMIN' as const
-        };
-        const mockToken = 'mock-jwt-token-' + Date.now();
+      const data = await res.json();
 
-        login(mockToken, mockUser);
-        setLocation('/admin');
-      } else {
-        throw new Error('Identifiants incorrects');
+      if (!res.ok) {
+        throw new Error(data.error || 'Identifiants incorrects');
       }
+
+      login(data.token, data.user);
+      setLocation('/admin');
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
     } finally {
@@ -188,15 +185,6 @@ export const NewLoginPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Demo Info */}
-              <div className="pt-2 pb-2">
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 backdrop-blur-sm">
-                  <p className="text-xs text-blue-300 text-center font-medium">
-                    🔑 Demo: <span className="font-mono">admin@epitaph.ma</span> / <span className="font-mono">admin123</span>
-                  </p>
-                </div>
-              </div>
-
               {/* Submit Button */}
               <button
                 type="submit"
@@ -228,6 +216,13 @@ export const NewLoginPage: React.FC = () => {
 
         {/* Footer */}
         <div className="text-center mt-8 space-y-3">
+          <a
+            href="/admin/forgot-password"
+            onClick={(e) => { e.preventDefault(); setLocation('/admin/forgot-password'); }}
+            className="text-sm text-slate-400 hover:text-[#E63946] transition-colors"
+          >
+            Mot de passe oublié ?
+          </a>
           <p className="text-xs text-slate-500">
             © 2026 Epitaphe — Tous droits réservés
           </p>

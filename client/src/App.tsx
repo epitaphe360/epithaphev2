@@ -88,6 +88,11 @@ import { ContactsList } from "../../cms-dashboard/pages/contacts";
 import { QRCodesList }      from "../../cms-dashboard/pages/qr-codes/QRCodesList";
 import { PushBroadcastPage } from "../../cms-dashboard/pages/push/PushBroadcastPage";
 import { ResourcesList as AdminResourcesList } from "../../cms-dashboard/pages/resources/ResourcesList";
+import { ClientAccountsPage } from "../../cms-dashboard/pages/client-accounts/ClientAccountsPage";
+import { AuditLogsPage } from "../../cms-dashboard/pages/audit-logs/AuditLogsPage";
+import { ForgotPasswordPage } from "../../cms-dashboard/pages/ForgotPasswordPage";
+import { ResetPasswordPage as AdminResetPasswordPage } from "../../cms-dashboard/pages/ResetPasswordPage";
+import ClientResetPasswordPage from "@/pages/espace-client/reset-password";
 import { useAuthStore } from "../../cms-dashboard/store/authStore";
 import type { ReactNode } from "react";
 
@@ -162,6 +167,9 @@ function Router() {
 
       {/* CMS Admin Routes */}
       <Route path="/admin/login" component={NewLoginPage} />
+      <Route path="/admin/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/admin/reset-password" component={AdminResetPasswordPage} />
+      <Route path="/espace-client/reset-password" component={ClientResetPasswordPage} />
       
       {/* Dashboard */}
       <Route path="/admin">
@@ -408,21 +416,39 @@ function Router() {
           </ProtectedRoute>
         )}
       </Route>
-      <Route path="/admin/blog">
+      {/* Espace Client — Gestion admin */}
+      <Route path="/admin/client-accounts">
         {() => (
           <ProtectedRoute>
             <DashboardLayout>
-            <BlogManagement />
-          </DashboardLayout>
+              <ClientAccountsPage />
+            </DashboardLayout>
           </ProtectedRoute>
         )}
       </Route>
+
+      {/* Audit Logs */}
+      <Route path="/admin/audit-logs">
+        {() => (
+          <ProtectedRoute>
+            <DashboardLayout>
+              <AuditLogsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        )}
+      </Route>
+
+      {/* /admin/blog redirige vers /admin/articles (BlogManagement appelait /api/admin/posts inexistant) */}
+      <Route path="/admin/blog">
+        {() => <Redirect to="/admin/articles" />}
+      </Route>
+      {/* /admin/solutions utilise ServicesList (le backend /api/admin/solutions pointe vers la table services) */}
       <Route path="/admin/solutions">
         {() => (
           <ProtectedRoute>
             <DashboardLayout>
-            <SolutionManagement />
-          </DashboardLayout>
+              <ServicesList />
+            </DashboardLayout>
           </ProtectedRoute>
         )}
       </Route>

@@ -346,6 +346,22 @@ export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
 
 // ========================================
+// PASSWORD RESET TOKENS
+// ========================================
+
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  email: text("email").notNull(),
+  accountType: varchar("account_type", { length: 10 }).notNull().default("admin"), // 'admin' | 'client'
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+// ========================================
 // NEWSLETTER SUBSCRIPTIONS
 // ========================================
 

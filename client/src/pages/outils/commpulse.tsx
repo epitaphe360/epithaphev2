@@ -6,12 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 import { ScoringQuestionnaire } from '@/components/scoring-questionnaire';
-import { ScoringResults } from '@/components/scoring-results';
 import { EmailGate } from '@/components/email-gate';
+import { DiscoverResults } from '@/components/discover-results';
+import { IntelligencePricing } from '@/components/intelligence-pricing';
+import { IntelligenceResults } from '@/components/intelligence-results';
 import {
-  calculateScore, calculatePillarScores, calculateRoiEstimate,
-  getMaturityLevel, MATURITY_LEVELS, saveScore, persistScore,
-  type ScoringQuestion, type ScoringAnswer, type ScoringResult,
+  calculateRoiEstimate,
+  type ScoringQuestion, type ScoringAnswer,
   type SectorType, type CompanySizeType,
 } from '@/lib/scoring-engine';
 
@@ -95,7 +96,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; pillarL
   return recs.slice(0, 4);
 }
 
-type Step = 'roi' | 'form' | 'gate' | 'result';
+type Step = 'roi' | 'form' | 'gate' | 'discover' | 'pricing' | 'intelligence';
 
 export default function CommPulsePage() {
   const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
@@ -106,36 +107,23 @@ export default function CommPulsePage() {
   const [companySize, setCompanySize] = useState<CompanySizeType>('pme');
   const [effectif, setEffectif] = useState(50);
   const [salaireMoyen, setSalaireMoyen] = useState(8000);
-  const [result, setResult] = useState<ScoringResult | null>(null);
+  const [enrichedAnswers, setEnrichedAnswers] = useState<Record<string, { value: number; pillar: string; weight: number }>>({});
+  const [resultId, setResultId] = useState('');
+  const [partialScores, setPartialScores] = useState<Record<string, number>>({});
+  const [intelligencePrice, setIntelligencePrice] = useState(4900);
+  const [discoverGlobalScore, setDiscoverGlobalScore] = useState(0);
+  const [discoverMaturityLevel, setDiscoverMaturityLevel] = useState(1);
+  const [intelligenceData, setIntelligenceData] = useState<{ globalScore: number; maturityLevel: number; pillarScores: Record<string, number>; aiReport: unknown } | null>(null);
 
   const roiEstimate = calculateRoiEstimate(effectif, salaireMoyen, 0.18);
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const globalScore = calculateScore(answers, questions);
-    const pillarScores = calculatePillarScores(answers, questions, PILLAR_COLORS);
-    const maturityLevel = getMaturityLevel(globalScore);
-    const maturity = MATURITY_LEVELS[maturityLevel];
-    const recommendations = generateRecommendations(pillarScores, globalScore);
-
-    const newResult: ScoringResult = {
-      toolId: TOOL_ID,
-      companyName,
-      respondentType,
-      sector,
-      companySize,
-      effectif,
-      pillarScores,
-      globalScore,
-      maturityLevel,
-      maturityLabel: maturity.label,
-      maturityColor: maturity.color,
-      roiEstimate,
-      recommendations,
-      benchmarkPercentile: Math.round(40 + Math.random() * 40),
-      createdAt: new Date(),
-    };
-    persistScore(newResult);
-    setResult(newResult);
+    const enriched: Record<string, { value: number; pillar: string; weight: number }> = {};
+    for (const a of answers) {
+      const q = questions.find(q => q.id === a.questionId);
+      if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight };
+    }
+    setEnrichedAnswers(enriched);
     setStep('gate');
   };
 
@@ -143,16 +131,30 @@ export default function CommPulsePage() {
   const handleUnlock = async (data: { email: string; name: string }) => {
     setIsUnlocking(true);
     try {
-      await fetch('/api/leads/capture', {
+      const response = await fetch(`/api/scoring/${TOOL_ID}/discover`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, sourceTool: TOOL_ID, companyName }),
+        body: JSON.stringify({
+          answers: enrichedAnswers,
+          companyName, sector, companySize,
+          voiceType: respondentType,
+          email: data.email,
+          respondentName: data.name,
+        }),
       });
+      if (response.ok) {
+        const res = await response.json();
+        setResultId(res.id);
+        setPartialScores(res.pillarScores);
+        setDiscoverGlobalScore(res.globalScore);
+        setDiscoverMaturityLevel(res.maturityLevel);
+        setIntelligencePrice(res.intelligencePrice ?? 4900);
+      }
     } catch (err) {
-      console.error("Erreur capture lead", err);
+      console.error('Erreur discover scoring', err);
     } finally {
       setIsUnlocking(false);
-      setStep('result');
+      setStep('discover');
     }
   };
 
@@ -343,20 +345,55 @@ export default function CommPulsePage() {
               </motion.div>
             )}
 
-            {/* STEP 4: Results */}
-            {step === 'result' && result && (
-              <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold text-white">
-                    Votre score CommPulse™ — {result.companyName}
-                  </h2>
-                  <p className="text-gray-400 mt-1">Analyse CLARITY™ complète · {new Date().toLocaleDateString('fr-FR')}</p>
-                </div>
-                <ScoringResults
-                  result={result}
-                  toolName="CommPulse™"
+            {/* STEP 4: Discover Results */}
+            {step === 'discover' && (
+              <motion.div key="discover" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <DiscoverResults
+                  toolId={TOOL_ID}
+                  toolLabel="CommPulse™"
                   toolColor={TOOL_COLOR}
-                  toolModel="CLARITY™"
+                  resultId={resultId}
+                  globalScore={discoverGlobalScore}
+                  maturityLevel={discoverMaturityLevel}
+                  pillarScores={partialScores}
+                  allPillars={Array.from(new Set(questions.map(q => q.pillar))).map(p => ({ id: p, label: questions.find(q => q.pillar === p)?.pillarLabel ?? p, color: PILLAR_COLORS[p] }))}
+                  intelligencePrice={intelligencePrice}
+                  onUpgrade={() => setStep('pricing')}
+                />
+              </motion.div>
+            )}
+
+            {/* STEP 5: Intelligence Pricing */}
+            {step === 'pricing' && (
+              <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <IntelligencePricing
+                  toolId={TOOL_ID}
+                  toolLabel="CommPulse™"
+                  toolColor={TOOL_COLOR}
+                  intelligencePrice={intelligencePrice}
+                  resultId={resultId}
+                  enrichedAnswers={enrichedAnswers}
+                  companyName={companyName}
+                  sector={sector}
+                  companySize={companySize}
+                  onSuccess={(data) => { setIntelligenceData(data); setStep('intelligence'); }}
+                  onBack={() => setStep('discover')}
+                />
+              </motion.div>
+            )}
+
+            {/* STEP 6: Intelligence Results */}
+            {step === 'intelligence' && intelligenceData && (
+              <motion.div key="intelligence" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <IntelligenceResults
+                  toolId={TOOL_ID}
+                  toolLabel="CommPulse™"
+                  toolColor={TOOL_COLOR}
+                  globalScore={intelligenceData.globalScore}
+                  maturityLevel={intelligenceData.maturityLevel}
+                  pillarScores={intelligenceData.pillarScores}
+                  aiReport={intelligenceData.aiReport as any}
+                  allPillars={Array.from(new Set(questions.map(q => q.pillar))).map(p => ({ id: p, label: questions.find(q => q.pillar === p)?.pillarLabel ?? p, color: PILLAR_COLORS[p] }))}
                 />
               </motion.div>
             )}

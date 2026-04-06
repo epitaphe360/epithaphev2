@@ -1,10 +1,17 @@
-import { Express } from "express";
+/**
+ * BMI 360™ — Routes de Scoring Intelligence
+ * Tunnel CDC : Discover (gratuit) → Intelligence (payant, rapport IA) → Transform (devis)
+ */
+import { Express, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import { db } from "./db";
-import { scoringResults, insertScoringResultSchema } from "../shared/schema";
-import { processAssessment } from "./lib/scoring-engine";
+import { scoringResults, payments } from "../shared/schema";
+import { processAssessment, calculateMaturityLevel } from "./lib/scoring-engine";
+import { generateAIReport } from "./lib/ai-report";
+import { requireAdmin } from "./lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
+import { sendMail } from "./lib/email";
 
 const scoringLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -14,57 +21,264 @@ const scoringLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-const ALLOWED_TOOL_IDS = ["commpulse", "talentprint", "bmi360", "brandpulse", "digitalscore"];
+const intelligenceLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: "Limite de génération IA atteinte. Réessayez dans 1 heure." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const ALLOWED_TOOL_IDS = [
+  "commpulse", "talentprint", "impacttrace", "safesignal",
+  "eventimpact", "spacescore", "finnarrative",
+];
+
+const INTELLIGENCE_PRICES: Record<string, number> = {
+  commpulse: 4900, talentprint: 7500, impacttrace: 8400,
+  safesignal: 7900, eventimpact: 7900, spacescore: 6500, finnarrative: 9900,
+};
+
+const TOOL_PILLAR_WEIGHTS: Record<string, Record<string, number>> = {
+  commpulse:   { C: 0.18, L: 0.18, A: 0.15, R: 0.15, I: 0.12, T: 0.12, Y: 0.10 },
+  talentprint: { A: 0.18, T1: 0.15, T2: 0.15, R: 0.14, AM: 0.13, CF: 0.13, TR: 0.12 },
+  impacttrace: { P: 0.25, R: 0.18, O: 0.20, OC: 0.20, F: 0.17 },
+  safesignal:  { S: 0.18, H: 0.22, IA: 0.14, E: 0.16, L: 0.14, D: 0.16 },
+  eventimpact: { S: 0.25, T: 0.25, A: 0.20, G: 0.20, E: 0.10 },
+  spacescore:  { S: 0.22, P: 0.22, A: 0.23, C: 0.18, E: 0.15 },
+  finnarrative:{ C: 0.18, A: 0.15, P: 0.20, I: 0.16, T: 0.16, AL: 0.15 },
+};
+
+const answersSchema = z.record(
+  z.string(),
+  z.object({
+    value:  z.number().int().min(1).max(5),
+    pillar: z.string(),
+    weight: z.number().int().min(1).max(3),
+  })
+);
+
+function computeScoreFromAnswers(
+  toolId: string,
+  answers: Record<string, { value: number; pillar: string; weight: number }>,
+  maxPillars?: number
+): { globalScore: number; maturityLevel: number; pillarScores: Record<string, number> } {
+  const pillarWeights = TOOL_PILLAR_WEIGHTS[toolId] ?? {};
+  const allPillars = Array.from(new Set(Object.values(answers).map(a => a.pillar)));
+  const pillars = maxPillars ? allPillars.slice(0, maxPillars) : allPillars;
+
+  const pillarScores: Record<string, number> = {};
+  let weightedSum = 0, totalWeight = 0;
+
+  for (const pillar of pillars) {
+    const pas = Object.values(answers).filter(a => a.pillar === pillar);
+    if (pas.length === 0) continue;
+    let pW = 0, pM = 0;
+    for (const ans of pas) { pW += ans.value * ans.weight; pM += 5 * ans.weight; }
+    const pS = pM > 0 ? Math.round((pW / pM) * 100) : 0;
+    pillarScores[pillar] = pS;
+    const dW = pillarWeights[pillar] ?? (1 / pillars.length);
+    weightedSum += pS * dW; totalWeight += dW;
+  }
+
+  const globalScore = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+  return { globalScore, maturityLevel: calculateMaturityLevel(globalScore), pillarScores };
+}
+
+const discoverBodySchema = z.object({
+  answers:        answersSchema,
+  companyName:    z.string().max(200).optional(),
+  sector:         z.string().max(80).optional(),
+  companySize:    z.string().max(30).optional(),
+  voiceType:      z.enum(['direction', 'terrain']).optional().default('direction'),
+  email:          z.string().email().optional(),
+  respondentName: z.string().max(200).optional(),
+});
 
 export function registerScoringRoutes(app: Express) {
-  // Soumettre un nouveau resultat de scoring (CommPulse, TalentPrint, etc.)
-  app.post("/api/scoring/:toolId", scoringLimiter, async (req, res) => {
+
+  // POST /api/scoring/:toolId/discover — Tier Discover (GRATUIT)
+  app.post("/api/scoring/:toolId/discover", scoringLimiter, async (req: Request, res: Response) => {
     try {
-      const toolId = req.params.toolId;
+      const toolId = req.params.toolId.toLowerCase();
+      if (!ALLOWED_TOOL_IDS.includes(toolId)) return res.status(400).json({ error: "Outil non reconnu." });
 
-      // Validate toolId against whitelist
-      if (!ALLOWED_TOOL_IDS.includes(toolId.toLowerCase())) {
-        return res.status(400).json({ error: "Invalid tool ID." });
-      }
+      const parsed = discoverBodySchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
 
-      const { answers } = req.body;
+      const { answers, companyName, sector, companySize, voiceType, email, respondentName } = parsed.data;
+      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers, 4);
 
-      if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
-        return res.status(400).json({ error: "Answers object is required." });
-      }
+      const [result] = await db.insert(scoringResults).values({
+        toolId, tier: 'discover', voiceType, companyName, sector, companySize,
+        email, respondentName, globalScore, pillarScores, maturityLevel,
+        sessionId: Math.random().toString(36).substring(7),
+        userAgent: req.headers['user-agent'] ?? null,
+      } as any).returning();
 
-      const processed = processAssessment(toolId, answers);
-
-      const [newResult] = await db
-        .insert(scoringResults)
-        .values(processed as any)
-        .returning();
-
-      return res.status(201).json(newResult);
+      return res.status(201).json({
+        id: result.id, tier: 'discover', globalScore, maturityLevel, pillarScores,
+        intelligencePrice: INTELLIGENCE_PRICES[toolId] ?? 4900,
+      });
     } catch (error) {
-      console.error("[Scoring API] Error saving result:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+      console.error("[Scoring/Discover]", error);
+      return res.status(500).json({ error: "Erreur serveur." });
     }
   });
 
-  // Recuperer un rapport de scoring par ID (UUID)
-  app.get("/api/scoring/result/:id", scoringLimiter, async (req, res) => {
+  // POST /api/scoring/:id/unlock-intelligence — Déverrouiller après paiement
+  app.post("/api/scoring/:id/unlock-intelligence", intelligenceLimiter, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: "ID invalide." });
 
-      // Validate UUID format to prevent injection
-      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
-          && !/^\d+$/.test(id)) {
-        return res.status(400).json({ error: "Invalid report ID format" });
+      const bodySchema = discoverBodySchema.extend({
+        paymentRef: z.string().max(100).optional(),
+      });
+      const parsed = bodySchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
+
+      const { answers, companyName, sector, companySize, voiceType, email, respondentName, paymentRef } = parsed.data;
+
+      const existing = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
+      if (!existing) return res.status(404).json({ error: "Résultat introuvable." });
+      if (existing.tier === 'intelligence') {
+        return res.json({ id, tier: 'intelligence', aiReport: existing.aiReport, globalScore: existing.globalScore, maturityLevel: existing.maturityLevel, pillarScores: existing.pillarScores });
       }
 
-      const result = await db.query.scoringResults.findFirst({
-        where: (t: any, { eq }: any) => eq(t.id, id)
+      const toolId = existing.toolId;
+      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers);
+
+      const aiReport = await generateAIReport({
+        toolId,
+        companyName: companyName ?? existing.companyName ?? undefined,
+        sector: sector ?? existing.sector ?? undefined,
+        companySize: companySize ?? existing.companySize ?? undefined,
+        globalScore, maturityLevel, pillarScores,
       });
-      if (!result) return res.status(404).json({ error: "Report not found" });
-      res.json(result);
+
+      const [updated] = await db.update(scoringResults).set({
+        tier: 'intelligence', globalScore, pillarScores, maturityLevel,
+        aiReport: aiReport as any,
+        intelligencePaymentRef: paymentRef ?? 'direct',
+        intelligenceUnlockedAt: new Date(),
+        voiceType: voiceType ?? existing.voiceType ?? 'direction',
+        companyName: companyName ?? existing.companyName,
+        sector: sector ?? existing.sector,
+        companySize: companySize ?? existing.companySize,
+        email: email ?? existing.email,
+        respondentName: respondentName ?? existing.respondentName,
+      }).where(eq(scoringResults.id, id)).returning();
+
+      const recipientEmail = email ?? existing.email;
+      if (recipientEmail) {
+        const labels: Record<string, string> = {
+          commpulse: 'CommPulse™', talentprint: 'TalentPrint™', impacttrace: 'ImpactTrace™',
+          safesignal: 'SafeSignal™', eventimpact: 'EventImpact™', spacescore: 'SpaceScore™', finnarrative: 'FinNarrative™',
+        };
+        await sendMail({
+          to: recipientEmail,
+          subject: `Votre rapport Intelligence™ ${labels[toolId] ?? toolId} est prêt`,
+          html: `<h2>Votre rapport Intelligence™ est disponible</h2><p>Bonjour ${respondentName ?? 'cher client'},</p><p>Score global : <strong>${globalScore}/100</strong></p><p><a href="${process.env.PUBLIC_URL ?? 'https://epitaphe360.ma'}/outils/${toolId}?result=${id}">Voir mon rapport complet</a></p><p>— L'équipe Epitaphe360</p>`,
+        }).catch(e => console.error('[AI Report] Email failed:', e));
+      }
+
+      return res.json({ id: updated.id, tier: 'intelligence', globalScore, maturityLevel, pillarScores, aiReport });
     } catch (error) {
-      res.status(500).json({ error: "Could not retrieve report" });
+      console.error("[Scoring/UnlockIntelligence]", error);
+      return res.status(500).json({ error: "Erreur lors de la génération du rapport." });
+    }
+  });
+
+  // GET /api/scoring/result/:id — Récupérer un résultat
+  app.get("/api/scoring/result/:id", scoringLimiter, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: "Format d'ID invalide." });
+
+      const result = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
+      if (!result) return res.status(404).json({ error: "Résultat introuvable." });
+
+      return res.json({
+        id: result.id, toolId: result.toolId, tier: result.tier,
+        globalScore: result.globalScore, maturityLevel: result.maturityLevel,
+        pillarScores: result.tier === 'intelligence'
+          ? result.pillarScores
+          : Object.fromEntries(Object.entries(result.pillarScores ?? {}).slice(0, 4)),
+        aiReport: result.tier === 'intelligence' ? result.aiReport : null,
+        intelligencePrice: INTELLIGENCE_PRICES[result.toolId] ?? 4900,
+        createdAt: result.createdAt,
+      });
+    } catch (error) {
+      console.error("[Scoring/GetResult]", error);
+      return res.status(500).json({ error: "Erreur serveur." });
+    }
+  });
+
+  // POST /api/scoring/intelligence-payment — Initier un paiement Intelligence
+  app.post("/api/scoring/intelligence-payment", scoringLimiter, async (req: Request, res: Response) => {
+    try {
+      const schema = z.object({
+        scoringResultId: z.string().uuid(),
+        toolId: z.string(),
+        email: z.string().email(),
+        companyName: z.string().max(200).optional(),
+      });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
+
+      const { toolId, email } = parsed.data;
+      const price = INTELLIGENCE_PRICES[toolId] ?? 4900;
+      const paymentRef = `INT-${toolId.toUpperCase().slice(0, 3)}-${Date.now().toString(36).toUpperCase()}`;
+
+      // TODO: Stripe payment intent quand STRIPE_SECRET_KEY configuré
+      return res.status(201).json({
+        paymentRef, amount: price, currency: 'MAD', toolId,
+        message: `Paiement de ${price} MAD en attente. Référence : ${paymentRef}`,
+        bankInstructions: {
+          beneficiary: 'Epitaphe360 SARL',
+          reference: paymentRef,
+          amount: `${price} MAD`,
+        },
+      });
+    } catch (error) {
+      console.error("[Scoring/Payment]", error);
+      return res.status(500).json({ error: "Erreur serveur." });
+    }
+  });
+
+  // POST /api/scoring/:toolId — Rétro-compat (ancien endpoint)
+  app.post("/api/scoring/:toolId", scoringLimiter, async (req: Request, res: Response) => {
+    try {
+      const toolId = req.params.toolId.toLowerCase();
+      if (!ALLOWED_TOOL_IDS.includes(toolId)) return res.status(400).json({ error: "Outil non reconnu." });
+
+      const { answers } = req.body;
+      if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
+        return res.status(400).json({ error: "Objet answers requis." });
+      }
+
+      const processed = processAssessment(toolId, answers as Record<string, number>);
+      const [newResult] = await db.insert(scoringResults).values(processed as any).returning();
+      return res.status(201).json(newResult);
+    } catch (error) {
+      console.error("[Scoring/Legacy]", error);
+      return res.status(500).json({ error: "Erreur serveur." });
+    }
+  });
+
+  // GET /api/admin/scoring — Admin: liste des résultats
+  app.get("/api/admin/scoring", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const results = await db.select({
+        id: scoringResults.id, toolId: scoringResults.toolId, tier: scoringResults.tier,
+        companyName: scoringResults.companyName, email: scoringResults.email,
+        globalScore: scoringResults.globalScore, maturityLevel: scoringResults.maturityLevel,
+        sector: scoringResults.sector, createdAt: scoringResults.createdAt,
+      }).from(scoringResults).orderBy(scoringResults.createdAt);
+      return res.json(results);
+    } catch (error) {
+      return res.status(500).json({ error: "Erreur serveur." });
     }
   });
 }

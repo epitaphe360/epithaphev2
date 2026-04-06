@@ -887,7 +887,16 @@ export const scoringResults = pgTable("scoring_results", {
   pillarScores: json("pillar_scores").$type<Record<string, number>>().notNull(),
   maturityLevel: integer("maturity_level").notNull(), // 1=Emergent … 5=Leader
   recommendations: json("recommendations").$type<string[]>(),
-  sessionId: text("session_id"), // identifiant anonyme de session
+  // Tier system (CDC: Discover gratuit → Intelligence payant)
+  tier: varchar("tier", { length: 20 }).notNull().default('discover'), // 'discover' | 'intelligence'
+  voiceType: varchar("voice_type", { length: 20 }).default('direction'),  // 'direction' | 'terrain'
+  email: text("email"),           // email capturé à la gate
+  respondentName: text("respondent_name"),
+  // Intelligence tier
+  aiReport: json("ai_report"),    // rapport IA généré après paiement
+  intelligencePaymentRef: varchar("intelligence_payment_ref", { length: 100 }),
+  intelligenceUnlockedAt: timestamp("intelligence_unlocked_at"),
+  sessionId: text("session_id"),  // identifiant anonyme de session
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

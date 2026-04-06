@@ -48,7 +48,7 @@ export function registerScoringRoutes(app: Express) {
   });
 
   // Recuperer un rapport de scoring par ID (UUID)
-  app.get("/api/scoring/result/:id", async (req, res) => {
+  app.get("/api/scoring/result/:id", scoringLimiter, async (req, res) => {
     try {
       const { id } = req.params;
 

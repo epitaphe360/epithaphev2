@@ -23,12 +23,22 @@ const getHeaders = () => {
   return headers;
 };
 
+// Helper pour gérer les erreurs de réponse (401 → logout auto)
+const handleResponse = async (response: Response) => {
+  if (response.status === 401) {
+    useAuthStore.getState().logout();
+    throw new Error('Session expirée. Veuillez vous reconnecter.');
+  }
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return response;
+};
+
 export const api = {
   async get(url: string) {
     const response = await fetch(prefixUrl(url), {
       headers: getHeaders(),
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await handleResponse(response);
     return response.json();
   },
 
@@ -38,7 +48,7 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await handleResponse(response);
     return response.json();
   },
 
@@ -48,7 +58,7 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await handleResponse(response);
     return response.json();
   },
 
@@ -57,7 +67,7 @@ export const api = {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    await handleResponse(response);
     return response.ok;
   },
 };

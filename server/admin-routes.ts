@@ -98,6 +98,15 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter pour reset de mot de passe — max 5 / heure
+const passwordResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Trop de demandes de réinitialisation. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export function registerAdminRoutes(app: Express) {
 
   // ========================================
@@ -123,6 +132,16 @@ export function registerAdminRoutes(app: Express) {
       // Verify password
       const isValidPassword = await verifyPassword(password, user.password);
       if (!isValidPassword) {
+        // Log failed login attempt for security monitoring
+        await db.insert(auditLogs).values({
+          userId: user.id,
+          action: 'LOGIN_FAILED',
+          entityType: 'user',
+          entityId: user.id,
+          changes: { reason: 'invalid_password', email },
+          ipAddress: req.ip ?? null,
+          userAgent: req.headers['user-agent']?.slice(0, 500) ?? null,
+        }).catch(() => {});
         return res.status(401).json({ error: 'Identifiants invalides' });
       }
 
@@ -147,7 +166,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // ── Mot de passe oublié (admin) ─────────────────────────────────────────────
-  app.post('/api/admin/forgot-password', async (req, res) => {
+  app.post('/api/admin/forgot-password', passwordResetLimiter, async (req, res) => {
     try {
       const { email } = req.body as { email?: string };
       if (!email) return res.status(400).json({ error: 'Email requis' });
@@ -758,7 +777,7 @@ export function registerAdminRoutes(app: Express) {
   // ========================================
 
   // Get all media
-  app.get('/api/admin/media', requireAuth, async (req, res) => {
+  app.get('/api/admin/media', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { folder, search, limit, offset } = req.query;
 
@@ -857,7 +876,7 @@ export function registerAdminRoutes(app: Express) {
   });
 
   // Delete media file
-  app.delete('/api/admin/media/:id', requireAuth, async (req, res) => {
+  app.delete('/api/admin/media/:id', requireAuth, requireAdmin, async (req, res) => {
     try {
       const [existing] = await db.select().from(media).where(eq(media.id, req.params.id)).limit(1);
       if (!existing) return res.status(404).json({ error: 'Média non trouvé' });
@@ -1701,7 +1720,7 @@ export function registerAdminRoutes(app: Express) {
   // PROJECT BRIEFS / LEADS CRUD
   // ========================================
 
-  app.get('/api/admin/leads', requireAuth, async (req, res) => {
+  app.get('/api/admin/leads', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { status, priority, search, limit, offset } = req.query;
       const pagination = validatePagination(limit as string, offset as string);
@@ -1769,7 +1788,7 @@ export function registerAdminRoutes(app: Express) {
   // NEWSLETTER SUBSCRIPTIONS
   // ========================================
 
-  app.get('/api/admin/newsletter', requireAuth, async (req, res) => {
+  app.get('/api/admin/newsletter', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { status, search, limit, offset } = req.query;
       const pagination = validatePagination(limit as string, offset as string);
@@ -1825,7 +1844,7 @@ export function registerAdminRoutes(app: Express) {
   // CONTACT MESSAGES MANAGEMENT
   // ========================================
 
-  app.get('/api/admin/contacts', requireAuth, async (req, res) => {
+  app.get('/api/admin/contacts', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { status, search, limit, offset } = req.query;
       const pagination = validatePagination(limit as string, offset as string);

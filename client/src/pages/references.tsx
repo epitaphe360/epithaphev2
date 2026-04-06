@@ -1,8 +1,8 @@
 /**
- * Page R�f�rences � /nos-references
- * - �tudes de cas dynamiques depuis DB
+ * Page Références — /nos-references
+ * - Études de cas dynamiques depuis DB
  * - Logos clients filtrables par secteur
- * - CDC 2.5 : maillage interne vers �tudes de cas
+ * - CDC 2.5 : maillage interne vers Études de cas
  */
 import { useState } from "react";
 import { Link } from "wouter";
@@ -23,7 +23,7 @@ interface CaseStudy {
 }
 
 const clientCategories = [
-  { name: "B�timent et Travaux Publics (BTP)", sector: "BTP", clients: [
+  { name: "Bâtiment et Travaux Publics (BTP)", sector: "BTP", clients: [
     { name: "LafargeHolcim", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/lafargeholcim.jpg" },
     { name: "Weber", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/weber.jpg" },
     { name: "AkzoNobel", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/akzonobel.jpg" },
@@ -41,7 +41,7 @@ const clientCategories = [
     { name: "Cosumar", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/cosumar.jpg" },
     { name: "Lesieur Cristal", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/lesieurcristal.jpg" },
   ]},
-  { name: "IT & T�l�coms", sector: "IT", clients: [
+  { name: "IT & Télécoms", sector: "IT", clients: [
     { name: "Huawei", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/huawei.jpg" },
     { name: "Dell", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/dell.jpg" },
     { name: "Intel", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/intel.jpg" },
@@ -53,7 +53,7 @@ const clientCategories = [
     { name: "Tanger Med", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/trangermed.jpg" },
     { name: "Qatar Airways", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/qatarairways.jpg" },
     { name: "FedEx", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/fedex.jpg" },
-    { name: "Bollor�", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/bollore.jpg" },
+    { name: "Bolloré", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/bollore.jpg" },
     { name: "TMSA", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/TMSA.jpg" },
   ]},
   { name: "Finance & Assurance", sector: "Finance", clients: [
@@ -84,7 +84,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
               <Building2 className="w-12 h-12 text-primary/30" />
             </div>
           )}
-          {cs.isFeatured && <div className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2.5 py-1 rounded-full">� la une</div>}
+          {cs.isFeatured && <div className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-bold px-2.5 py-1 rounded-full">À la une</div>}
           {cs.clientName && <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">{cs.clientName}</div>}
         </div>
         <div className="p-5 flex flex-col flex-1">
@@ -107,7 +107,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
             </p>
           )}
           <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-auto">
-            Voir l'�tude de cas <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            Voir l'étude de cas <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
       </motion.article>
@@ -133,8 +133,8 @@ export default function ReferencesPage() {
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Nos R�f�rences Clients � Epitaphe 360"
-        description="Plus de 500 entreprises nous font confiance. D�couvrez nos r�f�rences et �tudes de cas par secteur."
+        title="Nos Références Clients — Epitaphe 360"
+        description="Plus de 500 entreprises nous font confiance. Découvrez nos références et Études de cas par secteur."
         canonicalPath="/nos-references"
       />
       <Navigation />
@@ -148,7 +148,7 @@ export default function ReferencesPage() {
             <br />
             <span className="inline-block bg-primary px-4 py-2 mt-2">confiance</span>
           </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">500+ entreprises au Maroc et � l'international</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">500+ entreprises au Maroc et à l'international</motion.p>
         </div>
       </section>
 
@@ -158,8 +158,8 @@ export default function ReferencesPage() {
             <RevealSection>
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-1">�tudes de cas</h2>
-                  <p className="text-muted-foreground text-sm">Nos r�alisations les plus marquantes</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Études de cas</h2>
+                  <p className="text-muted-foreground text-sm">Nos réalisations les plus marquantes</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-primary/30" />
               </div>

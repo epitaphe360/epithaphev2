@@ -72,9 +72,11 @@ export default function SolutionPage() {
             {solution.content}
           </p>
           <div className="text-center mt-8">
-            <Button size="lg" className="font-semibold" data-testid="button-solution-cta">
-              PARLEZ-NOUS DE VOTRE PROJET
-            </Button>
+            <Link href="/contact">
+              <Button size="lg" className="font-semibold" data-testid="button-solution-cta">
+                PARLEZ-NOUS DE VOTRE PROJET
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

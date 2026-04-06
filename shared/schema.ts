@@ -1022,14 +1022,23 @@ export const payments = pgTable("payments", {
   clientId: integer("client_id").references(() => clientAccounts.id),
   devisId: integer("devis_id").references(() => devis.id),
   subscriptionId: integer("subscription_id").references(() => clientSubscriptions.id),
-  type: varchar("type", { length: 20 }).notNull(), // devis | subscription
+  scoringResultId: text("scoring_result_id"),       // lien scoring_results.id (Intelligence tier)
+  type: varchar("type", { length: 20 }).notNull(),  // devis | subscription | intelligence
   amount: integer("amount").notNull(),              // centimes MAD
   currency: varchar("currency", { length: 5 }).default("MAD"),
-  status: varchar("status", { length: 20 }).default("pending"), // pending | paid | failed | refunded
-  paymentMethod: varchar("payment_method", { length: 30 }),     // card | virement | cheque
+  status: varchar("status", { length: 20 }).default("pending"), // pending | paid | failed | refunded | cancelled
+  paymentMethod: varchar("payment_method", { length: 30 }),     // paypal | cmi | virement | cheque
+  // PayPal
+  paypalOrderId: text("paypal_order_id"),
+  paypalCaptureId: text("paypal_capture_id"),
+  // CMI (Centre Monétique Interbancaire — Maroc)
+  cmiOrderId: text("cmi_order_id"),
+  cmiTransactionId: text("cmi_transaction_id"),
+  // Héritage Stripe (conservé pour rétro-compatibilité)
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   stripeChargeId: text("stripe_charge_id"),
   receiptUrl: text("receipt_url"),
+  invoiceId: integer("invoice_id"),                 // lien vers invoices.id (après création)
   metadata: json("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -1042,3 +1051,38 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
 });
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
+
+// ============================================================
+// FACTURATION — Factures avec TVA (20% Maroc)
+// ============================================================
+
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  invoiceNumber: varchar("invoice_number", { length: 30 }).notNull().unique(), // FAC-2026-0001
+  paymentId: integer("payment_id"),                 // lien optionnel vers payments.id
+  scoringResultId: text("scoring_result_id"),       // lien scoring_results.id
+  clientEmail: text("client_email").notNull(),
+  clientName: text("client_name").notNull(),
+  clientCompany: text("client_company"),
+  toolId: varchar("tool_id", { length: 30 }),       // commpulse | talentprint | ...
+  description: text("description"),
+  amountHT: integer("amount_ht").notNull(),         // centimes MAD hors taxes
+  tvaRate: integer("tva_rate").default(20),         // 20% TVA Maroc
+  amountTVA: integer("amount_tva").notNull(),       // centimes MAD TVA
+  amountTTC: integer("amount_ttc").notNull(),       // centimes MAD toutes taxes comprises
+  currency: varchar("currency", { length: 5 }).default("MAD"),
+  status: varchar("status", { length: 20 }).default("draft"), // draft | sent | paid | cancelled
+  pdfBase64: text("pdf_base64"),                    // PDF encodé en base64
+  pdfUrl: text("pdf_url"),                          // URL publique du PDF (si stocké)
+  issuedAt: timestamp("issued_at").defaultNow(),
+  paidAt: timestamp("paid_at"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type Invoice = typeof invoices.$inferSelect;

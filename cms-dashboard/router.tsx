@@ -34,6 +34,7 @@ import { ResourcesList } from './pages/resources/ResourcesList';
 import MenuManagement from './pages/menu/MenuManagement';
 import { ClientAccountsPage } from './pages/client-accounts/ClientAccountsPage';
 import { AuditLogsPage } from './pages/audit-logs/AuditLogsPage';
+import { FacturationPage } from './pages/facturation/FacturationPage';
 
 // Auth guard component
 interface ProtectedRouteProps {
@@ -124,7 +125,8 @@ export const getDashboardRoutes = (
 
         // ── Espace Client ──────────────────────────────
         { path: 'client-accounts',     element: <ClientAccountsPage /> },
-
+        // ── Facturation ────────────────────────────────────────
+        { path: 'facturation',         element: <FacturationPage /> },
         // ── Administration ─────────────────────────────
         { path: 'audit-logs',          element: <AuditLogsPage /> },
         { path: 'categories',          element: <CategoriesList /> },

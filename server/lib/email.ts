@@ -45,6 +45,11 @@ export async function sendMail(options: {
   subject: string;
   html: string;
   text?: string;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer | string;
+    contentType?: string;
+  }>;
 }): Promise<boolean> {
   try {
     const t = getTransporter();
@@ -54,6 +59,7 @@ export async function sendMail(options: {
       subject: options.subject,
       html: options.html,
       text: options.text || options.html.replace(/<[^>]+>/g, ""),
+      attachments: options.attachments,
     });
     console.log(`[EMAIL] Envoyé à ${options.to}: ${options.subject} (${info.messageId})`);
     return true;

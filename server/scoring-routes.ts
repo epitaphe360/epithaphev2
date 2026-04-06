@@ -12,6 +12,8 @@ import { requireAdmin } from "./lib/auth";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { sendMail } from "./lib/email";
+import { createPayPalOrder } from "./lib/paypal";
+import { generateCMIForm } from "./lib/cmi";
 
 const scoringLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -220,27 +222,98 @@ export function registerScoringRoutes(app: Express) {
     try {
       const schema = z.object({
         scoringResultId: z.string().uuid(),
-        toolId: z.string(),
-        email: z.string().email(),
-        companyName: z.string().max(200).optional(),
+        toolId:          z.string(),
+        email:           z.string().email(),
+        companyName:     z.string().max(200).optional(),
+        method:          z.enum(['paypal', 'cmi', 'virement']).default('paypal'),
       });
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
 
-      const { toolId, email } = parsed.data;
-      const price = INTELLIGENCE_PRICES[toolId] ?? 4900;
-      const paymentRef = `INT-${toolId.toUpperCase().slice(0, 3)}-${Date.now().toString(36).toUpperCase()}`;
+      const { toolId, email, companyName, scoringResultId, method } = parsed.data;
+      const priceHT  = INTELLIGENCE_PRICES[toolId] ?? 4900; // centimes MAD HT
+      const priceTTC = Math.round(priceHT * 1.20);          // TVA 20%
+      const toolName = toolId.charAt(0).toUpperCase() + toolId.slice(1);
+      const description = `Rapport Intelligence BMI 360™ — ${toolName}`;
 
-      // TODO: Stripe payment intent quand STRIPE_SECRET_KEY configuré
-      return res.status(201).json({
-        paymentRef, amount: price, currency: 'MAD', toolId,
-        message: `Paiement de ${price} MAD en attente. Référence : ${paymentRef}`,
-        bankInstructions: {
-          beneficiary: 'Epitaphe360 SARL',
-          reference: paymentRef,
-          amount: `${price} MAD`,
-        },
-      });
+      // Créer l'enregistrement payment en base (statut pending)
+      const paymentRef = `INT-${toolId.toUpperCase().slice(0, 3)}-${Date.now().toString(36).toUpperCase()}`;
+      const [payment] = await db.insert(payments).values({
+        scoringResultId,
+        type:          'intelligence',
+        amount:        priceTTC,
+        currency:      'MAD',
+        status:        'pending',
+        paymentMethod: method,
+        metadata:      { toolId, email, companyName, paymentRef },
+      }).returning();
+
+      if (method === 'paypal') {
+        // Créer une commande PayPal (montant en MAD converti)
+        const amountMAD = priceTTC / 100; // centimes → dirhams
+        const order = await createPayPalOrder(
+          amountMAD,
+          description,
+          `${payment.id}|${scoringResultId}`,
+        );
+
+        // Mettre à jour le paiement avec l'ID PayPal
+        await db.update(payments)
+          .set({ paypalOrderId: order.orderId })
+          .where(eq(payments.id, payment.id));
+
+        return res.status(201).json({
+          paymentMethod: 'paypal',
+          paymentId:     payment.id,
+          paypalOrderId: order.orderId,
+          approvalUrl:   order.approvalUrl,
+          amount:        priceTTC,
+          amountHT:      priceHT,
+          amountTVA:     priceTTC - priceHT,
+          currency:      'MAD',
+        });
+
+      } else if (method === 'cmi') {
+        // Générer le formulaire CMI (montant en dirhams)
+        const amountMAD = priceTTC / 100;
+        const cmiOrderId = `CMI-${payment.id}-${Date.now().toString(36).toUpperCase()}`;
+        const form = generateCMIForm(amountMAD, cmiOrderId, description, email);
+
+        // Mettre à jour le paiement avec l'ID CMI
+        await db.update(payments)
+          .set({ cmiOrderId })
+          .where(eq(payments.id, payment.id));
+
+        return res.status(201).json({
+          paymentMethod: 'cmi',
+          paymentId:     payment.id,
+          cmiOrderId,
+          gatewayUrl:    form.gatewayUrl,
+          formFields:    form.fields,
+          amount:        priceTTC,
+          amountHT:      priceHT,
+          amountTVA:     priceTTC - priceHT,
+          currency:      'MAD',
+        });
+
+      } else {
+        // Virement bancaire (fallback)
+        return res.status(201).json({
+          paymentMethod:    'virement',
+          paymentId:        payment.id,
+          paymentRef,
+          amount:           priceTTC,
+          amountHT:         priceHT,
+          amountTVA:        priceTTC - priceHT,
+          currency:         'MAD',
+          bankInstructions: {
+            beneficiary: 'Epitaphe360 SARL',
+            reference:   paymentRef,
+            amount:      `${(priceTTC / 100).toFixed(2)} MAD TTC`,
+            note:        'Veuillez indiquer la référence lors du virement.',
+          },
+        });
+      }
     } catch (error) {
       console.error("[Scoring/Payment]", error);
       return res.status(500).json({ error: "Erreur serveur." });

@@ -16,6 +16,7 @@ import {
   clientSubscriptions,
   devis,
   payments,
+  invoices,
   clientAccounts,
 } from "@shared/schema";
 import { requireClientAuth } from "./public-api-routes";
@@ -25,6 +26,9 @@ import { requireAuth, requireAdmin } from "./lib/auth";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
 import { z } from "zod";
+import { capturePayPalOrder } from "./lib/paypal";
+import { verifyCMICallback } from "./lib/cmi";
+import { createAndSendInvoice, generateInvoiceNumber } from "./lib/invoice-generator";
 
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -566,6 +570,284 @@ export function registerPaymentRoutes(app: Express) {
       res.json({ data: rows, total: Number(count ?? 0) });
     } catch (error) {
       res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  // ================================================================
+  // PAYPAL — Callbacks de retour (success + cancel)
+  // ================================================================
+
+  /**
+   * GET /api/payments/paypal/success?token=ORDER_ID&PayerID=PAYER_ID
+   * PayPal redirige ici après approbation. On capture le paiement et génère la facture.
+   */
+  app.get("/api/payments/paypal/success", async (req: Request, res: Response) => {
+    try {
+      const { token: orderId, PayerID } = req.query as Record<string, string>;
+      if (!orderId) return res.redirect(`${process.env.APP_URL ?? ''}/paiement/echec?reason=missing_token`);
+
+      // Retrouver le paiement en base via paypalOrderId
+      const [payment] = await db.select().from(payments)
+        .where(eq(payments.paypalOrderId, orderId))
+        .limit(1);
+
+      if (!payment) return res.redirect(`${process.env.APP_URL ?? ''}/paiement/echec?reason=not_found`);
+      if (payment.status === 'paid') return res.redirect(`${process.env.APP_URL ?? ''}/paiement/succes?invoice=${payment.invoiceId ?? ''}`);
+
+      // Capturer le paiement
+      const capture = await capturePayPalOrder(orderId);
+
+      if (capture.status !== 'COMPLETED') {
+        await db.update(payments).set({ status: 'failed' }).where(eq(payments.id, payment.id));
+        return res.redirect(`${process.env.APP_URL ?? ''}/paiement/echec?reason=capture_failed`);
+      }
+
+      // Marquer comme payé
+      await db.update(payments)
+        .set({ status: 'paid', paypalCaptureId: capture.captureId, updatedAt: new Date() })
+        .where(eq(payments.id, payment.id));
+
+      // Générer et envoyer la facture
+      const meta = (payment.metadata as Record<string, string>) ?? {};
+      const toolId = meta.toolId ?? 'inconnu';
+      const email  = meta.email  ?? capture.payerEmail;
+      const clientName = capture.payerName || meta.companyName || email;
+      const invoiceNumber = await generateInvoiceNumber();
+
+      const invoiceResult = await createAndSendInvoice({
+        invoiceNumber,
+        paymentId:        payment.id,
+        scoringResultId:  payment.scoringResultId ?? undefined,
+        clientEmail:      email,
+        clientName:       clientName,
+        clientCompany:    meta.companyName,
+        toolId,
+        description:      `Rapport Intelligence BMI 360™ — ${toolId.charAt(0).toUpperCase() + toolId.slice(1)}`,
+        amountHT:         Math.round(payment.amount / 1.20),
+        currency:         payment.currency ?? 'MAD',
+      });
+
+      return res.redirect(`${process.env.APP_URL ?? ''}/paiement/succes?invoice=${invoiceResult.invoiceId}&method=paypal`);
+    } catch (error) {
+      console.error('[PayPal/Success]', error);
+      return res.redirect(`${process.env.APP_URL ?? ''}/paiement/echec?reason=server_error`);
+    }
+  });
+
+  /**
+   * GET /api/payments/paypal/cancel?token=ORDER_ID
+   * PayPal redirige ici si le client annule.
+   */
+  app.get("/api/payments/paypal/cancel", async (req: Request, res: Response) => {
+    try {
+      const { token: orderId } = req.query as Record<string, string>;
+      if (orderId) {
+        await db.update(payments)
+          .set({ status: 'cancelled', updatedAt: new Date() })
+          .where(eq(payments.paypalOrderId, orderId));
+      }
+      return res.redirect(`${process.env.APP_URL ?? ''}/paiement/annule`);
+    } catch (error) {
+      console.error('[PayPal/Cancel]', error);
+      return res.redirect(`${process.env.APP_URL ?? ''}/paiement/annule`);
+    }
+  });
+
+  // ================================================================
+  // CMI — Callback POST depuis la passerelle
+  // ================================================================
+
+  /**
+   * POST /api/payments/cmi/callback
+   * CMI envoie un POST avec le résultat du paiement + signature HMAC.
+   */
+  app.post("/api/payments/cmi/callback", async (req: Request, res: Response) => {
+    try {
+      const body = req.body as Record<string, string>;
+      const { valid, approved, orderId: cmiOrderId, transactionId } = verifyCMICallback(body);
+
+      if (!valid) {
+        console.warn('[CMI/Callback] Signature invalide:', body);
+        return res.status(400).send('FAILURE');
+      }
+
+      const [payment] = await db.select().from(payments)
+        .where(eq(payments.cmiOrderId, cmiOrderId))
+        .limit(1);
+
+      if (!payment) return res.status(404).send('FAILURE');
+
+      if (!approved) {
+        await db.update(payments)
+          .set({ status: 'failed', cmiTransactionId: transactionId, updatedAt: new Date() })
+          .where(eq(payments.id, payment.id));
+        return res.send('ACTION=POSTAUTH\nPROCCODE=1');
+      }
+
+      // Marquer comme payé
+      await db.update(payments)
+        .set({ status: 'paid', cmiTransactionId: transactionId, updatedAt: new Date() })
+        .where(eq(payments.id, payment.id));
+
+      // Générer et envoyer la facture
+      const meta      = (payment.metadata as Record<string, string>) ?? {};
+      const toolId    = meta.toolId ?? 'inconnu';
+      const email     = meta.email  ?? body['BillToEmailAddress'] ?? '';
+      const clientName = meta.companyName || body['BillToName'] || email;
+      const invoiceNumber = await generateInvoiceNumber();
+
+      await createAndSendInvoice({
+        invoiceNumber,
+        paymentId:        payment.id,
+        scoringResultId:  payment.scoringResultId ?? undefined,
+        clientEmail:      email,
+        clientName:       clientName,
+        clientCompany:    meta.companyName,
+        toolId,
+        description:      `Rapport Intelligence BMI 360™ — ${toolId.charAt(0).toUpperCase() + toolId.slice(1)}`,
+        amountHT:         Math.round(payment.amount / 1.20),
+        currency:         payment.currency ?? 'MAD',
+      });
+
+      // CMI attend cette réponse spécifique pour confirmer la réception
+      return res.send('ACTION=POSTAUTH\nPROCCODE=0');
+    } catch (error) {
+      console.error('[CMI/Callback]', error);
+      return res.status(500).send('FAILURE');
+    }
+  });
+
+  // ================================================================
+  // ADMIN — Factures (invoices)
+  // ================================================================
+
+  /**
+   * GET /api/admin/invoices — Liste toutes les factures
+   */
+  app.get("/api/admin/invoices", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+    try {
+      const { status, toolId, limit = "50", offset = "0" } = req.query as Record<string, string>;
+      let q = db.select({
+        id:            invoices.id,
+        invoiceNumber: invoices.invoiceNumber,
+        clientEmail:   invoices.clientEmail,
+        clientName:    invoices.clientName,
+        clientCompany: invoices.clientCompany,
+        toolId:        invoices.toolId,
+        description:   invoices.description,
+        amountHT:      invoices.amountHT,
+        tvaRate:       invoices.tvaRate,
+        amountTVA:     invoices.amountTVA,
+        amountTTC:     invoices.amountTTC,
+        currency:      invoices.currency,
+        status:        invoices.status,
+        issuedAt:      invoices.issuedAt,
+        paidAt:        invoices.paidAt,
+        sentAt:        invoices.sentAt,
+        createdAt:     invoices.createdAt,
+      }).from(invoices).orderBy(desc(invoices.createdAt)).$dynamic();
+
+      if (status) q = q.where(eq(invoices.status, status));
+      if (toolId) q = q.where(eq(invoices.toolId, toolId));
+
+      const rows = await q.limit(Number(limit)).offset(Number(offset));
+      const [{ count }] = await db.select({ count: sql`count(*)` }).from(invoices);
+      return res.json({ data: rows, total: Number(count ?? 0) });
+    } catch (error) {
+      console.error('[Admin/Invoices]', error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/admin/invoices/:id/pdf — Télécharger le PDF d'une facture
+   */
+  app.get("/api/admin/invoices/:id/pdf", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) return res.status(400).json({ error: "ID invalide" });
+
+      const [invoice] = await db.select({ pdfBase64: invoices.pdfBase64, invoiceNumber: invoices.invoiceNumber })
+        .from(invoices)
+        .where(eq(invoices.id, id))
+        .limit(1);
+
+      if (!invoice?.pdfBase64) return res.status(404).json({ error: "PDF non trouvé" });
+
+      const pdfBuffer = Buffer.from(invoice.pdfBase64, 'base64');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="facture-${invoice.invoiceNumber}.pdf"`);
+      return res.send(pdfBuffer);
+    } catch (error) {
+      console.error('[Admin/Invoice/PDF]', error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * PATCH /api/admin/invoices/:id/status — Mettre à jour le statut d'une facture
+   */
+  app.patch("/api/admin/invoices/:id/status", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) return res.status(400).json({ error: "ID invalide" });
+
+      const parsed = z.object({ status: z.enum(['draft', 'sent', 'paid', 'cancelled']) }).safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Statut invalide" });
+
+      const updateData: Record<string, unknown> = { status: parsed.data.status };
+      if (parsed.data.status === 'paid') updateData.paidAt = new Date();
+
+      const [updated] = await db.update(invoices).set(updateData).where(eq(invoices.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: "Facture non trouvée" });
+
+      return res.json(updated);
+    } catch (error) {
+      console.error('[Admin/Invoice/Status]', error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
+
+  /**
+   * GET /api/admin/invoices/stats — Statistiques de facturation
+   */
+  app.get("/api/admin/invoices/stats", requireAuth as any, requireAdmin as any, async (_req: Request, res: Response) => {
+    try {
+      const allInvoices = await db.select({
+        amountHT:  invoices.amountHT,
+        amountTVA: invoices.amountTVA,
+        amountTTC: invoices.amountTTC,
+        status:    invoices.status,
+        toolId:    invoices.toolId,
+        issuedAt:  invoices.issuedAt,
+      }).from(invoices);
+
+      const paid    = allInvoices.filter(i => i.status === 'paid');
+      const pending = allInvoices.filter(i => i.status === 'sent');
+
+      const sum = (arr: typeof allInvoices, key: 'amountHT' | 'amountTVA' | 'amountTTC') =>
+        arr.reduce((acc, i) => acc + (i[key] ?? 0), 0);
+
+      // Stats du mois courant
+      const now     = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const thisMonth  = paid.filter(i => i.issuedAt && new Date(i.issuedAt) >= monthStart);
+
+      return res.json({
+        total:        allInvoices.length,
+        paid:         paid.length,
+        pending:      pending.length,
+        totalHT:      sum(paid, 'amountHT'),
+        totalTVA:     sum(paid, 'amountTVA'),
+        totalTTC:     sum(paid, 'amountTTC'),
+        monthHT:      sum(thisMonth, 'amountHT'),
+        monthTVA:     sum(thisMonth, 'amountTVA'),
+        monthTTC:     sum(thisMonth, 'amountTTC'),
+        currency:     'MAD',
+      });
+    } catch (error) {
+      console.error('[Admin/Invoice/Stats]', error);
+      return res.status(500).json({ error: "Erreur serveur" });
     }
   });
 }

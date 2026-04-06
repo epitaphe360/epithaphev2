@@ -40,6 +40,7 @@ import {
   Navigation,
   ClipboardList,
   FolderKanban,
+  Receipt,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -89,6 +90,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Ressources',    href: '/admin/resources',          icon: Download,        group: 'tools' },
     { name: 'Navigation',    href: '/admin/menus',              icon: Navigation,      group: 'tools' },
     { name: 'Clients',       href: '/admin/client-accounts',    icon: FolderKanban,    group: 'clients' },
+    { name: 'Facturation',   href: '/admin/facturation',        icon: Receipt,         group: 'clients' },
     { name: 'Audit Logs',    href: '/admin/audit-logs',         icon: ClipboardList,   group: 'settings' },
     { name: 'Catégories',    href: '/admin/categories',         icon: FolderTree,      group: 'settings' },
     { name: 'Médias',        href: '/admin/media',              icon: Image,           group: 'settings' },

@@ -56,6 +56,7 @@ export function IntelligencePricing({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +99,47 @@ export function IntelligencePricing({
       setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSimulatePayment = async () => {
+    if (!email.trim() || !name.trim()) {
+      setError('Veuillez renseigner votre nom et email pour simuler le paiement.');
+      return;
+    }
+    setError('');
+    setIsSimulating(true);
+
+    try {
+      const response = await fetch(`/api/scoring/${resultId}/simulate-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          answers: enrichedAnswers,
+          email,
+          respondentName: name,
+          companyName,
+          sector,
+          companySize,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error ?? `Erreur ${response.status}`);
+      }
+
+      const data = await response.json();
+      onSuccess({
+        globalScore:   data.globalScore,
+        maturityLevel: data.maturityLevel,
+        pillarScores:  data.pillarScores,
+        aiReport:      data.aiReport,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Simulation échouée. Réessayez.');
+    } finally {
+      setIsSimulating(false);
     }
   };
 
@@ -190,7 +232,7 @@ export function IntelligencePricing({
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isSimulating}
               className="w-full py-4 rounded-xl text-sm font-bold text-black transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               style={{ backgroundColor: toolColor }}
             >
@@ -207,6 +249,31 @@ export function IntelligencePricing({
               Votre rapport sera envoyé par email. Le paiement sera confirmé par notre équipe sous 24h.
             </p>
           </form>
+
+          {/* ─── Bouton simulation paiement (TEST) ─────────────────── */}
+          <div className="mt-4 pt-4 border-t border-dashed border-yellow-600/40">
+            <p className="text-xs text-yellow-500/80 font-semibold mb-2 flex items-center gap-1">
+              <span>⚡</span> Mode test
+            </p>
+            <button
+              type="button"
+              disabled={isLoading || isSimulating}
+              onClick={handleSimulatePayment}
+              className="w-full py-3 rounded-xl text-sm font-bold border border-yellow-500/50 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSimulating ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-yellow-400/40 border-t-yellow-400 rounded-full animate-spin" />
+                  Simulation en cours…
+                </>
+              ) : (
+                <>🧪 Simuler le paiement (TEST)</>
+              )}
+            </button>
+            <p className="text-xs text-yellow-600/60 text-center mt-1.5">
+              Génère un paiement factice + facture + rapport IA sans transaction réelle
+            </p>
+          </div>
 
           {/* Instructions virement */}
           <div className="mt-4 pt-4 border-t border-gray-800">

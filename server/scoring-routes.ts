@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 import { sendMail } from "./lib/email";
 import { createPayPalOrder } from "./lib/paypal";
 import { generateCMIForm } from "./lib/cmi";
+import { createAndSendInvoice, generateInvoiceNumber } from "./lib/invoice-generator";
 
 const scoringLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -192,9 +193,111 @@ export function registerScoringRoutes(app: Express) {
     }
   });
 
-  // GET /api/scoring/result/:id — Récupérer un résultat
-  app.get("/api/scoring/result/:id", scoringLimiter, async (req: Request, res: Response) => {
+  // POST /api/scoring/:id/simulate-payment — Paiement simulé (TEST uniquement)
+  // Activé si PAYMENT_SIMULATION_ENABLED=true ou NODE_ENV !== 'production'
+  app.post("/api/scoring/:id/simulate-payment", scoringLimiter, async (req: Request, res: Response) => {
+    const simulationEnabled =
+      process.env.PAYMENT_SIMULATION_ENABLED === 'true' ||
+      process.env.NODE_ENV !== 'production';
+
+    if (!simulationEnabled) {
+      return res.status(403).json({ error: "Simulation désactivée en production." });
+    }
+
     try {
+      const { id } = req.params;
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: "ID invalide." });
+
+      const bodySchema = z.object({
+        answers:      answersSchema,
+        email:        z.string().email(),
+        respondentName: z.string().min(1).max(200),
+        companyName:  z.string().max(200).optional(),
+        sector:       z.string().max(100).optional(),
+        companySize:  z.string().max(50).optional(),
+      });
+      const parsed = bodySchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
+
+      const { answers, email, respondentName, companyName, sector, companySize } = parsed.data;
+
+      const existing = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
+      if (!existing) return res.status(404).json({ error: "Résultat introuvable." });
+
+      const toolId   = existing.toolId;
+      const priceHT  = INTELLIGENCE_PRICES[toolId] ?? 4900;
+      const priceTTC = Math.round(priceHT * 1.20);
+      const toolName = toolId.charAt(0).toUpperCase() + toolId.slice(1);
+
+      // 1. Créer enregistrement paiement simulé
+      const [payment] = await db.insert(payments).values({
+        scoringResultId: id,
+        type:          'intelligence',
+        amount:        priceTTC,
+        currency:      'MAD',
+        status:        'paid',
+        paymentMethod: 'simulation',
+        metadata:      { toolId, email, companyName, simulation: 'true' },
+      }).returning();
+
+      // 2. Générer la facture PDF + envoyer par email
+      const invoiceNumber = await generateInvoiceNumber();
+      const invoiceResult = await createAndSendInvoice({
+        invoiceNumber,
+        paymentId:       payment.id,
+        scoringResultId: id,
+        clientEmail:     email,
+        clientName:      respondentName,
+        clientCompany:   companyName,
+        toolId,
+        description:     `[TEST] Rapport Intelligence BMI 360™ — ${toolName}`,
+        amountHT:        priceHT,
+        currency:        'MAD',
+      });
+
+      // 3. Générer le rapport IA
+      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers);
+      const aiReport = await generateAIReport({
+        toolId,
+        companyName: companyName ?? existing.companyName ?? undefined,
+        sector:      sector      ?? existing.sector      ?? undefined,
+        companySize: companySize ?? existing.companySize ?? undefined,
+        globalScore, maturityLevel, pillarScores,
+      });
+
+      // 4. Mettre à jour le scoring result en intelligence tier
+      const [updated] = await db.update(scoringResults).set({
+        tier: 'intelligence', globalScore, pillarScores, maturityLevel,
+        aiReport: aiReport as any,
+        intelligencePaymentRef: `SIM-${payment.id}`,
+        intelligenceUnlockedAt: new Date(),
+        companyName: companyName ?? existing.companyName,
+        sector:      sector      ?? existing.sector,
+        companySize: companySize ?? existing.companySize,
+        email:       email       ?? existing.email,
+        respondentName: respondentName ?? existing.respondentName,
+      }).where(eq(scoringResults.id, id)).returning();
+
+      return res.json({
+        id:            updated.id,
+        tier:          'intelligence',
+        globalScore,
+        maturityLevel,
+        pillarScores,
+        aiReport,
+        simulation:    true,
+        paymentId:     payment.id,
+        invoiceNumber: invoiceResult.invoiceNumber,
+        amountTTC:     priceTTC,
+      });
+    } catch (error) {
+      console.error("[Scoring/SimulatePayment]", error);
+      return res.status(500).json({ error: "Erreur lors de la simulation." });
+    }
+  });
+
+  // GET /api/scoring/result/:id — Récupérer un résultat
+  app.get("/api/scoring/result/:id", scoringLimiter, async (req: Request, res: Response) => {    try {
       const { id } = req.params;
       if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: "Format d'ID invalide." });
 

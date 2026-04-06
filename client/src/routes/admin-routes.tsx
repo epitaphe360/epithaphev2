@@ -5,6 +5,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Route, useLocation } from "wouter";
 import { useAuthStore } from "../../../cms-dashboard/store/authStore";
+import { ErrorBoundary } from "@/components/error-boundary";
 import type { ReactNode } from "react";
 
 // ─── Lazy imports ─────────────────────────────────────────────────────────────
@@ -79,7 +80,9 @@ function AdminPage({ children }: { children: ReactNode }) {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </DashboardLayout>
     </ProtectedRoute>
   );

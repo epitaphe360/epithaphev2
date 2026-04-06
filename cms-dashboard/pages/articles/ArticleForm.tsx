@@ -2,7 +2,7 @@
 // CMS Dashboard - Création/Édition d'Article
 // ========================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from '../../hooks/useRouterParams';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
@@ -49,15 +49,22 @@ export const ArticleForm: React.FC = () => {
   }, [id]);
 
   // Auto-sauvegarde brouillon toutes les 60s si statut DRAFT
+  const formDataRef = useRef(formData);
+  const templateRef = useRef(selectedTemplate);
+  const templateDataRef = useRef(templateData);
+  useEffect(() => { formDataRef.current = formData; }, [formData]);
+  useEffect(() => { templateRef.current = selectedTemplate; }, [selectedTemplate]);
+  useEffect(() => { templateDataRef.current = templateData; }, [templateData]);
+
   useEffect(() => {
     if (formData.status !== 'DRAFT' || !formData.title) return;
     const timer = setInterval(async () => {
       try {
         const api = getApi();
-        const dataToSave = { ...formData, template: selectedTemplate, templateData };
+        const dataToSave = { ...formDataRef.current, template: templateRef.current, templateData: templateDataRef.current };
         if (isEditing) {
           await api.articles.update(id!, dataToSave);
-        } else if (formData.title) {
+        } else if (formDataRef.current.title) {
           await api.articles.create(dataToSave);
         }
         const now = new Date();
@@ -65,7 +72,7 @@ export const ArticleForm: React.FC = () => {
       } catch {}
     }, 60000);
     return () => clearInterval(timer);
-  }, [formData, selectedTemplate, templateData, isEditing, id]);
+  }, [formData.status, formData.title, isEditing, id]);
 
   const loadCategories = async () => {
     try {

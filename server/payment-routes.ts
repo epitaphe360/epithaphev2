@@ -39,6 +39,20 @@ async function generateDevisRef(): Promise<string> {
   return `DEV-${year}-${rand}`;
 }
 
+/**
+ * Vérifie la signature HMAC d'un devis.
+ * Retourne `true` si la signature est valide.
+ */
+function verifyDevisSignature(devisId: string | number, reference: string, sig: string): boolean {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return false;
+  const expectedSig = crypto.createHmac("sha256", secret)
+    .update(`${devisId}:${reference}`)
+    .digest("hex");
+  if (sig.length !== expectedSig.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig));
+}
+
 export function registerPaymentRoutes(app: Express) {
 
   // ================================================================
@@ -250,13 +264,7 @@ export function registerPaymentRoutes(app: Express) {
 
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
 
-      // Vérifier la signature HMAC
-      const secret = process.env.JWT_SECRET;
-      if (!secret) return res.status(500).json({ error: "Configuration serveur manquante" });
-      const expectedSig = crypto.createHmac("sha256", secret)
-        .update(`${d.id}:${d.reference}`)
-        .digest("hex");
-      if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+      if (!verifyDevisSignature(d.id, d.reference, sig)) {
         return res.status(401).json({ error: "Signature invalide" });
       }
 
@@ -284,13 +292,7 @@ export function registerPaymentRoutes(app: Express) {
       const [d] = await db.select().from(devis).where(eq(devis.reference, req.params.reference)).limit(1);
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
 
-      // Vérifier la signature HMAC
-      const secret = process.env.JWT_SECRET;
-      if (!secret) return res.status(500).json({ error: "Configuration serveur manquante" });
-      const expectedSig = crypto.createHmac("sha256", secret)
-        .update(`${d.id}:${d.reference}`)
-        .digest("hex");
-      if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+      if (!verifyDevisSignature(d.id, d.reference, sig)) {
         return res.status(401).json({ error: "Signature invalide" });
       }
 
@@ -333,13 +335,7 @@ export function registerPaymentRoutes(app: Express) {
       const [d] = await db.select().from(devis).where(eq(devis.reference, req.params.reference)).limit(1);
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
 
-      // Vérifier la signature HMAC
-      const secret = process.env.JWT_SECRET;
-      if (!secret) return res.status(500).json({ error: "Configuration serveur manquante" });
-      const expectedSig = crypto.createHmac("sha256", secret)
-        .update(`${d.id}:${d.reference}`)
-        .digest("hex");
-      if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+      if (!verifyDevisSignature(d.id, d.reference, sig)) {
         return res.status(401).json({ error: "Signature invalide" });
       }
 

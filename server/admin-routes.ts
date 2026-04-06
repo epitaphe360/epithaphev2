@@ -612,8 +612,27 @@ export function registerAdminRoutes(app: Express) {
   // Get all categories
   app.get('/api/admin/categories', requireAuth, async (req, res) => {
     try {
-      const result = await db.select().from(categories).orderBy(categories.order, categories.name);
-      res.json({ data: result, total: result.length });
+      const { search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(categories.name, `%${s}%`), like(categories.slug, `%${s}%`)));
+      }
+
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const [rows, countResult] = await Promise.all([
+        db.select().from(categories)
+          .where(whereClause)
+          .orderBy(categories.order, categories.name)
+          .limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql<number>`count(*)` }).from(categories).where(whereClause),
+      ]);
+
+      res.json({ data: rows, total: Number(countResult[0]?.count ?? 0) });
     } catch (error) {
       console.error('Get categories error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des catégories' });
@@ -679,7 +698,20 @@ export function registerAdminRoutes(app: Express) {
   // Get all users
   app.get('/api/admin/users', requireAuth, requireAdmin, async (req, res) => {
     try {
-      const result = await db.select({
+      const { search, role, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (role && role !== 'all') conditions.push(eq(users.role, role as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(users.name, `%${s}%`), like(users.email, `%${s}%`)));
+      }
+
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const selectFields = {
         id: users.id,
         email: users.email,
         name: users.name,
@@ -687,9 +719,17 @@ export function registerAdminRoutes(app: Express) {
         avatar: users.avatar,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
-      }).from(users).orderBy(desc(users.createdAt));
+      };
 
-      res.json({ data: result, total: result.length });
+      const [rows, countResult] = await Promise.all([
+        db.select(selectFields).from(users)
+          .where(whereClause)
+          .orderBy(desc(users.createdAt))
+          .limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql<number>`count(*)` }).from(users).where(whereClause),
+      ]);
+
+      res.json({ data: rows, total: Number(countResult[0]?.count ?? 0) });
     } catch (error) {
       console.error('Get users error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des utilisateurs' });
@@ -902,8 +942,28 @@ export function registerAdminRoutes(app: Express) {
   // Get all pages
   app.get('/api/admin/pages', requireAuth, async (req, res) => {
     try {
-      const result = await db.select().from(pages).orderBy(pages.order, pages.title);
-      res.json({ data: result, total: result.length });
+      const { search, status, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: any[] = [];
+      if (status && status !== 'all') conditions.push(eq(pages.status, status as string));
+      if (search) {
+        const s = sanitizeLikePattern(search as string);
+        conditions.push(or(like(pages.title, `%${s}%`), like(pages.slug, `%${s}%`)));
+      }
+
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const [rows, countResult] = await Promise.all([
+        db.select().from(pages)
+          .where(whereClause)
+          .orderBy(pages.order, pages.title)
+          .limit(pagination.limit).offset(pagination.offset),
+        db.select({ count: sql<number>`count(*)` }).from(pages).where(whereClause),
+      ]);
+
+      res.json({ data: rows, total: Number(countResult[0]?.count ?? 0) });
     } catch (error) {
       console.error('Get pages error:', error);
       res.status(500).json({ error: 'Erreur lors de la récupération des pages' });

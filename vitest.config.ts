@@ -1,5 +1,9 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
+import dns from "dns";
+
+// Force DNS to return IPv6 when IPv4 is not available (Supabase AAAA-only)
+dns.setDefaultResultOrder("verbatim");
 
 export default defineConfig({
   test: {
@@ -11,7 +15,7 @@ export default defineConfig({
       include: ["server/**/*.ts", "shared/**/*.ts"],
       exclude: ["server/vite.ts", "server/static.ts", "server/dev-routes.ts"],
     },
-    testTimeout: 15000,
+    testTimeout: 30000,
   },
   resolve: {
     alias: {

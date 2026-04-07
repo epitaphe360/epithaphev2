@@ -173,6 +173,44 @@ export function registerPublicApiRoutes(app: Express): void {
   }
 
   // ========================================
+  // SCORING QUESTIONS (PUBLIC — no auth)
+  // ========================================
+
+  /**
+   * GET /api/scoring-questions/:toolId
+   * Retourne les questions d'un outil depuis la table settings.
+   * Clé : scoring_questions_{toolId} dans le groupe forms_scoring.
+   * Aucune authentification requise (données publiques des formulaires).
+   */
+  app.get("/api/scoring-questions/:toolId", async (req: Request, res: Response) => {
+    try {
+      const toolId = req.params.toolId.replace(/[^a-z0-9_-]/gi, "").toLowerCase();
+      if (!toolId) return res.status(400).json({ error: "toolId invalide." });
+
+      const key = `scoring_questions_${toolId}`;
+      const result = await db
+        .select()
+        .from(settings)
+        .where(eq(settings.key, key))
+        .limit(1);
+
+      if (!result[0]?.value) {
+        return res.json({ questions: null });
+      }
+
+      const raw = result[0].value;
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      const questions = Array.isArray(parsed)
+        ? parsed.map((q: { id: string; text: string }) => ({ id: String(q.id), text: String(q.text) }))
+        : null;
+
+      return res.json({ questions });
+    } catch {
+      return res.json({ questions: null });
+    }
+  });
+
+  // ========================================
   // NEWSLETTER SUBSCRIPTION
   // ========================================
 

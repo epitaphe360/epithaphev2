@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 
-const questions = [
+const DEFAULT_QUESTIONS = [
   { id: 'q1', text: "Les collaborateurs sont informes des decisions strategiques en temps reel." },
   { id: 'q2', text: "Il existe des canaux efficaces pour les feedbacks ascendants." },
   { id: 'q3', text: "La communication interne reflete reellement la culture d'entreprise." },
@@ -12,13 +12,26 @@ const questions = [
 ];
 
 export default function CommPulsePage() {
+  const [questions, setQuestions] = useState(DEFAULT_QUESTIONS);
+
+  useEffect(() => {
+    fetch('/api/scoring-questions/commpulse')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.questions?.length) {
+          setQuestions(d.questions.map((q: { id: string; text: string }) => ({ id: q.id, text: q.text })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <Navigation />
-      <ScoringForm 
+      <ScoringForm
         toolId="commpulse"
-        toolName="CommPulse�"
-        description="The Internal Communication Intelligence Platform by Epitaphe360. Evaluez la maturite de votre communication interne en 2 minutes."
+        toolName="CommPulse"
+        description="The Internal Communication Intelligence Platform par Epitaphe360. Evaluez la maturite de votre communication interne en 2 minutes."
         questions={questions}
       />
       <Footer />

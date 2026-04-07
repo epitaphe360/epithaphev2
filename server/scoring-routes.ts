@@ -33,7 +33,7 @@ const intelligenceLimiter = rateLimit({
 });
 
 const ALLOWED_TOOL_IDS = [
-  "commpulse", "talentprint", "impacttrace", "safesignal",
+  "brandmaturity", "commpulse", "talentprint", "impacttrace", "safesignal",
   "eventimpact", "spacescore", "finnarrative",
 ];
 

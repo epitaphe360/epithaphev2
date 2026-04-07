@@ -33,6 +33,26 @@ interface ToolDef {
 // ─── Questions par défaut de chaque outil ────────────────────────────────────
 const TOOLS: ToolDef[] = [
   {
+    id: 'brandmaturity',
+    name: 'BMI 360™',
+    color: '#C8A96E',
+    model: 'BRAND™',
+    defaultQuestions: [
+      { id: 'b1', pillar: 'I', pillarLabel: 'Identité', text: 'L\'identité visuelle de la marque est déployée de manière cohérente sur tous les supports.', weight: 3 },
+      { id: 'b2', pillar: 'I', pillarLabel: 'Identité', text: 'La charte graphique est respectée par toutes les équipes et prestataires.', weight: 2 },
+      { id: 'b3', pillar: 'I', pillarLabel: 'Identité', text: 'Un Brand Book à jour est accessible à l\'ensemble des collaborateurs.', weight: 2 },
+      { id: 'b4', pillar: 'P', pillarLabel: 'Positionnement', text: 'Le positionnement de marque est compris et partagé par 100% de la direction.', weight: 3 },
+      { id: 'b5', pillar: 'P', pillarLabel: 'Positionnement', text: 'Nous nous différencions clairement de nos concurrents dans l\'esprit de nos cibles.', weight: 3 },
+      { id: 'b6', pillar: 'P', pillarLabel: 'Positionnement', text: 'Notre promesse de marque est tenue à chaque point de contact client.', weight: 2 },
+      { id: 'c1', pillar: 'C', pillarLabel: 'Communication', text: 'Nous avons une charte éditoriale claire définissant notre tonalité et nos messages.', weight: 2 },
+      { id: 'c2', pillar: 'C', pillarLabel: 'Communication', text: 'Les prises de parole publiques sont cohérentes avec notre positionnement.', weight: 2 },
+      { id: 'c3', pillar: 'C', pillarLabel: 'Communication', text: 'Notre stratégie de contenu est documentée et révisée au moins une fois par an.', weight: 2 },
+      { id: 'n1', pillar: 'N', pillarLabel: 'Notoriété', text: 'Notre marque est spontanément citée par nos cibles lors d\'études de notoriété.', weight: 3 },
+      { id: 'n2', pillar: 'N', pillarLabel: 'Notoriété', text: 'Notre présence digitale (site, réseaux sociaux) est forte et visible.', weight: 2 },
+      { id: 'n3', pillar: 'N', pillarLabel: 'Notoriété', text: 'Nous mesurons régulièrement l\'évolution de notre notoriété.', weight: 2 },
+    ],
+  },
+  {
     id: 'commpulse',
     name: 'CommPulse™',
     color: '#6366F1',

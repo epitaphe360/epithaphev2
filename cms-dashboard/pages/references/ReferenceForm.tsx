@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, Plus, Trash2 } from 'lucide-react';
 import { getApi } from '../../lib/api';
+import { toast } from '../../lib/toast';
 
 const ALL_SECTORS = ['Industrie', 'Santé', 'Luxe & Retail', 'Tech & Digital', 'Finance', 'Énergie', 'Agroalimentaire'];
 
@@ -49,8 +50,8 @@ export function ReferenceForm({ reference, onClose }: { reference: Partial<Ref> 
     set('sectors', form.sectors.includes(s) ? form.sectors.filter((x) => x !== s) : [...form.sectors, s]);
 
   const handleSave = async () => {
-    if (!form.name.trim()) return alert('Nom requis');
-    if (!form.slug.trim()) return alert('Slug requis');
+    if (!form.name.trim()) return toast.error('Nom requis');
+    if (!form.slug.trim()) return toast.error('Slug requis');
     setSaving(true);
     try {
       const api = getApi();
@@ -58,7 +59,7 @@ export function ReferenceForm({ reference, onClose }: { reference: Partial<Ref> 
       else await api.post('/admin/references', form);
       onClose(true);
     } catch (err: any) {
-      alert(err?.response?.data?.error ?? 'Erreur');
+      toast.error(err?.response?.data?.error ?? 'Erreur');
     } finally { setSaving(false); }
   };
 

@@ -115,11 +115,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
   return (
     <DashboardConfigProvider config={mergedConfig}>
       <ToastProvider>
-        {/* Skill: Fira Sans for dashboard precision typography */}
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
           [data-admin-page="true"] { font-family: 'Fira Sans', system-ui, sans-serif !important; }
           [data-admin-page="true"] code, [data-admin-page="true"] .font-mono { font-family: 'Fira Code', monospace !important; }
+          [data-admin-page="true"] h1 {
+            font-family: 'Playfair Display', Georgia, serif !important;
+            font-weight: 600 !important;
+            letter-spacing: -0.02em !important;
+          }
         `}</style>
 
         <div className="min-h-screen" style={{ background: '#F8FAFC' }}>

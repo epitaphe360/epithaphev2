@@ -1,5 +1,5 @@
-// ========================================
-// NOUVELLE PAGE DE CONNEXION - DESIGN PREMIUM 2026
+﻿// ========================================
+// CMS Dashboard — Login Page — Light Luxury Theme
 // ========================================
 
 import React, { useState, useEffect } from 'react';
@@ -19,44 +19,33 @@ export const NewLoginPage: React.FC = () => {
   const { login } = useAuthStore();
   const [, setLocation] = useLocation();
 
-  // ✅ Add data-admin-page attribute for CSS rules
   useEffect(() => {
     document.body.setAttribute('data-admin-page', 'true');
     return () => document.body.removeAttribute('data-admin-page');
   }, []);
 
-  // Validation en temps réel
   const isEmailValid = email.includes('@') && email.includes('.');
   const isPasswordValid = password.length >= 6;
   const canSubmit = isEmailValid && isPasswordValid;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!canSubmit) {
-      setError('Veuillez remplir correctement tous les champs');
-      return;
-    }
-
+    if (!canSubmit) { setError('Veuillez remplir correctement tous les champs'); return; }
     setError('');
     setLoading(true);
-
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
-
       if (!res.ok) {
         const errorData = res.headers.get('content-type')?.includes('application/json')
           ? await res.json()
           : { error: `Erreur serveur (${res.status})` };
         throw new Error(errorData.error || 'Identifiants incorrects');
       }
-
       const data = await res.json();
-
       login(data.token, data.user);
       setLocation('/admin');
     } catch (err: any) {
@@ -67,230 +56,186 @@ export const NewLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Gradient Orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#E63946] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
-      </div>
-
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md px-6 animate-fadeInUp">
-
-        {/* Logo & Header */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[#E63946] to-[#F08080] shadow-2xl shadow-[#E63946]/50">
-            <span className="text-3xl font-bold text-gray-900">E</span>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-            Bienvenue
-          </h1>
-          <p className="text-gray-500 text-sm font-medium">
-            Connectez-vous à votre espace administrateur
-          </p>
-        </div>
-
-        {/* Form Container */}
-        <div className="relative">
-          {/* Glassmorphism Card */}
-          <div className="relative backdrop-blur-2xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
-
-            {/* Error Alert */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl backdrop-blur-sm animate-shake">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-red-400 text-sm font-medium">{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Email Input */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Email
-                </label>
-                <div className="relative group">
-                  <div className={`absolute inset-0 bg-gradient-to-r from-[#E63946] to-purple-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 ${emailFocused ? 'opacity-50' : ''}`}></div>
-                  <div className="relative">
-                    <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${emailFocused ? 'text-[#E63946]' : 'text-gray-500'}`} />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onFocus={() => setEmailFocused(true)}
-                      onBlur={() => setEmailFocused(false)}
-                      placeholder="admin@epitaph.ma"
-                      required
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-gray-900 placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-[#E63946]/50 focus:bg-white/10 transition-all duration-300"
-                    />
-                    {email && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        {isEmailValid ? (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                        ) : (
-                          <AlertCircle className="w-5 h-5 text-amber-400" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Password Input */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Mot de passe
-                </label>
-                <div className="relative group">
-                  <div className={`absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-300 ${passwordFocused ? 'opacity-50' : ''}`}></div>
-                  <div className="relative">
-                    <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${passwordFocused ? 'text-purple-400' : 'text-gray-500'}`} />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
-                      placeholder="••••••••"
-                      required
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-gray-900 placeholder-slate-500 text-sm font-medium focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all duration-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                {password && !isPasswordValid && (
-                  <p className="text-xs text-amber-400 flex items-center gap-1.5 mt-2">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    Le mot de passe doit contenir au moins 6 caractères
-                  </p>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading || !canSubmit}
-                className={`w-full h-14 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 shadow-lg ${
-                  canSubmit
-                    ? 'bg-gradient-to-r from-[#E63946] to-[#F08080] hover:shadow-[#E63946]/50 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] text-gray-900'
-                    : 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Connexion en cours...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Se connecter</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Decorative Glow */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-[#E63946]/20 to-purple-600/20 rounded-3xl blur-2xl -z-10 opacity-50"></div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 space-y-3">
-          <a
-            href="/admin/forgot-password"
-            onClick={(e) => { e.preventDefault(); setLocation('/admin/forgot-password'); }}
-            className="text-sm text-gray-500 hover:text-[#E63946] transition-colors"
+    <div className="min-h-screen w-full flex" style={{ background: '#F8FAFC', fontFamily: "'Fira Sans', system-ui, sans-serif" }}>
+      {/* Left panel — branding */}
+      <div
+        className="hidden lg:flex flex-col justify-between w-2/5 p-12"
+        style={{ background: 'linear-gradient(160deg, #1E293B 0%, #0F172A 100%)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+            style={{ background: 'linear-gradient(135deg, #EC4899, #be185d)', boxShadow: '0 0 20px rgba(236,72,153,0.4)' }}
           >
-            Mot de passe oublié ?
-          </a>
-          <p className="text-xs text-gray-500">
-            © 2026 Epitaphe — Tous droits réservés
+            E
+          </div>
+          <div className="leading-none">
+            <span className="text-white font-bold text-lg tracking-tight block">Epitaphe</span>
+            <span className="text-[10px] font-semibold tracking-[0.22em] uppercase" style={{ color: '#EC4899' }}>360 CMS</span>
+          </div>
+        </div>
+
+        <div>
+          <h1
+            className="text-4xl text-white leading-snug mb-4"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 600, letterSpacing: '-0.02em' }}
+          >
+            Gérez votre<br />
+            <span style={{ color: '#EC4899' }}>présence digitale</span><br />
+            en toute sérénité.
+          </h1>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            Tableau de bord centralisé pour piloter votre contenu,
+            vos clients et votre stratégie de communication.
           </p>
         </div>
+
+        <p className="text-slate-600 text-xs">© 2026 Epitaphe 360 — Tous droits réservés</p>
       </div>
 
-      {/* Custom CSS Animations */}
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+      {/* Right panel — form */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        {/* Mobile logo */}
+        <div className="lg:hidden flex items-center gap-3 mb-10">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white"
+            style={{ background: 'linear-gradient(135deg, #EC4899, #be185d)' }}
+          >
+            E
+          </div>
+          <span className="font-bold text-gray-900 text-lg tracking-tight">Epitaphe 360</span>
+        </div>
 
-        @keyframes blob {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-        }
+        <div className="w-full max-w-sm">
+          <h2
+            className="text-3xl text-gray-900 mb-1"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 600, letterSpacing: '-0.02em' }}
+          >
+            Connexion
+          </h2>
+          <p className="text-gray-500 text-sm mb-8">Espace administrateur Epitaphe 360</p>
 
-        @keyframes shake {
-          0%, 100% {
-            transform: translateX(0);
-          }
-          10%, 30%, 50%, 70%, 90% {
-            transform: translateX(-5px);
-          }
-          20%, 40%, 60%, 80% {
-            transform: translateX(5px);
-          }
-        }
+          {error && (
+            <div className="mb-5 p-3.5 rounded-xl border flex items-start gap-3"
+              style={{ background: 'rgba(236,72,153,0.05)', borderColor: 'rgba(236,72,153,0.2)' }}>
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#EC4899' }} />
+              <p className="text-sm" style={{ color: '#be185d' }}>{error}</p>
+            </div>
+          )}
 
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-out;
-        }
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+              <div className="relative">
+                <Mail
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors"
+                  style={{ color: emailFocused ? '#EC4899' : '#94A3B8' }}
+                />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                  placeholder="admin@epitaphe360.ma"
+                  required
+                  className="w-full rounded-xl pl-10 pr-10 py-3 text-sm font-medium outline-none transition-all"
+                  style={{
+                    background: '#FFFFFF',
+                    border: `1px solid ${emailFocused ? '#EC4899' : '#E2E8F0'}`,
+                    boxShadow: emailFocused ? '0 0 0 3px rgba(236,72,153,0.08)' : 'none',
+                    color: '#1E293B',
+                  }}
+                />
+                {email && (
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                    {isEmailValid ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
+                  </div>
+                )}
+              </div>
+            </div>
 
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Mot de passe</label>
+              <div className="relative">
+                <Lock
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors"
+                  style={{ color: passwordFocused ? '#EC4899' : '#94A3B8' }}
+                />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full rounded-xl pl-10 pr-10 py-3 text-sm font-medium outline-none transition-all"
+                  style={{
+                    background: '#FFFFFF',
+                    border: `1px solid ${passwordFocused ? '#EC4899' : '#E2E8F0'}`,
+                    boxShadow: passwordFocused ? '0 0 0 3px rgba(236,72,153,0.08)' : 'none',
+                    color: '#1E293B',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: '#94A3B8' }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#EC4899'}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {password && !isPasswordValid && (
+                <p className="text-xs text-amber-500 flex items-center gap-1.5 mt-1.5">
+                  <AlertCircle className="w-3.5 h-3.5" /> Minimum 6 caractères
+                </p>
+              )}
+            </div>
 
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading || !canSubmit}
+              className="w-full h-12 rounded-xl font-semibold text-sm tracking-wide transition-all duration-200 flex items-center justify-center gap-2 mt-2"
+              style={canSubmit ? {
+                background: 'linear-gradient(135deg, #EC4899, #be185d)',
+                color: '#FFFFFF',
+                boxShadow: '0 4px 14px rgba(236,72,153,0.35)',
+              } : {
+                background: '#F1F5F9',
+                color: '#94A3B8',
+                cursor: 'not-allowed',
+              }}
+            >
+              {loading
+                ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Connexion...</span></>
+                : <><span>Se connecter</span><ArrowRight className="w-4 h-4" /></>
+              }
+            </button>
+          </form>
 
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
+          <div className="mt-6 text-center">
+            <a
+              href="/admin/forgot-password"
+              onClick={(e) => { e.preventDefault(); setLocation('/admin/forgot-password'); }}
+              className="text-xs transition-colors"
+              style={{ color: '#94A3B8' }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#EC4899'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}
+            >
+              Mot de passe oublié ?
+            </a>
+          </div>
+        </div>
 
-        .animate-shake {
-          animation: shake 0.5s;
-        }
-      `}</style>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Fira+Sans:wght@400;500;600&display=swap');`}</style>
+      </div>
     </div>
   );
 };
-
-export default NewLoginPage;

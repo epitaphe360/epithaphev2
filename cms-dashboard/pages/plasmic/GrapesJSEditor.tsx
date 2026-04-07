@@ -6,6 +6,7 @@ import gjsPresetWebpage from "grapesjs-preset-webpage";
 import gjsBlocksBasic from "grapesjs-blocks-basic";
 import { Button } from "../../components/Button";
 import { ArrowLeft, Save, Eye } from "lucide-react";
+import { toast } from '../../lib/toast';
 
 export default function GrapesJSEditor() {
   const { pageId } = useParams();
@@ -175,11 +176,11 @@ export default function GrapesJSEditor() {
       });
 
       if (response.ok) {
-        alert("Page sauvegardée avec succès !");
+        toast.warning("Page sauvegardée avec succès !");
       }
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
-      alert("Erreur lors de la sauvegarde");
+      toast.error("Erreur lors de la sauvegarde");
     } finally {
       setIsSaving(false);
     }

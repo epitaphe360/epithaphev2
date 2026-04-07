@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, Plus, Trash2 } from 'lucide-react';
 import { getApi } from '../../lib/api';
+import { toast } from '../../lib/toast';
 
 interface SocialLink { platform: string; url: string; }
 interface TeamMember {
@@ -40,14 +41,14 @@ export function TeamForm({ member, onClose }: { member: Partial<TeamMember> | nu
     set('socialLinks', form.socialLinks.map((x, idx) => idx === i ? { ...x, [k]: v } : x));
 
   const handleSave = async () => {
-    if (!form.name.trim()) return alert('Nom requis');
+    if (!form.name.trim()) return toast.error('Nom requis');
     setSaving(true);
     try {
       const api = getApi();
       if (form.id) await api.put(`/admin/team/${form.id}`, form);
       else await api.post('/admin/team', form);
       onClose(true);
-    } catch (err: any) { alert(err?.response?.data?.error ?? 'Erreur'); }
+    } catch (err: any) { toast.error(err?.response?.data?.error ?? 'Erreur'); }
     finally { setSaving(false); }
   };
 

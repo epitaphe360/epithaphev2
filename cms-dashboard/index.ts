@@ -42,7 +42,7 @@ export { Badge, StatusBadge, CountBadge } from './components/Badge';
 export { RichTextEditor, MarkdownEditor } from './components/RichTextEditor';
 export { FileUpload, ImagePreview, MediaGrid } from './components/FileUpload';
 export { ToastProvider, useToast } from './components/Toast';
-export { Sidebar } from './components/Sidebar';
+export { PageHeader } from './components/PageHeader';
 
 // Layouts
 export { DashboardLayout } from './layouts/DashboardLayout';

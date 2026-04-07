@@ -4,6 +4,7 @@
 
 import React, { useRef, useState, useCallback } from 'react';
 import { Upload, X, Image, File, Loader2 } from 'lucide-react';
+import { toast } from '../lib/toast';
 
 interface FileUploadProps {
   onUpload: (files: File[]) => Promise<void>;
@@ -36,7 +37,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     Array.from(files).forEach((file) => {
       if (file.size > maxSizeBytes) {
-        alert(`Le fichier ${file.name} dépasse la taille maximale de ${maxSize}MB`);
+        toast.warning(`Le fichier ${file.name} dépasse la taille maximale de ${maxSize}MB`);
       } else {
         validFiles.push(file);
       }

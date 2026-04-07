@@ -9,6 +9,7 @@ import { Badge } from "../../components/Badge";
 import { ListPage, Column, ListPageAction } from "../../components/ListPage";
 import { usePaginatedList } from "../../hooks/usePaginatedList";
 import { getApi } from "../../lib/api";
+import { toast } from '../../lib/toast';
 
 interface Article {
   id: string;
@@ -35,7 +36,7 @@ export function ArticlesList() {
   const handleDelete = async (item: Article) => {
     if (!confirm(`Supprimer "${item.title}" ?`)) return;
     try { await getApi().delete(`/admin/articles/${item.id}`); refetch(); }
-    catch { alert("Erreur lors de la suppression"); }
+    catch { toast.error("Erreur lors de la suppression"); }
   };
 
   const columns: Column<Article>[] = [

@@ -8,6 +8,7 @@ import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
 import { ReferenceForm } from './ReferenceForm';
+import { toast } from '../../lib/toast';
 
 interface ClientReference {
   id: string;
@@ -42,7 +43,7 @@ export function ReferencesList() {
   const handleDelete = async (item: ClientReference) => {
     if (!confirm(`Supprimer "${item.name}" ?`)) return;
     try { await getApi().delete(`/admin/references/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const columns: Column<ClientReference>[] = [

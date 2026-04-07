@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../../store/authStore";
+import { toast } from '../../lib/toast';
 
 interface DevisItem {
   id: number;
@@ -65,7 +66,7 @@ export function DevisList() {
       if (!res.ok) throw new Error("Erreur envoi");
       await fetchDevis();
     } catch (e: any) {
-      alert("Erreur : " + e.message);
+      toast.error("Erreur : " + e.message);
     } finally {
       setSendingId(null);
     }
@@ -78,7 +79,7 @@ export function DevisList() {
       if (!res.ok) throw new Error("Erreur suppression");
       await fetchDevis();
     } catch (e: any) {
-      alert("Erreur : " + e.message);
+      toast.error("Erreur : " + e.message);
     }
   }
 

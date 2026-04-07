@@ -86,8 +86,8 @@ export function AuditLogsPage() {
     <div className="p-6 space-y-6">
       {/* En-tête */}
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-[#E63946]/10 rounded-xl">
-          <ClipboardList className="w-6 h-6 text-[#E63946]" />
+        <div className="p-2 bg-[#EC4899]/10 rounded-xl">
+          <ClipboardList className="w-6 h-6 text-[#EC4899]" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
@@ -105,7 +105,7 @@ export function AuditLogsPage() {
         <select
           value={actionFilter}
           onChange={(e) => handleActionChange(e.target.value)}
-          className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/40"
+          className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/40"
         >
           <option value="all">Toutes les actions</option>
           <option value="CREATE">Créations</option>
@@ -115,7 +115,7 @@ export function AuditLogsPage() {
         <select
           value={entityFilter}
           onChange={(e) => handleEntityChange(e.target.value)}
-          className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946]/40"
+          className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#EC4899]/40"
         >
           <option value="all">Tous les types</option>
           {Object.entries(ENTITY_LABELS).map(([key, label]) => (
@@ -127,7 +127,7 @@ export function AuditLogsPage() {
       {/* Liste des logs */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#EC4899] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : items.length === 0 ? (
         <div className="text-center py-20 text-gray-500">

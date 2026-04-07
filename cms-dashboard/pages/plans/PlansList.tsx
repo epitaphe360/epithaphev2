@@ -3,6 +3,7 @@
  */
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../../store/authStore";
+import { toast } from '../../lib/toast';
 
 interface Plan {
   id: number;
@@ -47,7 +48,7 @@ export function PlansList() {
       setEditForm({});
       fetchPlans();
     } else {
-      alert("Erreur lors de la sauvegarde");
+      toast.error("Erreur lors de la sauvegarde");
     }
   }
 

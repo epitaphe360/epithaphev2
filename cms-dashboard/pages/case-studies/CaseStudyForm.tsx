@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, Plus, Trash2 } from 'lucide-react';
 import { getApi } from '../../lib/api';
+import { toast } from '../../lib/toast';
 
 interface KPI { label: string; value: string; }
 interface CaseStudy {
@@ -56,14 +57,14 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
   const setGallery = (i: number, v: string) => set('gallery', form.gallery.map((x, idx) => idx === i ? v : x));
 
   const handleSave = async () => {
-    if (!form.title.trim()) return alert('Titre requis');
+    if (!form.title.trim()) return toast.error('Titre requis');
     setSaving(true);
     try {
       const api = getApi();
       if (form.id) await api.put(`/admin/case-studies/${form.id}`, form);
       else await api.post('/admin/case-studies', form);
       onClose(true);
-    } catch (err: any) { alert(err?.response?.data?.error ?? 'Erreur'); }
+    } catch (err: any) { toast.error(err?.response?.data?.error ?? 'Erreur'); }
     finally { setSaving(false); }
   };
 

@@ -8,6 +8,7 @@ import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
 import { CaseStudyForm } from './CaseStudyForm';
+import { toast } from '../../lib/toast';
 
 interface CaseStudy {
   id: string;
@@ -36,7 +37,7 @@ export function CaseStudiesList() {
   const handleDelete = async (item: CaseStudy) => {
     if (!confirm(`Supprimer "${item.title}" ?`)) return;
     try { await getApi().delete(`/admin/case-studies/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const columns: Column<CaseStudy>[] = [

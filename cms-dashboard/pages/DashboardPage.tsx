@@ -61,9 +61,9 @@ interface ChartPoint {
   leads: number;
 }
 
-const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#E63946', delay }: any) => (
+const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#EC4899', delay }: any) => (
   <div
-    className="group relative overflow-hidden rounded-3xl bg-white border border-gray-200 p-5 transition-all duration-500 hover:border-[#E63946]/30 hover:shadow-2xl hover:shadow-[#E63946]/10"
+    className="group relative overflow-hidden rounded-xl bg-white border border-gray-200 p-5 transition-all duration-500 hover:border-[#EC4899]/30 hover:shadow-xl hover:shadow-[#EC4899]/8 hover:-translate-y-0.5"
     style={{ animation: `fadeInUp 0.6s ease-out ${delay}s backwards` }}
   >
     <div className="absolute top-0 right-0 p-5 opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-500">
@@ -71,7 +71,7 @@ const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#E63946',
     </div>
     <div className="relative z-10">
       <div className="flex items-center justify-between mb-3">
-        <div className="p-2 rounded-2xl bg-gray-100/50 border border-gray-300/40 text-[#E63946] group-hover:bg-[#E63946] group-hover:text-gray-700 transition-colors">
+        <div className="p-2 rounded-2xl bg-gray-100/50 border border-gray-300/40 text-[#EC4899] group-hover:bg-[#EC4899] group-hover:text-gray-700 transition-colors">
           <Icon className="w-[18px] h-[18px]" />
         </div>
         {trend !== undefined && (
@@ -90,7 +90,7 @@ const StatCard = ({ title, value, subtext, trend, icon: Icon, color = '#E63946',
         <span className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{value}</span>
       </div>
       <p className="text-gray-500 text-xs mt-3 flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#E63946]/80"></span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#EC4899]/80"></span>
         {subtext}
       </p>
     </div>
@@ -105,7 +105,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <div className="space-y-1">
           {payload[0] && (
             <p className="text-gray-900 text-sm font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#E63946]"></span>
+              <span className="w-2 h-2 rounded-full bg-[#EC4899]"></span>
               {payload[0].value} Articles
             </p>
           )}
@@ -176,8 +176,8 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center">
-          <div className="w-16 h-16 border-2 border-[#E63946]/20 border-t-[#E63946] rounded-full animate-spin" />
-          <p className="mt-4 text-[#E63946]/50 text-xs font-bold uppercase tracking-widest animate-pulse">Chargement du tableau de bord</p>
+          <div className="w-16 h-16 border-2 border-[#EC4899]/20 border-t-[#EC4899] rounded-full animate-spin" />
+          <p className="mt-4 text-[#EC4899]/50 text-xs font-bold uppercase tracking-widest animate-pulse">Chargement du tableau de bord</p>
         </div>
       </div>
     );
@@ -203,9 +203,9 @@ export const DashboardPage: React.FC = () => {
         {/* HEADER */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8 md:mb-10">
           <div>
-            <h2 className="text-[#E63946] font-bold text-xs uppercase tracking-widest mb-2">Vue d'ensemble</h2>
+            <h2 className="text-[#EC4899] font-bold text-xs uppercase tracking-widest mb-2">Vue d'ensemble</h2>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F08080] to-[#E63946]">Agence</span>
+              Performance <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F08080] to-[#EC4899]">Agence</span>
             </h1>
           </div>
           <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-gray-200">
@@ -215,7 +215,7 @@ export const DashboardPage: React.FC = () => {
                 onClick={() => setSelectedPeriod(period)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
                   selectedPeriod === period
-                    ? 'bg-[#E63946] text-gray-900 shadow-lg shadow-[#E63946]/20'
+                    ? 'bg-[#EC4899] text-gray-900 shadow-lg shadow-[#EC4899]/20'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -245,7 +245,7 @@ export const DashboardPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-2 text-xs font-medium text-gray-500">
-                  <span className="w-2 h-2 rounded-full bg-[#E63946]"></span> Articles
+                  <span className="w-2 h-2 rounded-full bg-[#EC4899]"></span> Articles
                 </span>
                 <span className="flex items-center gap-2 text-xs font-medium text-gray-500">
                   <span className="w-2 h-2 rounded-full bg-purple-500"></span> Leads
@@ -257,8 +257,8 @@ export const DashboardPage: React.FC = () => {
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorArticles" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#E63946" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#E63946" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#EC4899" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#EC4899" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#a855f7" stopOpacity={0.2} />
@@ -269,7 +269,7 @@ export const DashboardPage: React.FC = () => {
                   <XAxis dataKey="date" stroke="#475569" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} dy={10} />
                   <YAxis stroke="#475569" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} dx={-10} allowDecimals={false} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="articles" stroke="#E63946" strokeWidth={2.5} fillOpacity={1} fill="url(#colorArticles)" />
+                  <Area type="monotone" dataKey="articles" stroke="#EC4899" strokeWidth={2.5} fillOpacity={1} fill="url(#colorArticles)" />
                   <Area type="monotone" dataKey="leads" stroke="#a855f7" strokeWidth={2.5} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorLeads)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -299,7 +299,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
             <Link href="/admin/articles/new">
-              <button className="w-full py-3.5 bg-[#E63946] hover:bg-[#c8313d] text-gray-900 rounded-2xl font-bold tracking-wide transition-all shadow-lg shadow-[#E63946]/20 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
+              <button className="w-full py-3.5 bg-[#EC4899] hover:bg-[#c8313d] text-gray-900 rounded-2xl font-bold tracking-wide transition-all shadow-lg shadow-[#EC4899]/20 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">
                 <Plus className="w-5 h-5" /> NOUVEL ARTICLE
               </button>
             </Link>
@@ -314,7 +314,7 @@ export const DashboardPage: React.FC = () => {
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900">Derniers Leads</h3>
               <Link href="/admin/leads">
-                <span className="text-xs text-gray-500 hover:text-[#E63946] transition-colors cursor-pointer">Voir tout →</span>
+                <span className="text-xs text-gray-500 hover:text-[#EC4899] transition-colors cursor-pointer">Voir tout →</span>
               </Link>
             </div>
             <div className="divide-y divide-[#E2E8F0]">
@@ -323,8 +323,8 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 (s?.recentLeads ?? []).slice(0, 5).map((lead: any, i: number) => (
                   <div key={i} className="flex items-center gap-4 px-6 py-3 hover:bg-gray-100/40 transition">
-                    <div className="w-8 h-8 rounded-full bg-[#E63946]/20 flex items-center justify-center shrink-0">
-                      <Users className="w-4 h-4 text-[#E63946]" />
+                    <div className="w-8 h-8 rounded-full bg-[#EC4899]/20 flex items-center justify-center shrink-0">
+                      <Users className="w-4 h-4 text-[#EC4899]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900 font-medium truncate">{lead.name ?? lead.email ?? 'Lead'}</p>
@@ -346,7 +346,7 @@ export const DashboardPage: React.FC = () => {
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900">Derniers Articles</h3>
               <Link href="/admin/articles">
-                <span className="text-xs text-gray-500 hover:text-[#E63946] transition-colors cursor-pointer">Voir tout →</span>
+                <span className="text-xs text-gray-500 hover:text-[#EC4899] transition-colors cursor-pointer">Voir tout →</span>
               </Link>
             </div>
             <div className="divide-y divide-[#E2E8F0]">

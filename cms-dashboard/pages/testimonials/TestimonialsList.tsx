@@ -8,6 +8,7 @@ import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
 import { TestimonialForm } from './TestimonialForm';
+import { toast } from '../../lib/toast';
 
 interface Testimonial {
   id: string;
@@ -42,7 +43,7 @@ export function TestimonialsList() {
   const handleDelete = async (item: Testimonial) => {
     if (!confirm(`Supprimer le témoignage de "${item.authorName}" ?`)) return;
     try { await getApi().delete(`/admin/testimonials/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const columns: Column<Testimonial>[] = [

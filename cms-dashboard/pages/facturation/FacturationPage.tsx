@@ -14,6 +14,7 @@ import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { toast } from '../../lib/toast';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -175,7 +176,7 @@ export function FacturationPage() {
     const res = await fetch(`/api/admin/invoices/${invoice.id}/pdf`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
-    if (!res.ok) { alert('PDF non disponible'); return; }
+    if (!res.ok) { toast.warning('PDF non disponible'); return; }
     const blob = await res.blob();
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');

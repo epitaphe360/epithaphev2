@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, Star } from 'lucide-react';
 import { getApi } from '../../lib/api';
+import { toast } from '../../lib/toast';
 
 interface Testimonial {
   id?: string;
@@ -35,15 +36,15 @@ export function TestimonialForm({ testimonial, onClose }: { testimonial: Partial
   const set = (k: keyof Testimonial, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = async () => {
-    if (!form.quote.trim()) return alert('Citation requise');
-    if (!form.authorName.trim()) return alert('Nom de l\'auteur requis');
+    if (!form.quote.trim()) return toast.error('Citation requise');
+    if (!form.authorName.trim()) return toast.error('Nom de l\'auteur requis');
     setSaving(true);
     try {
       const api = getApi();
       if (form.id) await api.put(`/admin/testimonials/${form.id}`, form);
       else await api.post('/admin/testimonials', form);
       onClose(true);
-    } catch (err: any) { alert(err?.response?.data?.error ?? 'Erreur'); }
+    } catch (err: any) { toast.error(err?.response?.data?.error ?? 'Erreur'); }
     finally { setSaving(false); }
   };
 

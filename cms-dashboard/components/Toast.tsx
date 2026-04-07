@@ -2,8 +2,9 @@
 // CMS Dashboard - UI Components: Toast
 // ========================================
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import { registerToast } from '../lib/toast';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -118,6 +119,11 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const warning = useCallback((title: string, message?: string) => {
     addToast({ type: 'warning', title, message });
   }, [addToast]);
+
+  // Enregistrement du singleton global pour usage hors hook
+  useEffect(() => {
+    registerToast({ success, error, info, warning });
+  }, [success, error, info, warning]);
 
   return (
     <ToastContext.Provider

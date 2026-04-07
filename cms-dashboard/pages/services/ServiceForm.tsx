@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2 } from 'lucide-react';
 import { getApi } from '../../lib/api';
+import { toast } from '../../lib/toast';
 
 interface Service {
   id?: string;
@@ -85,7 +86,7 @@ export function ServiceForm({ service, onClose }: ServiceFormProps) {
       }
       onClose(true);
     } catch (err: any) {
-      alert(err?.response?.data?.error ?? 'Erreur lors de la sauvegarde');
+      toast.error(err?.response?.data?.error ?? 'Erreur lors de la sauvegarde');
     } finally {
       setSaving(false);
     }

@@ -34,7 +34,7 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#E63946] to-[#F08080] rounded-xl flex items-center justify-center shadow-lg shadow-[#E63946]/30">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#EC4899] to-[#F08080] rounded-xl flex items-center justify-center shadow-lg shadow-[#EC4899]/30">
               <span className="text-gray-900 font-bold text-2xl">E</span>
             </div>
           </div>
@@ -48,7 +48,7 @@ export const ForgotPasswordPage: React.FC = () => {
               </p>
               <button
                 onClick={() => setLocation('/admin/login')}
-                className="text-[#E63946] hover:underline text-sm"
+                className="text-[#EC4899] hover:underline text-sm"
               >
                 Retour à la connexion
               </button>
@@ -75,13 +75,13 @@ export const ForgotPasswordPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
                     required
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#E63946]/40 focus:border-[#E63946]/50"
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#EC4899]/40 focus:border-[#EC4899]/50"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#E63946] hover:bg-[#D62839] text-gray-900 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3 bg-[#EC4899] hover:bg-[#D62839] text-gray-900 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   Envoyer le lien

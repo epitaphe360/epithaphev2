@@ -9,6 +9,7 @@ import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
 import { ServiceForm } from './ServiceForm';
+import { toast } from '../../lib/toast';
 
 interface Service {
   id: string;
@@ -49,7 +50,7 @@ export function ServicesList() {
       await getApi().delete(`/admin/services/${item.id}`);
       refetch();
     } catch {
-      alert('Erreur lors de la suppression');
+      toast.error('Erreur lors de la suppression');
     }
   };
 

@@ -7,6 +7,7 @@ import { ListPage, Column, ListPageAction } from '../../components/ListPage';
 import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
+import { toast } from '../../lib/toast';
 
 interface Subscriber {
   id: string;
@@ -31,13 +32,13 @@ export function NewsletterList() {
   const handleDelete = async (item: Subscriber) => {
     if (!confirm(`Supprimer "${item.email}" de la liste ?`)) return;
     try { await getApi().delete(`/admin/newsletter/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const toggleStatus = async (item: Subscriber) => {
     const next = item.status === 'active' ? 'unsubscribed' : 'active';
     try { await getApi().put(`/admin/newsletter/${item.id}`, { status: next }); refetch(); }
-    catch { alert('Erreur'); }
+    catch { toast.error('Erreur'); }
   };
 
   const columns: Column<Subscriber>[] = [

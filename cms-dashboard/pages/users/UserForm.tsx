@@ -7,6 +7,7 @@ import { X } from 'lucide-react';
 import { Modal } from '../../components/Modal';
 import { Input, Textarea, Select } from '../../components/Input';
 import { Button } from '../../components/Button';
+import { toast } from '../../lib/toast';
 
 interface UserFormProps {
   user?: any;
@@ -43,12 +44,12 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) =>
     
     // Validation
     if (!formData.name || !formData.email) {
-      alert('Le nom et l\'email sont requis');
+      toast.error('Le nom et l\'email sont requis');
       return;
     }
 
     if (!user && !formData.password) {
-      alert('Le mot de passe est requis pour un nouvel utilisateur');
+      toast.error('Le mot de passe est requis pour un nouvel utilisateur');
       return;
     }
 

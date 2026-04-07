@@ -7,6 +7,7 @@ import { ListPage, Column, ListPageAction } from '../../components/ListPage';
 import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
+import { toast } from '../../lib/toast';
 
 interface Lead {
   id: string;
@@ -50,7 +51,7 @@ function LeadDetailModal({ lead, onClose }: { lead: Lead; onClose: () => void })
   const save = async () => {
     setSaving(true);
     try { await getApi().put(`/admin/leads/${lead.id}`, { status, internalNotes: notes, assignedTo }); onClose(); }
-    catch { alert('Erreur'); }
+    catch { toast.error('Erreur'); }
     finally { setSaving(false); }
   };
 
@@ -138,7 +139,7 @@ export function LeadsList() {
     try {
       await Promise.all(Array.from(selected).map((id) => getApi().put(`/admin/leads/${id}`, { status })));
       setSelected(new Set()); refetch();
-    } catch { alert('Erreur action groupée'); }
+    } catch { toast.error('Erreur action groupée'); }
     finally { setBulkLoading(false); }
   };
 
@@ -148,14 +149,14 @@ export function LeadsList() {
     try {
       await Promise.all(Array.from(selected).map((id) => getApi().delete(`/admin/leads/${id}`)));
       setSelected(new Set()); refetch();
-    } catch { alert('Erreur suppression'); }
+    } catch { toast.error('Erreur suppression'); }
     finally { setBulkLoading(false); }
   };
 
   const handleDelete = async (item: Lead) => {
     if (!confirm(`Supprimer le lead de "${item.firstName} ${item.lastName}" ?`)) return;
     try { await getApi().delete(`/admin/leads/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const columns: Column<Lead>[] = [
@@ -165,7 +166,7 @@ export function LeadsList() {
       width: '48px',
       render: (l) => (
         <input type="checkbox" checked={selected.has(l.id)} onChange={() => toggleSelect(l.id)}
-          className="w-4 h-4 rounded accent-[#E63946]" onClick={(e) => e.stopPropagation()} />
+          className="w-4 h-4 rounded accent-[#EC4899]" onClick={(e) => e.stopPropagation()} />
       ),
     },
     {
@@ -228,7 +229,7 @@ export function LeadsList() {
       </select>
 
       {selected.size > 0 && (
-        <div className="flex items-center gap-2 bg-gray-100 border border-[#E63946]/30 rounded-xl px-3 py-1.5">
+        <div className="flex items-center gap-2 bg-gray-100 border border-[#EC4899]/30 rounded-xl px-3 py-1.5">
           <span className="text-xs text-gray-500">{selected.size} sélectionné(s)</span>
           <button onClick={() => bulkStatus('contacted')} disabled={bulkLoading}
             className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Contacté</button>
@@ -249,7 +250,7 @@ export function LeadsList() {
         <div className="px-6 pt-4">
           <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" checked={selected.size === items.length && items.length > 0}
-              onChange={toggleAll} className="w-4 h-4 rounded accent-[#E63946]" />
+              onChange={toggleAll} className="w-4 h-4 rounded accent-[#EC4899]" />
             Tout sélectionner
           </label>
         </div>

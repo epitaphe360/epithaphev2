@@ -117,8 +117,8 @@ export function ClientAccountsPage() {
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#E63946]/10 rounded-xl">
-            <FolderKanban className="w-6 h-6 text-[#E63946]" />
+          <div className="p-2 bg-[#EC4899]/10 rounded-xl">
+            <FolderKanban className="w-6 h-6 text-[#EC4899]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Comptes Clients</h1>

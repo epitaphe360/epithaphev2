@@ -7,6 +7,7 @@ import { ListPage, Column, ListPageAction } from '../../components/ListPage';
 import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
+import { toast } from '../../lib/toast';
 
 interface Contact {
   id: string;
@@ -39,7 +40,7 @@ function ContactModal({ contact, onClose }: { contact: Contact; onClose: () => v
   const save = async () => {
     setSaving(true);
     try { await getApi().put(`/admin/contacts/${contact.id}`, { status }); onClose(); }
-    catch { alert('Erreur lors de la sauvegarde'); }
+    catch { toast.error('Erreur lors de la sauvegarde'); }
     finally { setSaving(false); }
   };
 
@@ -111,7 +112,7 @@ function ContactModal({ contact, onClose }: { contact: Contact; onClose: () => v
               <button
                 onClick={sendReply}
                 disabled={replySending || !replyBody.trim()}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#E63946] text-gray-900 font-semibold text-sm hover:bg-[#c8313d] transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#EC4899] text-gray-900 font-semibold text-sm hover:bg-[#c8313d] transition-colors disabled:opacity-50"
               >
                 {replySending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {replySending ? 'Envoi…' : 'Envoyer'}
@@ -123,7 +124,7 @@ function ContactModal({ contact, onClose }: { contact: Contact; onClose: () => v
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1.5">Statut</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#E63946]">
+              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#EC4899]">
               {Object.entries(STATUS_MAP).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
             </select>
           </div>
@@ -161,7 +162,7 @@ export function ContactsList() {
       await Promise.all(Array.from(selected).map((id) => getApi().put(`/admin/contacts/${id}`, { status })));
       setSelected(new Set());
       refetch();
-    } catch { alert('Erreur action groupée'); }
+    } catch { toast.error('Erreur action groupée'); }
     finally { setBulkLoading(false); }
   };
 
@@ -172,14 +173,14 @@ export function ContactsList() {
       await Promise.all(Array.from(selected).map((id) => getApi().delete(`/admin/contacts/${id}`)));
       setSelected(new Set());
       refetch();
-    } catch { alert('Erreur suppression'); }
+    } catch { toast.error('Erreur suppression'); }
     finally { setBulkLoading(false); }
   };
 
   const handleDelete = async (item: Contact) => {
     if (!confirm(`Supprimer le message de "${item.email}" ?`)) return;
     try { await getApi().delete(`/admin/contacts/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const columns: Column<Contact>[] = [
@@ -189,7 +190,7 @@ export function ContactsList() {
       width: '48px',
       render: (c) => (
         <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)}
-          className="w-4 h-4 rounded accent-[#E63946]" onClick={(e) => e.stopPropagation()} />
+          className="w-4 h-4 rounded accent-[#EC4899]" onClick={(e) => e.stopPropagation()} />
       ),
     },
     {
@@ -246,7 +247,7 @@ export function ContactsList() {
       </select>
 
       {selected.size > 0 && (
-        <div className="flex items-center gap-2 bg-gray-100 border border-[#E63946]/30 rounded-xl px-3 py-1.5">
+        <div className="flex items-center gap-2 bg-gray-100 border border-[#EC4899]/30 rounded-xl px-3 py-1.5">
           <span className="text-xs text-gray-500">{selected.size} sélectionné(s)</span>
           <button onClick={() => bulkStatus('read')} disabled={bulkLoading}
             className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Marquer Lu</button>
@@ -266,7 +267,7 @@ export function ContactsList() {
         <div className="px-6 pt-4">
           <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" checked={selected.size === items.length && items.length > 0}
-              onChange={toggleAll} className="w-4 h-4 rounded accent-[#E63946]" />
+              onChange={toggleAll} className="w-4 h-4 rounded accent-[#EC4899]" />
             Tout sélectionner
           </label>
         </div>

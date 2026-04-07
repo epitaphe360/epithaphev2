@@ -8,6 +8,7 @@ import { usePaginatedList } from '../../hooks/usePaginatedList';
 import { getApi } from '../../lib/api';
 import { Badge } from '../../components/Badge';
 import { TeamForm } from './TeamForm';
+import { toast } from '../../lib/toast';
 
 interface TeamMember {
   id: string;
@@ -36,7 +37,7 @@ export function TeamList() {
   const handleDelete = async (item: TeamMember) => {
     if (!confirm(`Supprimer "${item.name}" ?`)) return;
     try { await getApi().delete(`/admin/team/${item.id}`); refetch(); }
-    catch { alert('Erreur lors de la suppression'); }
+    catch { toast.error('Erreur lors de la suppression'); }
   };
 
   const columns: Column<TeamMember>[] = [

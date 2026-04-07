@@ -243,8 +243,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
                     localStorage.setItem(TOKEN_KEY, json.token);
                     onLogin(json.token, json.client);
                   } catch (e: any) {
-                    console.error("[dev] auto-login-client ERREUR:", e);
-                    alert("Auto-login client échoué.\n\nErreur : " + e.message);
+                    console.error("[dev] auto-login-client ERREUR:", e.message);
                   }
                 }}
                 className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
@@ -266,8 +265,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
                     localStorage.setItem("cms-auth-storage", JSON.stringify(authData));
                     window.location.href = "/admin";
                   } catch (e: any) {
-                    console.error("[dev] auto-login-admin ERREUR:", e);
-                    alert("Auto-login admin échoué.\n\nErreur : " + e.message);
+                    console.error("[dev] auto-login-admin ERREUR:", e.message);
                   }
                 }}
                 className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"

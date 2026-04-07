@@ -1,5 +1,7 @@
 import React from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
+import { Navigation } from '@/components/navigation';
+import { Footer } from '@/components/footer';
 
 const questions = [
   { id: 'q1', text: "Les collaborateurs sont informes des decisions strategiques en temps reel." },
@@ -11,11 +13,15 @@ const questions = [
 
 export default function CommPulsePage() {
   return (
-    <ScoringForm 
-      toolId="commpulse"
-      toolName="CommPulse™"
-      description="The Internal Communication Intelligence Platform by Epitaphe360. Evaluez la maturite de votre communication interne en 2 minutes."
-      questions={questions}
-    />
+    <>
+      <Navigation />
+      <ScoringForm 
+        toolId="commpulse"
+        toolName="CommPulseï¿½"
+        description="The Internal Communication Intelligence Platform by Epitaphe360. Evaluez la maturite de votre communication interne en 2 minutes."
+        questions={questions}
+      />
+      <Footer />
+    </>
   );
 }

@@ -1,5 +1,7 @@
 import React from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
+import { Navigation } from '@/components/navigation';
+import { Footer } from '@/components/footer';
 
 const questions = [
   { id: 'q1', text: "Notre promesse employeur (EVP) correspond a la realite vecue par les employes." },
@@ -10,11 +12,15 @@ const questions = [
 
 export default function TalentPrintPage() {
   return (
-    <ScoringForm 
-      toolId="talentprint"
-      toolName="TalentPrint™"
-      description="The Employer Branding Engine by Epitaphe360. Quel est votre niveau d'attractivite RH ?"
-      questions={questions}
-    />
+    <>
+      <Navigation />
+      <ScoringForm 
+        toolId="talentprint"
+        toolName="TalentPrintï¿½"
+        description="The Employer Branding Engine by Epitaphe360. Quel est votre niveau d'attractivite RH ?"
+        questions={questions}
+      />
+      <Footer />
+    </>
   );
 }

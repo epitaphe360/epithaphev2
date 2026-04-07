@@ -54,8 +54,12 @@ export const DynamicPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#C8A96E]" />
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -81,7 +85,7 @@ export const DynamicPage: React.FC = () => {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16 md:py-24">
+        <section className="bg-[#C8A96E] text-white py-16 md:py-24">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{page.title}</h1>
           </div>

@@ -131,19 +131,19 @@ export default function BlogPage() {
         {/* Glow background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60rem] h-[20rem] rounded-full opacity-20"
-            style={{ background: 'radial-gradient(ellipse, #EC4899 0%, transparent 70%)', filter: 'blur(80px)' }} />
+            style={{ background: 'radial-gradient(ellipse, #C8A96E 0%, transparent 70%)', filter: 'blur(80px)' }} />
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <AnimatedSection variant="fadeUp">
             <div className="text-center mb-14">
               <span className="inline-block text-xs font-bold uppercase tracking-[0.3em] mb-4"
-                style={{ color: '#EC4899', background: 'rgba(236,72,153,0.1)', padding: '6px 18px', borderRadius: '100px', border: '1px solid rgba(236,72,153,0.25)' }}>
+                style={{ color: '#C8A96E', background: 'rgba(200,169,110,0.1)', padding: '6px 18px', borderRadius: '100px', border: '1px solid rgba(200,169,110,0.25)' }}>
                 Magazine
               </span>
               <h1 className="font-cormorant text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6"
                 data-testid="text-blog-title">
-                Nos <em style={{ color: '#EC4899', fontStyle: 'italic' }}>articles</em>
+                Nos <em style={{ color: '#C8A96E', fontStyle: 'italic' }}>articles</em>
               </h1>
               <p className="text-white/50 text-lg max-w-xl mx-auto font-montserrat">
                 Insights, stratégies et tendances du monde de la communication globale
@@ -160,7 +160,7 @@ export default function BlogPage() {
                   onClick={() => setSelectedCategory(category)}
                   className="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 font-montserrat"
                   style={selectedCategory === category
-                    ? { background: '#EC4899', color: '#fff', boxShadow: '0 0 20px rgba(236,72,153,0.4)' }
+                    ? { background: '#C8A96E', color: '#fff', boxShadow: '0 0 20px rgba(200,169,110,0.4)' }
                     : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.12)' }
                   }
                 >
@@ -178,7 +178,7 @@ export default function BlogPage() {
             <AnimatedSection variant="fadeUp" delay={0.25}>
               <Link href={`/blog/${featuredArticle.slug}`} className="group block mb-12" data-testid={`link-article-${featuredArticle.slug}`}>
                 <div className="relative rounded-3xl overflow-hidden"
-                  style={{ border: '1px solid rgba(236,72,153,0.2)', boxShadow: '0 0 60px rgba(236,72,153,0.08)' }}>
+                  style={{ border: '1px solid rgba(200,169,110,0.2)', boxShadow: '0 0 60px rgba(200,169,110,0.08)' }}>
                   <div className="aspect-[21/9] relative overflow-hidden">
                     <img
                       src={featuredArticle.image}
@@ -191,12 +191,12 @@ export default function BlogPage() {
                     <div className="flex flex-wrap gap-2 mb-4">
                       {featuredArticle.categories.map((cat) => (
                         <span key={cat} className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full font-montserrat"
-                          style={{ color: '#EC4899', background: 'rgba(236,72,153,0.15)', border: '1px solid rgba(236,72,153,0.3)' }}>
+                          style={{ color: '#C8A96E', background: 'rgba(200,169,110,0.15)', border: '1px solid rgba(200,169,110,0.3)' }}>
                           {cat}
                         </span>
                       ))}
                     </div>
-                    <h2 className="font-cormorant text-3xl md:text-5xl font-bold text-white mb-3 group-hover:text-[#EC4899] transition-colors duration-300 line-clamp-2">
+                    <h2 className="font-cormorant text-3xl md:text-5xl font-bold text-white mb-3 group-hover:text-[#C8A96E] transition-colors duration-300 line-clamp-2">
                       {featuredArticle.title}
                     </h2>
                     <p className="text-white/60 text-sm md:text-base font-montserrat line-clamp-2 max-w-2xl">
@@ -205,7 +205,7 @@ export default function BlogPage() {
                   </div>
                   {/* Badge "À la une" */}
                   <span className="absolute top-6 left-6 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full font-montserrat"
-                    style={{ background: '#EC4899', color: '#fff', boxShadow: '0 0 20px rgba(236,72,153,0.5)' }}>
+                    style={{ background: '#C8A96E', color: '#fff', boxShadow: '0 0 20px rgba(200,169,110,0.5)' }}>
                     À la une
                   </span>
                 </div>
@@ -229,8 +229,8 @@ export default function BlogPage() {
                       boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.border = '1px solid rgba(236,72,153,0.3)';
-                      (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 40px rgba(236,72,153,0.12)';
+                      (e.currentTarget as HTMLElement).style.border = '1px solid rgba(200,169,110,0.3)';
+                      (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 40px rgba(200,169,110,0.12)';
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.border = '1px solid rgba(255,255,255,0.07)';
@@ -249,18 +249,18 @@ export default function BlogPage() {
                       <div className="flex flex-wrap gap-2 mb-3">
                         {article.categories.map((cat) => (
                           <span key={cat} className="text-xs font-semibold uppercase tracking-wide font-montserrat"
-                            style={{ color: '#EC4899' }}>
+                            style={{ color: '#C8A96E' }}>
                             {cat}
                           </span>
                         ))}
                       </div>
-                      <h2 className="font-cormorant text-xl font-bold text-white mb-3 group-hover:text-[#EC4899] transition-colors duration-300 line-clamp-3 flex-1">
+                      <h2 className="font-cormorant text-xl font-bold text-white mb-3 group-hover:text-[#C8A96E] transition-colors duration-300 line-clamp-3 flex-1">
                         {article.title}
                       </h2>
                       <p className="text-white/45 text-sm font-montserrat line-clamp-2">
                         {article.excerpt}
                       </p>
-                      <div className="mt-4 flex items-center gap-2 text-[#EC4899] text-xs font-bold uppercase tracking-widest font-montserrat opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="mt-4 flex items-center gap-2 text-[#C8A96E] text-xs font-bold uppercase tracking-widest font-montserrat opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Lire l'article <span>→</span>
                       </div>
                     </div>

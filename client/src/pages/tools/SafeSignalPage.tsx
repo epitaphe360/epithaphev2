@@ -1,5 +1,7 @@
 import React from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
+import { Navigation } from '@/components/navigation';
+import { Footer } from '@/components/footer';
 
 const questions = [
   { id: 'q1', text: "Nous avons un protocole de gestion de crise teste ces 12 derniers mois." },
@@ -9,11 +11,15 @@ const questions = [
 
 export default function SafeSignalPage() {
   return (
-    <ScoringForm 
-      toolId="safesignal"
-      toolName="SafeSignal™"
-      description="Crisis & Reputation Radar par Epitaphe360. Etes-vous prets pour la prochaine crise ?"
-      questions={questions}
-    />
+    <>
+      <Navigation />
+      <ScoringForm 
+        toolId="safesignal"
+        toolName="SafeSignalï¿½"
+        description="Crisis &amp; Reputation Radar par Epitaphe360. Etes-vous prets pour la prochaine crise ?"
+        questions={questions}
+      />
+      <Footer />
+    </>
   );
 }

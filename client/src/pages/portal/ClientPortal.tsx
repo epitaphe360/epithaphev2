@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, Receipt, User, LogOut, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import { Navigation } from "@/components/navigation";
+import { Footer } from "@/components/footer";
 
 export default function ClientPortal() {
   const [reports, setReports] = useState<any[]>([]);
@@ -21,7 +23,7 @@ export default function ClientPortal() {
         setReports(Array.isArray(repData) ? repData : []);
         setInvoices(Array.isArray(invData) ? invData : []);
       } catch(e) {
-        console.error(e);
+        // silently ignore portal fetch errors
       } finally {
         setLoading(false);
       }
@@ -30,9 +32,11 @@ export default function ClientPortal() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-50 pt-24 pb-12">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-zinc-50 pt-24 pb-12">
       {/* Header Portail */}
-      <div className="bg-neutral-950 text-white py-12 px-6 shadow-md mb-8">
+      <div className="bg-gray-900 text-white py-12 px-6 shadow-md mb-8">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold mb-2">Mon Espace Client</h1>
@@ -54,7 +58,7 @@ export default function ClientPortal() {
         {/* Colonne Principale : Rapports */}
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-2xl font-semibold text-neutral-900 flex items-center">
-            <FileText className="w-6 h-6 mr-3 text-teal-600" /> Mes Audits & Rapports
+            <FileText className="w-6 h-6 mr-3 text-[#C8A96E]" /> Mes Audits &amp; Rapports
           </h2>
           
           {loading ? (
@@ -64,11 +68,11 @@ export default function ClientPortal() {
               <Card key={report.id} className="hover:shadow-lg transition-shadow border-neutral-200">
                 <CardContent className="p-6 flex justify-between items-center">
                   <div>
-                    <div className="text-sm font-medium text-teal-600 mb-1">{report.toolId.toUpperCase()}</div>
+                    <div className="text-sm font-medium text-[#C8A96E] mb-1">{report.toolId.toUpperCase()}</div>
                     <CardTitle className="text-xl mb-1">Rapport de diagnostic</CardTitle>
                     <div className="text-sm text-zinc-500">Score Global: {report.globalScore}% � Maturite: {report.maturityLevel}/5</div>
                   </div>
-                  <Button variant="ghost" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50">
+                  <Button variant="ghost" className="text-[#C8A96E] hover:text-[#b8965e] hover:bg-[#C8A96E]/10">
                     Voir detail <ArrowRight className="w-4 h-4 ml-2"/>
                   </Button>
                 </CardContent>
@@ -90,7 +94,7 @@ export default function ClientPortal() {
         {/* Colonne Secondaire : Facturation */}
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-neutral-900 flex items-center">
-            <Receipt className="w-6 h-6 mr-3 text-teal-600" /> Facturation
+            <Receipt className="w-6 h-6 mr-3 text-[#C8A96E]" /> Facturation
           </h2>
           
           <Card>
@@ -117,5 +121,7 @@ export default function ClientPortal() {
 
       </div>
     </div>
+    <Footer />
+    </>
   );
 }

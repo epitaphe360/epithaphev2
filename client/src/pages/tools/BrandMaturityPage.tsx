@@ -1,5 +1,7 @@
 import React from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
+import { Navigation } from '@/components/navigation';
+import { Footer } from '@/components/footer';
 
 const questions = [
   { id: 'q1', text: "L'identite visuelle de la marque est deployee de maniere coherente partout." },
@@ -9,11 +11,15 @@ const questions = [
 
 export default function BrandMaturityPage() {
   return (
-    <ScoringForm 
-      toolId="brandmaturity"
-      toolName="BMI 360™"
-      description="Brand Maturity Index. Le diagnostic ultime pour la C-Suite."
-      questions={questions}
-    />
+    <>
+      <Navigation />
+      <ScoringForm 
+        toolId="brandmaturity"
+        toolName="BMI 360ï¿½"
+        description="Brand Maturity Index. Le diagnostic ultime pour la C-Suite."
+        questions={questions}
+      />
+      <Footer />
+    </>
   );
 }

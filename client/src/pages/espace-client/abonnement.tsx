@@ -3,8 +3,8 @@
  * Gérez votre plan d'abonnement Epitaphe360
  */
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Check, CreditCard, AlertCircle, Loader2, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, CreditCard, AlertCircle, Loader2, Star, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -87,6 +87,7 @@ export default function AbonnementPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"subscription" | "devis">("subscription");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   useEffect(() => {
     if (!token) { navigate("/espace-client"); return; }
@@ -126,7 +127,12 @@ export default function AbonnementPage() {
 
   async function cancelSubscription() {
     if (!token) return;
-    if (!window.confirm("Annuler l'abonnement à la fin de la période en cours ?")) return;
+    setConfirmingCancel(true);
+  }
+
+  async function doCancel() {
+    if (!token) return;
+    setConfirmingCancel(false);
     setActionLoading(true);
     try {
       const res = await fetch("/api/client/subscription", {
@@ -238,6 +244,32 @@ export default function AbonnementPage() {
                   </div>
                 </motion.div>
               )}
+
+              {/* Confirmation annulation */}
+              <AnimatePresence>
+                {confirmingCancel && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="rounded-xl p-4 bg-red-50 border border-red-200"
+                  >
+                    <p className="text-sm font-semibold text-red-700 mb-3">
+                      Annuler l'abonnement à la fin de la période en cours ?
+                    </p>
+                    <div className="flex gap-2">
+                      <button onClick={doCancel} disabled={actionLoading}
+                        className="flex-1 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors disabled:opacity-50">
+                        {actionLoading ? "..." : "Confirmer l'annulation"}
+                      </button>
+                      <button onClick={() => setConfirmingCancel(false)}
+                        className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 text-sm transition-colors">
+                        Garder
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Sélecteur cycle de facturation */}
               {(!subscription || subscription.status !== "active") && (

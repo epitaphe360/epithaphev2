@@ -9,6 +9,7 @@ import { useLocation } from "wouter";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PageMeta } from "@/components/seo/page-meta";
+import { ClientPageHeader } from "@/components/client-page-header";
 
 const TOKEN_KEY = "epitaphe_client_token";
 
@@ -117,7 +118,7 @@ export default function AbonnementPage() {
       await apiPost("/api/client/subscription", token, { planId, billingCycle });
       await loadAll();
     } catch (e: any) {
-      alert("Erreur : " + e.message);
+      setError("Erreur : " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -125,7 +126,7 @@ export default function AbonnementPage() {
 
   async function cancelSubscription() {
     if (!token) return;
-    if (!confirm("Annuler l'abonnement à la fin de la période en cours ?")) return;
+    if (!window.confirm("Annuler l'abonnement à la fin de la période en cours ?")) return;
     setActionLoading(true);
     try {
       const res = await fetch("/api/client/subscription", {
@@ -135,7 +136,7 @@ export default function AbonnementPage() {
       if (!res.ok) throw new Error("Erreur annulation");
       await loadAll();
     } catch (e: any) {
-      alert("Erreur : " + e.message);
+      setError("Erreur : " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -148,26 +149,21 @@ export default function AbonnementPage() {
         description="Gérez votre abonnement et consultez vos devis"
         noIndex
       />
-      <div className="min-h-screen bg-[#020617] text-white">
+      <div className="min-h-screen bg-gray-50">
         <Navigation />
 
         <main className="max-w-5xl mx-auto px-4 pt-28 pb-20">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-10"
-          >
-            <a href="/espace-client" className="text-sm text-gray-400 hover:text-white transition-colors mb-4 inline-block">
-              ← Retour au tableau de bord
-            </a>
-            <h1 className="text-3xl font-bold text-white">Mon abonnement</h1>
-            <p className="text-gray-400 mt-2">Gérez votre plan Epitaphe360 et consultez vos devis</p>
-          </motion.div>
+          <ClientPageHeader
+            title="Mon abonnement"
+            subtitle="Gérez votre plan Epitaphe360 et consultez vos devis"
+            breadcrumbs={[
+              { label: "Tableau de bord", href: "/espace-client" },
+              { label: "Abonnement" },
+            ]}
+          />
 
           {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-white/5 rounded-xl mb-8 w-fit">
+          <div className="flex gap-1 p-1 bg-gray-200/60 rounded-xl mb-8 w-fit">
             {[
               { key: "subscription", label: "Abonnement" },
               { key: "devis", label: `Devis${devisList.length > 0 ? ` (${devisList.length})` : ""}` },
@@ -177,8 +173,8 @@ export default function AbonnementPage() {
                 onClick={() => setActiveTab(tab.key as any)}
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.key
-                    ? "bg-white text-black"
-                    : "text-gray-400 hover:text-white"
+                    ? "bg-[#C8A96E] text-white shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
                 }`}
               >
                 {tab.label}
@@ -194,7 +190,7 @@ export default function AbonnementPage() {
           )}
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 text-red-600">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               {error}
             </div>
@@ -207,16 +203,16 @@ export default function AbonnementPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-[#EC4899]/10 to-[#8B5CF6]/10 border border-[#EC4899]/20 rounded-2xl p-6"
+                  className="bg-gradient-to-br from-[#C8A96E]/10 to-[#b8965e]/5 border border-[#C8A96E]/25 rounded-2xl p-6"
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <Star className="w-4 h-4 text-[#EC4899]" />
-                        <span className="text-xs text-[#EC4899] font-medium uppercase tracking-wider">Plan actif</span>
+                        <Star className="w-4 h-4 text-[#C8A96E]" />
+                        <span className="text-xs text-[#C8A96E] font-medium uppercase tracking-wider">Plan actif</span>
                       </div>
-                      <h2 className="text-xl font-bold text-white">{subscription.plan.name}</h2>
-                      <p className="text-gray-400 text-sm mt-1">
+                      <h2 className="text-xl font-bold text-gray-900">{subscription.plan.name}</h2>
+                      <p className="text-gray-500 text-sm mt-1">
                         {(subscription.billingCycle === "annual"
                           ? subscription.plan.priceAnnual
                           : subscription.plan.priceMonthly) / 100
@@ -234,7 +230,7 @@ export default function AbonnementPage() {
                       <button
                         onClick={cancelSubscription}
                         disabled={actionLoading}
-                        className="text-xs text-gray-500 hover:text-red-400 transition-colors border border-gray-700 hover:border-red-500/50 px-3 py-1.5 rounded-lg"
+                        className="text-xs text-gray-400 hover:text-red-500 transition-colors border border-gray-200 hover:border-red-300 px-3 py-1.5 rounded-lg"
                       >
                         Annuler
                       </button>
@@ -249,7 +245,7 @@ export default function AbonnementPage() {
                   <span className={`text-sm ${billingCycle === "monthly" ? "text-white" : "text-gray-500"}`}>Mensuel</span>
                   <button
                     onClick={() => setBillingCycle(c => c === "monthly" ? "annual" : "monthly")}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${billingCycle === "annual" ? "bg-[#EC4899]" : "bg-gray-700"}`}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${billingCycle === "annual" ? "bg-[#C8A96E]" : "bg-gray-300"}`}
                   >
                     <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${billingCycle === "annual" ? "left-7" : "left-1"}`} />
                   </button>
@@ -270,35 +266,35 @@ export default function AbonnementPage() {
                       key={plan.id}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`relative rounded-2xl p-6 border transition-all ${
+                      className={`relative rounded-2xl p-6 border transition-all bg-white shadow-sm hover:shadow-md${
                         isCurrent
-                          ? "border-[#EC4899]/50 bg-[#EC4899]/5"
+                          ? " border-[#C8A96E]/50"
                           : isPopular
-                          ? "border-[#8B5CF6]/40 bg-[#8B5CF6]/5"
-                          : "border-white/10 bg-white/5"
+                          ? " border-[#C8A96E]/30"
+                          : " border-gray-200"
                       }`}
                     >
                       {isPopular && !isCurrent && (
-                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#8B5CF6] text-white text-xs px-3 py-0.5 rounded-full font-medium">
+                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C8A96E] text-white text-xs px-3 py-0.5 rounded-full font-medium">
                           Populaire
                         </span>
                       )}
                       {isCurrent && (
-                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#EC4899] text-white text-xs px-3 py-0.5 rounded-full font-medium">
+                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C8A96E] text-white text-xs px-3 py-0.5 rounded-full font-medium">
                           Votre plan
                         </span>
                       )}
-                      <h3 className="text-lg font-bold text-white mb-1">{plan.name}</h3>
-                      {plan.description && <p className="text-gray-400 text-xs mb-4">{plan.description}</p>}
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">{plan.name}</h3>
+                      {plan.description && <p className="text-gray-500 text-xs mb-4">{plan.description}</p>}
                       <div className="mb-5">
-                        <span className="text-3xl font-bold text-white">{(price / 100).toLocaleString("fr-MA")}</span>
+                        <span className="text-3xl font-bold text-gray-900">{(price / 100).toLocaleString("fr-MA")}</span>
                         <span className="text-gray-400 text-sm ml-1">MAD/{billingCycle === "annual" ? "an" : "mois"}</span>
                       </div>
 
                       {plan.features?.length > 0 && (
                         <ul className="space-y-2 mb-6">
                           {plan.features.map((f, i) => (
-                            <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
+                            <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
                               <Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
                               {f}
                             </li>
@@ -311,8 +307,8 @@ export default function AbonnementPage() {
                         disabled={isCurrent || actionLoading}
                         className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all ${
                           isCurrent
-                            ? "bg-gray-700 text-gray-400 cursor-default"
-                            : "bg-white text-black hover:bg-gray-100 active:scale-95"
+                            ? "bg-gray-100 text-gray-400 cursor-default"
+                            : "bg-[#C8A96E] text-white hover:bg-[#b8965e] active:scale-95"
                         }`}
                       >
                         {isCurrent ? "Plan actuel" : actionLoading ? "Traitement…" : "Choisir ce plan"}
@@ -323,8 +319,8 @@ export default function AbonnementPage() {
               </div>
 
               {plans.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  <CreditCard className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <div className="text-center py-12 text-gray-400">
+                  <CreditCard className="w-10 h-10 mx-auto mb-3 text-[#C8A96E]/30" />
                   <p>Aucun plan disponible pour le moment.</p>
                 </div>
               )}
@@ -347,11 +343,11 @@ export default function AbonnementPage() {
                     href={`/devis/${d.reference}`}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all group"
+                    className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:border-[#C8A96E]/40 hover:shadow-sm transition-all group"
                   >
                     <div>
                       <div className="font-mono text-xs text-gray-400">{d.reference}</div>
-                      <div className="font-medium text-white mt-0.5">
+                      <div className="font-medium text-gray-900 mt-0.5">
                         {(d.total / 100).toLocaleString("fr-MA")} MAD
                       </div>
                       {d.sourceTool && <div className="text-xs text-gray-500 mt-0.5">{d.sourceTool}</div>}

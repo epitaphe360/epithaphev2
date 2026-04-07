@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading || !token}
-                  className="w-full py-3 bg-[#C8A96E] hover:bg-[#b8975e] text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3 bg-[#C8A96E] hover:bg-[#b8965e] text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                   Réinitialiser

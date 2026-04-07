@@ -104,6 +104,7 @@ export default function ProjetDetail() {
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending]   = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [msgError, setMsgError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"jalons" | "documents" | "messages">("jalons");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef   = useRef<HTMLInputElement>(null);
@@ -172,7 +173,7 @@ export default function ProjetDetail() {
       const msg = await msgRes.json();
       setProject((p) => p ? { ...p, messages: [...p.messages, msg] } : p);
     } catch (e: any) {
-      alert(e.message);
+      setMsgError(e.message);
     } finally {
       setUploading(false);
     }
@@ -181,6 +182,7 @@ export default function ProjetDetail() {
   async function sendMessage() {
     if (!msgInput.trim() || !token || !project) return;
     setSending(true);
+    setMsgError(null);
     try {
       const res = await fetch("/api/client/messages", {
         method: "POST",
@@ -192,7 +194,7 @@ export default function ProjetDetail() {
       setProject((p) => p ? { ...p, messages: [...p.messages, msg] } : p);
       setMsgInput("");
     } catch (e: any) {
-      alert(e.message);
+      setMsgError(e.message);
     } finally {
       setSending(false);
     }
@@ -426,6 +428,15 @@ export default function ProjetDetail() {
                   })}
                   <div ref={messagesEndRef} />
                 </div>
+
+                {/* Erreur envoi/upload */}
+                {msgError && (
+                  <div className="mx-4 mb-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    {msgError}
+                    <button onClick={() => setMsgError(null)} className="ml-auto text-red-400 hover:text-red-600"><span>×</span></button>
+                  </div>
+                )}
 
                 {/* Zone de saisie */}
                 <div className="border-t border-gray-100 p-4 flex gap-2">

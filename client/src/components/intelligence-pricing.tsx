@@ -176,6 +176,10 @@ export function IntelligencePricing({
         }),
       });
       if (!res.ok) {
+        const contentType = res.headers.get('content-type') ?? '';
+        if (!contentType.includes('application/json')) {
+          throw new Error(`Erreur serveur (${res.status}). Vérifiez votre connexion.`);
+        }
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error ?? `Erreur ${res.status}`);
       }

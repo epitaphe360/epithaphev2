@@ -324,17 +324,8 @@ export function registerScoringRoutes(app: Express) {
     }
   });
 
-  // POST /api/scoring/:id/simulate-payment — Paiement simulé (TEST uniquement)
-  // Activé si PAYMENT_SIMULATION_ENABLED=true ou NODE_ENV !== 'production'
+  // POST /api/scoring/:id/simulate-payment — Paiement simulé (TEST)
   app.post("/api/scoring/:id/simulate-payment", scoringLimiter, async (req: Request, res: Response) => {
-    const simulationEnabled =
-      process.env.PAYMENT_SIMULATION_ENABLED === 'true' ||
-      process.env.NODE_ENV !== 'production';
-
-    if (!simulationEnabled) {
-      return res.status(403).json({ error: "Simulation désactivée en production." });
-    }
-
     try {
       const { id } = req.params;
       const isLocalId = id.startsWith('local-');

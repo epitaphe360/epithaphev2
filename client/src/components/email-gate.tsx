@@ -6,10 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 const emailGateSchema = z.object({
-  email: z.string().email('Format email invalide').refine(
-    (e) => !['gmail.', 'yahoo.', 'hotmail.', 'outlook.', 'icloud.'].some((d) => e.includes(d)),
-    { message: 'Veuillez utiliser un email professionnel.' }
-  ),
+  email: z.string().email('Format email invalide'),
   name: z.string().min(2, 'Votre nom est requis'),
 });
 
@@ -44,7 +41,7 @@ export function EmailGate({ toolName, toolColor, onUnlock, isLoading }: EmailGat
           Analyse terminée
         </h3>
         <p className="text-sm text-gray-400">
-          Entrez votre email professionnel pour accéder à votre diagnostic détaillé et l'espace VIP.
+          Entrez votre email pour accéder à votre diagnostic détaillé et l'espace VIP.
         </p>
       </div>
 
@@ -64,7 +61,7 @@ export function EmailGate({ toolName, toolColor, onUnlock, isLoading }: EmailGat
 
         <div>
            <label className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1 block">
-            Email professionnel
+            Email
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
@@ -72,7 +69,7 @@ export function EmailGate({ toolName, toolColor, onUnlock, isLoading }: EmailGat
               {...register('email')}
               className={`w-full bg-gray-800 border ${errors.email ? 'border-red-500' : 'border-gray-700'} rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2`}
               style={{ '--tw-ring-color': toolColor } as React.CSSProperties}
-              placeholder="jean.dupont@entreprise.com"
+              placeholder="votre@email.com"
             />
           </div>
           {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}

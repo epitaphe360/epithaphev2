@@ -236,7 +236,7 @@ export function IntelligenceResults({
                   <span className="flex flex-col gap-0.5">
                     <span className="font-medium text-white">{title}</span>
                     {rationale && <span className="text-xs text-gray-500">{rationale}</span>}
-                    {timeline && <span className="text-xs" style={{ color: toolColor }}}>⏱ {timeline}</span>}
+                    {timeline && <span className="text-xs" style={{ color: toolColor }}>⏱ {timeline}</span>}
                   </span>
                 </li>
               );

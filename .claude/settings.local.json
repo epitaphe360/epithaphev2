@@ -3,7 +3,14 @@
     "allow": [
       "Bash(find c:UserssamyeOneDriveDesktopdevellopementepitapheepithaphev2.githubworkflows -type f -name *.yml)",
       "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(npx cross-env *)",
+      "Bash(powershell -Command \"Get-Process -Id 8336 | Select-Object Name, Id, CPU\")",
+      "Bash(curl -s http://localhost:5000/api/health)",
+      "Bash(powershell -Command \"Compress-Archive -Path 'c:/Users/samye/OneDrive/Desktop/devellopement/epitaphe/epithaphev2/wordpress-plugin/bmi360-scoring' -DestinationPath 'c:/Users/samye/OneDrive/Desktop/bmi360-scoring.zip' -Force; Write-Host 'Done'\")",
+      "Bash(powershell -Command ' *)"
     ]
   }
 }

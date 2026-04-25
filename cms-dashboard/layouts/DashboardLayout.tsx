@@ -41,6 +41,9 @@ import {
   ClipboardList,
   FolderKanban,
   Receipt,
+  BarChart2,
+  CalendarCheck,
+  TrendingUp,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -89,6 +92,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Push',          href: '/admin/push',               icon: Bell,            group: 'crm' },
     { name: 'Ressources',    href: '/admin/resources',          icon: Download,        group: 'tools' },
     { name: 'Navigation',    href: '/admin/menus',              icon: Navigation,      group: 'tools' },
+    { name: 'Scoring',       href: '/admin/scoring',            icon: BarChart2,       group: 'bmi360' },
+    { name: 'Consultations', href: '/admin/bmi360/consultations', icon: CalendarCheck,  group: 'bmi360' },
+    { name: 'Funnel',        href: '/admin/bmi360/funnel',      icon: TrendingUp,      group: 'bmi360' },
     { name: 'Clients',       href: '/admin/client-accounts',    icon: FolderKanban,    group: 'clients' },
     { name: 'Facturation',   href: '/admin/facturation',        icon: Receipt,         group: 'clients' },
     { name: 'Audit Logs',    href: '/admin/audit-logs',         icon: ClipboardList,   group: 'settings' },
@@ -103,6 +109,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { id: 'content',  label: 'Contenu' },
     { id: 'crm',      label: 'CRM' },
     { id: 'tools',    label: 'Outils' },
+    { id: 'bmi360',   label: 'BMI 360™' },
     { id: 'clients',  label: 'Espace Client' },
     { id: 'settings', label: 'Configuration' },
   ];

@@ -10,6 +10,10 @@ import {
 
 const BASE_URL = "https://www.epitaphe360.ma";
 
+// Plan annuel BMI 360™ Full — aligné sur server/scoring-routes.ts FULL_ANNUAL_PRICE_MAD
+const FULL_ANNUAL_PRICE_MAD = 39000;
+const FULL_INDIVIDUAL_TOTAL = 4900 + 7500 + 8400 + 7900 + 7900 + 6500 + 9900; // = 53 000 MAD
+
 // ─── Catalogue des 8 outils BMI 360™ ─────────────────────────────────────────
 const TOOLS = [
   {
@@ -33,43 +37,43 @@ const TOOLS = [
       "Mesurez l'attractivité de votre marque employeur et votre capacité à attirer, engager et retenir les talents.",
     url: "/outils/talentprint",
     color: "#EC4899",
-    priceMad: 4900,
+    priceMad: 7500,
     pillars: ["Attractivité", "TCohérence", "RExpérience", "Ambassadeurs", "Culture", "Talents", "You"],
   },
   {
     id: "impacttrace",
     name: "ImpactTrace™",
-    model: "IMPACT",
+    model: "PROOF",
     tagline: "Scoring RSE & Communication Responsable",
     description:
       "Diagnostiquez la maturité RSE de votre communication et son impact mesurable sur vos parties prenantes.",
     url: "/outils/impacttrace",
     color: "#10B981",
-    priceMad: 4900,
+    priceMad: 8400,
     pillars: ["Intégrité", "Mesure", "Parties prenantes", "Actions", "Cohérence", "Transparence", "You"],
   },
   {
     id: "safesignal",
     name: "SafeSignal™",
-    model: "SECURE",
+    model: "SHIELD",
     tagline: "Scoring Communication QHSE",
     description:
       "Évaluez l'efficacité de votre communication sécurité et votre culture QHSE à travers 42 indicateurs clés.",
     url: "/outils/safesignal",
     color: "#F59E0B",
-    priceMad: 4900,
+    priceMad: 7900,
     pillars: ["Sécurité", "Alertes", "Formation", "Engagement", "Signalétique", "Gestion crise", "You"],
   },
   {
     id: "eventimpact",
     name: "EventImpact™",
-    model: "ENGAGE",
+    model: "STAGE",
     tagline: "Scoring Événementiel Corporate",
     description:
       "Mesurez le ROI et l'impact réel de vos événements corporate sur l'engagement et la culture d'entreprise.",
     url: "/outils/eventimpact",
     color: "#8B5CF6",
-    priceMad: 4900,
+    priceMad: 7900,
     pillars: ["Expérience", "Ventes", "Engagement", "Notoriété", "Taux retour", "Impact", "You"],
   },
   {
@@ -81,19 +85,19 @@ const TOOLS = [
       "Auditez la performance de votre signalétique, vos espaces de travail et leur impact sur l'expérience collaborateur.",
     url: "/outils/spacescore",
     color: "#06B6D4",
-    priceMad: 4900,
+    priceMad: 6500,
     pillars: ["Signalétique", "Parcours", "Accessibilité", "Cohérence visuelle", "Expérience", "You"],
   },
   {
     id: "finnarrative",
     name: "FinNarrative™",
-    model: "TRUST",
+    model: "CAPITAL",
     tagline: "Scoring Communication Financière",
     description:
       "Évaluez la qualité et la clarté de votre communication financière auprès des investisseurs et actionnaires.",
     url: "/outils/finnarrative",
     color: "#0EA5E9",
-    priceMad: 4900,
+    priceMad: 9900,
     pillars: ["Clarté", "Fiabilité", "Fréquence", "Narration", "Impact", "Conformité", "You"],
   },
   {
@@ -271,20 +275,20 @@ export default function OutilsHub() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {[
-                { label: "1 outil", price: "4 900 MAD", detail: "Rapport PDF + 3 recommandations" },
+                { label: "1 outil Intelligence™", price: "4 900 – 9 900 MAD", detail: "Rapport IA complet + plan 90 jours" },
                 {
-                  label: "Pack 3 outils",
-                  price: "12 000 MAD",
-                  detail: "Économisez 2 700 MAD",
+                  label: "BMI 360™ Full — Annuel",
+                  price: `${FULL_ANNUAL_PRICE_MAD.toLocaleString("fr-MA")} MAD`,
+                  detail: `Accès 12 mois aux 7 outils — économie ${(FULL_INDIVIDUAL_TOTAL - FULL_ANNUAL_PRICE_MAD).toLocaleString("fr-MA")} MAD`,
                   highlight: true,
                 },
-                { label: "Suite complète", price: "27 000 MAD", detail: "7 outils + Dashboard" },
+                { label: "Transform — RDV expert", price: "Sur devis", detail: "Mission d'accompagnement personnalisée" },
               ].map((plan) => (
                 <div
                   key={plan.label}
                   className={`p-6 rounded-2xl border ${
                     plan.highlight
-                      ? "border-[#E3001B] bg-[#E3001B]/5"
+                      ? "border-[#C8A96E] bg-[#C8A96E]/5"
                       : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                   }`}
                 >

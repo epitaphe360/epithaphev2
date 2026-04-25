@@ -15,6 +15,7 @@ export default {
         playfair: ['Playfair Display', 'Georgia', 'serif'],
         cormorant: ['Cormorant Garamond', 'Georgia', 'serif'],
         montserrat: ['Montserrat', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'monospace'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Playfair Display', 'Georgia', 'serif'],
       },
@@ -32,6 +33,10 @@ export default {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */
         sm: ".1875rem", /* 3px */
+        xl: "0.75rem",
+        "2xl": "1rem",
+        "3xl": "1.25rem",
+        "4xl": "1.5rem",
       },
       colors: {
         // Flat / base colors (regular buttons)
@@ -131,10 +136,30 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(24px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in-up": {
+          from: { opacity: "0", transform: "translateY(48px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        shimmer: {
+          from: { backgroundPosition: "200% 0" },
+          to: { backgroundPosition: "-200% 0" },
+        },
+        "spin-slow": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in-up": "fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "slide-in-up": "slide-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "shimmer": "shimmer 1.5s infinite",
+        "spin-slow": "spin-slow 8s linear infinite",
       },
     },
   },

@@ -96,13 +96,76 @@ export default function CalculateurFabrique() {
         canonicalPath="/outils/calculateur-fabrique"
       />
       <Navigation />
-      <main className="py-16 md:py-24">
+      {/* ─── HERO ─────────────────────────────────────────────────────── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-[#0A0A0A] via-[#0d1117] to-[#0A0A0A] border-b border-white/6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <span className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-6 border border-primary/20">
+            🏭 La Fabrique™ · Calculateur ROI
+          </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-5 leading-tight">
+            Combien perdez-vous<br /><span className="text-primary">à gérer 6 fournisseurs ?</span>
+          </h1>
+          <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
+            Chaque projet multi-fournisseurs coûte en moyenne <strong className="text-foreground">3,5h de coordination par fournisseur</strong>.
+            Estimez en 30 secondes vos gains potentiels avec l'intégration verticale Epitaphe360.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mb-10">
+            <button onClick={() => document.getElementById('calculator-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-3 rounded-xl font-bold text-sm text-primary-foreground bg-primary hover:bg-primary/90 transition-colors">
+              Calculer mes économies →
+            </button>
+            <a href="/outils" className="px-8 py-3 rounded-xl font-semibold text-sm text-muted-foreground border border-border hover:border-primary/50 transition-colors no-underline">
+              Voir tous les outils
+            </a>
+          </div>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+            {[
+              { v: '−30%', l: 'sur les coûts de fabrication (intégration verticale)' },
+              { v: '−45%', l: 'sur les délais projet (sourcing centralisé)' },
+              { v: '−70%', l: 'du temps de coordination interne récupéré' },
+              { v: '1 interlocuteur', l: 'au lieu de 6+ fournisseurs à gérer' },
+            ].map(s => (
+              <div key={s.v} className="rounded-xl p-4 border border-border bg-muted/30 text-center">
+                <div className="text-xl font-extrabold text-primary mb-1">{s.v}</div>
+                <p className="text-xs text-muted-foreground leading-snug">{s.l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Avantages La Fabrique ─────────────────────────────────────── */}
+      <section className="py-12 border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-primary/10 text-primary border border-primary/20">INTÉGRATION VERTICALE</span>
+            <h2 className="text-2xl font-bold text-foreground">Tout sous un même toit</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: '🖨️', name: 'Impression', desc: 'Grand format, numérique, offset' },
+              { icon: '🪵', name: 'Menuiserie', desc: 'Stands, mobilier, présentoirs' },
+              { icon: '🪧', name: 'Signalétique', desc: 'Intérieure, extérieure, murale' },
+              { icon: '🎧', name: 'Audiovisuel', desc: 'Écrans, son, éclairage LED' },
+            ].map(s => (
+              <div key={s.name} className="rounded-xl p-5 border border-border bg-card text-center">
+                <div className="text-3xl mb-3">{s.icon}</div>
+                <div className="text-sm font-bold text-foreground mb-1">{s.name}</div>
+                <p className="text-xs text-muted-foreground">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <main id="calculator-section" className="py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <RevealSection className="text-center mb-12">
             <span className="inline-block bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">Outil ROI</span>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Calculateur La Fabrique™</h1>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Calculateur La Fabrique™</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Combien perdez-vous à gérer plusieurs fournisseurs ? Estimez en 30 secondes vos gains potentiels avec l'intégration verticale Epitaphe360.
+              Ajustez les curseurs selon votre situation. Vos gains s'affichent en temps réel.
             </p>
           </RevealSection>
 

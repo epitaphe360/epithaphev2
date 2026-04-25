@@ -228,7 +228,7 @@ export default function HomeV5() {
       <Navigation />
 
       {/* ─── HERO SECTION ───────────────────────────────────── */}
-      <section className="relative h-screen min-h-[800px] mt-16 w-full flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen min-h-[800px] mt-16 w-full flex items-center justify-center overflow-hidden grain">
         <div className="absolute inset-0 z-0">
           <motion.img 
             initial={{ scale: 1.1 }}
@@ -239,7 +239,7 @@ export default function HomeV5() {
             className="w-full h-full object-cover"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+          <div className="absolute inset-0 bg-black/62 backdrop-blur-[2px]"></div>
         </div>
 
         <div className="relative z-10 w-full max-w-[90rem] mx-auto px-6 md:px-12">
@@ -249,29 +249,31 @@ export default function HomeV5() {
             animate="visible"
             className="max-w-4xl"
           >
+            <div className="mb-6">
+              <span className="badge-gold">Agence 360°</span>
+            </div>
             <h1 className="text-6xl md:text-8xl lg:text-[6rem] font-bold text-white leading-[1.05] tracking-tight mb-8">
               <RevealText>
                 {heroTitle.includes('Marquez') ? (
-                  <>{heroTitle.split('Marquez')[0]}Marquez <span className="text-[#E3001B]">durablement.</span></>
+                  <>{heroTitle.split('Marquez')[0]}Marquez <span className="text-[#C8A96E]">durablement.</span></>
                 ) : heroTitle}
               </RevealText>
             </h1>
             <motion.p 
               variants={revealVariants}
-              className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl font-light leading-relaxed"
+              className="text-xl md:text-2xl text-white/80 mb-12 max-w-2xl font-light leading-relaxed"
             >
               {heroSubtitle}
             </motion.p>
-            <motion.div variants={revealVariants} className="flex flex-wrap gap-6">
+            <motion.div variants={revealVariants} className="flex flex-wrap gap-4">
               <Link href="/contact/brief">
-                <button className="px-10 py-5 text-lg font-bold text-white bg-[#E3001B] hover:bg-[#C20017] flex items-center gap-3 transition-colors duration-300 rounded-none">
-                  Démarrer un projet <ArrowRight size={24} />
+                <button className="btn-gold">
+                  Démarrer un projet <ArrowRight size={20} />
                 </button>
               </Link>
               <button 
                 onClick={() => document.querySelector('#expertises')?.scrollIntoView({ behavior: 'smooth' })}
-                className="px-10 py-5 text-lg font-bold text-white border-2 border-white hover:bg-white hover:text-[#111111] flex items-center gap-3 transition-colors duration-300 rounded-none bg-transparent"
-              >
+                className="btn-outline-white">
                 Nos métiers
               </button>
             </motion.div>
@@ -280,17 +282,18 @@ export default function HomeV5() {
       </section>
 
       {/* ─── ABOUT SECTION ──────────────────────────────────── */}
-      <section className="py-32 lg:py-48 bg-white" id="about">
+      <section className="py-32 lg:py-48 section-canvas" id="about">
         <div className="max-w-[90rem] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
           <div className="lg:col-span-6">
             <FadeUp>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tight leading-tight text-[#111111]">
+              <div className="mb-4"><span className="section-number">01</span></div>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 tracking-tight leading-tight text-[#0A0A0B] gold-rule">
                 <RevealText>{aboutH2}</RevealText>
               </h2>
-              <p className="text-xl md:text-2xl leading-relaxed mb-10 text-[#555555] font-light">
+              <p className="text-xl md:text-2xl leading-relaxed mb-10 text-[#0A0A0B]/60 font-light">
                 {aboutDesc}
               </p>
-              <ul className="mb-12 space-y-6">
+              <ul className="mb-12 space-y-4">
                 {aboutBullets.map((item, idx) => (
                   <motion.li 
                     key={idx} 
@@ -301,14 +304,14 @@ export default function HomeV5() {
                     className="flex items-start gap-4"
                   >
                     <div className="mt-2.5 flex-shrink-0">
-                      <div className="w-3 h-3 rounded-full bg-[#E3001B]"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#C8A96E]"></div>
                     </div>
-                    <span className="text-xl font-medium text-[#111111]">{item}</span>
+                    <span className="text-xl font-medium text-[#0A0A0B]">{item}</span>
                   </motion.li>
                 ))}
               </ul>
               <Link href="/nos-references">
-                <span className="inline-flex items-center gap-2 text-xl font-bold text-[#E3001B] hover:text-[#C20017] transition-colors group cursor-pointer">
+                <span className="inline-flex items-center gap-2 text-xl font-bold text-[#C8A96E] hover:text-[#A68B55] transition-colors group cursor-pointer">
                   Découvrir l'agence 
                   <motion.span whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400 }}>
                     <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
@@ -330,16 +333,18 @@ export default function HomeV5() {
       </section>
 
       {/* ─── STATS SECTION ──────────────────────────────────── */}
-      <section className="py-32 bg-[#111111] relative overflow-hidden">
-        <div className="absolute -top-[50%] -left-[10%] w-[120%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(227,0,27,0.05)_0%,transparent_50%)] z-0"></div>
+      <section className="py-32 section-dark grain relative overflow-hidden">
+        <div className="absolute -top-[50%] -left-[10%] w-[120%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(200,169,110,0.06)_0%,transparent_50%)] z-0"></div>
         <div className="max-w-[90rem] mx-auto px-6 md:px-12 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8 divide-x-0 md:divide-x divide-white/20 text-center">
+          <div className="mb-10 text-center"><span className="section-number justify-center">02</span></div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8 divide-x-0 md:divide-x divide-white/10 text-center">
             {statsList.map((stat, i) => (
               <div key={i} className="px-4 flex flex-col items-center justify-center">
                 <p className="text-6xl md:text-8xl font-black text-white mb-4 tracking-tighter">
                   <StatsCounter to={stat.val} suffix={stat.suffix || stat.suf} />
                 </p>
-                <p className="text-lg md:text-xl font-medium uppercase tracking-[0.2em] text-[#AAAAAA] max-w-[200px]">
+                <div className="w-8 h-px bg-[#C8A96E] mb-3 mx-auto" />
+                <p className="text-sm md:text-base font-semibold uppercase tracking-[0.2em] text-white/55 max-w-[180px] font-montserrat">
                   {stat.label}
                 </p>
               </div>
@@ -353,24 +358,25 @@ export default function HomeV5() {
         <div className="max-w-[90rem] mx-auto px-6 md:px-12">
           <div className="text-center max-w-4xl mx-auto mb-24">
             <FadeUp>
-              <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#111111]">
+              <div className="mb-4"><span className="section-number justify-center">03</span></div>
+              <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight text-[#0A0A0B] gold-rule">
                 Nos domaines d'intervention.
               </h2>
-              <p className="text-2xl text-[#555555] font-light leading-relaxed">
+              <p className="text-2xl text-[#0A0A0B]/55 font-light leading-relaxed">
                 Qu'il s'agisse d'une soirée de gala, de l'aménagement de vos locaux ou de la conception d'un stand sur-mesure, nous avons la solution.
               </p>
             </FadeUp>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {servicesList.map((service, idx) => (
               <FadeUp key={idx} delay={idx * 0.1}>
                 <Link href={service.href}>
                   <motion.div 
                     whileHover="hover"
-                    className="group cursor-pointer bg-white overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500"
+                    className="group cursor-pointer card-premium overflow-hidden"
                   >
-                    <div className="relative h-[400px] overflow-hidden">
+                    <div className="relative h-[360px] overflow-hidden">
                       <motion.img 
                         src={service.img} 
                         alt={service.title} 
@@ -383,14 +389,14 @@ export default function HomeV5() {
                       />
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500"></div>
                     </div>
-                    <div className="p-8 border border-t-0 border-[#EAEAEA] bg-white relative z-10">
-                      <h3 className="text-2xl font-bold mb-4 text-[#111111] group-hover:text-[#E3001B] transition-colors duration-300">
+                    <div className="p-6 bg-white">
+                      <h3 className="text-xl font-bold mb-3 text-[#0A0A0B] group-hover:text-[#C8A96E] transition-colors duration-300">
                         {service.title}
                       </h3>
-                      <span className="text-lg font-bold flex items-center gap-2 text-[#E3001B]">
+                      <span className="text-sm font-bold flex items-center gap-1.5 text-[#C8A96E] font-montserrat uppercase tracking-wide">
                         En savoir plus 
                         <motion.span variants={{ hover: { x: 5 } }}>
-                          <ChevronRight size={20} />
+                          <ChevronRight size={16} />
                         </motion.span>
                       </span>
                     </div>
@@ -407,11 +413,14 @@ export default function HomeV5() {
         <div className="max-w-[90rem] mx-auto px-6 md:px-12">
           <FadeUp>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-[#111111]">
-                Ils nous font <span className="text-[#E3001B]">confiance</span>
-              </h2>
+              <div>
+                <div className="mb-3"><span className="section-number">04</span></div>
+                <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-[#0A0A0B] gold-rule">
+                  Ils nous font <span className="text-[#C8A96E]">confiance</span>
+                </h2>
+              </div>
               <Link href="/nos-references">
-                <span className="hidden md:flex text-xl font-bold items-center gap-2 hover:text-[#E3001B] transition-colors cursor-pointer group pb-4">
+                <span className="hidden md:flex text-xl font-bold items-center gap-2 hover:text-[#C8A96E] transition-colors cursor-pointer group pb-4">
                   Voir tout le portfolio 
                   <motion.span whileHover={{ x: 5 }}>
                     <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
@@ -467,25 +476,28 @@ export default function HomeV5() {
       </section>
 
       {/* ─── CALL TO ACTION FINAL ───────────────────────────── */}
-      <section className="py-32 lg:py-48 text-center bg-[#E3001B] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=50')] opacity-10 bg-cover bg-center mix-blend-overlay"></div>
+      <section className="py-32 lg:py-48 text-center section-dark grain relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=50')] opacity-[0.06] bg-cover bg-center mix-blend-overlay"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[20rem] rounded-full opacity-15"
+          style={{ background: "radial-gradient(ellipse, #C8A96E 0%, transparent 70%)", filter: "blur(60px)" }} />
         <div className="max-w-5xl mx-auto px-6 relative z-10">
           <FadeUp>
-            <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-10 tracking-tight leading-[1.1]">
+            <div className="mb-6"><span className="section-number justify-center">05</span></div>
+            <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 tracking-tight leading-[1.1] gold-rule">
               Prêt à donner vie à votre projet ?
             </h2>
-            <p className="text-2xl lg:text-3xl text-white/90 mb-16 font-light">
+            <p className="text-xl lg:text-2xl text-white/65 mb-14 font-light leading-relaxed">
               Un interlocuteur dédié vous répond sous 24h ouvrées.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-5">
               <Link href="/contact/brief">
-                <button className="w-full sm:w-auto px-12 py-6 bg-white text-[#111111] text-xl font-bold hover:bg-[#F8F9FA] transition-colors flex items-center justify-center gap-3 shadow-2xl">
-                  Déposer un brief en ligne <ChevronRight size={24} />
+                <button className="btn-gold text-lg px-10 py-5 w-full sm:w-auto justify-center">
+                  Déposer un brief en ligne <ChevronRight size={22} />
                 </button>
               </Link>
               <a href="tel:212662744741" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto px-12 py-6 border-2 border-white text-white text-xl font-bold hover:bg-white hover:text-[#111111] transition-colors flex items-center justify-center gap-3 bg-transparent">
-                  <Phone size={24} /> Nous appeler
+                <button className="btn-outline-white text-lg px-10 py-5 w-full sm:w-auto justify-center">
+                  <Phone size={20} /> Nous appeler
                 </button>
               </a>
             </div>

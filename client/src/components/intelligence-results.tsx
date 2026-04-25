@@ -5,6 +5,7 @@
 import { motion } from 'framer-motion';
 import { MATURITY_LEVELS } from '@/lib/scoring-engine';
 import type { MaturityLevel } from '@/lib/scoring-engine';
+import { BookExpertCTA } from './book-expert-cta';
 
 interface PillarAnalysis {
   pillar: string;
@@ -45,6 +46,8 @@ interface IntelligenceResultsProps {
   pillarScores: Record<string, number>;
   aiReport: AIReport | null;
   allPillars: PillarInfo[];
+  /** UUID du résultat de scoring (pour relier la demande Transform au scoring). */
+  resultId?: string;
 }
 
 export function IntelligenceResults({
@@ -56,6 +59,7 @@ export function IntelligenceResults({
   pillarScores,
   aiReport,
   allPillars,
+  resultId,
 }: IntelligenceResultsProps) {
   const level = Math.min(Math.max(maturityLevel, 1), 5) as MaturityLevel;
   const maturity = MATURITY_LEVELS[level];
@@ -280,6 +284,14 @@ export function IntelligenceResults({
         </a>
         <p className="text-xs text-gray-600 mt-3">Sur devis · Accompagnement personnalisé</p>
       </motion.div>
+
+      {/* Formulaire interne RDV expert (Transform) */}
+      <BookExpertCTA
+        scoringResultId={resultId}
+        toolId={toolId}
+        toolColor={toolColor}
+        globalScore={globalScore}
+      />
     </div>
   );
 }

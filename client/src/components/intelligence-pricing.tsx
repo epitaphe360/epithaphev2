@@ -1,8 +1,9 @@
-/**
- * IntelligencePricing — Sélection et paiement du rapport Intelligence™
- * CDC BMI 360™ : Discover → Intelligence → Transform
+﻿/**
+ * IntelligencePricing - Sélection et paiement du rapport Intelligence
+ * CDC BMI 360: Discover -> Intelligence -> Transform
+ * Méthodes supportées: CMI (carte bancaire MAR), PayPal, Virement bancaire
  */
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface EnrichedAnswer {
@@ -30,14 +31,22 @@ interface IntelligencePricingProps {
   onBack: () => void;
 }
 
+type PaymentMethod = 'cmi' | 'paypal' | 'virement';
+
 const WHAT_YOU_GET = [
-  { icon: '🧠', label: 'Analyse IA complète de tous vos pilliers' },
+  { icon: '🧠', label: 'Analyse IA complète de tous vos piliers' },
   { icon: '📊', label: 'Diagnostic expert personnalisé par dimension' },
-  { icon: '🎯', label: 'Plan d\'action 90 jours prioritisé' },
+  { icon: '🎯', label: 'Plan d\'action 90 jours priorisé' },
   { icon: '⚡', label: 'Quick wins à mettre en place immédiatement' },
   { icon: '🔍', label: 'Identification de vos risques clés' },
   { icon: '📈', label: 'Benchmark sectoriel et recommandations stratégiques' },
   { icon: '🚀', label: 'Accès au programme Transform (sur devis)' },
+];
+
+const PAYMENT_METHODS: Array<{ id: PaymentMethod; icon: string; label: string; desc: string }> = [
+  { id: 'cmi',      icon: '💳', label: 'Carte bancaire',  desc: 'CMI · 3D Secure · Maroc' },
+  { id: 'paypal',   icon: '🅿️', label: 'PayPal',          desc: 'Paiement international' },
+  { id: 'virement', icon: '🏦', label: 'Virement',         desc: 'Sous 24-48h' },
 ];
 
 export function IntelligencePricing({
@@ -53,65 +62,103 @@ export function IntelligencePricing({
   onSuccess,
   onBack,
 }: IntelligencePricingProps) {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail]               = useState('');
+  const [name, setName]                 = useState('');
+  const [method, setMethod]             = useState<PaymentMethod>('cmi');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError]               = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // CMI: auto-submit d'un formulaire caché après réception des champs
+  const cmiFormRef = useRef<HTMLFormElement>(null);
+  const [cmiFormData, setCmiFormData] = useState<{
+    gatewayUrl: string;
+    fields: Record<string, string>;
+  } | null>(null);
+
+  useEffect(() => {
+    if (cmiFormData && cmiFormRef.current) {
+      cmiFormRef.current.submit();
+    }
+  }, [cmiFormData]);
+
+  const priceTTC = Math.round(intelligencePrice * 1.20);
+  const virRef = `INT-${toolId.toUpperCase().slice(0, 3)}-${resultId.slice(0, 6).toUpperCase()}`;
+
+  const validateForm = () => {
     if (!email.trim() || !name.trim()) {
       setError('Veuillez renseigner votre nom et email.');
-      return;
+      return false;
     }
-    setError('');
-    setIsLoading(true);
+    return true;
+  };
 
+  /** CMI - initier + soumettre le formulaire passerelle */
+  const handleCMI = async () => {
+    if (!validateForm()) return;
+    setError('');
+    setIsProcessing(true);
     try {
-      const response = await fetch(`/api/scoring/${resultId}/unlock-intelligence`, {
+      const res = await fetch('/api/scoring/intelligence-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          answers: enrichedAnswers,
-          companyName,
-          sector,
-          companySize,
+          scoringResultId: resultId,
+          toolId,
           email,
-          respondentName: name,
-          voiceType: 'direction',
+          companyName,
+          method: 'cmi',
         }),
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data?.error ?? `Erreur ${response.status}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? `Erreur ${res.status}`);
       }
-
-      const data = await response.json();
-      onSuccess({
-        globalScore: data.globalScore,
-        maturityLevel: data.maturityLevel,
-        pillarScores: data.pillarScores,
-        aiReport: data.aiReport,
-      });
+      const data = await res.json();
+      // Déclenche l'auto-submit dans useEffect
+      setCmiFormData({ gatewayUrl: data.gatewayUrl, fields: data.formFields });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.');
-    } finally {
-      setIsLoading(false);
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'initiation CMI.');
+      setIsProcessing(false);
     }
   };
 
-  const handleSimulatePayment = async () => {
-    if (!email.trim() || !name.trim()) {
-      setError('Veuillez renseigner votre nom et email pour simuler le paiement.');
-      return;
+  /** PayPal - initier + redirection vers la page d'approbation */
+  const handlePayPal = async () => {
+    if (!validateForm()) return;
+    setError('');
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/scoring/intelligence-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scoringResultId: resultId,
+          toolId,
+          email,
+          companyName,
+          method: 'paypal',
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? `Erreur ${res.status}`);
+      }
+      const data = await res.json();
+      window.location.href = data.approvalUrl;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'initiation PayPal.');
+      setIsProcessing(false);
     }
+  };
+
+  /** Mode test - simulation sans transaction réelle */
+  const handleSimulatePayment = async () => {
+    if (!validateForm()) return;
     setError('');
     setIsSimulating(true);
-
     try {
-      const response = await fetch(`/api/scoring/${resultId}/simulate-payment`, {
+      const res = await fetch(`/api/scoring/${resultId}/simulate-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -123,13 +170,11 @@ export function IntelligencePricing({
           companySize,
         }),
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data?.error ?? `Erreur ${response.status}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? `Erreur ${res.status}`);
       }
-
-      const data = await response.json();
+      const data = await res.json();
       onSuccess({
         globalScore:   data.globalScore,
         maturityLevel: data.maturityLevel,
@@ -143,34 +188,41 @@ export function IntelligencePricing({
     }
   };
 
+  const handlePay = () => {
+    if (method === 'cmi')    handleCMI();
+    else if (method === 'paypal') handlePayPal();
+    // Virement: pas de bouton pay, uniquement les coordonnées
+  };
+
   return (
     <div className="space-y-6">
+      {/* Formulaire caché pour CMI (auto-soumis) */}
+      {cmiFormData && (
+        <form ref={cmiFormRef} method="POST" action={cmiFormData.gatewayUrl} style={{ display: 'none' }}>
+          {Object.entries(cmiFormData.fields).map(([k, v]) => (
+            <input key={k} type="hidden" name={k} value={v} />
+          ))}
+        </form>
+      )}
+
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
           style={{ backgroundColor: `${toolColor}20`, color: toolColor }}>
-          Intelligence™ · {toolLabel}
+          Intelligence · {toolLabel}
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">
-          Votre rapport Intelligence™ vous attend
+          Votre rapport Intelligence vous attend
         </h2>
         <p className="text-gray-400 text-sm">
-          Un rapport IA complet, personnalisé et actionnable — livré en moins de 2 minutes.
+          Un rapport IA complet, personnalisé et actionnable - livré en moins de 2 minutes.
         </p>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Ce que vous obtenez */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl p-6 bg-gray-900/50 border border-gray-800"
-        >
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}
+          className="rounded-2xl p-6 bg-gray-900/50 border border-gray-800">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
             Ce que vous obtenez
           </h3>
@@ -184,87 +236,111 @@ export function IntelligencePricing({
           </ul>
         </motion.div>
 
-        {/* Formulaire paiement */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl p-6 border"
-          style={{ borderColor: `${toolColor}40`, background: `linear-gradient(135deg, ${toolColor}10, transparent)` }}
-        >
-          <div className="text-center mb-6">
-            <div className="text-3xl font-bold text-white mb-1">
+        {/* Panneau paiement */}
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}
+          className="rounded-2xl p-6 border space-y-5"
+          style={{ borderColor: `${toolColor}40`, background: `linear-gradient(135deg, ${toolColor}10, transparent)` }}>
+
+          {/* Prix */}
+          <div className="text-center">
+            <div className="text-3xl font-bold text-white mb-0.5">
               {intelligencePrice.toLocaleString('fr-MA')} MAD
+              <span className="text-sm font-normal text-gray-500 ml-2">HT</span>
             </div>
-            <div className="text-xs text-gray-500">Hors taxes · Paiement sécurisé</div>
+            <div className="text-xs text-gray-500">
+              Soit {priceTTC.toLocaleString('fr-MA')} MAD TTC (TVA 20%) · Paiement sécurisé
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Champs communs */}
+          <div className="space-y-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Votre nom complet *</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Prénom Nom"
-                required
-                className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-opacity-100"
-                style={{ '--tw-ring-color': toolColor } as React.CSSProperties}
-                disabled={isLoading}
-              />
+              <label className="block text-xs text-gray-400 mb-1">Nom complet *</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)}
+                placeholder="Prénom Nom" required disabled={isProcessing}
+                className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 text-sm focus:outline-none" />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Votre email professionnel *</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="vous@entreprise.ma"
-                required
-                className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 text-sm focus:outline-none"
-                disabled={isLoading}
-              />
+              <label className="block text-xs text-gray-400 mb-1">Email professionnel *</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="vous@entreprise.ma" required disabled={isProcessing}
+                className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 text-sm focus:outline-none" />
             </div>
+          </div>
 
-            {error && (
-              <p className="text-red-400 text-xs">{error}</p>
-            )}
+          {/* Sélecteur de méthode */}
+          <div>
+            <p className="text-xs text-gray-400 mb-2">Méthode de paiement</p>
+            <div className="grid grid-cols-3 gap-2">
+              {PAYMENT_METHODS.map(m => (
+                <button key={m.id} type="button" onClick={() => setMethod(m.id)}
+                  disabled={isProcessing}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-xs transition-all ${
+                    method === m.id
+                      ? 'border-current font-semibold'
+                      : 'border-gray-700 text-gray-500 hover:border-gray-500'
+                  }`}
+                  style={method === m.id ? { borderColor: toolColor, color: toolColor, backgroundColor: `${toolColor}15` } : {}}>
+                  <span className="text-lg">{m.icon}</span>
+                  <span>{m.label}</span>
+                  <span className="text-[10px] opacity-60 hidden sm:block">{m.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={isLoading || isSimulating}
-              className="w-full py-4 rounded-xl text-sm font-bold text-black transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-              style={{ backgroundColor: toolColor }}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Génération du rapport IA en cours…
-                </span>
-              ) : (
-                `Générer mon rapport Intelligence™ →`
-              )}
-            </button>
-            <p className="text-xs text-gray-600 text-center">
-              Votre rapport sera envoyé par email. Le paiement sera confirmé par notre équipe sous 24h.
-            </p>
-          </form>
+          {/* Contenu selon méthode */}
+          {method === 'virement' ? (
+            <div className="rounded-xl p-4 bg-gray-900/60 border border-gray-700 space-y-2">
+              <p className="text-xs font-semibold text-gray-300 mb-2">Coordonnées bancaires</p>
+              <div className="text-xs space-y-1.5 text-gray-400">
+                <p>Bénéficiaire : <span className="text-white">Epitaphe360 SARL</span></p>
+                <p>Montant : <span className="text-white">{priceTTC.toLocaleString('fr-MA')} MAD TTC</span></p>
+                <p>Référence : <span className="font-mono text-white">{virRef}</span></p>
+                <p className="text-gray-500 text-[10px] pt-1">
+                  Votre rapport sera généré dès réception du virement (24-48h). Indiquez impérativement la référence.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {error && <p className="text-red-400 text-xs">{error}</p>}
+              <button type="button" onClick={handlePay} disabled={isProcessing || isSimulating}
+                className="w-full py-4 rounded-xl text-sm font-bold text-black transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ backgroundColor: toolColor }}>
+                {isProcessing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    Redirection vers la passerelle...
+                  </span>
+                ) : method === 'cmi' ? (
+                  `💳 Payer ${priceTTC.toLocaleString('fr-MA')} MAD TTC par carte`
+                ) : (
+                  `🅿️ Payer ${priceTTC.toLocaleString('fr-MA')} MAD TTC via PayPal`
+                )}
+              </button>
+              <p className="text-xs text-gray-600 text-center">
+                {method === 'cmi'
+                  ? 'Redirection sécurisée vers la passerelle CMI (3D Secure)'
+                  : 'Redirection vers PayPal - retour automatique après paiement'}
+              </p>
+            </>
+          )}
 
-          {/* ─── Bouton simulation paiement (TEST) ─────────────────── */}
-          <div className="mt-4 pt-4 border-t border-dashed border-yellow-600/40">
+          {error && method === 'virement' && <p className="text-red-400 text-xs">{error}</p>}
+
+          {/* --- Bouton simulation paiement (TEST) ------------------- */}
+          <div className="pt-3 border-t border-dashed border-yellow-600/40">
             <p className="text-xs text-yellow-500/80 font-semibold mb-2 flex items-center gap-1">
               <span>⚡</span> Mode test
             </p>
-            <button
-              type="button"
-              disabled={isLoading || isSimulating}
+            <button type="button" disabled={isProcessing || isSimulating}
               onClick={handleSimulatePayment}
-              className="w-full py-3 rounded-xl text-sm font-bold border border-yellow-500/50 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
+              className="w-full py-3 rounded-xl text-sm font-bold border border-yellow-500/50 text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
               {isSimulating ? (
                 <>
                   <span className="w-4 h-4 border-2 border-yellow-400/40 border-t-yellow-400 rounded-full animate-spin" />
-                  Simulation en cours…
+                  Simulation en cours...
                 </>
               ) : (
                 <>🧪 Simuler le paiement (TEST)</>
@@ -274,23 +350,10 @@ export function IntelligencePricing({
               Génère un paiement factice + facture + rapport IA sans transaction réelle
             </p>
           </div>
-
-          {/* Instructions virement */}
-          <div className="mt-4 pt-4 border-t border-gray-800">
-            <p className="text-xs text-gray-500 mb-2 font-medium">Virement bancaire :</p>
-            <div className="text-xs text-gray-600 space-y-0.5">
-              <p>Bénéficiaire : <span className="text-gray-400">Epitaphe360 SARL</span></p>
-              <p>Montant : <span className="text-gray-400">{intelligencePrice.toLocaleString('fr-MA')} MAD</span></p>
-              <p>Référence : <span className="text-gray-400">INT-{toolId.toUpperCase().slice(0, 3)}-{resultId.slice(0, 6).toUpperCase()}</span></p>
-            </div>
-          </div>
         </motion.div>
       </div>
 
-      <button
-        onClick={onBack}
-        className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
-      >
+      <button onClick={onBack} className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
         ← Retour aux résultats Discover
       </button>
     </div>

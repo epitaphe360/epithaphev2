@@ -29,6 +29,8 @@ import { z } from "zod";
 import { capturePayPalOrder } from "./lib/paypal";
 import { verifyCMICallback } from "./lib/cmi";
 import { createAndSendInvoice, generateInvoiceNumber } from "./lib/invoice-generator";
+import { generateAIReport } from "./lib/ai-report";
+import { scoringResults } from "../shared/schema";
 
 const paymentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -627,7 +629,34 @@ export function registerPaymentRoutes(app: Express) {
         currency:         payment.currency ?? 'MAD',
       });
 
-      return res.redirect(`${process.env.APP_URL ?? ''}/paiement/succes?invoice=${invoiceResult.invoiceId}&method=paypal`);
+      // Générer le rapport IA si le paiement est lié à un scoring
+      if (payment.scoringResultId) {
+        try {
+          const [result] = await db.select().from(scoringResults)
+            .where(eq(scoringResults.id, payment.scoringResultId)).limit(1);
+          if (result && result.tier !== 'intelligence') {
+            const aiReport = await generateAIReport(result);
+            await db.update(scoringResults)
+              .set({ tier: 'intelligence', aiReport, intelligenceUnlockedAt: new Date(), updatedAt: new Date() })
+              .where(eq(scoringResults.id, payment.scoringResultId));
+          }
+        } catch (aiError) {
+          console.error('[PayPal/Success] Rapport IA échoué:', aiError);
+        }
+      } else if (meta.plan === 'bmi360-full-annual') {
+        // Plan annuel — envoyer email de confirmation
+        sendMail({
+          to: email,
+          subject: 'Confirmation — BMI 360™ Full Annuel activé',
+          html: `<h2>Votre accès BMI 360™ Full Annuel est activé !</h2><p>Bonjour,</p><p>Votre paiement de <strong>${payment.amount.toLocaleString('fr-MA')} MAD TTC</strong> a bien été reçu.</p><p>Vous avez désormais accès à l'ensemble des 7 outils Intelligence BMI 360™ pendant 12 mois.</p><p><a href="${process.env.APP_URL ?? 'https://epitaphe360.ma'}/outils">Accéder aux outils</a></p><p>Référence : <code>${meta.paymentRef ?? payment.id}</code></p><p>— L'équipe Epitaphe360</p>`,
+        }).catch(e => console.error('[PayPal/Annual] Email failed:', e));
+      }
+
+      const appUrl = process.env.APP_URL ?? '';
+      const returnPath = payment.scoringResultId
+        ? `/paiement/succes?result=${payment.scoringResultId}&tool=${toolId}&method=paypal`
+        : `/paiement/succes?invoice=${invoiceResult.invoiceId}&method=paypal`;
+      return res.redirect(`${appUrl}${returnPath}`);
     } catch (error) {
       console.error('[PayPal/Success]', error);
       return res.redirect(`${process.env.APP_URL ?? ''}/paiement/echec?reason=server_error`);
@@ -708,6 +737,29 @@ export function registerPaymentRoutes(app: Express) {
         amountHT:         Math.round(payment.amount / 1.20),
         currency:         payment.currency ?? 'MAD',
       });
+
+      // Générer le rapport IA si le paiement est lié à un scoring
+      if (payment.scoringResultId) {
+        try {
+          const [result] = await db.select().from(scoringResults)
+            .where(eq(scoringResults.id, payment.scoringResultId)).limit(1);
+          if (result && result.tier !== 'intelligence') {
+            const aiReport = await generateAIReport(result);
+            await db.update(scoringResults)
+              .set({ tier: 'intelligence', aiReport, intelligenceUnlockedAt: new Date(), updatedAt: new Date() })
+              .where(eq(scoringResults.id, payment.scoringResultId));
+          }
+        } catch (aiError) {
+          console.error('[CMI/Callback] Rapport IA échoué:', aiError);
+        }
+      } else if (meta.plan === 'bmi360-full-annual') {
+        // Plan annuel — envoyer email de confirmation
+        sendMail({
+          to: email,
+          subject: 'Confirmation — BMI 360™ Full Annuel activé',
+          html: `<h2>Votre accès BMI 360™ Full Annuel est activé !</h2><p>Votre paiement a bien été reçu. Vous avez désormais accès aux 7 outils Intelligence pendant 12 mois.</p><p><a href="${process.env.APP_URL ?? 'https://epitaphe360.ma'}/outils">Accéder aux outils</a></p><p>Réf : <code>${meta.paymentRef ?? payment.id}</code></p><p>— L'équipe Epitaphe360</p>`,
+        }).catch(e => console.error('[CMI/Annual] Email failed:', e));
+      }
 
       // CMI attend cette réponse spécifique pour confirmer la réception
       return res.send('ACTION=POSTAUTH\nPROCCODE=0');

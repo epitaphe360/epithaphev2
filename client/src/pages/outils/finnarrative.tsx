@@ -119,11 +119,13 @@ export default function FinNarrativePage() {
   const [discoverMaturityLevel, setDiscoverMaturityLevel] = useState(1);
   const [intelligenceData, setIntelligenceData] = useState<{ globalScore: number; maturityLevel: number; pillarScores: Record<string, number>; aiReport: unknown } | null>(null);
 
+  const [valorisation, setValorisation] = useState(50000000);
+
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const enriched: Record<string, { value: number; pillar: string; weight: number }> = {};
+    const enriched: Record<string, { value: number; pillar: string; weight: number; reverseScored?: boolean }> = {};
     for (const a of answers) {
       const q = questions.find(q => q.id === a.questionId);
-      if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight };
+      if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight, reverseScored: q.reverseScored };
     }
     setEnrichedAnswers(enriched);
     setStep('gate');
@@ -164,83 +166,181 @@ export default function FinNarrativePage() {
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       <Helmet>
         <title>FinNarrative™ — Scoring Communication Financière | Epitaphe 360</title>
-        <meta name="description" content="Évaluez la qualité de votre communication financière avec FinNarrative™ (modèle TRUST). Scoring investisseurs sur 100." />
+        <meta name="description" content="Évaluez la qualité de votre communication financière avec FinNarrative™ (modèle CAPITAL™). Narrative Doctor™ : 4 pathologies narratives détectées, conformité AMMC 2025." />
         <link rel="canonical" href="https://www.epitaphe360.ma/outils/finnarrative" />
         <meta property="og:title" content="FinNarrative™ — Scoring Communication Financière" />
         <meta property="og:url" content="https://www.epitaphe360.ma/outils/finnarrative" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-      <SoftwareApplicationSchema name="FinNarrative™" description="Évaluez la qualité et la clarté de votre communication financière auprès des investisseurs." url="/outils/finnarrative" priceMad={4900} />
+      <SoftwareApplicationSchema name="FinNarrative™" description="Évaluez la qualité et la clarté de votre communication financière auprès des investisseurs." url="/outils/finnarrative" priceMad={9900} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"FinNarrative™",url:"/outils/finnarrative"}]} />
       <Navigation />
       <main className="pt-24 pb-20">
         <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold"
-              style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR, border: `1px solid ${TOOL_COLOR}40` }}>
-              FinNarrative™ · Modèle CAPITAL™
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Vos chiffres sont bons.<br />
-              <span style={{ color: TOOL_COLOR }}>Votre narration convainc-elle ?</span>
-            </h1>
-            <p className="text-gray-400 text-lg">
-              La performance financière ne suffit pas — la narration financière décide.<br />
-              Le Narrative Doctor™ détecte les 4 pathologies qui érodent la confiance des investisseurs.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-4 mb-10">
-            {(['roi', 'form', 'result'] as Step[]).map((s, i) => (
-              <div key={s} className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step === s ? 'text-black' : 'bg-gray-800 text-gray-500'}`}
-                  style={step === s ? { backgroundColor: TOOL_COLOR } : {}}>
-                  {i + 1}
-                </div>
-                <span className="text-xs text-gray-500 hidden sm:block">
-                  {s === 'roi' ? 'Contexte' : s === 'form' ? 'Évaluation' : 'Résultats'}
-                </span>
-                {i < 2 && <div className="w-8 h-px bg-gray-700" />}
+          {step !== 'roi' && (
+            <div className="flex items-center gap-3 mb-8">
+              <button onClick={() => setStep('roi')} className="text-gray-500 hover:text-white text-sm flex items-center gap-2 transition-colors">← Retour</button>
+              <div className="flex items-center gap-2 ml-auto">
+                {(['form','gate','discover','pricing','intelligence'] as const).map((s) => {
+                  const ss=['form','gate','discover','pricing','intelligence'] as const;
+                  const ci=ss.indexOf(step as typeof ss[number]); const si=ss.indexOf(s);
+                  return (<div key={s} className={`w-2 h-2 rounded-full ${si===ci?'bg-white':si<ci?'bg-green-500':'bg-gray-700'}`} />);
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
           <AnimatePresence mode="wait">
             {step === 'roi' && (
-              <motion.div key="roi" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <div className="border border-gray-800 rounded-2xl p-8 space-y-6">
-                  <h2 className="text-xl font-bold text-white">Narrative Doctor™ — Contexte financier</h2>
-                  <div className="grid grid-cols-2 gap-3">
+              <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+
+                {/* HERO */}
+                <div className="text-center mb-14">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 text-sm font-semibold"
+                    style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR, border: `1px solid ${TOOL_COLOR}40` }}>
+                    FinNarrative™ · Modèle CAPITAL™ · par Epitaphe360
+                  </div>
+                  <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+                    Vos chiffres sont bons.<br /><span style={{ color: TOOL_COLOR }}>Votre narration convainc-elle ?</span>
+                  </h1>
+                  <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                    78% des investisseurs lisent moins de 30% de votre rapport. 67% des décisions d’investissement reposent sur la qualité de la narration, pas seulement les chiffres.
+                  </p>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <button onClick={() => setStep('form')} className="px-6 py-3 rounded-xl text-sm font-bold text-black hover:opacity-90" style={{ backgroundColor: TOOL_COLOR }}>Lancer mon audit →</button>
+                    <a href="/outils" className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500 no-underline">Voir les outils</a>
+                    <button onClick={() => document.getElementById('capital-pillars')?.scrollIntoView({ behavior: 'smooth' })} className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500">En savoir plus</button>
+                    <button className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500">Rapport PDF</button>
+                  </div>
+                </div>
+
+                {/* STATS */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
+                  {[
+                    { value: '78%', label: 'des investisseurs lisent moins de 30% d’un rapport annuel', src: 'Ernst & Young' },
+                    { value: '67%', label: 'des décisions d’investissement reposent sur la qualité narrative', src: 'CFA Institute' },
+                    { value: '2.4×', label: 'meilleure valorisation pour les entreprises à narrative financière solide', src: 'McKinsey' },
+                    { value: '4', label: 'pathologies narratives récurrentes détectées par le Narrative Doctor™', src: 'FinNarrative™' },
+                  ].map(s => (
+                    <div key={s.value} className="rounded-xl p-5 border border-gray-800 bg-gray-900/40 text-center">
+                      <div className="text-3xl font-extrabold mb-1" style={{ color: TOOL_COLOR }}>{s.value}</div>
+                      <p className="text-xs text-gray-400 leading-snug">{s.label}</p>
+                      <p className="text-xs text-gray-600 mt-1">— {s.src}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 4 PATHOLOGIES */}
+                <div className="rounded-2xl p-8 mb-14 border border-gray-800 bg-gray-900/40">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>NARRATIVE DOCTOR™ — 4 PATHOLOGIES</div>
+                  <h2 className="text-2xl font-bold text-white mb-6">Qu'érode la confiance des investisseurs ?</h2>
+                  <div className="grid grid-cols-2 gap-4">
                     {PATHOLOGIES.map(p => (
-                      <div key={p.name} className="flex items-start gap-3 rounded-xl p-4 border border-gray-800" style={{ background: `${TOOL_COLOR}08` }}>
-                        <span className="text-2xl flex-shrink-0">{p.icon}</span>
+                      <div key={p.name} className="rounded-xl p-5 border border-gray-800 flex items-start gap-3" style={{ background: `${TOOL_COLOR}06` }}>
+                        <span className="text-3xl flex-shrink-0">{p.icon}</span>
                         <div>
-                          <div className="text-sm font-semibold text-white">{p.name}</div>
-                          <div className="text-xs text-gray-500 mt-0.5">{p.desc}</div>
+                          <div className="text-sm font-bold text-white mb-1">{p.name}</div>
+                          <div className="text-xs text-gray-400">{p.desc}</div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="rounded-xl p-4 border" style={{ borderColor: `${TOOL_COLOR}40`, background: `${TOOL_COLOR}10` }}>
+                </div>
+
+                {/* 7 PILIERS CAPITAL™ */}
+                <div id="capital-pillars" className="mb-14">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3" style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>LES 7 PILIERS DU MODÈLE CAPITAL™</div>
+                    <h2 className="text-2xl font-bold text-white">Qu'évalue FinNarrative™ ?</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { code: 'C', name: 'Clarté Narrative', sub: 'Structure & lisibilité', desc: 'Votre rapport est-il lisible en <30 minutes ? La thèse d’investissement est-elle explicitée en page 1 ?', tags: ['Executive Summary', 'Lisibilité', 'Structure'] },
+                      { code: 'A', name: 'Alignement Stratégique', sub: 'Cohérence & vision', desc: 'Votre communication financière est-elle alignée avec votre stratégie d’entreprise à 3 ans ?', tags: ['Vision 3 ans', 'KPIs strat', 'Roadmap'] },
+                      { code: 'P', name: 'Performance Visuelle', sub: 'Datavisualisation', desc: 'Qualité des graphiques, tableaux et infographies. Les données complexes sont-elles rendues accessibles ?', tags: ['Dataviz', 'Infographies', 'Tableaux de bord'] },
+                      { code: 'I', name: 'Impact Investisseurs', sub: 'Résonance & persuasion', desc: 'Le rapport génère-t-il un impact émotionnel positif ? Donne-t-il confiance et envie d’investir ?', tags: ['Persuasion', 'Présentation CA', 'Road show'] },
+                      { code: 'T', name: 'Transparence', sub: 'Cohérence & intégrité', desc: 'Gestion de la cohérence entre les messages positifs et les risques. Les mauvaises nouvelles sont-elles intégrées honnorément ?', tags: ['Risk disclosure', 'Incertitudes', 'Gouvernance'] },
+                      { code: 'AN', name: 'Anticipation', sub: 'Vision prospective', desc: 'Qualité de la communication sur les perspectives futures : guidance, pipeline, marchés en croissance.', tags: ['Guidance', 'Pipeline', 'Prospective'] },
+                      { code: 'BM', name: 'Benchmark Sectoriel', sub: 'Positionnement comparatif', desc: 'Votre communication financière vous positionne-t-elle avantageusement vs vos concurrents sectoriels ?', tags: ['Benchmark', 'Comparatifs', 'Premium narratif'] },
+                    ].map((p) => (
+                      <div key={p.code} className="rounded-xl p-5 border border-gray-800 bg-gray-900/30 flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-extrabold shrink-0" style={{ backgroundColor: `${TOOL_COLOR}25`, color: TOOL_COLOR }}>{p.code}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1"><span className="font-bold text-white">{p.name}</span><span className="text-xs text-gray-500">— {p.sub}</span></div>
+                          <p className="text-sm text-gray-400 mb-2 leading-relaxed">{p.desc}</p>
+                          <div className="flex flex-wrap gap-2">{p.tags.map(tag => (<span key={tag} className="px-2 py-0.5 rounded text-xs border" style={{ borderColor: `${TOOL_COLOR}40`, color: TOOL_COLOR, background: `${TOOL_COLOR}10` }}>{tag}</span>))}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SCORE GAUGE */}
+                <div className="rounded-2xl p-8 mb-14 border border-gray-800 bg-gray-900/40">
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3" style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>SCORE DE MATURITÉ NARRATIVE</div>
+                    <h2 className="text-2xl font-bold text-white">Les 5 niveaux CAPITAL™</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-44 h-44">
+                        <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
+                          <circle cx="100" cy="100" r="80" fill="none" stroke="#1f2937" strokeWidth="20" />
+                          <circle cx="100" cy="100" r="80" fill="none" stroke={TOOL_COLOR} strokeWidth="20"
+                            strokeDasharray={`${2 * Math.PI * 80 * 0.58} ${2 * Math.PI * 80 * 0.42}`} strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="text-5xl font-extrabold" style={{ color: TOOL_COLOR }}>58</div>
+                          <div className="text-gray-400 text-sm">/100</div>
+                        </div>
+                      </div>
+                      <div className="text-center mt-3"><div className="text-lg font-bold" style={{ color: '#22C55E' }}>Clair</div><div className="text-xs text-gray-500">Niveau 3 sur 5 — exemple illustratif</div></div>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { name: 'Opaque', range: '0–20', color: '#EF4444', desc: 'Rapport incompréhensible. Aucune thèse d’investissement visible.' },
+                        { name: 'Formel', range: '21–40', color: '#F97316', desc: 'Rapport conformiste. Chiffres présents mais narrative absente.' },
+                        { name: 'Clair', range: '41–60', color: '#EAB308', desc: 'Lisible mais sans conviction. La stratégie reste floue.' },
+                        { name: 'Convaincant', range: '61–80', color: '#22C55E', desc: 'Narrative solide, stratégie visible, confiance investisseur.' },
+                        { name: 'Référence Sectorielle', range: '81–100', color: '#3B82F6', desc: 'Rapport prémium. Référence du secteur. 2.4× valorisation narrative.' },
+                      ].map(m => (
+                        <div key={m.name} className="flex items-start gap-3">
+                          <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: m.color }} />
+                          <div><div className="text-sm font-semibold text-white">{m.name} <span className="text-gray-500 font-normal">({m.range})</span></div><div className="text-xs text-gray-400">{m.desc}</div></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* NARRATIVE DOCTOR + ROI */}
+                <div className="rounded-2xl p-8 mb-10 border border-gray-800 bg-gray-900/40">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>NARRATIVE DOCTOR™ — SIMULATEUR VALORISATION</div>
+                  <h2 className="text-xl font-bold text-white mb-6">Estimez le discount narratif sur votre valorisation</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div><label className="block text-sm text-gray-400 mb-2">Valorisation / Capitalisation : <strong className="text-white">{(valorisation/1000000).toFixed(0)}M MAD</strong></label>
+                      <input type="range" min={5000000} max={5000000000} step={5000000} value={valorisation} onChange={e => setValorisation(Number(e.target.value))} className="w-full" style={{ accentColor: TOOL_COLOR }} /></div>
+                    <div className="rounded-xl p-5 text-center" style={{ background: `${TOOL_COLOR}12`, border: `1px solid ${TOOL_COLOR}40` }}>
+                      <div className="text-xs text-gray-400 mb-2">Discount narratif estimé</div>
+                      <div className="text-4xl font-extrabold" style={{ color: TOOL_COLOR }}>
+                        {Math.round(valorisation * 0.15).toLocaleString()} MAD
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">(15% = décote moyenne pour narration financière faible)</div>
+                    </div>
+                  </div>
+                  <div className="rounded-xl p-4 border mb-6" style={{ borderColor: `${TOOL_COLOR}40`, background: `${TOOL_COLOR}08` }}>
                     <p className="text-sm font-semibold text-white mb-2">📄 Narrative Doctor™ (optionnel)</p>
-                    <p className="text-xs text-gray-400 mb-3">Uploadez votre rapport annuel PDF pour une analyse IA des pathologies narratives avec votre consultant Epitaphe360.</p>
+                    <p className="text-xs text-gray-400 mb-3">Uploadez votre rapport annuel PDF pour une analyse IA des pathologies narratives.</p>
                     <div className="flex items-center gap-3">
-                      <button onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 rounded-xl text-sm font-medium border border-gray-600 text-gray-300 hover:border-gray-400 transition-colors">
-                        📎 Joindre le rapport annuel
-                      </button>
+                      <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 rounded-xl text-sm font-medium border border-gray-600 text-gray-300 hover:border-gray-400 transition-colors">📎 Joindre le rapport annuel</button>
                       {uploadedFile && <span className="text-xs text-green-400">✓ {uploadedFile}</span>}
                     </div>
-                    <input ref={fileInputRef} type="file" accept=".pdf" className="hidden"
-                      onChange={e => { if (e.target.files?.[0]) setUploadedFile(e.target.files[0].name); }} />
+                    <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) setUploadedFile(e.target.files[0].name); }} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Nom de votre entreprise</label>
-                      <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Ex : Attijariwafa Bank, BMCE..." className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Secteur</label>
+                    <div><label className="block text-sm text-gray-400 mb-2">Nom de votre entreprise</label>
+                      <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Ex : Attijariwafa Bank, BMCE..." className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 focus:outline-none" /></div>
+                    <div><label className="block text-sm text-gray-400 mb-2">Secteur d'activité</label>
                       <select value={sector} onChange={e => setSector(e.target.value as SectorType)} className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white focus:outline-none">
                         <option value="finance">Finance / Banque / Assurance</option>
                         <option value="energie">Énergie / Mining</option>
@@ -248,37 +348,59 @@ export default function FinNarrativePage() {
                         <option value="pharma">Pharma / Santé</option>
                         <option value="btp">Immobilier / BTP</option>
                         <option value="tech">Tech / Telecom</option>
-                        <option value="agroalimentaire">Agroalimentaire</option>
-                        <option value="luxury">Retail / Distribution</option>
                         <option value="autre">Autre</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Vous êtes :</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {(['direction', 'terrain'] as const).map(type => (
-                          <button key={type} onClick={() => setRespondentType(type)}
-                            className={`px-3 py-2 rounded-xl border text-sm font-medium transition-all ${respondentType === type ? 'text-black' : 'border-gray-700 text-gray-400'}`}
-                            style={respondentType === type ? { backgroundColor: TOOL_COLOR, borderColor: TOOL_COLOR } : {}}>
-                            {type === 'direction' ? '💼 DG / DAF / CA' : '📊 Contrôle gestion'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Taille entreprise</label>
-                      <select value={companySize} onChange={e => setCompanySize(e.target.value as CompanySizeType)} className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white focus:outline-none">
-                        <option value="pme">PME</option>
-                        <option value="eti">ETI cotée / Non cotée</option>
-                        <option value="grande">Grande entreprise / Groupe</option>
-                      </select>
-                    </div>
+                      </select></div>
                   </div>
-                  <button onClick={() => setStep('form')} className="w-full py-4 rounded-xl text-sm font-semibold text-black transition-all hover:opacity-90"
-                    style={{ backgroundColor: TOOL_COLOR }}>
-                    Démarrer l'évaluation CAPITAL™ — 42 questions →
-                  </button>
                 </div>
+
+                {/* RESPONDENT */}
+                <div className="mb-10">
+                  <label className="block text-sm font-semibold text-gray-300 mb-3">Je suis :</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {(['direction', 'terrain'] as const).map(type => (
+                      <button key={type} onClick={() => setRespondentType(type)}
+                        className={`px-4 py-4 rounded-xl border text-sm font-medium transition-all ${respondentType === type ? 'text-black' : 'border-gray-700 text-gray-400 hover:border-gray-600'}`}
+                        style={respondentType === type ? { backgroundColor: TOOL_COLOR, borderColor: TOOL_COLOR } : {}}>
+                        {type === 'direction' ? '💼 DG / DAF / Conseil d’Administration' : '📊 Contrôle de gestion'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3-TIER */}
+                <div className="mb-14">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3" style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>MODÈLE D'ÉVALUATION — 3 TIERS</div>
+                    <h2 className="text-2xl font-bold text-white">Choisissez votre niveau d'analyse</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { tier: 'Discover', price: 'Gratuit', highlight: false, items: ['Score CAPITAL™ partiel (4 piliers)', 'Niveau de maturité narrative', '2 pathologies identifiées', 'Benchmark sectoriel indicatif'] },
+                      { tier: 'Intelligence', price: '9 900 MAD', highlight: true, items: ['Score complet 7 piliers CAPITAL™', '4 Pathologies Narrative Doctor™', 'Discount narratif estimé', 'Rapport IA 12 pages premium', 'Analyse rapport annuel IA'] },
+                      { tier: 'Transform', price: 'Sur devis', highlight: false, items: ['Rédaction rapport annuel', 'Coaching communication DG/DAF', 'Road show story', 'Annual report design premium'] },
+                    ].map(t => (
+                      <div key={t.tier} className="rounded-2xl p-6 border" style={t.highlight ? { border: `2px solid ${TOOL_COLOR}`, background: `${TOOL_COLOR}10` } : { borderColor: '#374151' }}>
+                        {t.highlight && (<div className="text-xs font-bold mb-3 px-2 py-0.5 rounded-full inline-block" style={{ backgroundColor: TOOL_COLOR, color: '#000' }}>✦ RECOMMANDÉ</div>)}
+                        <div className="text-lg font-bold text-white mb-1">{t.tier}</div>
+                        <div className="text-2xl font-extrabold mb-4" style={{ color: t.highlight ? TOOL_COLOR : '#fff' }}>{t.price}</div>
+                        <ul className="space-y-2">{t.items.map(item => (<li key={item} className="flex gap-2 text-sm text-gray-400"><span style={{ color: t.highlight ? TOOL_COLOR : '#6b7280' }}>✓</span> {item}</li>))}</ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FINAL CTA */}
+                <motion.div className="rounded-2xl p-10 text-center mb-4"
+                  style={{ background: `linear-gradient(135deg, ${TOOL_COLOR}25, ${TOOL_COLOR}08)`, border: `1px solid ${TOOL_COLOR}50` }}>
+                  <div className="text-4xl mb-4">💹</div>
+                  <h2 className="text-2xl font-extrabold text-white mb-3">FinNarrative™ — Prochaine étape</h2>
+                  <p className="text-gray-400 mb-2 max-w-lg mx-auto">Obtenez votre Score CAPITAL™ gratuit en 8 minutes. 42 indicateurs narratifs analysés.</p>
+                  <p className="text-gray-500 text-sm mb-6">Vous êtes {respondentType === 'direction' ? 'Direction / CA' : 'Contrôle de gestion'} — l'évaluation sera adaptée.</p>
+                  <button onClick={() => setStep('form')}
+                    className="px-10 py-4 rounded-xl text-base font-bold text-black transition-all hover:opacity-90 hover:scale-105"
+                    style={{ backgroundColor: TOOL_COLOR }}>Démarrer l'évaluation CAPITAL™ — 42 questions · ~8 min →</button>
+                </motion.div>
+
               </motion.div>
             )}
 
@@ -340,6 +462,7 @@ export default function FinNarrativePage() {
                   maturityLevel={intelligenceData.maturityLevel}
                   pillarScores={intelligenceData.pillarScores}
                   aiReport={intelligenceData.aiReport as any}
+                  resultId={intelligenceData.id ?? resultId}
                   allPillars={Array.from(new Set(questions.map(q => q.pillar))).map(p => ({ id: p, label: questions.find(q => q.pillar === p)?.pillarLabel ?? p, color: PILLAR_COLORS[p] }))}
                 />
               </motion.div>

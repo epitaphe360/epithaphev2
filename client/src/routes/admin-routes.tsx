@@ -42,6 +42,8 @@ const QRCodesList           = lazy(() => import("../../../cms-dashboard/pages/qr
 const PushBroadcastPage     = lazy(() => import("../../../cms-dashboard/pages/push/PushBroadcastPage").then(m => ({ default: m.PushBroadcastPage })));
 const AdminResourcesList    = lazy(() => import("../../../cms-dashboard/pages/resources/ResourcesList").then(m => ({ default: m.ResourcesList })));
 const ScoringResultsList    = lazy(() => import("../../../cms-dashboard/pages/scoring/ScoringResultsList").then(m => ({ default: m.ScoringResultsList })));
+const ConsultationsPage     = lazy(() => import("../../../cms-dashboard/pages/scoring/ConsultationsPage").then(m => ({ default: m.ConsultationsPage })));
+const FunnelPage            = lazy(() => import("../../../cms-dashboard/pages/scoring/FunnelPage").then(m => ({ default: m.FunnelPage })));
 const ClientProjectsAdmin   = lazy(() => import("../../../cms-dashboard/pages/clients/ClientProjectsAdmin").then(m => ({ default: m.ClientProjectsAdmin })));
 const ClientsList           = lazy(() => import("../../../cms-dashboard/pages/clients/ClientsList").then(m => ({ default: m.ClientsList })));
 const DevisList             = lazy(() => import("../../../cms-dashboard/pages/devis/DevisList").then(m => ({ default: m.DevisList })));
@@ -231,6 +233,16 @@ export function AdminRoutes() {
       {/* Scoring — résultats des outils */}
       <Route path="/admin/scoring">
         {() => <AdminPage><ScoringResultsList /></AdminPage>}
+      </Route>
+
+      {/* BMI 360™ — Consultations expert */}
+      <Route path="/admin/bmi360/consultations">
+        {() => <AdminPage><ConsultationsPage /></AdminPage>}
+      </Route>
+
+      {/* BMI 360™ — Funnel analytics */}
+      <Route path="/admin/bmi360/funnel">
+        {() => <AdminPage><FunnelPage /></AdminPage>}
       </Route>
 
       {/* Clients — projets */}

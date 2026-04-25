@@ -9,6 +9,74 @@
 
 ---
 
+## 🎯 Tunnel BMI 360™ — Discover → Intelligence → Transform
+
+Le cœur fonctionnel de la plateforme : un tunnel à 3 niveaux pour qualifier
+les leads, monétiser un rapport IA, puis convertir en mission d'expert humain.
+
+### 1. **Discover™ — gratuit, instantané**
+- Score sur 4 piliers (sur 7) après ~8 min de questionnaire
+- Email opt-in : envoi automatique du score + upsell Intelligence™
+- Endpoint : `POST /api/scoring/:toolId/discover`
+
+### 2. **Intelligence™ — payant à l'unité (4 900 – 9 900 MAD HT)**
+Rapport IA complet (GPT-4o-mini) : 7 piliers analysés, plan 90 jours,
+recommandations chiffrées, déverrouillé **uniquement** après vérification
+d'un paiement valide en base (`payments.status = 'paid'`).
+- Méthodes : PayPal · CMI · virement
+- Endpoint paiement : `POST /api/scoring/intelligence-payment`
+- Endpoint déverrouillage : `POST /api/scoring/:id/unlock-intelligence` (renvoie **402** si aucun paiement vérifié)
+- Catalogue prix : `GET /api/scoring/catalog` (source de vérité serveur)
+
+| Outil | Prix HT | Modèle |
+|---|---|---|
+| CommPulse™ | 4 900 MAD | CLARITY |
+| TalentPrint™ | 7 500 MAD | ATTRACT |
+| ImpactTrace™ | 8 400 MAD | IMPACT |
+| SafeSignal™ | 7 900 MAD | SECURE |
+| EventImpact™ | 7 900 MAD | ENGAGE |
+| SpaceScore™ | 6 500 MAD | SPACE |
+| FinNarrative™ | 9 900 MAD | TRUST |
+
+#### Plan **BMI 360™ Full — Annuel** : `39 000 MAD HT / 12 mois`
+Accès aux 7 outils Intelligence pendant 1 an — économie **14 000 MAD** vs achat unitaire.
+- Endpoint : `POST /api/scoring/full-annual-payment`
+
+### 3. **Transform™ — RDV avec un expert humain**
+Formulaire **interne** (pas de Cal.com / Calendly) : le client réserve un
+créneau, l'équipe est notifiée par email et reprend contact sous 24 h.
+- Endpoint : `POST /api/scoring/:id/request-expert`
+- Composant React : `client/src/components/book-expert-cta.tsx` (injecté
+  automatiquement à la fin de chaque rapport Intelligence™)
+- Admin : `GET /api/admin/consultations` · `PATCH /api/admin/consultations/:id`
+
+---
+
+## 📈 Analytics & Relances Automatiques
+
+### Funnel events (`funnel_events` table)
+Chaque action clé est tracée pour reconstituer l'entonnoir Discover → Intelligence → Transform :
+
+| Event | Déclenché par |
+|---|---|
+| `discover_completed` | Score Discover calculé |
+| `discover_email_sent` | Email Discover envoyé avec succès |
+| `intelligence_payment_initiated` | Paiement créé (PayPal/CMI/virement) |
+| `unlock_denied_no_payment` | **Tentative de déverrouillage sans paiement vérifié** (suspect) |
+| `intelligence_unlocked` | Rapport IA généré |
+| `expert_requested` | Demande de RDV Transform |
+| `relance_d{1,3,7}_sent` | Email de relance Discover envoyé |
+| `full_annual_payment_initiated` | Souscription au plan annuel |
+
+Tableau de bord admin : `GET /api/admin/funnel?days=30`
+
+### Cron de relance Discover (J+1, J+3, J+7)
+- Tick horaire (`server/lib/relance-scheduler.ts`)
+- Idempotent : ne renvoie jamais 2× la même relance pour un même lead
+- Skip automatique si l'utilisateur a déjà payé l'Intelligence™
+
+---
+
 ## 📊 Note Globale : **8.5/10** (vs 7.2/10 version originale)
 
 Cette version représente une amélioration significative du site Epitaphe 360 avec des optimisations techniques, UX, SEO et de nouvelles fonctionnalités pour atteindre un standard de classe mondiale.

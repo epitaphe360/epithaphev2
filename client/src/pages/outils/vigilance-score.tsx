@@ -171,12 +171,75 @@ export default function VigilanceScore() {
         canonicalPath="/outils/vigilance-score"
       />
       <Navigation />
-      <main className="py-16 md:py-24">
+      {/* ─── HERO ─────────────────────────────────────────────────────── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-[#0A0A0A] via-[#0d1117] to-[#0A0A0A] border-b border-white/6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <span className="inline-flex items-center gap-2 bg-orange-500/10 text-orange-400 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-6 border border-orange-500/20">
+            🛡️ Outil QHSE · Vigilance Score™
+          </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-5 leading-tight">
+            Votre conformité QHSE<br /><span className="text-orange-400">en 2 minutes chrono.</span>
+          </h1>
+          <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+            5 questions. Un score sur 100. Des recommandations ciblées pour renforcer votre communication sécurité et votre culture QHSE.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mb-10">
+            <button onClick={() => document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-3 rounded-xl font-bold text-sm text-black bg-orange-400 hover:bg-orange-300 transition-colors">
+              Évaluer ma conformité →
+            </button>
+            <a href="/outils" className="px-8 py-3 rounded-xl font-semibold text-sm text-gray-300 border border-gray-700 hover:border-gray-500 transition-colors no-underline">
+              Voir tous les outils
+            </a>
+          </div>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+            {[
+              { v: '5', l: 'questions pour un diagnostic complet' },
+              { v: '2 min', l: 'pour obtenir votre score sur 100' },
+              { v: '4', l: 'niveaux de maturité QHSE' },
+              { v: '100%', l: 'recommandations personnalisées' },
+            ].map(s => (
+              <div key={s.v} className="rounded-xl p-4 border border-gray-800 bg-gray-900/40 text-center">
+                <div className="text-2xl font-extrabold text-orange-400 mb-1">{s.v}</div>
+                <p className="text-xs text-gray-400 leading-snug">{s.l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Ce qu'évalue Vigilance Score™ ───────────────────────────── */}
+      <section className="py-14 border-b border-white/6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3 bg-orange-500/10 text-orange-400 border border-orange-500/20">5 DIMENSIONS ÉVALUÉES</span>
+            <h2 className="text-2xl font-bold text-white">Qu'évalue Vigilance Score™ ?</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            {[
+              { icon: '📋', name: 'Documentation', desc: 'Formalisation et mise à jour du système QHSE' },
+              { icon: '🎓', name: 'Formation', desc: 'Plan de formation sécurité et traçabilité' },
+              { icon: '🪧', name: 'Affichage', desc: 'Conformité et personnalisation de la signalétique' },
+              { icon: '🚨', name: 'Urgences', desc: 'Procédures rédigées, affichées et exercées' },
+              { icon: '🔄', name: 'Audits', desc: 'Audits planifiés avec PDCA et indicateurs' },
+            ].map(d => (
+              <div key={d.name} className="rounded-xl p-4 border border-gray-800 bg-gray-900/30 text-center">
+                <div className="text-3xl mb-2">{d.icon}</div>
+                <div className="text-sm font-bold text-white mb-1">{d.name}</div>
+                <p className="text-xs text-gray-400 leading-snug">{d.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <main id="quiz-section" className="py-16 md:py-24">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <RevealSection className="text-center mb-10">
             <span className="inline-block bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">Outil QHSE</span>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Vigilance Score™</h1>
-            <p className="text-muted-foreground">Évaluez en 2 minutes la maturité de votre communication QHSE. Obtenez un score sur 100 et des recommandations ciblées.</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Vigilance Score™</h2>
+            <p className="text-muted-foreground">Répondez aux 5 questions ci-dessous pour obtenir votre score.</p>
           </RevealSection>
 
           <div className="bg-card border border-border rounded-2xl overflow-hidden">

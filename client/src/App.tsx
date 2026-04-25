@@ -16,6 +16,8 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 import { PushPermissionBanner } from "@/components/push-permission-banner";
 import { PwaInstallPrompt }     from "@/components/pwa-install-prompt";
 import { CookieConsentBanner }  from "@/components/cookie-consent-banner";
+import { EmbedProvider, useEmbed } from "@/contexts/embed-context";
+import { EmbedResizeReporter } from "@/components/embed-resize-reporter";
 
 // ── Espace client reset password ─────────────────────────────────────────────
 import ClientResetPasswordPage from "@/pages/espace-client/reset-password";
@@ -29,6 +31,14 @@ import NotFound from "@/pages/not-found";
 
 // ── Toutes les autres pages — lazy-loaded (code splitting) ───────────────────
 const HomeV4                 = lazy(() => import("@/pages/home-v4"));
+
+// ── Pages SEO (nouvelles) ─────────────────────────────────────────────────────
+const APropos                = lazy(() => import("@/pages/a-propos"));
+const FaqPage                = lazy(() => import("@/pages/faq"));
+const NosPolesHub            = lazy(() => import("@/pages/nos-poles/index"));
+const ComInterne             = lazy(() => import("@/pages/nos-poles/com-interne"));
+const ComRse                 = lazy(() => import("@/pages/nos-poles/com-rse"));
+const BrandingSiege          = lazy(() => import("@/pages/la-fabrique/branding-siege"));
 const DesignPreview          = lazy(() => import("@/pages/design-preview"));
 const DynamicPage            = lazy(() => import("@/pages/dynamic-page"));
 const ReferencesPage         = lazy(() => import("@/pages/references"));
@@ -92,6 +102,10 @@ const AbonnementPage   = lazy(() => import("@/pages/espace-client/abonnement"));
 // ── Devis public ──────────────────────────────────────────────────────────────
 const DevisPage = lazy(() => import("@/pages/devis/index"));
 
+// ── Pages paiement (retour PayPal / CMI) ─────────────────────────────────────
+const PaiementSucces = lazy(() => import("@/pages/paiement-succes"));
+const PaiementEchec  = lazy(() => import("@/pages/paiement-echec"));
+
 // ── Analytics ─────────────────────────────────────────────────────────────────
 const AnalyticsPage = lazy(() => import("@/pages/analytics/index"));
 
@@ -118,6 +132,15 @@ function Router() {
           <Route path="/" component={HomeV5} />
           <Route path="/design-v4" component={HomeV4} />
           <Route path="/design-preview" component={DesignPreview} />
+
+          {/* ── Pages SEO ───────────────────────────────────────── */}
+          <Route path="/a-propos" component={APropos} />
+          <Route path="/faq" component={FaqPage} />
+
+          {/* ── Nos pôles d'expertise ───────────────────────────── */}
+          <Route path="/nos-poles" component={NosPolesHub} />
+          <Route path="/nos-poles/com-interne" component={ComInterne} />
+          <Route path="/nos-poles/com-rse" component={ComRse} />
           
           
           
@@ -145,6 +168,7 @@ function Router() {
 
           {/* ── La Fabrique ─────────────────────────────────────── */}
           <Route path="/la-fabrique" component={LaFabriqueHub} />
+          <Route path="/la-fabrique/branding-siege" component={BrandingSiege} />
           <Route path="/la-fabrique/impression" component={Impression} />
           <Route path="/la-fabrique/menuiserie" component={Menuiserie} />
           <Route path="/la-fabrique/signaletique" component={Signaletique} />
@@ -169,6 +193,15 @@ function Router() {
           <Route path="/outils/finnarrative" component={FinNarrativePage} />
           <Route path="/outils/bmi360" component={BMI360Page} />
 
+          {/* ── Alias /tools/ → /outils/ (redirections SEO) ─────── */}
+          <Route path="/tools/commpulse">{() => { window.location.replace('/outils/commpulse'); return null; }}</Route>
+          <Route path="/tools/talentprint">{() => { window.location.replace('/outils/talentprint'); return null; }}</Route>
+          <Route path="/tools/safesignal">{() => { window.location.replace('/outils/safesignal'); return null; }}</Route>
+          <Route path="/tools/impacttrace">{() => { window.location.replace('/outils/impacttrace'); return null; }}</Route>
+          <Route path="/tools/eventimpact">{() => { window.location.replace('/outils/eventimpact'); return null; }}</Route>
+          <Route path="/tools/spacescore">{() => { window.location.replace('/outils/spacescore'); return null; }}</Route>
+          <Route path="/tools/finnarrative">{() => { window.location.replace('/outils/finnarrative'); return null; }}</Route>
+
           {/* ── Ressources ──────────────────────────────────────── */}
           <Route path="/ressources" component={RessourcesPage} />
 
@@ -185,6 +218,10 @@ function Router() {
           {/* ── Devis public ────────────────────────────────────── */}
           <Route path="/devis/:reference" component={DevisPage} />
 
+          {/* ── Paiement callbacks (PayPal / CMI) ───────────────── */}
+          <Route path="/paiement/succes" component={PaiementSucces} />
+          <Route path="/paiement/echec"  component={PaiementEchec} />
+          <Route path="/paiement/annule" component={PaiementEchec} />
 
           {/* ── Analytics ───────────────────────────────────────── */}
           <Route path="/analytics" component={AnalyticsPage} />
@@ -203,6 +240,31 @@ function Router() {
   );
 }
 
+function AppInner() {
+  const isEmbed = useEmbed();
+  return (
+    <>
+      <EmbedResizeReporter />
+      {!isEmbed && <OrganizationSchema />}
+      <Toaster />
+      {!isEmbed && <DevShortcuts />}
+      {!isEmbed && <MagentaCursor />}
+      {!isEmbed && <WhatsAppButton />}
+      {!isEmbed && <PushPermissionBanner />}
+      {!isEmbed && <PwaInstallPrompt />}
+      {!isEmbed && <CookieConsentBanner />}
+      <Suspense fallback={
+        <div style={{ minHeight: isEmbed ? 'auto' : '100vh', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #EC4899', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      }>
+        <Router />
+      </Suspense>
+    </>
+  );
+}
+
 function App() {
   return (
     <HelmetProvider>
@@ -210,22 +272,9 @@ function App() {
         <ThemeProvider defaultTheme="light" storageKey="epitaphe-theme">
           <QueryClientProvider client={queryClient}>
             <TooltipProvider>
-              <OrganizationSchema />
-              <Toaster />
-      <DevShortcuts />
-              <MagentaCursor />
-              <WhatsAppButton />
-              <PushPermissionBanner />
-              <PwaInstallPrompt />
-              <CookieConsentBanner />
-              <Suspense fallback={
-                <div style={{ minHeight: '100vh', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #EC4899', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
-                  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                </div>
-              }>
-                <Router />
-              </Suspense>
+              <EmbedProvider>
+                <AppInner />
+              </EmbedProvider>
             </TooltipProvider>
           </QueryClientProvider>
         </ThemeProvider>

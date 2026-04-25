@@ -102,8 +102,8 @@ export default function BMI360Page() {
       <Navigation />
       <main className="pt-24 pb-20">
         <div className="max-w-5xl mx-auto px-6">
-          {/* Header */}
-          <div className="text-center mb-16">
+          {/* Header enrichi */}
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold"
               style={{ backgroundColor: '#6366F120', color: '#6366F1', border: '1px solid #6366F140' }}>
               BMI 360™ · Business Maturity Intelligence
@@ -114,9 +114,33 @@ export default function BMI360Page() {
                 d'entreprise à 360°
               </span>
             </h1>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
               Le BMI 360™ agrège vos scores sur les 7 dimensions critiques pour révéler votre maturité organisationnelle globale et votre potentiel de croissance.
             </p>
+            {/* Stats rapides */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-10">
+              {[
+                { v: '7', l: 'dimensions analysées', color: '#6366F1' },
+                { v: '5', l: 'niveaux de maturité', color: '#EC4899' },
+                { v: '200+', l: 'indicateurs croisés', color: '#10B981' },
+                { v: '1', l: 'score global unifié', color: '#0EA5E9' },
+              ].map(s => (
+                <div key={s.v} className="rounded-xl p-4 border border-gray-800 bg-gray-900/40 text-center">
+                  <div className="text-2xl font-extrabold mb-1" style={{ color: s.color }}>{s.v}</div>
+                  <p className="text-xs text-gray-400 leading-snug">{s.l}</p>
+                </div>
+              ))}
+            </div>
+            {/* CTA si aucun score */}
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link href="/outils/commpulse" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 no-underline"
+                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+                Commencer CommPulse™ →
+              </Link>
+              <a href="/outils" className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500 transition-colors no-underline">
+                Voir tous les outils
+              </a>
+            </div>
           </div>
 
           {/* Global score */}

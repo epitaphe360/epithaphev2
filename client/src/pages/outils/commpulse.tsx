@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
+import { useEmbed } from '@/contexts/embed-context';
 import { Helmet } from 'react-helmet-async';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -99,6 +100,7 @@ function generateRecommendations(pillarScores: Array<{ pillarId: string; pillarL
 type Step = 'roi' | 'form' | 'gate' | 'discover' | 'pricing' | 'intelligence';
 
 export default function CommPulsePage() {
+  const isEmbed = useEmbed();
   const questions = useToolQuestions(TOOL_ID, DEFAULT_QUESTIONS);
   const [step, setStep] = useState<Step>('roi');
   const [respondentType, setRespondentType] = useState<'direction' | 'terrain'>('direction');
@@ -107,7 +109,7 @@ export default function CommPulsePage() {
   const [companySize, setCompanySize] = useState<CompanySizeType>('pme');
   const [effectif, setEffectif] = useState(50);
   const [salaireMoyen, setSalaireMoyen] = useState(8000);
-  const [enrichedAnswers, setEnrichedAnswers] = useState<Record<string, { value: number; pillar: string; weight: number }>>({});
+  const [enrichedAnswers, setEnrichedAnswers] = useState<Record<string, { value: number; pillar: string; weight: number; reverseScored?: boolean }>>({})
   const [resultId, setResultId] = useState('');
   const [partialScores, setPartialScores] = useState<Record<string, number>>({});
   const [intelligencePrice, setIntelligencePrice] = useState(4900);
@@ -118,10 +120,10 @@ export default function CommPulsePage() {
   const roiEstimate = calculateRoiEstimate(effectif, salaireMoyen, 0.18);
 
   const handleComplete = (answers: ScoringAnswer[]) => {
-    const enriched: Record<string, { value: number; pillar: string; weight: number }> = {};
+    const enriched: Record<string, { value: number; pillar: string; weight: number; reverseScored?: boolean }> = {};
     for (const a of answers) {
       const q = questions.find(q => q.id === a.questionId);
-      if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight };
+      if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight, reverseScored: q.reverseScored };
     }
     setEnrichedAnswers(enriched);
     setStep('gate');
@@ -149,6 +151,19 @@ export default function CommPulsePage() {
         setDiscoverGlobalScore(res.globalScore);
         setDiscoverMaturityLevel(res.maturityLevel);
         setIntelligencePrice(res.intelligencePrice ?? 4900);
+        // Notify WordPress parent iframe of lead capture
+        if (isEmbed) {
+          window.parent.postMessage({
+            type: 'bmi360:lead',
+            lead: {
+              tool: TOOL_ID,
+              email: data.email,
+              name: data.name,
+              score: res.globalScore,
+              maturity: res.maturityLevel,
+            },
+          }, '*');
+        }
       }
     } catch (err) {
       console.error('Erreur discover scoring', err);
@@ -159,7 +174,7 @@ export default function CommPulsePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className={`${isEmbed ? '' : 'min-h-screen'} bg-[#0A0A0A] text-white`}>
       <Helmet>
         <title>CommPulse™ — Scoring Communication Interne | Epitaphe 360</title>
         <meta name="description" content="Évaluez la santé de votre communication interne avec CommPulse™ (modèle CLARITY). 42 indicateurs, score sur 100, recommandations expert." />
@@ -171,73 +186,229 @@ export default function CommPulsePage() {
       <SoftwareApplicationSchema name="CommPulse™" description="Évaluez la santé de votre communication interne : cohérence, écoute, transparence et impact RH." url="/outils/commpulse" priceMad={4900} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"CommPulse™",url:"/outils/commpulse"}]} />
       <Navigation />
-      <main className="pt-24 pb-20">
+      <main className={isEmbed ? "pt-6 pb-10" : "pt-24 pb-20"}>
         <div className="max-w-3xl mx-auto px-6">
 
-          {/* Hero */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-sm font-semibold"
-              style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR, border: `1px solid ${TOOL_COLOR}40` }}>
-              CommPulse™ · Modèle CLARITY™
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Feel the heartbeat of<br />
-              <span style={{ color: TOOL_COLOR }}>your organization.</span>
-            </h1>
-            <p className="text-gray-400 text-lg">
-              71% des employés sont insatisfaits de leur communication interne.<br />
-              Découvrez où vous en êtes — et ce que ça vous coûte vraiment.
-            </p>
-          </div>
-
-          {/* Steps */}
-          <div className="flex items-center justify-center gap-4 mb-10">
-            {(['roi', 'form', 'result'] as Step[]).map((s, i) => (
-              <div key={s} className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  step === s ? 'text-black' : ((['roi', 'form', 'result'].indexOf(s) < ['roi', 'form', 'result'].indexOf(step)) ? 'bg-green-500/20 text-green-400' : 'bg-gray-800 text-gray-500')
-                }`} style={step === s ? { backgroundColor: TOOL_COLOR } : {}}>
-                  {i + 1}
-                </div>
-                <span className="text-xs text-gray-500 hidden sm:block">
-                  {s === 'roi' ? 'Contexte' : s === 'form' ? 'Évaluation' : 'Résultats'}
-                </span>
-                {i < 2 && <div className="w-8 h-px bg-gray-700" />}
+          {step !== 'roi' && (
+            <div className="flex items-center gap-3 mb-8">
+              <button onClick={() => setStep('roi')} className="text-gray-500 hover:text-white text-sm flex items-center gap-2 transition-colors">
+                ← Retour
+              </button>
+              <div className="flex items-center gap-2 ml-auto">
+                {(['form', 'gate', 'discover', 'pricing', 'intelligence'] as const).map((s) => {
+                  const steps = ['form', 'gate', 'discover', 'pricing', 'intelligence'] as const;
+                  const currentIdx = steps.indexOf(step as typeof steps[number]);
+                  const sIdx = steps.indexOf(s);
+                  return (
+                    <div key={s} className={`w-2 h-2 rounded-full transition-colors ${
+                      sIdx === currentIdx ? 'bg-white' : sIdx < currentIdx ? 'bg-green-500' : 'bg-gray-700'
+                    }`} />
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
           <AnimatePresence mode="wait">
-            {/* STEP 1: ROI Calculator */}
+            {/* STEP 1 : Landing Page Complète */}
             {step === 'roi' && (
-              <motion.div key="roi" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                <div className="border border-gray-800 rounded-2xl p-8 space-y-6">
-                  <h2 className="text-xl font-bold text-white">
-                    Calculez d'abord le coût de votre communication défaillante
-                  </h2>
-                  <p className="text-gray-400 text-sm">
-                    Les cadres seniors perdent en moyenne 63 jours/an à cause d'une communication inefficace. 
-                    Quel est votre coût réel ?
-                  </p>
+              <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
+                {/* ── HERO ─────────────────────────────────────────────── */}
+                <div className="text-center mb-14">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 text-sm font-semibold"
+                    style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR, border: `1px solid ${TOOL_COLOR}40` }}>
+                    CommPulse™ · Modèle CLARITY™ · par Epitaphe360
+                  </div>
+                  <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+                    Feel the heartbeat of<br />
+                    <span style={{ color: TOOL_COLOR }}>your organization.</span>
+                  </h1>
+                  <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                    71% des employés sont insatisfaits de leur communication interne. Découvrez où vous en êtes — et ce que ça vous coûte vraiment.
+                  </p>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <button onClick={() => setStep('form')}
+                      className="px-6 py-3 rounded-xl text-sm font-bold text-black hover:opacity-90"
+                      style={{ backgroundColor: TOOL_COLOR }}>
+                      Lancer mon audit →
+                    </button>
+                    <a href="/outils" className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500 no-underline">
+                      Voir les outils
+                    </a>
+                    <button
+                      onClick={() => document.getElementById('clarity-pillars')?.scrollIntoView({ behavior: 'smooth' })}
+                      className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500">
+                      En savoir plus
+                    </button>
+                    <button className="px-6 py-3 rounded-xl text-sm font-semibold text-gray-300 border border-gray-700 hover:border-gray-500">
+                      Rapport PDF
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── STATS BANNER ─────────────────────────────────────── */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14">
+                  {[
+                    { value: '71%', label: 'des employés insatisfaits de leur communication interne', src: 'Towers Watson' },
+                    { value: '63j', label: 'perdus par cadre senior / an en communication inefficace', src: 'McKinsey' },
+                    { value: '9 284 $', label: 'coût annuel par employé d\'une communication défaillante', src: 'Gallup' },
+                    { value: '86%', label: 'des entreprises améliorent leur performance avec CLARITY™', src: 'Epitaphe360' },
+                  ].map(s => (
+                    <div key={s.value} className="rounded-xl p-5 border border-gray-800 bg-gray-900/40 text-center">
+                      <div className="text-3xl font-extrabold mb-1" style={{ color: TOOL_COLOR }}>{s.value}</div>
+                      <p className="text-xs text-gray-400 leading-snug">{s.label}</p>
+                      <p className="text-xs text-gray-600 mt-1">— {s.src}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── POSITIONNEMENT UNIQUE ────────────────────────────── */}
+                <div className="rounded-2xl p-8 mb-14 border border-gray-800 bg-gray-900/40">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
+                    style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                    POSITIONNEMENT UNIQUE
+                  </div>
+                  <h2 className="text-2xl font-bold text-white mb-4">Pourquoi CommPulse™ ?</h2>
+                  <p className="text-gray-400 mb-6 leading-relaxed">
+                    CommPulse™ est la première suite de scoring de la communication interne développée pour les entreprises francophones. Ce n'est pas un sondage de satisfaction — c'est un outil d'<strong className="text-white">intelligence organisationnelle</strong> en 7 dimensions calibré sur les réalités du terrain marocain et africain.
+                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="rounded-xl p-5 border border-red-500/20 bg-red-500/5">
+                      <h3 className="text-sm font-bold text-red-400 mb-3">Ce que font les autres</h3>
+                      <ul className="space-y-2 text-sm text-gray-400">
+                        <li className="flex gap-2"><span className="text-red-500">✗</span> Sondages satisfaction génériques</li>
+                        <li className="flex gap-2"><span className="text-red-500">✗</span> Résultats non actionnables</li>
+                        <li className="flex gap-2"><span className="text-red-500">✗</span> Pas de benchmark sectoriel</li>
+                        <li className="flex gap-2"><span className="text-red-500">✗</span> Aucun calcul de ROI</li>
+                      </ul>
+                    </div>
+                    <div className="rounded-xl p-5" style={{ border: `1px solid ${TOOL_COLOR}30`, background: `${TOOL_COLOR}08` }}>
+                      <h3 className="text-sm font-bold mb-3" style={{ color: TOOL_COLOR }}>Ce que fait CommPulse™</h3>
+                      <ul className="space-y-2 text-sm text-gray-400">
+                        <li className="flex gap-2"><span style={{ color: TOOL_COLOR }}>✓</span> Modèle CLARITY™ en 7 dimensions</li>
+                        <li className="flex gap-2"><span style={{ color: TOOL_COLOR }}>✓</span> Score sur 100 + niveau de maturité</li>
+                        <li className="flex gap-2"><span style={{ color: TOOL_COLOR }}>✓</span> Dual Voice Score™ Direction vs Terrain</li>
+                        <li className="flex gap-2"><span style={{ color: TOOL_COLOR }}>✓</span> ROI calculé + rapport IA 12 pages</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── 7 PILIERS CLARITY™ ───────────────────────────────── */}
+                <div id="clarity-pillars" className="mb-14">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+                      style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                      LES 7 PILIERS DU MODÈLE CLARITY™
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">Qu'évalue CommPulse™ ?</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { code: 'C', name: 'Cohérence', sub: 'Cohérence Stratégique', desc: 'Alignement entre messages direction, valeurs affichées et réalité vécue. Premier pilier de la confiance organisationnelle.', tags: ['Alignement direction', 'Cohérence multi-niveaux', 'Suivi engagements'] },
+                      { code: 'L', name: 'Liens', sub: 'Culture du feedback', desc: 'Efficacité et fluidité des canaux de communication interne. L\'info circule-t-elle vraiment dans toute l\'organisation ?', tags: ['Canaux adaptés', 'Circulation info', 'Outils digitaux'] },
+                      { code: 'A', name: 'Attention', sub: 'Écoute active', desc: 'Qualité de l\'écoute managériale et mécanismes de remontée terrain. Les signaux faibles sont-ils captés à temps ?', tags: ['Écoute active', 'Espaces d\'expression', 'Signaux faibles'] },
+                      { code: 'R', name: 'Résultats', sub: 'Amplification & impact', desc: 'L\'impact de la communication sur la performance organisationnelle est-il mesuré, prouvé et communiqué ?', tags: ['KPIs com', 'Impact performance', 'Tableau de bord'] },
+                      { code: 'I', name: 'Inclusion', sub: 'Résonance & équité', desc: 'Accès équitable à l\'information pour tous les profils, localisations et niveaux hiérarchiques sans exception.', tags: ['Accès équitable', 'Diversité', 'Terrain vs siège'] },
+                      { code: 'T', name: 'Transparence', sub: 'Intelligence & confiance', desc: 'Honnêteté dans la communication des décisions difficiles et des mauvaises nouvelles. La confiance se bâtit dans les moments difficiles.', tags: ['Décisions expliquées', 'Mauvaises nouvelles', 'Confiance'] },
+                      { code: 'Y', name: 'Yield', sub: 'Impact business', desc: 'Retour réel de la communication sur l\'engagement des employés. Fierté, appartenance et NPS employé mesurés.', tags: ['Fierté', 'Appartenance', 'NPS employé'] },
+                    ].map((p) => (
+                      <div key={p.code} className="rounded-xl p-5 border border-gray-800 bg-gray-900/30 flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-base font-extrabold shrink-0"
+                          style={{ backgroundColor: `${TOOL_COLOR}25`, color: TOOL_COLOR }}>
+                          {p.code}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <span className="font-bold text-white">{p.name}</span>
+                            <span className="text-xs text-gray-500">— {p.sub}</span>
+                          </div>
+                          <p className="text-sm text-gray-400 mb-2 leading-relaxed">{p.desc}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {p.tags.map(tag => (
+                              <span key={tag} className="px-2 py-0.5 rounded text-xs border"
+                                style={{ borderColor: `${TOOL_COLOR}40`, color: TOOL_COLOR, background: `${TOOL_COLOR}10` }}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── SCORE GAUGE + MATURITÉ ───────────────────────────── */}
+                <div className="rounded-2xl p-8 mb-14 border border-gray-800 bg-gray-900/40">
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+                      style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                      VOTRE SCORE DE MATURITÉ COMMUNICATIONNELLE
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">Comment se lit votre score ?</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-44 h-44">
+                        <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
+                          <circle cx="100" cy="100" r="80" fill="none" stroke="#1f2937" strokeWidth="20" />
+                          <circle cx="100" cy="100" r="80" fill="none"
+                            stroke={TOOL_COLOR} strokeWidth="20"
+                            strokeDasharray={`${2 * Math.PI * 80 * 0.70} ${2 * Math.PI * 80 * 0.30}`}
+                            strokeLinecap="round" />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="text-5xl font-extrabold" style={{ color: TOOL_COLOR }}>70</div>
+                          <div className="text-gray-400 text-sm">/100</div>
+                        </div>
+                      </div>
+                      <div className="text-center mt-3">
+                        <div className="text-lg font-bold" style={{ color: '#22C55E' }}>Engaged</div>
+                        <div className="text-xs text-gray-500">Niveau 4 sur 5 — exemple illustratif</div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { name: 'Silent', range: '0–20', color: '#EF4444', desc: 'Absence de stratégie. Les rumeurs remplacent l\'info officielle.' },
+                        { name: 'Broadcast', range: '21–40', color: '#F97316', desc: 'Communication unidirectionnelle sans retour du terrain.' },
+                        { name: 'Dialogue', range: '41–60', color: '#EAB308', desc: 'Échanges existent mais sans cohérence ni mesure d\'impact.' },
+                        { name: 'Engaged', range: '61–80', color: '#22C55E', desc: 'Culture de communication construite. Employés actifs.' },
+                        { name: 'Pulse', range: '81–100', color: '#3B82F6', desc: 'Standard de référence sectorielle. Avantage compétitif.' },
+                      ].map(m => (
+                        <div key={m.name} className="flex items-start gap-3">
+                          <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: m.color }} />
+                          <div>
+                            <div className="text-sm font-semibold text-white">
+                              {m.name} <span className="text-gray-500 font-normal">({m.range})</span>
+                            </div>
+                            <div className="text-xs text-gray-400">{m.desc}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── ROI SIMULATOR ────────────────────────────────────── */}
+                <div id="roi-calc" className="rounded-2xl p-8 mb-10 border border-gray-800 bg-gray-900/40">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
+                    style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                    SIMULATEUR — COÛT DE LA COMMUNICATION INEFFICACE
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-2">Calculez votre coût réel</h2>
+                  <p className="text-gray-400 text-sm mb-6">Les cadres seniors perdent en moyenne 63 jours/an. Quel est votre coût annuel réel ?</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                     <div>
                       <label className="block text-sm text-gray-400 mb-2">Nom de votre entreprise</label>
-                      <input
-                        type="text"
-                        value={companyName}
-                        onChange={e => setCompanyName(e.target.value)}
-                        placeholder="Ex : Maroc Telecom, OCP..."
-                        className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500"
-                      />
+                      <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)}
+                        placeholder="Ex : OCP, Maroc Telecom..."
+                        className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500" />
                     </div>
                     <div>
                       <label className="block text-sm text-gray-400 mb-2">Secteur d'activité</label>
-                      <select
-                        value={sector}
-                        onChange={e => setSector(e.target.value as SectorType)}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white focus:outline-none focus:border-indigo-500"
-                      >
+                      <select value={sector} onChange={e => setSector(e.target.value as SectorType)}
+                        className="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700 text-white focus:outline-none focus:border-indigo-500">
                         <option value="pharma">Pharma / Santé</option>
                         <option value="auto">Automobile</option>
                         <option value="finance">Banque / Finance</option>
@@ -254,68 +425,160 @@ export default function CommPulsePage() {
                       <label className="block text-sm text-gray-400 mb-2">
                         Effectif : <strong className="text-white">{effectif} employés</strong>
                       </label>
-                      <input
-                        type="range" min={10} max={5000} step={10}
-                        value={effectif}
+                      <input type="range" min={10} max={5000} step={10} value={effectif}
                         onChange={e => setEffectif(Number(e.target.value))}
-                        className="w-full accent-indigo-500"
-                      />
+                        className="w-full accent-indigo-500" />
                     </div>
                     <div>
                       <label className="block text-sm text-gray-400 mb-2">
                         Salaire moyen : <strong className="text-white">{salaireMoyen.toLocaleString('fr-MA')} MAD/mois</strong>
                       </label>
-                      <input
-                        type="range" min={3000} max={50000} step={500}
-                        value={salaireMoyen}
+                      <input type="range" min={3000} max={50000} step={500} value={salaireMoyen}
                         onChange={e => setSalaireMoyen(Number(e.target.value))}
-                        className="w-full accent-indigo-500"
-                      />
+                        className="w-full accent-indigo-500" />
                     </div>
                   </div>
-
-                  {/* ROI display */}
-                  <motion.div
-                    key={roiEstimate}
-                    initial={{ scale: 0.95 }}
-                    animate={{ scale: 1 }}
+                  <motion.div key={roiEstimate} initial={{ scale: 0.97 }} animate={{ scale: 1 }}
                     className="rounded-xl p-6 text-center"
-                    style={{ background: `linear-gradient(135deg, ${TOOL_COLOR}20, ${TOOL_COLOR}08)`, border: `1px solid ${TOOL_COLOR}40` }}
-                  >
-                    <p className="text-sm text-gray-400 mb-2">Coût estimé de votre communication défaillante</p>
-                    <div className="text-4xl font-bold mb-1" style={{ color: TOOL_COLOR }}>
-                      {roiEstimate.toLocaleString('fr-MA')} MAD
+                    style={{ background: `linear-gradient(135deg, ${TOOL_COLOR}15, ${TOOL_COLOR}05)`, border: `1px solid ${TOOL_COLOR}40` }}>
+                    <p className="text-sm text-gray-400 mb-1">Coût estimé de votre communication défaillante</p>
+                    <div className="text-4xl font-extrabold mb-1" style={{ color: TOOL_COLOR }}>
+                      {(roiEstimate * 12).toLocaleString('fr-MA')} MAD
                     </div>
-                    <p className="text-xs text-gray-500">par an · basé sur le facteur CLARITY™ (18% de la masse salariale)</p>
+                    <p className="text-xs text-gray-500">par an · facteur CLARITY™ (18% de la masse salariale) · ~{Math.round(63 * effectif / 100)} jours perdus / an</p>
                   </motion.div>
+                </div>
 
-                  {/* Respondent type */}
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-3">Je suis :</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(['direction', 'terrain'] as const).map(type => (
-                        <button
-                          key={type}
-                          onClick={() => setRespondentType(type)}
-                          className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
-                            respondentType === type ? 'text-black' : 'border-gray-700 text-gray-400 hover:border-gray-600'
-                          }`}
-                          style={respondentType === type ? { backgroundColor: TOOL_COLOR, borderColor: TOOL_COLOR } : {}}
-                        >
-                          {type === 'direction' ? '👔 Direction / Management' : '🔧 Collaborateur / Terrain'}
-                        </button>
-                      ))}
-                    </div>
+                {/* ── RESPONDENT TYPE ──────────────────────────────────── */}
+                <div className="mb-10">
+                  <label className="block text-sm font-semibold text-gray-300 mb-3">Je suis :</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {(['direction', 'terrain'] as const).map(type => (
+                      <button key={type} onClick={() => setRespondentType(type)}
+                        className={`px-4 py-4 rounded-xl border text-sm font-medium transition-all ${
+                          respondentType === type ? 'text-black' : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                        }`}
+                        style={respondentType === type ? { backgroundColor: TOOL_COLOR, borderColor: TOOL_COLOR } : {}}>
+                        {type === 'direction' ? '👔 Direction / Management' : '🔧 Collaborateur / Terrain'}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
+                {/* ── 3-TIER MODEL ─────────────────────────────────────── */}
+                <div className="mb-14">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+                      style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                      MODÈLE D'ÉVALUATION — 3 TIERS
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">Choisissez votre niveau d'analyse</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { tier: 'Discover', price: 'Gratuit', highlight: false, items: ['Score CLARITY™ partiel (4 pilliers)', 'Niveau de maturité CLARITY™', '2 recommandations prioritaires', 'Résultat immédiat en ligne'] },
+                      { tier: 'Intelligence', price: '4 900 MAD', highlight: true, items: ['Score complet 7 pilliers', 'Dual Voice Score™ Direction/Terrain', 'Rapport IA 12 pages personnalisé', 'Benchmark sectoriel Maroc', 'Plan d\'action 90 jours'] },
+                      { tier: 'Transform', price: 'Sur devis', highlight: false, items: ['Accompagnement expert 6 mois', 'Ateliers co-construction équipe', 'KPIs & tableau de bord mensuel', 'ROI garanti contractuellement'] },
+                    ].map(t => (
+                      <div key={t.tier} className="rounded-2xl p-6 border"
+                        style={t.highlight ? { border: `2px solid ${TOOL_COLOR}`, background: `${TOOL_COLOR}10` } : { borderColor: '#374151' }}>
+                        {t.highlight && (
+                          <div className="text-xs font-bold mb-3 px-2 py-0.5 rounded-full inline-block"
+                            style={{ backgroundColor: TOOL_COLOR, color: '#000' }}>✦ RECOMMANDÉ</div>
+                        )}
+                        <div className="text-lg font-bold text-white mb-1">{t.tier}</div>
+                        <div className="text-2xl font-extrabold mb-4"
+                          style={{ color: t.highlight ? TOOL_COLOR : '#fff' }}>{t.price}</div>
+                        <ul className="space-y-2">
+                          {t.items.map(item => (
+                            <li key={item} className="flex gap-2 text-sm text-gray-400">
+                              <span style={{ color: t.highlight ? TOOL_COLOR : '#6b7280' }}>✓</span> {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── RAPPORT 12 PAGES ─────────────────────────────────── */}
+                <div className="rounded-2xl p-8 mb-14 border border-gray-800 bg-gray-900/40">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
+                    style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                    CAPITAL RAPPORT COMPLET — 12 PAGES
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-6">Structure du rapport Intelligence™</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { pages: '1–2', title: 'Executive Summary', desc: 'Score global, niveau CLARITY™ et top 3 priorités.' },
+                      { pages: '3–4', title: 'Score détaillé par pilier', desc: 'Analyse des 7 dimensions avec forces et faiblesses.' },
+                      { pages: '5–6', title: 'Benchmark sectoriel', desc: 'Positionnement vs entreprises similaires au Maroc.' },
+                      { pages: '7', title: 'Diagnostic Dual Voice™', desc: 'Écart Direction / Terrain — zones de tension identifiées.' },
+                      { pages: '8', title: 'Plan d\'action 90 jours', desc: 'Quick wins à J+30, J+60, J+90 priorisés.' },
+                      { pages: '9–10', title: 'Cartographie de l\'impact', desc: 'Impact financier et ROI des actions recommandées.' },
+                      { pages: '11', title: 'Roadmap Transform', desc: 'Architecture du programme d\'accompagnement 6 mois.' },
+                      { pages: '12', title: 'Prochaines étapes', desc: 'Modalités d\'engagement et planning Epitaphe360.' },
+                    ].map(r => (
+                      <div key={r.pages} className="flex gap-3 p-3 rounded-lg border border-gray-800">
+                        <div className="text-xs font-bold rounded px-1.5 py-0.5 shrink-0 h-fit mt-0.5"
+                          style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>P. {r.pages}</div>
+                        <div>
+                          <div className="text-sm font-semibold text-white">{r.title}</div>
+                          <div className="text-xs text-gray-500">{r.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── INTÉGRATIONS ─────────────────────────────────────── */}
+                <div className="rounded-2xl p-8 mb-14 border border-gray-800 bg-gray-900/40">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
+                    style={{ backgroundColor: `${TOOL_COLOR}20`, color: TOOL_COLOR }}>
+                    FONCTIONNALITÉS ET INTÉGRATIONS
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-6">Écosystème technique CommPulse™</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { icon: '📋', name: 'Formulaire', desc: 'Questionnaire digital optimisé' },
+                      { icon: '⚡', name: 'Automatisation', desc: 'Envoi automatique des rapports' },
+                      { icon: '🤖', name: 'Rapport IA', desc: 'Analyse GPT-4o personnalisée' },
+                      { icon: '📅', name: 'Booking', desc: 'Prise de RDV intégrée' },
+                      { icon: '📄', name: 'PDF Report', desc: 'Rapport 12 pages téléchargeable' },
+                      { icon: '🔗', name: 'Slack / CRM', desc: 'Intégrations tierces disponibles' },
+                      { icon: '📊', name: 'Dashboard', desc: 'Suivi temps réel évolution' },
+                      { icon: '🌐', name: 'Multi-sites', desc: 'Comparaison inter-entités' },
+                    ].map(int => (
+                      <div key={int.name} className="rounded-xl p-4 border border-gray-800 text-center">
+                        <div className="text-2xl mb-2">{int.icon}</div>
+                        <div className="text-sm font-semibold text-white">{int.name}</div>
+                        <div className="text-xs text-gray-500 mt-1">{int.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── FINAL CTA ────────────────────────────────────────── */}
+                <motion.div
+                  className="rounded-2xl p-10 text-center mb-4"
+                  style={{ background: `linear-gradient(135deg, ${TOOL_COLOR}25, ${TOOL_COLOR}08)`, border: `1px solid ${TOOL_COLOR}50` }}
+                >
+                  <div className="text-4xl mb-4">💬</div>
+                  <h2 className="text-2xl font-extrabold text-white mb-3">CommPulse™ — Prochaine étape</h2>
+                  <p className="text-gray-400 mb-2 max-w-lg mx-auto">
+                    Obtenez votre score CLARITY™ gratuit en 8 minutes. 42 indicateurs analysés. Résultat immédiat.
+                  </p>
+                  <p className="text-gray-500 text-sm mb-6">
+                    Vous êtes {respondentType === 'direction' ? 'une direction / management' : 'un collaborateur terrain'} — l'évaluation sera adaptée à votre perspective.
+                  </p>
                   <button
                     onClick={() => setStep('form')}
-                    className="w-full py-4 rounded-xl text-sm font-semibold text-black transition-all hover:opacity-90"
-                    style={{ backgroundColor: TOOL_COLOR }}
-                  >
+                    className="px-10 py-4 rounded-xl text-base font-bold text-black transition-all hover:opacity-90 hover:scale-105"
+                    style={{ backgroundColor: TOOL_COLOR }}>
                     Démarrer l'évaluation CLARITY™ — 42 questions · ~8 min →
                   </button>
-                </div>
+                </motion.div>
+
               </motion.div>
             )}
 
@@ -393,6 +656,7 @@ export default function CommPulsePage() {
                   maturityLevel={intelligenceData.maturityLevel}
                   pillarScores={intelligenceData.pillarScores}
                   aiReport={intelligenceData.aiReport as any}
+                  resultId={intelligenceData.id ?? resultId}
                   allPillars={Array.from(new Set(questions.map(q => q.pillar))).map(p => ({ id: p, label: questions.find(q => q.pillar === p)?.pillarLabel ?? p, color: PILLAR_COLORS[p] }))}
                 />
               </motion.div>

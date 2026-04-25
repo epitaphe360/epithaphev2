@@ -19,6 +19,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
 import { registerRoutes } from "./routes";
 import { registerGrapesRoutes } from "./plasmic-routes";
+import { startRelanceScheduler } from "./lib/relance-scheduler";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import rateLimit from "express-rate-limit";
@@ -87,9 +88,16 @@ const siteUrl = process.env.SITE_URL
     ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
     : null);
 
+// WordPress origins that may embed the React app — comma-separated in env
+const wordpressOriginsEnv = process.env.WORDPRESS_ORIGINS || '';
+const wordpressOrigins = wordpressOriginsEnv
+  ? wordpressOriginsEnv.split(',').map(o => o.trim()).filter(Boolean)
+  : [];
+
 const allowedOrigins = [
   ...baseOrigins,
   ...(siteUrl ? [siteUrl] : []),
+  ...wordpressOrigins,
 ];
 
 // Accepte uniquement les sous-domaines epithaphev2*.vercel.app (previews, staging, prod)
@@ -120,10 +128,20 @@ app.use(cors({
 // Security headers with Helmet
 // Disable CSP in development (Vite HMR needs ws:, inline scripts, etc.)
 const isDev = process.env.NODE_ENV === "development";
+
+// Allow WordPress sites to embed our scoring tools in iframes.
+// frame-ancestors: 'self' + all WordPress origins + wildcard if not specified.
+const frameAncestors = wordpressOrigins.length > 0
+  ? ["'self'", ...wordpressOrigins]
+  : ["'self'", "*"];
+
 app.use(helmet({
+  // Disable X-Frame-Options globally — we use CSP frame-ancestors instead.
+  frameguard: false,
   contentSecurityPolicy: isDev ? false : {
     directives: {
       defaultSrc: ["'self'"],
+      frameAncestors,
       scriptSrc: [
         "'self'", "'unsafe-inline'", "'unsafe-eval'",
         "https://www.googletagmanager.com",
@@ -148,8 +166,9 @@ app.use(helmet({
         "https://www.clarity.ms",
         "https://c.clarity.ms",
         "https://e.clarity.ms",
+        ...wordpressOrigins,
       ],
-      frameSrc: ["'self'"],
+      frameSrc: ["'self'", ...wordpressOrigins],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
@@ -283,6 +302,12 @@ app.use((req, res, next) => {
     () => {
       console.log(`✅ Server is ready and listening on port ${port}`);
       log(`serving on port ${port}`);
+      // Démarrer le scheduler de relances Discover™ (J+1, J+3, J+7)
+      try {
+        startRelanceScheduler();
+      } catch (e) {
+        console.error('[Relance] Démarrage scheduler échoué:', e);
+      }
     },
   );
 })();

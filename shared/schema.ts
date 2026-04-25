@@ -910,6 +910,72 @@ export type ScoringResult = typeof scoringResults.$inferSelect;
 
 
 // ============================================================
+// BMI 360™ — TUNNEL TRANSFORM (RDV expert humain)
+// ============================================================
+
+export const expertConsultations = pgTable("expert_consultations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scoringResultId: varchar("scoring_result_id", { length: 36 }), // lien optionnel
+  toolId: varchar("tool_id", { length: 50 }),
+  // Identité
+  contactName: text("contact_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: varchar("contact_phone", { length: 30 }),
+  companyName: text("company_name"),
+  jobTitle: text("job_title"),
+  companySize: varchar("company_size", { length: 30 }),
+  // Brief
+  message: text("message"),
+  preferredSlot: varchar("preferred_slot", { length: 30 }), // matin | apres-midi | soir | flexible
+  preferredChannel: varchar("preferred_channel", { length: 20 }).default('visio'), // visio | telephone | presentiel
+  // Suivi
+  status: varchar("status", { length: 20 }).default('new'), // new | contacted | scheduled | done | cancelled
+  scheduledAt: timestamp("scheduled_at"),
+  expertNotes: text("expert_notes"),
+  // Source & metadata
+  source: varchar("source", { length: 30 }).default('intelligence-report'), // intelligence-report | landing | direct
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertExpertConsultationSchema = createInsertSchema(expertConsultations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertExpertConsultation = z.infer<typeof insertExpertConsultationSchema>;
+export type ExpertConsultation = typeof expertConsultations.$inferSelect;
+
+
+// ============================================================
+// BMI 360™ — FUNNEL EVENTS (analytics & relances)
+// ============================================================
+
+export const funnelEvents = pgTable("funnel_events", {
+  id: serial("id").primaryKey(),
+  scoringResultId: varchar("scoring_result_id", { length: 36 }),
+  toolId: varchar("tool_id", { length: 50 }),
+  eventType: varchar("event_type", { length: 50 }).notNull(),
+  // discover_started | discover_completed | discover_email_sent
+  // intelligence_payment_initiated | intelligence_paid | intelligence_unlocked
+  // expert_requested | expert_scheduled
+  // relance_d1_sent | relance_d3_sent | relance_d7_sent
+  email: text("email"),
+  metadata: json("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertFunnelEventSchema = createInsertSchema(funnelEvents).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFunnelEvent = z.infer<typeof insertFunnelEventSchema>;
+export type FunnelEvent = typeof funnelEvents.$inferSelect;
+
+
+// ============================================================
 // PAIEMENT — Plans d'abonnement plateforme (Type 2)
 // ============================================================
 

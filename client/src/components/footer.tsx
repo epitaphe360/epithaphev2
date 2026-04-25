@@ -1,4 +1,4 @@
-﻿import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Cookie } from "lucide-react";
+import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Cookie } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { Link } from "wouter";
 import { resetCookieConsent } from "@/components/cookie-consent-banner";
@@ -9,35 +9,35 @@ const polesLinks = [
   { label: "Marque Employeur",  href: "/architecture-de-marque/marque-employeur" },
   { label: "COM'SST-QHSE",      href: "/architecture-de-marque/communication-qhse" },
   { label: "COM'RSE",           href: "/nos-poles/com-rse" },
-  { label: "COM' Ã‰vÃ©nementiel", href: "/evenements" },
+  { label: "COM' Événementiel", href: "/evenements" },
 ];
 
 const fabriqueLinks = [
-  { label: "Branding de siÃ¨ge",            href: "/la-fabrique/branding-siege" },
+  { label: "Branding de siège",            href: "/la-fabrique/branding-siege" },
   { label: "Stands et Showroom",           href: "/la-fabrique/menuiserie" },
-  { label: "Enseignes et signalÃ©tiques",   href: "/la-fabrique/signaletique" },
+  { label: "Enseignes et signalétiques",   href: "/la-fabrique/signaletique" },
   { label: "Impression grand format",      href: "/la-fabrique/impression" },
-  { label: "Lettrage & dÃ©coupe Laser/CNC", href: "/la-fabrique/amenagement" },
+  { label: "Lettrage & découpe Laser/CNC", href: "/la-fabrique/amenagement" },
   { label: "PLV & dispositifs retail",     href: "/la-fabrique/impression" },
 ];
 
 const scoringLinks = [
-  { label: "CommPulseâ„¢",       href: "/outils/commpulse" },
-  { label: "TalentPrintâ„¢",     href: "/outils/talentprint" },
-  { label: "SafeSignalâ„¢",      href: "/outils/safesignal" },
-  { label: "ImpactTraceâ„¢",     href: "/outils/impacttrace" },
-  { label: "EventImpactâ„¢",     href: "/outils/eventimpact" },
-  { label: "SpaceScoreâ„¢",      href: "/outils/spacescore" },
-  { label: "FinNarrativeâ„¢",    href: "/outils/finnarrative" },
-  { label: "Tableau BMI 360â„¢", href: "/outils/bmi360" },
+  { label: "CommPulse™",       href: "/outils/commpulse" },
+  { label: "TalentPrint™",     href: "/outils/talentprint" },
+  { label: "SafeSignal™",      href: "/outils/safesignal" },
+  { label: "ImpactTrace™",     href: "/outils/impacttrace" },
+  { label: "EventImpact™",     href: "/outils/eventimpact" },
+  { label: "SpaceScore™",      href: "/outils/spacescore" },
+  { label: "FinNarrative™",    href: "/outils/finnarrative" },
+  { label: "Tableau BMI 360™", href: "/outils/bmi360" },
 ];
 
 const liensLinks = [
   { label: "Ressources",           href: "/ressources" },
-  { label: "RÃ©fÃ©rences",           href: "/nos-references" },
+  { label: "Références",           href: "/nos-references" },
   { label: "FAQ",                  href: "/faq" },
   { label: "Contact",              href: "/contact" },
-  { label: "Conditions gÃ©nÃ©rales", href: "/mentions-legales" },
+  { label: "Conditions générales", href: "/mentions-legales" },
 ];
 
 function FooterLinkList({ links }: { links: { label: string; href: string }[] }) {
@@ -57,10 +57,10 @@ function FooterLinkList({ links }: { links: { label: string; href: string }[] })
 export function Footer() {
   const isEmbed = useEmbed();
   const { settings } = useSettings("footer", {
-    footer_address: "RDC 7-9, Rue Bussang Maarif Casablanca â€“ Maroc",
+    footer_address: "RDC 7-9, Rue Bussang Maarif Casablanca — Maroc",
     footer_phone: "+212 662 744 741",
     footer_email: "info@epitaphe.ma",
-    footer_description: "Agence de communication 360Â° au Maroc. Depuis plus de 20 ans, nous accompagnons les entreprises dans leur stratÃ©gie de communication globale.",
+    footer_description: "Agence de communication 360° au Maroc. Depuis plus de 20 ans, nous accompagnons les entreprises dans leur stratégie de communication globale.",
     footer_linkedin: "https://www.linkedin.com/company/epitaphe360",
     footer_facebook: "https://www.facebook.com/epitaphe360",
     footer_instagram: "https://www.instagram.com/epitaphe360",
@@ -92,7 +92,7 @@ export function Footer() {
       />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
-        {/* â”€â”€ Main grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* Main grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-10 xl:gap-8 mb-14">
 
           {/* Col 1-2: Brand block */}
@@ -132,7 +132,7 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-            {/* Social icons â€” always visible */}
+            {/* Social icons - always visible */}
             <div className="flex gap-2">
               <a
                 href={settings.footer_facebook || "https://www.facebook.com/epitaphe360"}
@@ -164,10 +164,10 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Col 3: Nos pÃ´les d'expertise */}
+          {/* Col 3: Nos poles d'expertise */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-[#C8A96E] mb-5 font-montserrat">
-              Nos pÃ´les d'expertise
+              Nos pôles d'expertise
             </h4>
             <FooterLinkList links={polesLinks} />
           </div>
@@ -197,24 +197,24 @@ export function Footer() {
           </div>
         </div>
 
-        {/* â”€â”€ Bottom bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* Bottom bar */}
         <div className="border-t border-white/[0.07] pt-7">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/30 font-montserrat order-2 sm:order-1">
-              &copy; {new Date().getFullYear()} Epitaphe 360. Tous droits rÃ©servÃ©s.
+              &copy; {new Date().getFullYear()} Epitaphe 360. Tous droits réservés.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 order-1 sm:order-2">
               <Link
                 href="/mentions-legales"
                 className="text-xs text-white/30 hover:text-white/70 transition-colors"
               >
-                Mentions lÃ©gales
+                Mentions légales
               </Link>
               <Link
                 href="/politique-confidentialite"
                 className="text-xs text-white/30 hover:text-white/70 transition-colors"
               >
-                Politique de confidentialitÃ©
+                Politique de confidentialité
               </Link>
               <button
                 onClick={resetCookieConsent}

@@ -253,3 +253,172 @@ export async function sendAgencyMessageNotification(opts: {
     `),
   });
 }
+
+// ========================================
+// BMI 360™ — Tunnel Discover → Intelligence → Transform
+// ========================================
+
+const TOOL_LABELS: Record<string, string> = {
+  commpulse:    'CommPulse™',
+  talentprint:  'TalentPrint™',
+  impacttrace:  'ImpactTrace™',
+  safesignal:   'SafeSignal™',
+  eventimpact:  'EventImpact™',
+  spacescore:   'SpaceScore™',
+  finnarrative: 'FinNarrative™',
+};
+
+function toolLabel(toolId: string): string {
+  return TOOL_LABELS[toolId] ?? toolId;
+}
+
+/**
+ * Hint des prix Intelligence™ pour les emails de relance (sans créer
+ * de dépendance circulaire avec scoring-routes). Source de vérité = serveur.
+ */
+export const INTELLIGENCE_PRICES_HINT: Record<string, number> = {
+  commpulse:    4900,
+  talentprint:  7500,
+  impacttrace:  8400,
+  safesignal:   7900,
+  eventimpact:  7900,
+  spacescore:   6500,
+  finnarrative: 9900,
+};
+
+// ── 8. Discover — Score gratuit livré + upsell Intelligence ───────────────────
+export async function sendDiscoverScoreEmail(opts: {
+  to: string;
+  name?: string;
+  toolId: string;
+  globalScore: number;
+  maturityLevel: number;
+  resultId: string;
+  intelligencePriceMad: number;
+}): Promise<boolean> {
+  const reportUrl = `${FRONTEND_URL}/outils/${opts.toolId}?result=${opts.resultId}`;
+  return sendMail({
+    to: opts.to,
+    subject: `Votre score Discover™ ${toolLabel(opts.toolId)} : ${opts.globalScore}/100`,
+    html: baseTemplate("Votre rapport Discover™ est prêt", `
+      <h1>Bonjour ${esc(opts.name ?? '')},</h1>
+      <p>Merci d'avoir réalisé votre diagnostic <strong>${esc(toolLabel(opts.toolId))}</strong>.</p>
+      <div style="background:#f8f8f8;border-radius:8px;padding:20px;text-align:center;margin:20px 0;">
+        <div style="font-size:42px;font-weight:800;color:#C8A96E;">${opts.globalScore}<span style="font-size:18px;color:#888;">/100</span></div>
+        <div style="font-size:13px;color:#666;text-transform:uppercase;letter-spacing:0.1em;">Niveau de maturité ${opts.maturityLevel}/5</div>
+      </div>
+      <p>Votre rapport Discover™ couvre <strong>4 piliers visibles</strong> sur 7. Pour débloquer le rapport complet généré par notre IA experte, passez au tier Intelligence™.</p>
+      <p><strong>Le rapport Intelligence™ inclut :</strong></p>
+      <ul style="font-size:14px;color:#444;line-height:1.8;">
+        <li>Analyse experte par pilier (7 dimensions complètes)</li>
+        <li>Plan d'action 30/60/90 jours priorisé</li>
+        <li>Quick wins à mettre en œuvre immédiatement</li>
+        <li>Identification de vos risques clés</li>
+        <li>Accès au programme Transform avec un expert humain</li>
+      </ul>
+      <a href="${reportUrl}" class="btn">Débloquer mon rapport Intelligence™ — ${opts.intelligencePriceMad.toLocaleString('fr-MA')} MAD HT</a>
+      <hr class="divider" />
+      <p style="font-size:13px;color:#888;">Lien direct : <a href="${reportUrl}" style="color:#C8A96E;">${reportUrl}</a></p>
+    `),
+  });
+}
+
+// ── 9. Discover — Relance J+1, J+3, J+7 ───────────────────────────────────────
+export async function sendDiscoverRelance(opts: {
+  to: string;
+  name?: string;
+  toolId: string;
+  globalScore: number;
+  resultId: string;
+  intelligencePriceMad: number;
+  relanceStep: 1 | 3 | 7;
+}): Promise<boolean> {
+  const reportUrl = `${FRONTEND_URL}/outils/${opts.toolId}?result=${opts.resultId}`;
+  const subjects: Record<number, string> = {
+    1: `Vos 3 leviers d'action immédiats — ${toolLabel(opts.toolId)}`,
+    3: `Ne laissez pas votre diagnostic prendre la poussière`,
+    7: `Dernière chance — votre rapport Intelligence™ vous attend`,
+  };
+  const intros: Record<number, string> = {
+    1: `Vous avez obtenu un score de <strong>${opts.globalScore}/100</strong> sur ${esc(toolLabel(opts.toolId))}. Voici comment passer à l'action.`,
+    3: `Votre diagnostic révèle des leviers d'amélioration concrets. L'inaction coûte plus cher que le rapport complet.`,
+    7: `Votre rapport Discover™ reste accessible. Le rapport complet Intelligence™ avec plan 90 jours est encore à portée de clic.`,
+  };
+  return sendMail({
+    to: opts.to,
+    subject: subjects[opts.relanceStep],
+    html: baseTemplate("Passez à l'action", `
+      <h1>${esc(opts.name ?? 'Bonjour')},</h1>
+      <p>${intros[opts.relanceStep]}</p>
+      <p><strong>Le rapport Intelligence™ vous donne :</strong></p>
+      <ul style="font-size:14px;color:#444;line-height:1.8;">
+        <li>Une analyse IA personnalisée de tous vos piliers</li>
+        <li>Un plan d'action 90 jours immédiatement applicable</li>
+        <li>Une session de 30 min offerte avec un expert</li>
+      </ul>
+      <a href="${reportUrl}" class="btn">Débloquer mon rapport — ${opts.intelligencePriceMad.toLocaleString('fr-MA')} MAD HT</a>
+      <hr class="divider" />
+      <p style="font-size:13px;color:#888;">Si ce message ne vous intéresse plus, ignorez-le simplement.</p>
+    `),
+  });
+}
+
+// ── 10. Transform — Confirmation client demande RDV expert ────────────────────
+export async function sendExpertRequestConfirmation(opts: {
+  to: string;
+  name: string;
+  toolId?: string;
+}): Promise<boolean> {
+  return sendMail({
+    to: opts.to,
+    subject: `Votre demande de RDV expert est bien reçue`,
+    html: baseTemplate("Demande reçue", `
+      <h1>Merci ${esc(opts.name)},</h1>
+      <p>Nous avons bien reçu votre demande de consultation${opts.toolId ? ` concernant <strong>${esc(toolLabel(opts.toolId))}</strong>` : ''}.</p>
+      <p>Un expert Epitaphe360 vous contactera <strong>sous 24 heures ouvrées</strong> pour planifier ensemble votre session de diagnostic et de plan d'action.</p>
+      <p>Préparez si possible :</p>
+      <ul style="font-size:14px;color:#444;line-height:1.8;">
+        <li>Votre rapport Intelligence™ (déjà généré)</li>
+        <li>2 ou 3 enjeux prioritaires de votre organisation</li>
+        <li>Vos contraintes calendaires des 2 prochaines semaines</li>
+      </ul>
+      <a href="${FRONTEND_URL}" class="btn">Visiter Epitaphe 360</a>
+    `),
+  });
+}
+
+// ── 11. Transform — Notification interne équipe expert ────────────────────────
+export async function sendExpertRequestNotification(opts: {
+  adminEmail: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+  companyName?: string;
+  jobTitle?: string;
+  toolId?: string;
+  message?: string;
+  preferredSlot?: string;
+  preferredChannel?: string;
+  consultationId: string;
+  scoringResultId?: string;
+  globalScore?: number;
+}): Promise<boolean> {
+  return sendMail({
+    to: opts.adminEmail,
+    subject: `🎯 Nouvelle demande RDV expert — ${esc(opts.contactName)}${opts.companyName ? ` (${esc(opts.companyName)})` : ''}`,
+    html: baseTemplate("Nouvelle demande RDV expert", `
+      <h1>Nouvelle demande de RDV Transform™</h1>
+      <p><strong>Contact :</strong> ${esc(opts.contactName)} &lt;${esc(opts.contactEmail)}&gt;</p>
+      ${opts.contactPhone ? `<p><strong>Téléphone :</strong> ${esc(opts.contactPhone)}</p>` : ''}
+      ${opts.companyName ? `<p><strong>Société :</strong> ${esc(opts.companyName)}${opts.jobTitle ? ` — ${esc(opts.jobTitle)}` : ''}</p>` : ''}
+      ${opts.toolId ? `<p><strong>Outil source :</strong> ${esc(toolLabel(opts.toolId))}</p>` : ''}
+      ${opts.globalScore !== undefined ? `<p><strong>Score Intelligence™ :</strong> ${opts.globalScore}/100</p>` : ''}
+      ${opts.preferredSlot ? `<p><strong>Créneau préféré :</strong> ${esc(opts.preferredSlot)}</p>` : ''}
+      ${opts.preferredChannel ? `<p><strong>Canal :</strong> ${esc(opts.preferredChannel)}</p>` : ''}
+      ${opts.message ? `<hr class="divider" /><p><strong>Message :</strong></p><p style="white-space:pre-wrap;">${esc(opts.message)}</p>` : ''}
+      <hr class="divider" />
+      <p style="font-size:12px;color:#888;">ID consultation : <code>${esc(opts.consultationId)}</code>${opts.scoringResultId ? ` · ID scoring : <code>${esc(opts.scoringResultId)}</code>` : ''}</p>
+      <a href="${FRONTEND_URL}/admin/consultations" class="btn">Ouvrir dans l'admin</a>
+    `),
+  });
+}

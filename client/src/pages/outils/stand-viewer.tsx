@@ -75,7 +75,16 @@ export default function StandViewerPage() {
               <p className="text-background/70 text-lg max-w-2xl mx-auto mb-8">
                 Explorez vos futurs stands en temps réel. Tournez, zoomez, changez les couleurs — voyez votre marque prendre vie avant la fabrication.
               </p>
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-background/60">
+              <div className="flex flex-wrap justify-center gap-3 mb-8">
+                <button onClick={() => document.getElementById('stand-configurator')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-7 py-3 rounded-xl font-bold text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                  Configurer mon stand →
+                </button>
+                <a href="/contact/brief" className="px-7 py-3 rounded-xl font-semibold text-sm text-background/80 border border-background/20 hover:border-background/40 transition-colors no-underline">
+                  Demander un devis
+                </a>
+              </div>
+              <div className="flex flex-wrap justify-center gap-6 text-sm text-background/60 mb-4">
                 <span className="flex items-center gap-1.5"><RotateCcw className="w-4 h-4" /> Rotation libre 360°</span>
                 <span className="flex items-center gap-1.5"><ZoomIn className="w-4 h-4" /> Zoom interactif</span>
                 <span className="flex items-center gap-1.5"><Maximize2 className="w-4 h-4" /> Plein écran</span>
@@ -85,8 +94,28 @@ export default function StandViewerPage() {
           </div>
         </section>
 
+        {/* Avantages */}
+        <section className="py-10 border-b border-border bg-muted/20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { icon: '⚡', v: '24h', l: 'Rendu 3D livré en 24h après brief' },
+                { icon: '🎨', v: '100%', l: 'Personnalisé aux couleurs de votre marque' },
+                { icon: '🔧', v: '3 formats', l: 'Îlot, linéaire et angle disponibles' },
+                { icon: '🏭', v: '1 fabricant', l: 'Conception & fabrication dans notre atelier' },
+              ].map(s => (
+                <div key={s.v} className="rounded-xl p-4 border border-border bg-card text-center">
+                  <div className="text-2xl mb-1">{s.icon}</div>
+                  <div className="text-xl font-extrabold text-primary mb-1">{s.v}</div>
+                  <p className="text-xs text-muted-foreground leading-snug">{s.l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Sélecteur de stand */}
-        <section className="py-8 border-b border-border bg-muted/30">
+        <section id="stand-configurator" className="py-8 border-b border-border bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex flex-wrap gap-3 justify-center">
               {DEMO_STANDS.map((s, i) => (

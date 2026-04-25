@@ -6,11 +6,12 @@ import {
   Briefcase, ShieldCheck, Users, Printer, Hammer, Signpost, LayoutGrid,
   BookOpen, BarChart2, Calculator, Mail, LogIn, ArrowRight, ImageIcon,
   FolderOpen, Lock, FileText, UserCircle, Palette, MonitorPlay, Layers,
-  Settings,
+  Settings, Building2, Scissors, Package, Leaf, MessageSquare,
 } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useSettings } from "@/hooks/useSettings";
+import { useEmbed } from "@/contexts/embed-context";
 
 interface SubEntryConfig {
   label: string;
@@ -69,87 +70,72 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   UserCircle: <UserCircle className="w-5 h-5" />,
   Palette: <Palette className="w-5 h-5" />,
   MonitorPlay: <MonitorPlay className="w-5 h-5" />,
-  Layers: <Layers className="w-5 h-5" />
+  Layers: <Layers className="w-5 h-5" />,
+  Building2: <Building2 className="w-5 h-5" />,
+  Scissors: <Scissors className="w-5 h-5" />,
+  Package: <Package className="w-5 h-5" />,
+  Leaf: <Leaf className="w-5 h-5" />,
+  MessageSquare: <MessageSquare className="w-5 h-5" />,
 };
 
 /* === Data ===================================================== */
 const defaultNavConfig: NavEntryConfig[] = [
+  { label: "À propos", href: "/a-propos" },
   {
-    label: "Événements",
+    label: "Nos pôles d'expertise",
     mega: true,
-    href: "/evenements",
-    previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg",
-    entries: [
-      { label: "Conventions & Kickoffs",   description: "Fédérez vos équipes autour de vos ambitions",    href: "/evenements/conventions-kickoffs",  icon: "Calendar", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
-      { label: "Soirées de gala",          description: "Créez des moments d'exception inoubliables",     href: "/evenements/soirees-de-gala",       icon: "Trophy", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/soiree-gala.jpg" },
-      { label: "Roadshows & Tournées",     description: "Portez votre message dans toute la région",      href: "/evenements/roadshows",    icon: "Truck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/roadshow.jpg" },
-      { label: "Salons & Expositions",     description: "Maximisez votre visibilité sur les salons B2B",  href: "/evenements/salons",    icon: "Store", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/salon.jpg" },
-    ],
-  },
-  {
-    label: "Architecture de Marque",
-    mega: true,
-    href: "/architecture-de-marque",
+    href: "/nos-poles",
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg",
     entries: [
-      { label: "Marque Employeur",    description: "Attirez et retenez les meilleurs talents",    href: "/architecture-de-marque/marque-employeur",   icon: "Briefcase", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
-      { label: "Communication QHSE", description: "Sécurité & conformité avec impact visuel",    href: "/architecture-de-marque/communication-qhse", icon: "ShieldCheck", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
-      { label: "Expérience Clients", description: "Différenciation et fidélisation durables",    href: "/architecture-de-marque/experience-clients", icon: "Users", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/experience-client.jpg" },
+      { label: "COM' Interne",       description: "Communication interne & engagement collaborateurs",   href: "/nos-poles/com-interne",                    icon: "MessageSquare", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
+      { label: "Marque Employeur",   description: "Attirez et retenez les meilleurs talents",           href: "/architecture-de-marque/marque-employeur",  icon: "Briefcase",     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
+      { label: "COM'SST-QHSE",       description: "Sécurité, santé au travail & conformité visuelle",  href: "/architecture-de-marque/communication-qhse",icon: "ShieldCheck",   previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/qhse.jpg" },
+      { label: "COM'RSE",            description: "Responsabilité sociétale & communication d'impact", href: "/nos-poles/com-rse",                         icon: "Leaf",          previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg" },
+      { label: "COM' Événementiel",  description: "Conventions, galas, roadshows & salons B2B",       href: "/evenements",                               icon: "Calendar",      previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg" },
     ],
   },
   {
-    label: "La Fabrique",
+    label: "La Fabrique 360",
     mega: true,
     href: "/la-fabrique",
-    rightAlign: true,
     previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg",
     entries: [
-      { label: "Impression grand format", description: "Bâches, adhésifs, toiles rétroéclairées",     href: "/la-fabrique/impression",    icon: "Printer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
-      { label: "Menuiserie & Décor",      description: "Stands sur mesure, mobilier d'ambiance",      href: "/la-fabrique/menuiserie",    icon: "Hammer", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
-      { label: "Signalétique",            description: "Totems, enseignes, wayfinding professionnel", href: "/la-fabrique/signaletique",  icon: "Signpost", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
-      { label: "Aménagement Espace",      description: "Scénographie & architecture éphémère",        href: "/la-fabrique/amenagement",   icon: "LayoutGrid", previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
-    ],
-  },
-  { label: "Références", href: "/nos-references" },
-  { label: "Blog",       href: "/blog" },
-  {
-    label: "Ressources",
-    href: "/ressources",
-    entries: [
-      { label: "Bibliothèque",            description: "Guides, templates et livres blancs (accès libre)", href: "/ressources",                  icon: "BookOpen" },
-      { label: "Études de cas",           description: "Découvrez nos réalisations sectorielles",          href: "/nos-references",              icon: "FileText" },
-      { label: "Blog & Actualités",       description: "Insights, conseils et tendances événementielles",  href: "/blog",                        icon: "ImageIcon" },
+      { label: "Branding de siège",            description: "Identité visuelle & scénographie de bureau",          href: "/la-fabrique/branding-siege", icon: "Building2",  previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
+      { label: "Stands et Showroom",           description: "Stands sur mesure, espaces d'exposition premium",    href: "/la-fabrique/menuiserie",     icon: "Store",      previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg" },
+      { label: "Enseignes et signalétiques",   description: "Totems, enseignes, wayfinding professionnel",        href: "/la-fabrique/signaletique",   icon: "Signpost",   previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/signaletique.jpg" },
+      { label: "Impression grand format",      description: "Bâches, adhésifs, toiles rétroéclairées",            href: "/la-fabrique/impression",     icon: "Printer",    previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
+      { label: "Lettrage & découpe Laser/CNC", description: "Lettres découpées, gravure, découpe de précision",   href: "/la-fabrique/amenagement",    icon: "Scissors",   previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/impression.jpg" },
+      { label: "PLV & dispositifs retail",     description: "Présentoirs, totems de vente, écrans dynamiques",    href: "/la-fabrique/impression",     icon: "Package",    previewImage: "https://epitaphe.ma/wp-content/uploads/2020/05/amenagement.jpg" },
     ],
   },
   {
-    label: "Outils",
+    label: "Scoring",
     href: "/outils",
-    rightAlign: true,
     entries: [
-      { label: "BMI 360™ Intelligence", description: "", href: "#", icon: null, isGroupHeader: true },
-      { label: "CommPulse™",      description: "Score Communication Interne",    href: "/outils/commpulse",            icon: "BarChart2" },
-      { label: "TalentPrint™",     description: "Score Marque Employeur",        href: "/outils/talentprint",          icon: "BarChart2" },
-      { label: "ImpactTrace™",     description: "Score RSE et Impact",           href: "/outils/impacttrace",          icon: "BarChart2" },
-      { label: "SafeSignal™",      description: "Score Sécurité QHSE",             href: "/outils/safesignal",           icon: "BarChart2" },
-      { label: "EventImpact™",     description: "Score Événementiel",              href: "/outils/eventimpact",          icon: "BarChart2" },
-      { label: "SpaceScore™",      description: "Score Brand Physique",          href: "/outils/spacescore",           icon: "BarChart2" },
-      { label: "FinNarrative™",    description: "Score Com Financière",          href: "/outils/finnarrative",         icon: "BarChart2" },
-      { label: "Tableau BMI 360™",  description: "Vue globale de votre intelligence", href: "/outils/bmi360", icon: "BarChart2" },
-      { label: "Calculateur Fabrique", description: "Estimez vos économies de production", href: "/outils/calculateur-fabrique", icon: "Calculator" },
-      { label: "Déposer un brief",  description: "Formulaire stratégique multi-étapes", href: "/contact/brief", icon: "Mail" },
+      { label: "Outils BMI 360™", description: "", href: "#", icon: null, isGroupHeader: true },
+      { label: "CommPulse™",      description: "Score Communication Interne",          href: "/outils/commpulse",            icon: "BarChart2" },
+      { label: "TalentPrint™",    description: "Score Marque Employeur",               href: "/outils/talentprint",          icon: "BarChart2" },
+      { label: "SafeSignal™",     description: "Score Sécurité QHSE",                  href: "/outils/safesignal",           icon: "BarChart2" },
+      { label: "ImpactTrace™",    description: "Score RSE et Impact",                  href: "/outils/impacttrace",          icon: "BarChart2" },
+      { label: "EventImpact™",    description: "Score Événementiel",                   href: "/outils/eventimpact",          icon: "BarChart2" },
+      { label: "SpaceScore™",     description: "Score Brand Physique",                 href: "/outils/spacescore",           icon: "BarChart2" },
+      { label: "FinNarrative™",   description: "Score Com Financière",                 href: "/outils/finnarrative",         icon: "BarChart2" },
+      { label: "Tableau BMI 360™",description: "Vue globale de votre intelligence",    href: "/outils/bmi360",               icon: "Layers" },
     ],
   },
+  { label: "Ressources",  href: "/ressources" },
+  { label: "Références",  href: "/nos-references" },
+  { label: "Contact",     href: "/contact" },
   {
     label: "Espace Client",
     rightAlign: true,
     entries: [
-      { label: "Se connecter",     description: "Accéder à votre espace personnel",          href: "/espace-client",            icon: "LogIn" },
-      { label: "Mes projets",      description: "Suivi temps réel de vos projets en cours", href: "/espace-client/projets",    icon: "FolderOpen" },
-      { label: "Mes documents",    description: "Coffre-fort numérique et livrables signés",  href: "/espace-client/documents",  icon: "Lock" },
-      { label: "Mon abonnement",   description: "Plans, facturation et devis",                href: "/espace-client/abonnement", icon: "UserCircle" },
+      { label: "Se connecter",     description: "Accéder à votre espace personnel",           href: "/espace-client",            icon: "LogIn" },
+      { label: "Mes projets",      description: "Suivi temps réel de vos projets en cours",  href: "/espace-client/projets",    icon: "FolderOpen" },
+      { label: "Mes documents",    description: "Coffre-fort numérique et livrables signés", href: "/espace-client/documents",  icon: "Lock" },
+      { label: "Mon abonnement",   description: "Plans, facturation et devis",               href: "/espace-client/abonnement", icon: "UserCircle" },
     ],
   },
-  { label: "Contact", href: "/contact" },
 ];
 
 /* === Framer Motion variants =================================== */
@@ -194,11 +180,14 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
     return (
       <Link
         href={entry.href!}
-        className={`px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
-          isActive ? "text-white bg-white/10" : "text-white/75 hover:text-white hover:bg-white/[0.08]"
+        className={`relative px-3 py-2 text-sm font-medium transition-colors rounded-lg group ${
+          isActive ? "text-white" : "text-white/70 hover:text-white"
         }`}
       >
         {entry.label}
+        <span className={`absolute bottom-0 left-3 right-3 h-px bg-[#C8A96E] transition-transform duration-200 origin-left ${
+          isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`} />
       </Link>
     );
   }
@@ -210,8 +199,8 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
       onMouseLeave={() => { if (openTimer.current) clearTimeout(openTimer.current); timer.current = setTimeout(() => { setOpen(false); setHoveredSub(null); }, 200); }}
     >
       <button
-        className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
-          isActive ? "text-white bg-white/10" : "text-white/75 hover:text-white hover:bg-white/[0.08]"
+        className={`relative flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-lg group ${
+          isActive ? "text-white" : "text-white/70 hover:text-white"
         }`}
         aria-expanded={open}
         aria-haspopup="true"
@@ -220,6 +209,9 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
           <ChevronDown className="w-3.5 h-3.5" />
         </motion.span>
+        <span className={`absolute bottom-0 left-3 right-3 h-px bg-[#C8A96E] transition-transform duration-200 origin-left ${
+          isActive || open ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`} />
       </button>
       <AnimatePresence>
         {open && (
@@ -244,13 +236,13 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                       onClick={() => setOpen(false)}
                       onMouseEnter={() => setHoveredSub(sub)}
                       onMouseLeave={() => setHoveredSub(null)}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors group"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#C8A96E]/[0.06] transition-colors group"
                     >
-                      <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
+                      <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#C8A96E]/10 flex items-center justify-center text-[#C8A96E] group-hover:bg-[#C8A96E] group-hover:text-white transition-colors mt-0.5">
                         {sub.icon}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{sub.label}</p>
+                        <p className="text-sm font-semibold text-foreground group-hover:text-[#C8A96E] transition-colors">{sub.label}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{sub.description}</p>
                       </div>
                     </Link>
@@ -264,7 +256,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                         className="flex items-center justify-between px-1 py-1.5 rounded-lg hover:bg-primary/5 transition-colors group"
                       >
                         <p className="text-xs text-muted-foreground">Toutes nos expertises en {entry.label.toLowerCase()}</p>
-                        <span className="flex items-center gap-1 text-xs font-semibold text-primary group-hover:underline underline-offset-2">
+                        <span className="flex items-center gap-1 text-xs font-semibold text-[#C8A96E] group-hover:underline underline-offset-2">
                           Voir tout <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                         </span>
                       </Link>
@@ -319,12 +311,12 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
                   }
                   return (
                     <Link key={sub.href} href={sub.href} onClick={() => setOpen(false)}
-                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors group">
-                      <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors mt-0.5">
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#C8A96E]/[0.06] transition-colors group">
+                      <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#C8A96E]/10 flex items-center justify-center text-[#C8A96E] group-hover:bg-[#C8A96E] group-hover:text-white transition-colors mt-0.5">
                         {sub.icon}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{sub.label}</p>
+                        <p className="text-sm font-semibold text-foreground group-hover:text-[#C8A96E] transition-colors">{sub.label}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{sub.description}</p>
                       </div>
                     </Link>
@@ -341,6 +333,7 @@ function DesktopMenu({ entry, rightAlign = false }: { entry: NavEntry; rightAlig
 
 /* === Composant Navigation principal =========================== */
 export function Navigation() {
+  const isEmbed = useEmbed();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location] = useLocation();
@@ -348,6 +341,8 @@ export function Navigation() {
   const { settings: navSettings } = useSettings('nav_config');
   const { settings: siteIdentity } = useSettings('site_identity');
   
+  if (isEmbed) return null;
+
   const rawNavConfig: NavEntryConfig[] = Array.isArray(navSettings) ? navSettings : defaultNavConfig;
   
   const navConfig: NavEntry[] = rawNavConfig.map(entry => ({
@@ -360,10 +355,10 @@ export function Navigation() {
 
   const logoUrl = siteIdentity?.logo_url || "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO-epitaphe360-1.png";
 
-  // Navbar: fond sombre semi-transparent au repos, plus opaque au scroll
-  const bgColor   = useTransform(scrollY, [0, 60], ["rgba(3,0,12,0.75)",     "rgba(3,0,12,0.95)"]);
-  const shadow    = useTransform(scrollY, [0, 60], ["0 0 0 0 transparent",   "0 2px 32px rgba(0,0,0,0.45)"]);
-  const borderCol = useTransform(scrollY, [0, 60], ["rgba(236,72,153,0.0)",  "rgba(236,72,153,0.18)"]);
+  // Navbar: fond sombre premium au repos → plus opaque + bordure gold subtile au scroll
+  const bgColor   = useTransform(scrollY, [0, 60], ["rgba(10,10,11,0.78)",   "rgba(10,10,11,0.97)"]);
+  const shadow    = useTransform(scrollY, [0, 60], ["0 0 0 0 transparent",   "0 4px 24px rgba(0,0,0,0.35)"]);
+  const borderCol = useTransform(scrollY, [0, 60], ["rgba(200,169,110,0.0)", "rgba(200,169,110,0.14)"]);
 
   useEffect(() => { setDrawerOpen(false); setMobileExpanded(null); }, [location]);
   useEffect(() => {
@@ -387,8 +382,8 @@ export function Navigation() {
           <div className="hidden lg:flex items-center gap-2">
             <LanguageSwitcher />
             <Link href="/contact/brief">
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
+              <motion.button whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 bg-[#C8A96E] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#A68B55] transition-colors shadow-[0_4px_16px_rgba(200,169,110,0.30)]">
                 <Mail className="w-4 h-4" /> Déposer un brief
               </motion.button>
             </Link>
@@ -457,8 +452,8 @@ export function Navigation() {
                               initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
                               <div className="pl-4 pt-1 space-y-1">
                                 {entry.entries.map((sub) => (
-                                  <Link key={sub.href} href={sub.href} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
-                                    <span className="text-primary w-4 h-4 flex-shrink-0">{sub.icon}</span>
+                                  <Link key={sub.href} href={sub.href} className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-[#C8A96E] hover:bg-[#C8A96E]/[0.06] transition-colors">
+                                    <span className="text-[#C8A96E] w-4 h-4 flex-shrink-0">{sub.icon}</span>
                                     {sub.label}
                                   </Link>
                                 ))}
@@ -477,7 +472,7 @@ export function Navigation() {
               </nav>
               <div className="p-4 border-t border-border space-y-2">
                 <Link href="/contact/brief">
-                  <motion.button whileTap={{ scale: 0.96 }} className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl text-sm font-semibold">
+                  <motion.button whileTap={{ scale: 0.97 }} className="w-full flex items-center justify-center gap-2 bg-[#C8A96E] text-white py-3 rounded-xl text-sm font-semibold shadow-[0_4px_16px_rgba(200,169,110,0.28)]">
                     <Mail className="w-4 h-4" /> Déposer un brief
                   </motion.button>
                 </Link>

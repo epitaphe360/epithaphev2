@@ -189,6 +189,8 @@ export default function CommPulsePage() {
       }
     } catch (err) {
       console.error('Erreur discover scoring', err);
+      // Générer un ID local pour que la simulation de paiement fonctionne même sans DB
+      if (!resultId) setResultId(`local-commpulse-${Date.now()}`);
     } finally {
       setIsUnlocking(false);
       setStep('discover');

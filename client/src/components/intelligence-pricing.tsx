@@ -172,6 +172,7 @@ export function IntelligencePricing({
           companyName,
           sector,
           companySize,
+          toolId, // fallback si resultId est local
         }),
       });
       if (!res.ok) {

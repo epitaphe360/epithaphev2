@@ -195,44 +195,32 @@ export function registerScoringRoutes(app: Express) {
 
       const { answers, companyName, sector, companySize, voiceType, email, respondentName } = parsed.data;
       const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers, 4);
-
-      const [result] = await db.insert(scoringResults).values({
-        toolId, tier: 'discover', voiceType, companyName, sector, companySize,
-        email, respondentName, globalScore, pillarScores, maturityLevel,
-        sessionId: Math.random().toString(36).substring(7),
-        userAgent: req.headers['user-agent'] ?? null,
-      } as any).returning();
-
       const intelligencePrice = INTELLIGENCE_PRICES[toolId];
 
-      // Funnel event
-      await trackEvent({
-        scoringResultId: result.id,
-        toolId, eventType: 'discover_completed',
-        email,
-        metadata: { globalScore, maturityLevel },
-      });
+      // Sauvegarde DB non bloquante — les scores sont retournés même si la DB échoue
+      let resultId: string = `local-${toolId}-${Date.now()}`;
+      try {
+        const [result] = await db.insert(scoringResults).values({
+          toolId, tier: 'discover', voiceType, companyName, sector, companySize,
+          email, respondentName, globalScore, pillarScores, maturityLevel,
+          sessionId: Math.random().toString(36).substring(7),
+          userAgent: req.headers['user-agent'] ?? null,
+        } as any).returning();
+        resultId = result.id;
 
-      // Email Discover automatique avec upsell (non bloquant)
-      if (email) {
-        sendDiscoverScoreEmail({
-          to: email,
-          name: respondentName,
-          toolId,
-          globalScore,
-          maturityLevel,
-          resultId: result.id,
-          intelligencePriceMad: intelligencePrice,
-        })
-          .then(() => trackEvent({
-            scoringResultId: result.id, toolId,
-            eventType: 'discover_email_sent', email,
-          }))
-          .catch(e => console.error('[Discover] Email failed:', e));
+        // Funnel event & email (non bloquants)
+        trackEvent({ scoringResultId: result.id, toolId, eventType: 'discover_completed', email, metadata: { globalScore, maturityLevel } }).catch(() => {});
+        if (email) {
+          sendDiscoverScoreEmail({ to: email, name: respondentName, toolId, globalScore, maturityLevel, resultId: result.id, intelligencePriceMad: intelligencePrice })
+            .then(() => trackEvent({ scoringResultId: result.id, toolId, eventType: 'discover_email_sent', email }))
+            .catch(e => console.error('[Discover] Email failed:', e));
+        }
+      } catch (dbErr) {
+        console.error('[Scoring/Discover] DB save failed (scores still returned):', dbErr);
       }
 
       return res.status(201).json({
-        id: result.id, tier: 'discover', globalScore, maturityLevel, pillarScores,
+        id: resultId, tier: 'discover', globalScore, maturityLevel, pillarScores,
         intelligencePrice,
       });
     } catch (error) {
@@ -349,7 +337,11 @@ export function registerScoringRoutes(app: Express) {
 
     try {
       const { id } = req.params;
-      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: "ID invalide." });
+      const isLocalId = id.startsWith('local-');
+
+      if (!isLocalId && !/^[0-9a-f-]{36}$/i.test(id)) {
+        return res.status(400).json({ error: "ID invalide." });
+      }
 
       const bodySchema = z.object({
         answers:      answersSchema,
@@ -358,81 +350,99 @@ export function registerScoringRoutes(app: Express) {
         companyName:  z.string().max(200).optional(),
         sector:       z.string().max(100).optional(),
         companySize:  z.string().max(50).optional(),
+        toolId:       z.string().optional(), // fallback si ID local
       });
       const parsed = bodySchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
 
       const { answers, email, respondentName, companyName, sector, companySize } = parsed.data;
 
-      const existing = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
-      if (!existing) return res.status(404).json({ error: "Résultat introuvable." });
+      // Récupérer l'enregistrement DB — peut être absent si la sauvegarde discover a échoué
+      let existing: typeof scoringResults.$inferSelect | undefined;
+      if (!isLocalId) {
+        existing = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
+      }
 
-      const toolId   = existing.toolId;
+      // toolId : depuis DB, depuis le body, ou depuis l'ID local (format local-{toolId}-{ts})
+      const toolId = existing?.toolId
+        ?? parsed.data.toolId
+        ?? (isLocalId ? id.split('-')[1] : undefined)
+        ?? 'commpulse';
+
+      if (!ALLOWED_TOOL_IDS.includes(toolId)) return res.status(400).json({ error: "Outil non reconnu." });
+
       const priceHT  = INTELLIGENCE_PRICES[toolId];
       if (!priceHT) return res.status(400).json({ error: "Outil non facturé." });
       const priceTTC = Math.round(priceHT * (1 + TVA_RATE));
       const toolName = toolId.charAt(0).toUpperCase() + toolId.slice(1);
 
-      // 1. Créer enregistrement paiement simulé
-      const [payment] = await db.insert(payments).values({
-        scoringResultId: id,
-        type:          'intelligence',
-        amount:        priceTTC,
-        currency:      'MAD',
-        status:        'paid',
-        paymentMethod: 'simulation',
-        metadata:      { toolId, email, companyName, simulation: 'true' },
-      }).returning();
-
-      // 2. Générer la facture PDF + envoyer par email
-      const invoiceNumber = await generateInvoiceNumber();
-      const invoiceResult = await createAndSendInvoice({
-        invoiceNumber,
-        paymentId:       payment.id,
-        scoringResultId: id,
-        clientEmail:     email,
-        clientName:      respondentName,
-        clientCompany:   companyName,
-        toolId,
-        description:     `[TEST] Rapport Intelligence BMI 360™ — ${toolName}`,
-        amountHT:        priceHT,
-        currency:        'MAD',
-      });
-
-      // 3. Générer le rapport IA
+      // Calcul du score complet (tous les piliers)
       const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers);
+
+      // Générer rapport IA
       const aiReport = await generateAIReport({
         toolId,
-        companyName: companyName ?? existing.companyName ?? undefined,
-        sector:      sector      ?? existing.sector      ?? undefined,
-        companySize: companySize ?? existing.companySize ?? undefined,
+        companyName: companyName ?? existing?.companyName ?? undefined,
+        sector:      sector      ?? existing?.sector      ?? undefined,
+        companySize: companySize ?? existing?.companySize ?? undefined,
         globalScore, maturityLevel, pillarScores,
       });
 
-      // 4. Mettre à jour le scoring result en intelligence tier
-      const [updated] = await db.update(scoringResults).set({
-        tier: 'intelligence', globalScore, pillarScores, maturityLevel,
-        aiReport: aiReport as any,
-        intelligencePaymentRef: `SIM-${payment.id}`,
-        intelligenceUnlockedAt: new Date(),
-        companyName: companyName ?? existing.companyName,
-        sector:      sector      ?? existing.sector,
-        companySize: companySize ?? existing.companySize,
-        email:       email       ?? existing.email,
-        respondentName: respondentName ?? existing.respondentName,
-      }).where(eq(scoringResults.id, id)).returning();
+      // DB ops non bloquantes — simulation réussit même si DB indisponible
+      let paymentId = `sim-local-${Date.now()}`;
+      let invoiceNumber = `INV-SIM-${Date.now()}`;
+      try {
+        // Upsert scoring result
+        let targetId = id;
+        if (isLocalId || !existing) {
+          const [inserted] = await db.insert(scoringResults).values({
+            toolId, tier: 'intelligence', voiceType: 'direction',
+            companyName, sector, companySize, email, respondentName,
+            globalScore, pillarScores, maturityLevel,
+            aiReport: aiReport as any,
+            intelligencePaymentRef: `SIM-pending`,
+            intelligenceUnlockedAt: new Date(),
+            sessionId: Math.random().toString(36).substring(7),
+          } as any).returning();
+          targetId = inserted.id;
+        } else {
+          await db.update(scoringResults).set({
+            tier: 'intelligence', globalScore, pillarScores, maturityLevel,
+            aiReport: aiReport as any,
+            intelligenceUnlockedAt: new Date(),
+            companyName: companyName ?? existing.companyName,
+            sector:      sector      ?? existing.sector,
+            companySize: companySize ?? existing.companySize,
+            email:       email       ?? existing.email,
+            respondentName: respondentName ?? existing.respondentName,
+          }).where(eq(scoringResults.id, id));
+        }
+
+        const [payment] = await db.insert(payments).values({
+          scoringResultId: targetId,
+          type: 'intelligence', amount: priceTTC, currency: 'MAD',
+          status: 'paid', paymentMethod: 'simulation',
+          metadata: { toolId, email, companyName, simulation: 'true' },
+        }).returning();
+        paymentId = payment.id;
+
+        const invNum = await generateInvoiceNumber();
+        const invoiceResult = await createAndSendInvoice({
+          invoiceNumber: invNum, paymentId: payment.id, scoringResultId: targetId,
+          clientEmail: email, clientName: respondentName, clientCompany: companyName,
+          toolId, description: `[TEST] Rapport Intelligence BMI 360™ — ${toolName}`,
+          amountHT: priceHT, currency: 'MAD',
+        });
+        invoiceNumber = invoiceResult.invoiceNumber;
+
+        await db.update(scoringResults).set({ intelligencePaymentRef: `SIM-${payment.id}` }).where(eq(scoringResults.id, targetId));
+      } catch (dbErr) {
+        console.error('[Scoring/SimulatePayment] DB ops failed (report still returned):', dbErr);
+      }
 
       return res.json({
-        id:            updated.id,
-        tier:          'intelligence',
-        globalScore,
-        maturityLevel,
-        pillarScores,
-        aiReport,
-        simulation:    true,
-        paymentId:     payment.id,
-        invoiceNumber: invoiceResult.invoiceNumber,
-        amountTTC:     priceTTC,
+        id, tier: 'intelligence', globalScore, maturityLevel, pillarScores,
+        aiReport, simulation: true, paymentId, invoiceNumber, amountTTC: priceTTC,
       });
     } catch (error) {
       console.error("[Scoring/SimulatePayment]", error);

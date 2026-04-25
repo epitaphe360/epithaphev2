@@ -17,17 +17,25 @@ interface PillarAnalysis {
   quickWin: string;
 }
 
-interface ActionPlan {
-  days30: string[];
-  days60: string[];
-  days90: string[];
+interface ActionPlanEntry {
+  week: string;
+  actions: string[];
+}
+
+interface TopRecommendation {
+  priority?: number;
+  title: string;
+  rationale?: string;
+  impact?: string;
+  timeline?: string;
+  roiEstimate?: string;
 }
 
 interface AIReport {
   executiveSummary: string;
   pillarAnalyses: PillarAnalysis[];
-  topRecommendations: string[];
-  actionPlan90Days: ActionPlan;
+  topRecommendations: Array<TopRecommendation | string>;
+  actionPlan90Days: Array<ActionPlanEntry> | { days30: string[]; days60: string[]; days90: string[] };
   transformCTA: string;
 }
 
@@ -217,12 +225,22 @@ export function IntelligenceResults({
             Top recommandations stratégiques
           </h3>
           <ol className="space-y-3">
-            {aiReport.topRecommendations.map((rec, i) => (
-              <li key={i} className="flex gap-3 text-sm text-gray-300">
-                <span className="shrink-0 font-bold w-5 text-center" style={{ color: toolColor }}>{i + 1}.</span>
-                <span>{rec}</span>
-              </li>
-            ))}
+            {aiReport.topRecommendations.map((rec, i) => {
+              const isObj = typeof rec === 'object' && rec !== null;
+              const title = isObj ? (rec as TopRecommendation).title : rec as string;
+              const rationale = isObj ? (rec as TopRecommendation).rationale : undefined;
+              const timeline = isObj ? (rec as TopRecommendation).timeline : undefined;
+              return (
+                <li key={i} className="flex gap-3 text-sm text-gray-300">
+                  <span className="shrink-0 font-bold w-5 text-center" style={{ color: toolColor }}>{i + 1}.</span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="font-medium text-white">{title}</span>
+                    {rationale && <span className="text-xs text-gray-500">{rationale}</span>}
+                    {timeline && <span className="text-xs" style={{ color: toolColor }}}>⏱ {timeline}</span>}
+                  </span>
+                </li>
+              );
+            })}
           </ol>
         </motion.div>
       )}
@@ -237,25 +255,45 @@ export function IntelligenceResults({
         >
           <h3 className="text-base font-semibold text-white mb-4">Plan d'action 90 jours</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {(['days30', 'days60', 'days90'] as const).map((period, i) => {
-              const items = aiReport.actionPlan90Days[period] ?? [];
-              const labels = ['30 premiers jours', '30–60 jours', '60–90 jours'];
-              return (
-                <div key={period} className="rounded-xl p-4 bg-gray-900 border border-gray-800">
-                  <h4 className="text-xs font-semibold mb-3" style={{ color: toolColor }}>
-                    {labels[i]}
-                  </h4>
-                  <ul className="space-y-2">
-                    {items.map((item: string, j: number) => (
-                      <li key={j} className="text-xs text-gray-400 flex gap-1.5">
-                        <span className="shrink-0 text-gray-600">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
+            {(() => {
+              const plan = aiReport.actionPlan90Days;
+              // Format array [{week, actions}] (serveur)
+              if (Array.isArray(plan)) {
+                const labels = ['30 premiers jours', '30–60 jours', '60–90 jours'];
+                return plan.slice(0, 3).map((entry, i) => (
+                  <div key={i} className="rounded-xl p-4 bg-gray-900 border border-gray-800">
+                    <h4 className="text-xs font-semibold mb-3" style={{ color: toolColor }}>{entry.week ?? labels[i]}</h4>
+                    <ul className="space-y-2">
+                      {(entry.actions ?? []).map((item: string, j: number) => (
+                        <li key={j} className="text-xs text-gray-400 flex gap-1.5">
+                          <span className="shrink-0 text-gray-600">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ));
+              }
+              // Format objet {days30, days60, days90} (legacy)
+              const obj = plan as { days30: string[]; days60: string[]; days90: string[] };
+              return (['days30', 'days60', 'days90'] as const).map((period, i) => {
+                const items = obj[period] ?? [];
+                const labels = ['30 premiers jours', '30–60 jours', '60–90 jours'];
+                return (
+                  <div key={period} className="rounded-xl p-4 bg-gray-900 border border-gray-800">
+                    <h4 className="text-xs font-semibold mb-3" style={{ color: toolColor }}>{labels[i]}</h4>
+                    <ul className="space-y-2">
+                      {items.map((item: string, j: number) => (
+                        <li key={j} className="text-xs text-gray-400 flex gap-1.5">
+                          <span className="shrink-0 text-gray-600">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </motion.div>
       )}

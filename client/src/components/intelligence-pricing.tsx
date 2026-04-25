@@ -22,6 +22,8 @@ interface IntelligencePricingProps {
   companyName?: string;
   sector?: string;
   companySize?: string;
+  respondentEmail?: string;
+  respondentName?: string;
   onSuccess: (data: {
     globalScore: number;
     maturityLevel: number;
@@ -59,11 +61,13 @@ export function IntelligencePricing({
   companyName,
   sector,
   companySize,
+  respondentEmail,
+  respondentName,
   onSuccess,
   onBack,
 }: IntelligencePricingProps) {
-  const [email, setEmail]               = useState('');
-  const [name, setName]                 = useState('');
+  const [email, setEmail]               = useState(respondentEmail ?? '');
+  const [name, setName]                 = useState(respondentName ?? '');
   const [method, setMethod]             = useState<PaymentMethod>('cmi');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);

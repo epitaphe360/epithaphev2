@@ -113,6 +113,8 @@ export default function CommPulsePage() {
   const [resultId, setResultId] = useState('');
   const [partialScores, setPartialScores] = useState<Record<string, number>>({});
   const [intelligencePrice, setIntelligencePrice] = useState(4900);
+  const [respondentEmail, setRespondentEmail] = useState('');
+  const [respondentName, setRespondentName] = useState('');
   const [discoverGlobalScore, setDiscoverGlobalScore] = useState(0);
   const [discoverMaturityLevel, setDiscoverMaturityLevel] = useState(1);
   const [intelligenceData, setIntelligenceData] = useState<{ globalScore: number; maturityLevel: number; pillarScores: Record<string, number>; aiReport: unknown } | null>(null);
@@ -131,6 +133,8 @@ export default function CommPulsePage() {
 
   const [isUnlocking, setIsUnlocking] = useState(false);
   const handleUnlock = async (data: { email: string; name: string }) => {
+    setRespondentEmail(data.email);
+    setRespondentName(data.name);
     setIsUnlocking(true);
     try {
       const response = await fetch(`/api/scoring/${TOOL_ID}/discover`, {
@@ -639,6 +643,8 @@ export default function CommPulsePage() {
                   companyName={companyName}
                   sector={sector}
                   companySize={companySize}
+                  respondentEmail={respondentEmail}
+                  respondentName={respondentName}
                   onSuccess={(data) => { setIntelligenceData(data); setStep('intelligence'); }}
                   onBack={() => setStep('discover')}
                 />

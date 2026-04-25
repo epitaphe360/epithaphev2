@@ -186,6 +186,10 @@ export default function CommPulsePage() {
             },
           }, '*');
         }
+      } else {
+        // DB down (500) — continuer avec ID local, scores client déjà calculés
+        console.warn('Discover 500 — fallback ID local');
+        if (!resultId) setResultId(`local-${TOOL_ID}-${Date.now()}`);
       }
     } catch (err) {
       console.error('Erreur discover scoring', err);

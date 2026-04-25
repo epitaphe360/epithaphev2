@@ -186,22 +186,30 @@ export function registerScoringRoutes(app: Express) {
 
   // POST /api/scoring/:toolId/discover — Tier Discover (GRATUIT)
   app.post("/api/scoring/:toolId/discover", scoringLimiter, async (req: Request, res: Response) => {
+    // Variables hors try pour que le catch externe puisse retourner un fallback local
+    let _toolId = '';
+    let _computed: { globalScore: number; maturityLevel: number; pillarScores: Record<string, number> } | null = null;
+    let _localId = '';
+    let _intelligencePrice = 0;
     try {
-      const toolId = req.params.toolId.toLowerCase();
-      if (!ALLOWED_TOOL_IDS.includes(toolId)) return res.status(400).json({ error: "Outil non reconnu." });
+      _toolId = req.params.toolId.toLowerCase();
+      if (!ALLOWED_TOOL_IDS.includes(_toolId)) return res.status(400).json({ error: "Outil non reconnu." });
 
       const parsed = discoverBodySchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
 
       const { answers, companyName, sector, companySize, voiceType, email, respondentName } = parsed.data;
-      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers, 4);
-      const intelligencePrice = INTELLIGENCE_PRICES[toolId];
+      _computed = computeScoreFromAnswers(_toolId, answers, 4);
+      _intelligencePrice = INTELLIGENCE_PRICES[_toolId];
+      _localId = `local-${_toolId}-${Date.now()}`;
+
+      const { globalScore, maturityLevel, pillarScores } = _computed;
 
       // Sauvegarde DB non bloquante — les scores sont retournés même si la DB échoue
-      let resultId: string = `local-${toolId}-${Date.now()}`;
+      let resultId: string = _localId;
       try {
         const [result] = await db.insert(scoringResults).values({
-          toolId, tier: 'discover', voiceType, companyName, sector, companySize,
+          toolId: _toolId, tier: 'discover', voiceType, companyName, sector, companySize,
           email, respondentName, globalScore, pillarScores, maturityLevel,
           sessionId: Math.random().toString(36).substring(7),
           userAgent: req.headers['user-agent'] ?? null,
@@ -209,10 +217,10 @@ export function registerScoringRoutes(app: Express) {
         resultId = result.id;
 
         // Funnel event & email (non bloquants)
-        trackEvent({ scoringResultId: result.id, toolId, eventType: 'discover_completed', email, metadata: { globalScore, maturityLevel } }).catch(() => {});
+        trackEvent({ scoringResultId: result.id, toolId: _toolId, eventType: 'discover_completed', email, metadata: { globalScore, maturityLevel } }).catch(() => {});
         if (email) {
-          sendDiscoverScoreEmail({ to: email, name: respondentName, toolId, globalScore, maturityLevel, resultId: result.id, intelligencePriceMad: intelligencePrice })
-            .then(() => trackEvent({ scoringResultId: result.id, toolId, eventType: 'discover_email_sent', email }))
+          sendDiscoverScoreEmail({ to: email, name: respondentName, toolId: _toolId, globalScore, maturityLevel, resultId: result.id, intelligencePriceMad: _intelligencePrice })
+            .then(() => trackEvent({ scoringResultId: result.id, toolId: _toolId, eventType: 'discover_email_sent', email }))
             .catch(e => console.error('[Discover] Email failed:', e));
         }
       } catch (dbErr) {
@@ -221,9 +229,16 @@ export function registerScoringRoutes(app: Express) {
 
       return res.status(201).json({
         id: resultId, tier: 'discover', globalScore, maturityLevel, pillarScores,
-        intelligencePrice,
+        intelligencePrice: _intelligencePrice,
       });
     } catch (error) {
+      // Fallback : si les scores sont calculés mais une erreur DB inattendue a échappé au catch interne
+      if (_computed && _localId) {
+        console.warn('[Scoring/Discover] Erreur inattendue catchée — fallback local:', (error as Error).message);
+        return res.status(201).json({
+          id: _localId, tier: 'discover', ..._computed, intelligencePrice: _intelligencePrice,
+        });
+      }
       console.error("[Scoring/Discover]", error);
       return res.status(500).json({ error: "Erreur serveur." });
     }

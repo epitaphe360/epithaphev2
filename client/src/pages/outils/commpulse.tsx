@@ -13,6 +13,9 @@ import { IntelligencePricing } from '@/components/intelligence-pricing';
 import { IntelligenceResults } from '@/components/intelligence-results';
 import {
   calculateRoiEstimate,
+  calculateScore,
+  calculatePillarScores,
+  getMaturityLevel,
   type ScoringQuestion, type ScoringAnswer,
   type SectorType, type CompanySizeType,
 } from '@/lib/scoring-engine';
@@ -128,6 +131,18 @@ export default function CommPulsePage() {
       if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight, reverseScored: q.reverseScored };
     }
     setEnrichedAnswers(enriched);
+
+    // Calcul immédiat côté client — affiché même si le serveur échoue
+    const clientScore = calculateScore(answers, questions);
+    const clientPillarScores = calculatePillarScores(answers, questions, Object.fromEntries(
+      Array.from(new Set(questions.map(q => q.pillar))).map(p => [p, '#6366F1'])
+    ));
+    const clientPartial: Record<string, number> = {};
+    clientPillarScores.forEach(ps => { clientPartial[ps.pillarId] = ps.score; });
+    setDiscoverGlobalScore(clientScore);
+    setDiscoverMaturityLevel(getMaturityLevel(clientScore));
+    setPartialScores(clientPartial);
+
     setStep('gate');
   };
 
@@ -151,9 +166,12 @@ export default function CommPulsePage() {
       if (response.ok) {
         const res = await response.json();
         setResultId(res.id);
-        setPartialScores(res.pillarScores);
-        setDiscoverGlobalScore(res.globalScore);
-        setDiscoverMaturityLevel(res.maturityLevel);
+        // Mise à jour avec les scores serveur seulement si cohérents
+        if (res.globalScore > 0) {
+          setPartialScores(res.pillarScores);
+          setDiscoverGlobalScore(res.globalScore);
+          setDiscoverMaturityLevel(res.maturityLevel);
+        }
         setIntelligencePrice(res.intelligencePrice ?? 4900);
         // Notify WordPress parent iframe of lead capture
         if (isEmbed) {

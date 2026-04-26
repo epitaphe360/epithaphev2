@@ -11,15 +11,23 @@ interface PillarAnalysis {
   pillar: string;
   pillarLabel: string;
   score: number;
+  niveau?: string;
   diagnostic: string;
+  impactOrganisationnel?: string;
+  benchmarkMENA?: string;
   risquesCles: string[];
+  facteursBloquants?: string[];
   actions: string[];
   quickWin: string;
+  indicateursCles?: string[];
+  prochainNiveau?: string;
 }
 
 interface ActionPlanEntry {
   week: string;
   actions: string[];
+  livrable?: string;
+  kpi?: string;
 }
 
 interface TopRecommendation {
@@ -27,15 +35,23 @@ interface TopRecommendation {
   title: string;
   rationale?: string;
   impact?: string;
+  effortRequis?: string;
   timeline?: string;
   roiEstimate?: string;
+  responsable?: string;
+  prerequis?: string;
 }
 
 interface AIReport {
+  syntheseDirecteur?: string;
   executiveSummary: string;
+  positionConcurrentielle?: string;
+  risqueStrategique?: string;
+  opportuniteStrategique?: string;
   pillarAnalyses: PillarAnalysis[];
   topRecommendations: Array<TopRecommendation | string>;
   actionPlan90Days: Array<ActionPlanEntry> | { days30: string[]; days60: string[]; days90: string[] };
+  messageDirigeant?: string;
   transformCTA: string;
 }
 
@@ -102,6 +118,25 @@ export function IntelligenceResults({
         <p className="text-gray-400 text-sm">{maturity.description}</p>
       </motion.div>
 
+      {/* Synthèse Dirigeant */}
+      {aiReport?.syntheseDirecteur && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="rounded-2xl p-6 bg-gray-900/80 border border-gray-700"
+          style={{ borderLeft: `3px solid ${toolColor}` }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">✍️</span>
+            <h3 className="text-sm font-semibold text-white">Note du Senior Partner</h3>
+          </div>
+          {aiReport.syntheseDirecteur.split('\n\n').map((para, i) => (
+            <p key={i} className={`text-gray-300 text-sm leading-relaxed ${i > 0 ? 'mt-3' : ''}`}>{para}</p>
+          ))}
+        </motion.div>
+      )}
+
       {/* Executive Summary IA */}
       {aiReport?.executiveSummary && (
         <motion.div
@@ -114,6 +149,35 @@ export function IntelligenceResults({
             Synthèse exécutive
           </h3>
           <p className="text-gray-300 text-sm leading-relaxed">{aiReport.executiveSummary}</p>
+        </motion.div>
+      )}
+
+      {/* Signaux stratégiques */}
+      {(aiReport?.positionConcurrentielle || aiReport?.risqueStrategique || aiReport?.opportuniteStrategique) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-3"
+        >
+          {aiReport.positionConcurrentielle && (
+            <div className="rounded-xl p-4 bg-gray-900/50 border border-gray-800">
+              <p className="text-xs font-semibold text-blue-400 mb-1.5">🌍 Position concurrentielle</p>
+              <p className="text-xs text-gray-400 leading-relaxed">{aiReport.positionConcurrentielle}</p>
+            </div>
+          )}
+          {aiReport.risqueStrategique && (
+            <div className="rounded-xl p-4 bg-gray-900/50 border border-red-900/30">
+              <p className="text-xs font-semibold text-red-400 mb-1.5">⚠ Risque stratégique #1</p>
+              <p className="text-xs text-gray-400 leading-relaxed">{aiReport.risqueStrategique}</p>
+            </div>
+          )}
+          {aiReport.opportuniteStrategique && (
+            <div className="rounded-xl p-4 bg-gray-900/50 border border-green-900/30">
+              <p className="text-xs font-semibold text-green-400 mb-1.5">🚀 Opportunité prioritaire</p>
+              <p className="text-xs text-gray-400 leading-relaxed">{aiReport.opportuniteStrategique}</p>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -168,7 +232,18 @@ export function IntelligenceResults({
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h4 className="font-semibold text-white text-sm">{pa.pillarLabel}</h4>
-                  <div className="text-xs text-gray-500 mt-0.5">{pa.pillar}</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="text-xs text-gray-500">{pa.pillar}</div>
+                    {pa.niveau && (
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                        pa.niveau === 'Critique' ? 'bg-red-900/40 text-red-400' :
+                        pa.niveau === 'Préoccupant' ? 'bg-orange-900/40 text-orange-400' :
+                        pa.niveau === 'En développement' ? 'bg-yellow-900/40 text-yellow-400' :
+                        pa.niveau === 'Performant' ? 'bg-blue-900/40 text-blue-400' :
+                        'bg-green-900/40 text-green-400'
+                      }`}>{pa.niveau}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold" style={{ color: toolColor }}>{pa.score}</div>
@@ -176,6 +251,18 @@ export function IntelligenceResults({
                 </div>
               </div>
               <p className="text-gray-300 text-xs leading-relaxed mb-3">{pa.diagnostic}</p>
+              {pa.impactOrganisationnel && (
+                <div className="rounded-lg p-3 mb-3 bg-gray-800/50 border border-gray-700/50">
+                  <p className="text-xs font-medium text-gray-400 mb-1">📊 Impact organisationnel</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">{pa.impactOrganisationnel}</p>
+                </div>
+              )}
+              {pa.benchmarkMENA && (
+                <div className="flex items-start gap-1.5 mb-3">
+                  <span className="text-xs text-blue-500 shrink-0">🌍</span>
+                  <p className="text-xs text-blue-400/80 italic">{pa.benchmarkMENA}</p>
+                </div>
+              )}
               {pa.risquesCles && pa.risquesCles.length > 0 && (
                 <div className="mb-3">
                   <p className="text-xs font-medium text-red-400 mb-1.5">⚠ Risques clés</p>
@@ -184,6 +271,19 @@ export function IntelligenceResults({
                       <li key={j} className="text-xs text-gray-500 flex gap-1.5">
                         <span className="text-red-600 shrink-0">•</span>
                         <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {pa.facteursBloquants && pa.facteursBloquants.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-medium text-orange-400 mb-1.5">🔒 Facteurs bloquants</p>
+                  <ul className="space-y-1">
+                    {pa.facteursBloquants.map((f, j) => (
+                      <li key={j} className="text-xs text-gray-500 flex gap-1.5">
+                        <span className="text-orange-600 shrink-0">—</span>
+                        <span>{f}</span>
                       </li>
                     ))}
                   </ul>
@@ -202,10 +302,26 @@ export function IntelligenceResults({
                   </ul>
                 </div>
               )}
+              {pa.indicateursCles && pa.indicateursCles.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-medium text-purple-400 mb-1.5">📈 KPIs de suivi</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {pa.indicateursCles.map((kpi, j) => (
+                      <span key={j} className="text-[10px] px-2 py-0.5 rounded-full bg-purple-900/30 text-purple-300 border border-purple-800/30">{kpi}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {pa.quickWin && (
                 <div className="rounded-lg p-3 mt-2" style={{ backgroundColor: `${toolColor}10`, border: `1px solid ${toolColor}20` }}>
                   <p className="text-xs font-medium mb-1" style={{ color: toolColor }}>⚡ Quick Win (30 jours)</p>
                   <p className="text-xs text-gray-400">{pa.quickWin}</p>
+                </div>
+              )}
+              {pa.prochainNiveau && (
+                <div className="mt-2 flex items-start gap-1.5">
+                  <span className="text-xs text-gray-600 shrink-0">↑</span>
+                  <p className="text-xs text-gray-600 italic leading-relaxed">{pa.prochainNiveau}</p>
                 </div>
               )}
             </motion.div>
@@ -224,20 +340,61 @@ export function IntelligenceResults({
           <h3 className="text-base font-semibold text-white mb-4">
             Top recommandations stratégiques
           </h3>
-          <ol className="space-y-3">
+          <ol className="space-y-4">
             {aiReport.topRecommendations.map((rec, i) => {
               const isObj = typeof rec === 'object' && rec !== null;
-              const title = isObj ? (rec as TopRecommendation).title : rec as string;
-              const rationale = isObj ? (rec as TopRecommendation).rationale : undefined;
-              const timeline = isObj ? (rec as TopRecommendation).timeline : undefined;
+              const title       = isObj ? (rec as TopRecommendation).title       : rec as string;
+              const rationale   = isObj ? (rec as TopRecommendation).rationale   : undefined;
+              const timeline    = isObj ? (rec as TopRecommendation).timeline    : undefined;
+              const impact      = isObj ? (rec as TopRecommendation).impact      : undefined;
+              const effortRequis= isObj ? (rec as TopRecommendation).effortRequis: undefined;
+              const roiEstimate = isObj ? (rec as TopRecommendation).roiEstimate : undefined;
+              const responsable = isObj ? (rec as TopRecommendation).responsable : undefined;
+              const prerequis   = isObj ? (rec as TopRecommendation).prerequis   : undefined;
               return (
-                <li key={i} className="flex gap-3 text-sm text-gray-300">
-                  <span className="shrink-0 font-bold w-5 text-center" style={{ color: toolColor }}>{i + 1}.</span>
-                  <span className="flex flex-col gap-0.5">
-                    <span className="font-medium text-white">{title}</span>
-                    {rationale && <span className="text-xs text-gray-500">{rationale}</span>}
-                    {timeline && <span className="text-xs" style={{ color: toolColor }}>⏱ {timeline}</span>}
-                  </span>
+                <li key={i} className="rounded-xl p-4 bg-gray-900/80 border border-gray-800">
+                  <div className="flex items-start gap-3 mb-2">
+                    <span className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-black"
+                      style={{ backgroundColor: toolColor }}>{i + 1}</span>
+                    <span className="font-semibold text-white text-sm">{title}</span>
+                  </div>
+                  <div className="ml-9 space-y-2">
+                    {rationale && <p className="text-xs text-gray-400 leading-relaxed">{rationale}</p>}
+                    <div className="flex flex-wrap gap-1.5">
+                      {impact && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          impact === 'Élevé' || impact === 'Fort' ? 'bg-red-900/40 text-red-400' : 'bg-yellow-900/40 text-yellow-400'
+                        }`}>Impact: {impact}</span>
+                      )}
+                      {effortRequis && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400">
+                          Effort: {effortRequis}
+                        </span>
+                      )}
+                      {timeline && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${toolColor}20`, color: toolColor }}>
+                          ⏱ {timeline}
+                        </span>
+                      )}
+                      {responsable && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400">
+                          👤 {responsable}
+                        </span>
+                      )}
+                    </div>
+                    {roiEstimate && (
+                      <p className="text-xs text-green-400/80 flex gap-1.5">
+                        <span className="shrink-0">💰</span>
+                        <span>{roiEstimate}</span>
+                      </p>
+                    )}
+                    {prerequis && (
+                      <p className="text-xs text-gray-600 flex gap-1.5">
+                        <span className="shrink-0">📋</span>
+                        <span>Prérequis : {prerequis}</span>
+                      </p>
+                    )}
+                  </div>
                 </li>
               );
             })}
@@ -263,7 +420,7 @@ export function IntelligenceResults({
                 return plan.slice(0, 3).map((entry, i) => (
                   <div key={i} className="rounded-xl p-4 bg-gray-900 border border-gray-800">
                     <h4 className="text-xs font-semibold mb-3" style={{ color: toolColor }}>{entry.week ?? labels[i]}</h4>
-                    <ul className="space-y-2">
+                    <ul className="space-y-2 mb-3">
                       {(entry.actions ?? []).map((item: string, j: number) => (
                         <li key={j} className="text-xs text-gray-400 flex gap-1.5">
                           <span className="shrink-0 text-gray-600">•</span>
@@ -271,6 +428,18 @@ export function IntelligenceResults({
                         </li>
                       ))}
                     </ul>
+                    {entry.livrable && (
+                      <div className="border-t border-gray-800 pt-2 mt-2">
+                        <p className="text-[10px] text-gray-600 font-medium mb-0.5">📄 Livrable</p>
+                        <p className="text-[10px] text-gray-500">{entry.livrable}</p>
+                      </div>
+                    )}
+                    {entry.kpi && (
+                      <div className="mt-1.5">
+                        <p className="text-[10px] text-gray-600 font-medium mb-0.5">📊 KPI</p>
+                        <p className="text-[10px] text-purple-400/80">{entry.kpi}</p>
+                      </div>
+                    )}
                   </div>
                 ));
               }
@@ -295,6 +464,23 @@ export function IntelligenceResults({
               });
             })()}
           </div>
+        </motion.div>
+      )}
+
+      {/* Message au Dirigeant */}
+      {aiReport?.messageDirigeant && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38 }}
+          className="rounded-2xl p-6"
+          style={{ background: `linear-gradient(135deg, ${toolColor}10, ${toolColor}04)`, border: `1px solid ${toolColor}30` }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">💬</span>
+            <h3 className="text-sm font-semibold text-white">Message au dirigeant</h3>
+          </div>
+          <p className="text-gray-300 text-sm leading-relaxed italic">{aiReport.messageDirigeant}</p>
         </motion.div>
       )}
 

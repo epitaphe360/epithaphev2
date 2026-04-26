@@ -1,51 +1,236 @@
 /**
- * BMI 360™ — Générateur de rapports IA Intelligence
- * Utilise l'API OpenAI (gpt-4o) pour produire une analyse stratégique de niveau C-suite.
- * Fallback: rapport structuré dynamique si OPENAI_API_KEY absent.
+ * BMI 360™ — Générateur de rapports IA Intelligence (TIER-1 CONSULTING GRADE)
+ * Modèle : OpenAI gpt-4o, max_tokens 8000, temperature 0.3
+ * Schéma de livrable : niveau McKinsey/BCG/Bain — quantification financière, business case,
+ * RACI, scénarios, change management, cas références.
  */
+
+// ─── Types granulaires ───────────────────────────────────────────────────────
+
+export interface QuantifiedRisk {
+  risque: string;
+  consequence: string;
+  probabilite: 'Élevée' | 'Moyenne' | 'Faible';
+  impact: 'Critique' | 'Élevé' | 'Moyen';
+  horizon: string;                 // "6 mois" | "12 mois" | "24 mois"
+  coutEstime?: string;             // "200-400k MAD/an"
+  mitigation: string;
+}
+
+export interface QuantifiedOpportunity {
+  opportunite: string;
+  facilite: 'Élevée' | 'Moyenne' | 'Faible';
+  valeur: 'Élevée' | 'Moyenne' | 'Faible';
+  horizon: string;
+  valeurEstimee: string;
+  actionPourSaisir: string;
+}
+
+export interface BloquantTypé {
+  facteur: string;
+  type: 'Culturel' | 'Structurel' | 'Compétences' | 'Outils' | 'Gouvernance';
+  leverDeblocage: string;
+}
+
+export interface ActionDetaillee {
+  action: string;
+  responsable: string;
+  delai: string;
+  ressources?: string;
+  kpiSucces?: string;
+}
+
+export interface QuickWinDetaille {
+  titre: string;
+  description: string;
+  responsable: string;
+  delai: string;                   // "15 jours"
+  livrable: string;
+  investissement?: string;         // "5-10k MAD"
+  impactAttendu: string;           // "+8 points sur ce pilier en 60j"
+}
 
 export interface AIPillarAnalysis {
   pillar: string;
   pillarLabel: string;
   score: number;
-  niveau?: string;                 // "Critique" | "Préoccupant" | "En développement" | "Performant" | "Excellence"
-  diagnostic: string;              // 4-5 phrases d'analyse approfondie et spécifique
-  impactOrganisationnel?: string;  // Impact concret sur la performance de l'organisation
-  benchmarkMENA?: string;          // Positionnement vs entreprises MENA similaires
-  risquesCles: string[];           // 3-4 risques avec conséquences concrètes
-  facteursBloquants?: string[];    // 2-3 facteurs organisationnels bloquant la progression
-  actions: string[];               // 3-4 actions prioritaires concrètes et nommées
-  quickWin: string;                // 1 action ultra-spécifique faisable en < 30 jours
-  indicateursCles?: string[];      // 2-3 KPIs pour mesurer le progrès
-  prochainNiveau?: string;         // Ce qui permettrait de passer au niveau de maturité suivant
+  niveau: string;                  // "Critique" | "Préoccupant" | "En développement" | "Performant" | "Excellence"
+  diagnostic: string;              // 5-7 phrases approfondies, ancrées dans les données
+  rootCauseAnalysis?: string;      // Analyse causale de type 5-Why ou Ishikawa
+  impactQuantifie?: {
+    coutCacheAnnuel?: string;      // "200-400k MAD/an"
+    impactProductivite?: string;
+    impactEngagement?: string;
+    impactReputationnel?: string;
+  };
+  benchmarkSectoriel?: {
+    vousEtes: number;
+    moyenneMENA: number;
+    topQuartileMENA: number;
+    leaderSecteur?: number;
+    ecartAuLeader?: string;
+    interpretation: string;
+  };
+  benchmarkMENA?: string;          // Legacy / texte court complémentaire
+  risquesCles: Array<QuantifiedRisk | string>;
+  facteursBloquants?: Array<BloquantTypé | string>;
+  actions: Array<ActionDetaillee | string>;
+  quickWin: QuickWinDetaille | string;
+  indicateursCles?: {
+    lagging: string[];             // KPIs résultat (mesurés a posteriori)
+    leading: string[];             // KPIs prédictifs (mesurés en cours)
+  } | string[];
+  cheminVersExcellence?: {
+    niveauActuel: string;
+    prochainNiveau: string;
+    leviersClefs: string[];
+    horizonAtteinte: string;       // "6 mois" / "12 mois"
+  };
+  prochainNiveau?: string;         // Legacy texte
+  impactOrganisationnel?: string;  // Legacy texte
+}
+
+export interface BusinessCase {
+  investissementEstime: string;    // "150-250k MAD"
+  gainAnnuelEstime: string;        // "500-800k MAD"
+  paybackPeriod: string;           // "5-8 mois"
+  horizonROI: string;              // "Année 1" / "Année 2"
+  hypothesesClefs: string[];
+  ratioROI?: string;               // "3.2x sur 3 ans"
+}
+
+export interface RACI {
+  responsable: string;             // R — exécute le travail
+  imputable: string;               // A — rend des comptes
+  consultes: string[];             // C — donne avis avant action
+  informes: string[];              // I — informé du résultat
+}
+
+export interface TopRecommendation {
+  priority: number;
+  title: string;
+  narrativeStrategique?: string;   // 3-4 phrases : pourquoi c'est LA priorité
+  rationale: string;
+  businessCase?: BusinessCase;
+  raci?: RACI;
+  impact: 'Élevé' | 'Moyen' | 'Fort';
+  effortRequis?: 'Faible' | 'Moyen' | 'Important';
+  timeline: string;
+  roiEstimate: string;
+  responsable?: string;            // Legacy short form
+  prerequis: string[] | string;
+  facteursCritiquesSucces?: string[];
+  piegesAEviter?: string[];
+  methodologie?: string;           // "Hoshin Kanri" / "OKR" / "Kotter 8 steps" / etc.
+}
+
+export interface ActionPlanPhase {
+  phase?: string;                  // "Mobilisation & Cadrage" / "Déploiement" / "Capitalisation"
+  week: string;                    // "J1-J30"
+  objectif?: string;
+  actions: Array<ActionDetaillee | string>;
+  livrable?: string;
+  kpi?: string;
+  comiteValidation?: string;       // "COMEX du J28"
+  ressourcesRequises?: string;
+  budgetAlloue?: string;
+}
+
+export interface ScenarioProjection {
+  scoreCible12Mois: number;
+  investissement: string;
+  description: string;
+  conditionsRealisation?: string[];
+}
+
+export interface CasReference {
+  secteur: string;
+  tailleEntreprise: string;
+  situationDepart: string;
+  actionsClefs: string[];
+  resultats: string;
+  duree?: string;
+}
+
+export interface StakeholderImpact {
+  groupe: string;                  // "Managers N-1" / "Comité d'entreprise" / "Direction RH"
+  posture: 'Promoteur' | 'Allié' | 'Neutre' | 'Sceptique' | 'Opposant';
+  enjeu: string;
+  actionRequise: string;
 }
 
 export interface AIReport {
   generatedAt: string;
   model: string;
-  syntheseDirecteur?: string;       // Synthèse 2 paragraphes, ton lettre Senior Partner
-  executiveSummary: string;         // 4-5 phrases de synthèse stratégique COMEX
-  positionConcurrentielle?: string; // Positionnement vs secteur MENA
-  risqueStrategique?: string;       // Le risque stratégique #1 de l'organisation
-  opportuniteStrategique?: string;  // L'opportunité prioritaire à saisir
+
+  // ───── COUVERTURE ─────
+  couverture?: {
+    titre: string;
+    sousTitre: string;
+    verdictUneLigne: string;       // Le verdict en 1 phrase percutante
+    dateDiagnostic: string;
+    perimetre?: string;
+  };
+
+  // ───── EXECUTIVE LAYER ─────
+  syntheseDirecteur?: string;       // Lettre 2-3 § du Senior Partner
+  executiveSummary: string;
+  troisChiffresClefs?: Array<{
+    chiffre: string;
+    label: string;
+    interpretation: string;
+  }>;
+  troisMessagesClefs?: string[];
+
+  // ───── POSITIONING ─────
+  positionConcurrentielle?: string;
+  positionnementStrategique?: {
+    vsBenchmarkMENA: string;
+    vsTop25Pct: string;
+    vsLeaderSecteur?: string;
+    trajectoireProjete5Ans: string; // Si rien ne change
+  };
+  risqueStrategique?: string;
+  opportuniteStrategique?: string;
+
+  // ───── MATRICES ─────
+  matriceRisques?: QuantifiedRisk[];
+  matriceOpportunites?: QuantifiedOpportunity[];
+
+  // ───── DIAGNOSTIC PAR PILIER ─────
   pillarAnalyses: AIPillarAnalysis[];
-  topRecommendations: Array<{
-    priority: number;
-    title: string;
-    rationale: string;
-    impact: 'Élevé' | 'Moyen' | 'Fort';
-    effortRequis?: 'Faible' | 'Moyen' | 'Important';
-    timeline: string;
-    roiEstimate: string;
-    responsable?: string;
-    prerequis?: string;
-  }>;
-  actionPlan90Days: Array<{
-    week: string;
-    actions: string[];
-    livrable?: string;
-    kpi?: string;
-  }>;
+
+  // ───── ROADMAP ─────
+  topRecommendations: Array<TopRecommendation | string>;
+  actionPlan90Days: Array<ActionPlanPhase> | { days30: string[]; days60: string[]; days90: string[] };
+
+  // ───── SCÉNARIOS ─────
+  scenariosProjection?: {
+    conservateur: ScenarioProjection;
+    base: ScenarioProjection;
+    ambitieux: ScenarioProjection;
+  };
+
+  // ───── GOUVERNANCE & CHANGE ─────
+  gouvernance?: {
+    instancePilotage: string;
+    frequenceReporting: string;
+    sponsorExecutif: string;
+    equipeProjet: string;
+    budgetTotalRecommande: string;
+  };
+
+  changeManagement?: {
+    stakeholdersCritiques: StakeholderImpact[];
+    risquesAdoption: string[];
+    leviersAdoption: string[];
+    planCommunicationInterne: string;
+  };
+
+  // ───── PROOF POINTS ─────
+  casReference?: CasReference[];
+
+  // ───── CLOSING ─────
   messageDirigeant?: string;
   transformCTA: string;
 }
@@ -253,6 +438,48 @@ const MATURITY_NAMES: Record<number, Record<string, string>> = {
   5: { commpulse: 'Pulse', talentprint: 'Iconic', impacttrace: 'Régénératif', safesignal: 'Generative', eventimpact: 'Iconic', spacescore: 'Immersive', finnarrative: 'Reference' },
 };
 
+// ─── Calibrage financier MENA pour estimations ──────────────────────────────
+
+const FINANCIAL_BENCHMARKS_MENA = {
+  // Salaires bruts moyens annuels (MAD)
+  salaireCadre: '180-350k MAD/an',
+  salaireManager: '350-700k MAD/an',
+  salaireDirecteur: '700k-1.5M MAD/an',
+  // Coûts cachés référentiels documentés MENA
+  coutTurnover: '6-12 mois de salaire par départ non souhaité',
+  coutAccidentTravail: '50-150k MAD par accident avec arrêt (CNSS + production + RH)',
+  coutRecrutementCadre: '15-25% du salaire annuel (cabinet + onboarding + montée en compétence)',
+  coutDesengagement: '15-25% de baisse de productivité par collaborateur désengagé',
+  coutCriseReputationnelle: '500k-5M MAD selon ampleur (marque employeur, ventes, partenaires)',
+  // Tailles entreprises MENA typiques
+  pmePetite: '50-150 collaborateurs · CA 20-80M MAD',
+  pmeMoyenne: '150-500 collaborateurs · CA 80-300M MAD',
+  grandeEntreprise: '500-2000 collaborateurs · CA 300M-2Md MAD',
+  groupe: '2000+ collaborateurs · CA > 2Md MAD',
+};
+
+// ─── Méthodologies et frameworks référentiels ───────────────────────────────
+
+const METHODOLOGIES_LIBRARY = [
+  'Hoshin Kanri (déploiement stratégique X-Matrix)',
+  'OKR (Objectives & Key Results, méthode Google/Intel)',
+  'Kotter 8-Step Change Model',
+  'ADKAR (Awareness, Desire, Knowledge, Ability, Reinforcement)',
+  'McKinsey 7S Framework',
+  'Balanced Scorecard (Kaplan & Norton)',
+  'RACI Matrix (Responsabilités projet)',
+  'SIPOC (Supplier, Input, Process, Output, Customer)',
+  'Voice of Customer / Voice of Employee surveys',
+  '5-Why Root Cause Analysis',
+  'Ishikawa (diagramme causes-effets)',
+  'Net Promoter Score interne (eNPS)',
+  'Pulse Survey mensuel (15 questions max)',
+  'Design Sprint (Google Ventures, 5 jours)',
+  'Lean Six Sigma DMAIC',
+  'Stage-Gate Innovation Process',
+  'OGSM (Objectives, Goals, Strategies, Measures)',
+];
+
 function buildPrompt(params: {
   toolId: string;
   companyName?: string;
@@ -263,22 +490,22 @@ function buildPrompt(params: {
   pillarScores: Record<string, number>;
 }): string {
   const { toolId, companyName, sector, companySize, globalScore, maturityLevel, pillarScores } = params;
-  const toolCtx  = TOOL_CONTEXTS[toolId] ?? '';
+  const toolCtx     = TOOL_CONTEXTS[toolId] ?? '';
   const maturityName = MATURITY_NAMES[maturityLevel]?.[toolId] ?? `Niveau ${maturityLevel}`;
   const pillarDefs   = TOOL_PILLAR_LABELS[toolId] ?? {};
   const benchmark    = TOOL_BENCHMARKS[toolId];
 
-  // Tri des piliers du plus faible au plus fort pour mise en évidence des priorités
+  // Tri des piliers du plus faible au plus fort
   const sortedPillars = Object.entries(pillarScores).sort((a, b) => a[1] - b[1]);
-  const pillarsText = sortedPillars
+  const pillarsText   = sortedPillars
     .map(([p, s]) => {
-      const def   = pillarDefs[p];
-      const lvl   = s < 20 ? 'CRITIQUE' : s < 40 ? 'PRÉOCCUPANT' : s < 60 ? 'EN DÉVELOPPEMENT' : s < 80 ? 'PERFORMANT' : 'EXCELLENCE';
-      return `  • [${p}] ${def?.label ?? p} (poids ${def?.weight ?? '?'}%) : ${s}/100 → ${lvl}\n    Description : ${def?.description ?? 'N/A'}`;
+      const def = pillarDefs[p];
+      const lvl = s < 20 ? 'CRITIQUE' : s < 40 ? 'PRÉOCCUPANT' : s < 60 ? 'EN DÉVELOPPEMENT' : s < 80 ? 'PERFORMANT' : 'EXCELLENCE';
+      return `  • [${p}] ${def?.label ?? p} (poids ${def?.weight ?? '?'}%) : ${s}/100 → ${lvl}\n    Définition : ${def?.description ?? 'N/A'}`;
     })
     .join('\n');
 
-  // Gap analysis dynamique
+  // Gap analysis
   const scores       = Object.values(pillarScores);
   const maxScore     = Math.max(...scores);
   const minScore     = Math.min(...scores);
@@ -286,154 +513,346 @@ function buildPrompt(params: {
   const weakest      = sortedPillars[0];
   const strongest    = sortedPillars[sortedPillars.length - 1];
   const gapAnalysis  = gap > 25
-    ? `⚠ PROFIL DÉSÉQUILIBRÉ (écart de ${gap} points) : la dimension [${strongest[0]}] à ${strongest[1]}/100 coexiste avec [${weakest[0]}] à ${weakest[1]}/100. Ce déséquilibre est structurellement limitant — l'organisation performe globalement à la hauteur de sa dimension la plus faible.`
+    ? `⚠ PROFIL FORTEMENT DÉSÉQUILIBRÉ (écart de ${gap} points entre [${strongest[0]}]=${strongest[1]} et [${weakest[0]}]=${weakest[1]}). Loi du maillon faible : l'organisation performe au niveau de sa dimension la plus faible. Le rééquilibrage est PRIORITAIRE absolu — investir uniquement sur les forces ne génère plus de gain marginal significatif.`
     : gap > 15
-    ? `Profil modérément déséquilibré (écart de ${gap} points). Les dimensions faibles freinent l'expression des dimensions fortes — aligner les niveaux est prioritaire.`
-    : `Profil relativement homogène (écart de ${gap} points). La progression passe par une amélioration systématique de l'ensemble du modèle.`;
+    ? `Profil modérément déséquilibré (écart ${gap} points). Les dimensions faibles freinent l'expression des forces — séquencer le rééquilibrage AVANT toute optimisation des dimensions fortes.`
+    : `Profil homogène (écart ${gap} points). Progression par optimisation systématique de l'ensemble du modèle, pas de point de blocage isolé.`;
 
   // Comparaison benchmark
   const benchmarkNote = benchmark
-    ? `Score ${globalScore}/100 vs moyenne MENA ${benchmark.menaAvg}/100 (${globalScore > benchmark.menaAvg ? `+${globalScore - benchmark.menaAvg} points au-dessus` : `${globalScore - benchmark.menaAvg} points en dessous`} de la moyenne) · Top 25% MENA = ${benchmark.menaTop}/100`
+    ? `Score ${globalScore}/100 vs moyenne MENA ${benchmark.menaAvg}/100 (${globalScore > benchmark.menaAvg ? `+${globalScore - benchmark.menaAvg} pts au-dessus` : `${globalScore - benchmark.menaAvg} pts en dessous`}) · Top 25% MENA = ${benchmark.menaTop}/100 · Écart au top quartile = ${benchmark.menaTop - globalScore} pts`
     : '';
 
-  const sectorNote    = sector     ? `\nSECTEUR : ${sector} — contextualise chaque analyse et recommandation avec les enjeux spécifiques à ce secteur en MENA (réglementation, concurrence, maturité sectorielle, attentes parties prenantes).` : '';
-  const sizeNote      = companySize ? `\nTAILLE : ${companySize} — adapte les recommandations aux capacités et contraintes réelles (ressources humaines, budget transformation, gouvernance) de cette taille d'entreprise.` : '';
+  const sectorNote = sector
+    ? `\nSECTEUR : ${sector} — TU DOIS contextualiser CHAQUE recommandation et CHAQUE estimation financière avec les enjeux spécifiques à ${sector} en MENA (réglementation locale, intensité concurrentielle, maturité sectorielle, attentes parties prenantes, marges typiques, contraintes RH).`
+    : '\nSECTEUR : Non précisé — utilise les benchmarks transversaux MENA.';
 
-  return `=== IDENTITÉ ET MISSION ===
-Tu es un Senior Partner chez Epitaphe360, cabinet de conseil stratégique de référence en transformation organisationnelle et communication d'entreprise en Afrique du Nord et MENA.
-Tu as accompagné plus de 200 transformations d'entreprises : PME familiales marocaines, filiales de multinationales, entreprises publiques en transition, scale-ups africaines.
-Ton expertise couvre la communication interne, la marque employeur, la RSE, la sécurité, l'événementiel, le brand physique et la communication financière.
+  const sizeNote = companySize
+    ? `\nTAILLE : ${companySize} — TU DOIS calibrer les investissements, ressources et complexité organisationnelle selon cette taille (gouvernance, capacité d'investissement, vitesse d'exécution).`
+    : '\nTAILLE : Non précisée — calibre par défaut sur PME moyenne MENA (150-500 collaborateurs).';
 
-TON STYLE EST :
-• Direct et sans complaisance — tu dis ce qui est, pas ce que le client veut entendre
-• Expert et ancré dans la réalité MENA — tes recommandations sont opérationnelles, pas théoriques
-• Structuré comme un rapport McKinsey/BCG — chaque phrase porte une information concrète
-• Jamais générique — chaque analyse est unique et fondée sur les scores réels de cette entreprise
-• Tu n'utilises jamais des formules creuses ("il convient de", "il est important de", "nous recommandons de") — tu nommes des actions, des responsables, des délais
+  return `=== IDENTITÉ ET POSTURE ===
+Tu es un Senior Partner & Practice Leader chez Epitaphe360, cabinet de conseil stratégique tier-1 en Afrique du Nord et MENA, équivalent McKinsey/BCG/Bain pour la région. Tu factures cette mission à 10,000 USD au minimum.
 
-RÈGLE ABSOLUE : Tu réponds UNIQUEMENT en JSON valide selon le schéma demandé. Aucun texte hors du JSON.
+EXPÉRIENCE :
+• 20+ ans de conseil stratégique, dont 12 ans en région MENA
+• 200+ transformations pilotées : groupes industriels, banques, assurances, retail, agro, services, scale-ups tech
+• Membre du Board d'Epitaphe360, intervenant régulier au CEO Forum, à HEM, à l'ISCAE
+• Spécialisé dans les transformations organisationnelles à fort impact business mesurable
+
+EXIGENCES NON-NÉGOCIABLES POUR CE RAPPORT :
+
+1. NIVEAU DE QUALITÉ
+   Ce rapport doit être indiscernable d'un livrable McKinsey/BCG/Bain. Le client doit avoir l'impression d'avoir économisé 6 semaines de mission terrain. Aucune trivialité, aucune généralité. Chaque phrase doit faire gagner ou faire perdre des décisions.
+
+2. QUANTIFICATION OBLIGATOIRE
+   • TOUS les impacts en MAD (dirhams marocains) ou EUR avec fourchettes (ex: "200-400k MAD/an")
+   • TOUTES les recommandations avec business case : investissement, gain annuel, payback period, ROI
+   • TOUS les KPIs avec valeurs cibles chiffrées et horizons
+   • TOUTES les actions avec délais en jours/semaines/mois précis
+   Référentiel coûts MENA :
+   - Turn-over non souhaité : 6-12 mois de salaire perdus
+   - Accident travail avec arrêt : 50-150k MAD
+   - Recrutement cadre : 15-25% du salaire annuel
+   - Désengagement : -15 à -25% de productivité
+   - Crise réputationnelle : 500k-5M MAD
+
+3. STYLE D'ÉCRITURE
+   • Direct, factuel, sans complaisance — tu dis ce qui est, pas ce qui rassure
+   • Phrases courtes, verbes d'action, voix active
+   • INTERDIT : "il convient de", "il est important de", "il faudrait", "nous recommandons de"
+   • OBLIGATOIRE : "X fait Y avec Z en N jours pour produire L"
+   • Cite des chiffres, des marques, des acteurs, des cas concrets MENA quand pertinent
+   • Ton de Senior Partner — exigeant mais constructif, jamais condescendant
+
+4. MÉTHODOLOGIES
+   Quand tu recommandes une démarche, NOMME la méthodologie de référence :
+   ${METHODOLOGIES_LIBRARY.map(m => `   • ${m}`).join('\n')}
+
+5. SPÉCIFICITÉ
+   Aucune phrase qui pourrait être copiée-collée à un autre client. Chaque ligne ancrée dans LES SCORES RÉELS de cette entreprise. Si tu écris "il faut améliorer la communication", c'est éliminatoire — tu écris "Le score Cohérence à 58/100 vs benchmark 72/100 nécessite la mise en place d'un Comité Éditorial mensuel piloté par le DRH avec validation des messages clés par le DG, dès J15".
+
+6. CAS RÉFÉRENCE
+   Tu cites 2-3 cas d'entreprises MENA anonymisés (mais réalistes) ayant vécu une transformation similaire — secteur, taille, situation de départ, actions, résultats chiffrés.
+
+7. JSON UNIQUEMENT
+   Aucun texte hors du JSON. Aucun markdown. Aucune explication. Le JSON DOIT être valide.
 
 === CONTEXTE DE L'OUTIL ===
 ${toolCtx}
 
 === DONNÉES DE L'ÉVALUATION ===
-Entreprise  : ${companyName  || 'Confidentiel'}${sectorNote}${sizeNote}
-Score global : ${globalScore}/100 — Niveau ${maturityLevel}/5 "${maturityName}"
+ENTREPRISE : ${companyName || 'Confidentiel — utilise "votre organisation"'}${sectorNote}${sizeNote}
+SCORE GLOBAL : ${globalScore}/100 — Niveau ${maturityLevel}/5 "${maturityName}"
 ${benchmarkNote}
 
-=== SCORES DÉTAILLÉS PAR DIMENSION (triés du plus faible au plus fort) ===
+=== SCORES DÉTAILLÉS PAR DIMENSION (triés faible → fort) ===
 ${pillarsText}
 
 === ANALYSE DES ÉCARTS INTER-DIMENSIONS ===
 ${gapAnalysis}
 
 === GRILLE D'INTERPRÉTATION DES SCORES ===
-• 0–19   → CRITIQUE         : Absence de pratiques structurées — risque opérationnel immédiat et coûts cachés significatifs
-• 20–39  → PRÉOCCUPANT      : Pratiques embryonnaires — vulnérabilités structurelles majeures, urgence d'action
-• 40–59  → EN DÉVELOPPEMENT : Bases en place mais incohérences limitantes — fort potentiel d'amélioration rapide
-• 60–79  → PERFORMANT       : Pratiques solides — optimisations à fort impact disponibles pour passer au niveau supérieur
-• 80–100 → EXCELLENCE       : Maturité avancée — positionnement de référence sectorielle, rôle de benchmark
+• 0–19   → CRITIQUE         · Risque opérationnel immédiat · Coûts cachés majeurs (>500k MAD/an typiquement)
+• 20–39  → PRÉOCCUPANT      · Vulnérabilités structurelles · Coûts cachés significatifs (200-500k MAD/an)
+• 40–59  → EN DÉVELOPPEMENT · Bases présentes mais incohérences · Coûts d'opportunité importants
+• 60–79  → PERFORMANT       · Pratiques solides · Optimisations rentables disponibles
+• 80–100 → EXCELLENCE       · Référence sectorielle · Actif différenciant à valoriser
 
-=== INSTRUCTIONS DE RÉDACTION (CRITIQUES) ===
+=== INSTRUCTIONS PAR SECTION (LIRE CHAQUE LIGNE) ===
 
-1. syntheseDirecteur — 2 paragraphes distincts séparés par \\n\\n
-   • §1 : État des lieux HONNÊTE basé sur le score ${globalScore}/100. Nomme les 2 forces et les 2 faiblesses majeures. Cite les scores réels.
-   • §2 : Ce que l'organisation peut concrètement réaliser dans les 12 mois avec les bons leviers. Ton : constructif mais exigeant.
+▸ COUVERTURE
+  • titre : "Rapport Intelligence™ — [Nom outil] — [Nom entreprise ou Confidentiel]"
+  • sousTitre : 1 phrase positionnant l'enjeu stratégique central
+  • verdictUneLigne : LE verdict en 1 phrase brutale et honnête. Ex : "Une organisation au-dessus de la moyenne MENA mais structurellement bloquée par 2 dimensions critiques qui annulent les efforts sur les autres."
+  • dateDiagnostic : ISO 8601 du jour
+  • perimetre : ce que couvre et ne couvre pas le diagnostic
 
-2. executiveSummary — 4-5 phrases. Commence par le constat clé du score ${globalScore}/100 au niveau ${maturityName}. Nomme les dimensions critiques. Conclure par l'enjeu compétitif si rien n'est fait.
+▸ syntheseDirecteur (2-3 paragraphes, séparés par \\n\\n)
+  §1 — État des lieux SANS COMPLAISANCE basé sur le score ${globalScore}/100. Nomme les 2 forces ET les 2 faiblesses majeures avec scores réels. Le ton est celui d'une note adressée au DG par un Senior Partner expérimenté.
+  §2 — Ce que l'organisation peut atteindre dans 12 mois avec une feuille de route ciblée. Cite des cibles chiffrées (ex: "passage de 55 à 68/100, soit dans le top 30% MENA").
+  §3 (optionnel) — Le coût de l'inaction sur 18 mois (chiffré).
 
-3. positionConcurrentielle — 2 phrases. Compare à ${benchmark ? `la moyenne MENA de ${benchmark.menaAvg}/100` : 'la moyenne MENA'}. Contextualise dans le secteur ${sector ?? 'MENA'}.
+▸ executiveSummary (5-6 phrases denses)
+  Synthèse COMEX. Constat → Cause profonde → Risque #1 → Opportunité #1 → Recommandation phare → Engagement requis.
 
-4. risqueStrategique — 1 phrase précise. Le risque #1 qui menace la performance de l'entreprise si ce score reste inchangé dans 18 mois.
+▸ troisChiffresClefs (EXACTEMENT 3 chiffres choc)
+  Ex : { chiffre: "850k MAD", label: "Coût caché annuel estimé", interpretation: "Équivalent à 4 cadres seniors perdus chaque année" }
 
-5. opportuniteStrategique — 1 phrase précise. L'opportunité de gain rapide et mesurable la plus accessible compte tenu des scores actuels.
+▸ troisMessagesClefs (EXACTEMENT 3 messages courts mémorables, max 12 mots chacun)
 
-6. pillarAnalyses — TOUTES les dimensions présentes dans les scores. Pour chaque dimension :
-   • niveau : "Critique" | "Préoccupant" | "En développement" | "Performant" | "Excellence" selon la grille ci-dessus
-   • diagnostic : 4-5 phrases SPÉCIFIQUES à ce score précis. Interprète ce que ce score signifie concrètement pour cette entreprise dans ce secteur. Jamais générique.
-   • impactOrganisationnel : 2-3 phrases sur l'impact CONCRET et MESURABLE de ce score sur la performance de l'organisation (coûts cachés, risques de compétitivité, impact RH, etc.)
-   • benchmarkMENA : 1 phrase comparant ce score aux entreprises MENA de même secteur/taille. Cite le benchmark.
-   • risquesCles : 3-4 risques CONCRETS avec conséquences MESURABLES. Exemple : "Risque de turn-over managérial > 20% dans les 18 mois si aucune action sur cette dimension" — PAS "risque de perte de performance"
-   • facteursBloquants : 2-3 facteurs organisationnels PRÉCIS qui expliquent ce score (culture, gouvernance, ressources, processus, compétences manquantes)
-   • actions : 3-4 actions CONCRÈTES et NOMMÉES avec responsable. Exemple : "Déployer un baromètre mensuel de 5 indicateurs, piloté par le DRH, avec restitution trimestrielle au COMEX" — PAS "améliorer la communication"
-   • quickWin : 1 action ULTRA-SPÉCIFIQUE réalisable en < 30 jours. Nomme : QUI fait QUOI, avec QUEL livrable attendu, en COMBIEN de jours.
-   • indicateursCles : 2-3 KPIs PRÉCIS et mesurables pour suivre la progression sur cette dimension
-   • prochainNiveau : 1-2 phrases sur ce qui permettrait de passer du niveau ${maturityLevel} "${maturityName}" au niveau ${Math.min(maturityLevel + 1, 5)}
+▸ positionnementStrategique
+  • vsBenchmarkMENA : positionnement vs moyenne ${benchmark?.menaAvg ?? 'MENA'}/100 avec interprétation
+  • vsTop25Pct : positionnement vs ${benchmark?.menaTop ?? 'top 25%'}/100 + écart à combler
+  • vsLeaderSecteur : qui sont les leaders sectoriels MENA en ${benchmark?.unit ?? 'cette dimension'} (cite 1-2 références sectorielles MENA)
+  • trajectoireProjete5Ans : où l'organisation sera dans 5 ans SI RIEN N'EST FAIT (factuel, pas dramatique)
 
-7. topRecommendations — EXACTEMENT 5 recommandations, classées par priorité décroissante (ROI × urgence). Chaque recommandation :
-   • fondée sur les scores réels — jamais déconnectée des données
-   • avec un ROI qualitatif PRÉCIS (ex: "Réduction estimée du turn-over de 15-20%, économie de 3-6 mois de salaire par poste retenu")
-   • avec un responsable clairement identifié (DG / DRH / DCom / DSI / etc.)
-   • avec un prérequis concret et réaliste
+▸ risqueStrategique : LE risque #1 si score inchangé à 18 mois — chiffré
+▸ opportuniteStrategique : L'opportunité prioritaire — chiffrée
 
-8. actionPlan90Days — 3 phases de 30 jours. Chaque phase :
-   • 3-4 actions concrètes et séquencées logiquement
-   • 1 livrable tangible (document, atelier, outil, décision, etc.)
-   • 1 KPI précis pour mesurer le succès de la phase
+▸ matriceRisques (3-5 risques quantifiés)
+  Pour chaque : risque, conséquence concrète, probabilité, impact, horizon, coût estimé en MAD, mitigation
 
-9. messageDirigeant — 3-4 phrases personnelles, directement adressées au dirigeant. Ton : direct, honnête, sans complaisance mais constructif. Inclure le score ${globalScore}/100 et 1 message d'espoir ancré dans les données.
+▸ matriceOpportunites (3-5 opportunités quantifiées)
+  Pour chaque : opportunité, facilité d'exécution, valeur, horizon, valeur estimée en MAD, action pour saisir
 
-10. transformCTA — 1 phrase d'accroche percutante proposant la mission Transform Epitaphe360, personnalisée au niveau ${maturityName} et au score ${globalScore}/100.
+▸ pillarAnalyses (TOUS les piliers)
+  Pour chaque dimension :
+  • niveau : badge selon grille
+  • diagnostic : 5-7 phrases SPÉCIFIQUES à ce score précis dans ce contexte. Aucune généralité.
+  • rootCauseAnalysis : analyse causale en 3-5 phrases (5-Why) — POURQUOI ce score ?
+  • impactQuantifie : objet avec coutCacheAnnuel (chiffré MAD), impactProductivite, impactEngagement, impactReputationnel
+  • benchmarkSectoriel : objet { vousEtes, moyenneMENA, topQuartileMENA, leaderSecteur, ecartAuLeader, interpretation }
+  • risquesCles : 3-4 objets QuantifiedRisk { risque, consequence, probabilite, impact, horizon, coutEstime, mitigation }
+  • facteursBloquants : 2-3 objets BloquantTypé { facteur, type, leverDeblocage }
+  • actions : 3-4 objets ActionDetaillee { action, responsable, delai, ressources, kpiSucces }
+  • quickWin : objet QuickWinDetaille COMPLET avec investissement chiffré et impact attendu chiffré
+  • indicateursCles : objet { lagging: [KPIs résultat], leading: [KPIs prédictifs] } — chacun avec valeur cible
+  • cheminVersExcellence : objet { niveauActuel, prochainNiveau, leviersClefs, horizonAtteinte }
 
-=== SCHÉMA JSON EXACT (réponds UNIQUEMENT avec ce JSON, aucun texte hors du JSON) ===
+▸ topRecommendations (EXACTEMENT 5, classées ROI × urgence)
+  Pour chaque :
+  • narrativeStrategique : 3-4 phrases — pourquoi c'est LA priorité maintenant
+  • businessCase OBLIGATOIRE : { investissementEstime (MAD), gainAnnuelEstime (MAD), paybackPeriod, horizonROI, hypothesesClefs (3-4), ratioROI (sur 3 ans) }
+  • raci OBLIGATOIRE : { responsable, imputable, consultes [], informes [] }
+  • impact, effortRequis, timeline
+  • prerequis : 2-3 prérequis critiques
+  • facteursCritiquesSucces : 3-4 FCS
+  • piegesAEviter : 2-3 pièges classiques observés sur ce type de transformation
+  • methodologie : nom de la méthode de référence à appliquer
+
+▸ actionPlan90Days (3 phases × 30 jours)
+  Pour chaque phase :
+  • phase : nom (ex: "Mobilisation & Cadrage" / "Déploiement Quick Wins" / "Capitalisation & Scale")
+  • week : "J1-J30" / "J31-J60" / "J61-J90"
+  • objectif : 1 phrase
+  • actions : 4-5 ActionDetaillee avec responsable, délai, ressources, kpiSucces
+  • livrable : livrable tangible attendu
+  • kpi : KPI précis et chiffré
+  • comiteValidation : instance de validation
+  • ressourcesRequises : ressources humaines / budget
+  • budgetAlloue : montant en MAD
+
+▸ scenariosProjection (3 scénarios)
+  Conservateur / Base / Ambitieux — pour chaque : score cible 12 mois (chiffre), investissement total (MAD), description, conditionsRealisation (3-4)
+
+▸ gouvernance
+  Instance pilotage, fréquence reporting, sponsor exécutif, équipe projet, budget total recommandé sur 12 mois (MAD)
+
+▸ changeManagement
+  • stakeholdersCritiques : 4-6 groupes avec posture évaluée et action requise
+  • risquesAdoption : 3-4 risques typiques d'adoption
+  • leviersAdoption : 3-4 leviers concrets pour mobiliser
+  • planCommunicationInterne : approche en 3-4 phrases (timing, canaux, messages clés)
+
+▸ casReference (2-3 cas anonymisés)
+  Cas réalistes d'entreprises MENA ayant vécu transformation similaire — secteur, taille, situation départ (score), actions clés, résultats chiffrés (score arrivée + ROI), durée
+
+▸ messageDirigeant (4-5 phrases)
+  Adressé directement au dirigeant, ton personnel et exigeant. Inclure score ${globalScore}/100, 1 vérité difficile, 1 message d'espoir ancré dans les données, 1 invitation à l'action.
+
+▸ transformCTA (1 phrase percutante)
+  Personnalisée niveau ${maturityName} et score ${globalScore}/100.
+
+=== SCHÉMA JSON EXACT (réponds UNIQUEMENT avec ce JSON, sans markdown) ===
 {
-  "syntheseDirecteur": "PARAGRAPHE_1\\n\\nPARAGRAPHE_2",
-  "executiveSummary": "4-5 phrases de synthèse stratégique COMEX",
-  "positionConcurrentielle": "2 phrases sur le positionnement vs secteur MENA",
-  "risqueStrategique": "1 phrase sur le risque stratégique #1 à 18 mois",
-  "opportuniteStrategique": "1 phrase sur l'opportunité de gain prioritaire",
+  "couverture": {
+    "titre": "Rapport Intelligence™ — ...",
+    "sousTitre": "...",
+    "verdictUneLigne": "...",
+    "dateDiagnostic": "2025-...",
+    "perimetre": "..."
+  },
+  "syntheseDirecteur": "PARAGRAPHE_1\\n\\nPARAGRAPHE_2\\n\\nPARAGRAPHE_3",
+  "executiveSummary": "5-6 phrases denses",
+  "troisChiffresClefs": [
+    { "chiffre": "850k MAD", "label": "Coût caché annuel", "interpretation": "..." },
+    { "chiffre": "...", "label": "...", "interpretation": "..." },
+    { "chiffre": "...", "label": "...", "interpretation": "..." }
+  ],
+  "troisMessagesClefs": ["Message 1 max 12 mots", "Message 2", "Message 3"],
+  "positionnementStrategique": {
+    "vsBenchmarkMENA": "...",
+    "vsTop25Pct": "...",
+    "vsLeaderSecteur": "...",
+    "trajectoireProjete5Ans": "..."
+  },
+  "risqueStrategique": "...",
+  "opportuniteStrategique": "...",
+  "matriceRisques": [
+    { "risque": "...", "consequence": "...", "probabilite": "Élevée", "impact": "Critique", "horizon": "12 mois", "coutEstime": "300-600k MAD/an", "mitigation": "..." }
+  ],
+  "matriceOpportunites": [
+    { "opportunite": "...", "facilite": "Élevée", "valeur": "Élevée", "horizon": "6 mois", "valeurEstimee": "200-400k MAD/an", "actionPourSaisir": "..." }
+  ],
   "pillarAnalyses": [
     {
-      "pillar": "ID_DIMENSION",
-      "pillarLabel": "Nom complet de la dimension",
+      "pillar": "ID",
+      "pillarLabel": "Nom complet",
       "score": 0,
-      "niveau": "Critique|Préoccupant|En développement|Performant|Excellence",
-      "diagnostic": "4-5 phrases d'analyse approfondie et spécifique à ce score et ce contexte",
-      "impactOrganisationnel": "2-3 phrases sur l'impact concret et mesurable sur la performance organisationnelle",
-      "benchmarkMENA": "1 phrase de positionnement vs pairs MENA avec chiffre de benchmark",
-      "risquesCles": ["Risque concret avec conséquence mesurable 1", "Risque 2", "Risque 3"],
-      "facteursBloquants": ["Facteur organisationnel précis bloquant la progression 1", "Facteur 2"],
-      "actions": ["Action concrète nommée avec responsable 1", "Action 2", "Action 3"],
-      "quickWin": "Action ultra-spécifique : QUI fait QUOI en X jours pour produire QUEL livrable",
-      "indicateursCles": ["KPI précis et mesurable 1", "KPI 2"],
-      "prochainNiveau": "Ce qui permettrait concrètement de passer au niveau de maturité suivant"
+      "niveau": "Préoccupant",
+      "diagnostic": "5-7 phrases spécifiques et ancrées",
+      "rootCauseAnalysis": "Analyse 5-Why en 3-5 phrases",
+      "impactQuantifie": {
+        "coutCacheAnnuel": "200-400k MAD/an",
+        "impactProductivite": "...",
+        "impactEngagement": "...",
+        "impactReputationnel": "..."
+      },
+      "benchmarkSectoriel": {
+        "vousEtes": 0,
+        "moyenneMENA": 0,
+        "topQuartileMENA": 0,
+        "leaderSecteur": 0,
+        "ecartAuLeader": "...",
+        "interpretation": "..."
+      },
+      "risquesCles": [
+        { "risque": "...", "consequence": "...", "probabilite": "Élevée", "impact": "Élevé", "horizon": "12 mois", "coutEstime": "...", "mitigation": "..." }
+      ],
+      "facteursBloquants": [
+        { "facteur": "...", "type": "Culturel", "leverDeblocage": "..." }
+      ],
+      "actions": [
+        { "action": "...", "responsable": "DRH", "delai": "30 jours", "ressources": "1 ETP RH + budget 50k MAD", "kpiSucces": "Score Inclusion à 45/100 à J90" }
+      ],
+      "quickWin": {
+        "titre": "...",
+        "description": "...",
+        "responsable": "...",
+        "delai": "15 jours",
+        "livrable": "...",
+        "investissement": "5-10k MAD",
+        "impactAttendu": "+8 points sur ce pilier en 60 jours"
+      },
+      "indicateursCles": {
+        "lagging": ["KPI résultat 1 (cible chiffrée)", "KPI 2"],
+        "leading": ["KPI prédictif 1 (cible chiffrée)", "KPI 2"]
+      },
+      "cheminVersExcellence": {
+        "niveauActuel": "...",
+        "prochainNiveau": "...",
+        "leviersClefs": ["...", "..."],
+        "horizonAtteinte": "9 mois"
+      }
     }
   ],
   "topRecommendations": [
     {
       "priority": 1,
-      "title": "Titre court, percutant et spécifique",
-      "rationale": "Pourquoi c'est la priorité #1 — fondé sur les scores et leur impact business",
+      "title": "Titre court et percutant",
+      "narrativeStrategique": "3-4 phrases",
+      "rationale": "...",
+      "businessCase": {
+        "investissementEstime": "150-250k MAD",
+        "gainAnnuelEstime": "500-800k MAD",
+        "paybackPeriod": "5-8 mois",
+        "horizonROI": "Année 1",
+        "hypothesesClefs": ["...", "...", "..."],
+        "ratioROI": "3.2x sur 3 ans"
+      },
+      "raci": {
+        "responsable": "DRH",
+        "imputable": "DG",
+        "consultes": ["DAF", "DCom"],
+        "informes": ["COMEX", "Managers N-1"]
+      },
       "impact": "Élevé",
       "effortRequis": "Moyen",
-      "timeline": "X jours / X mois",
-      "roiEstimate": "Description précise et qualitative du ROI attendu avec ordre de grandeur",
-      "responsable": "DG / DRH / DCom / DSI / etc.",
-      "prerequis": "Ce qui doit être en place avant de démarrer cette recommandation"
+      "timeline": "3 mois",
+      "prerequis": ["...", "..."],
+      "facteursCritiquesSucces": ["...", "...", "..."],
+      "piegesAEviter": ["...", "..."],
+      "methodologie": "Hoshin Kanri + RACI"
     }
   ],
   "actionPlan90Days": [
     {
+      "phase": "Mobilisation & Cadrage",
       "week": "J1-J30",
-      "actions": ["Action concrète 1", "Action 2", "Action 3"],
-      "livrable": "Livrable tangible attendu à J30 (document, outil, décision, atelier...)",
-      "kpi": "KPI précis pour mesurer le succès de cette phase"
-    },
-    {
-      "week": "J31-J60",
-      "actions": ["Action 1", "Action 2", "Action 3"],
-      "livrable": "Livrable tangible attendu à J60",
-      "kpi": "KPI de mesure"
-    },
-    {
-      "week": "J61-J90",
-      "actions": ["Action 1", "Action 2", "Action 3"],
-      "livrable": "Livrable tangible attendu à J90",
-      "kpi": "KPI de mesure"
+      "objectif": "...",
+      "actions": [
+        { "action": "...", "responsable": "...", "delai": "J1-J7" }
+      ],
+      "livrable": "...",
+      "kpi": "...",
+      "comiteValidation": "COMEX du J28",
+      "ressourcesRequises": "1 sponsor exécutif + 1 chef de projet + 0.5 ETP DRH",
+      "budgetAlloue": "50-80k MAD"
     }
   ],
-  "messageDirigeant": "Message personnel et direct au dirigeant — honnête, constructif, ancré dans les scores réels",
-  "transformCTA": "1 phrase d'accroche percutante pour proposer la mission Transform Epitaphe360"
+  "scenariosProjection": {
+    "conservateur": { "scoreCible12Mois": 0, "investissement": "300-500k MAD", "description": "...", "conditionsRealisation": ["...", "..."] },
+    "base":         { "scoreCible12Mois": 0, "investissement": "800k-1.2M MAD", "description": "...", "conditionsRealisation": ["...", "..."] },
+    "ambitieux":    { "scoreCible12Mois": 0, "investissement": "1.5-2.5M MAD", "description": "...", "conditionsRealisation": ["...", "..."] }
+  },
+  "gouvernance": {
+    "instancePilotage": "Comité Transform mensuel présidé par le DG",
+    "frequenceReporting": "Mensuel COMEX, trimestriel Conseil",
+    "sponsorExecutif": "DG ou DRH",
+    "equipeProjet": "1 chef de projet + 2 référents métiers + appui Epitaphe360",
+    "budgetTotalRecommande": "1.2-1.8M MAD sur 12 mois (incluant ressources internes)"
+  },
+  "changeManagement": {
+    "stakeholdersCritiques": [
+      { "groupe": "Managers N-1", "posture": "Sceptique", "enjeu": "...", "actionRequise": "..." }
+    ],
+    "risquesAdoption": ["...", "...", "..."],
+    "leviersAdoption": ["...", "...", "..."],
+    "planCommunicationInterne": "..."
+  },
+  "casReference": [
+    {
+      "secteur": "Industrie agroalimentaire MENA",
+      "tailleEntreprise": "320 collaborateurs · CA 180M MAD",
+      "situationDepart": "Score 38/100 — niveau Broadcast",
+      "actionsClefs": ["...", "..."],
+      "resultats": "Score 64/100 en 9 mois, ROI 3.5x, turn-over divisé par 2",
+      "duree": "9 mois"
+    }
+  ],
+  "messageDirigeant": "4-5 phrases personnelles et directes",
+  "transformCTA": "1 phrase percutante personnalisée"
 }`;
 }
 
@@ -690,12 +1109,26 @@ export async function generateAIReport(params: {
         messages: [
           {
             role: 'system',
-            content: 'Tu es un Senior Partner chez Epitaphe360, cabinet de conseil stratégique de référence en MENA. Tu analyses les résultats de diagnostic BMI 360™ et produis des rapports Intelligence™ de niveau C-suite. Ton analyse est toujours spécifique aux données fournies, jamais générique. Tu réponds UNIQUEMENT en JSON valide selon le schéma demandé — aucun texte, aucun markdown, aucune explication hors du JSON.',
+            content: `Tu es Senior Partner & Practice Leader chez Epitaphe360, cabinet de conseil stratégique tier-1 en MENA (équivalent McKinsey/BCG/Bain). Tu produis des rapports Intelligence™ vendus 10,000 USD minimum.
+
+EXIGENCES ABSOLUES :
+1. Niveau de qualité indiscernable d'un livrable McKinsey/BCG/Bain
+2. Quantification financière SYSTÉMATIQUE en MAD (dirhams marocains) avec fourchettes
+3. Business case complet pour chaque recommandation : investissement, gain annuel, payback, ROI
+4. RACI détaillée (Responsable, Imputable, Consultés, Informés)
+5. Scénarios de projection (conservateur / base / ambitieux) avec scores cibles chiffrés
+6. Cas références anonymisés mais réalistes d'entreprises MENA
+7. Méthodologies nommées (Hoshin Kanri, OKR, Kotter, ADKAR, RACI, etc.)
+8. Aucune généralité, aucune phrase copiable-collable à un autre client
+9. Style direct, factuel, sans formules creuses
+10. JSON valide UNIQUEMENT — aucun texte hors du JSON, aucun markdown, aucune explication
+
+Le client doit avoir l'impression d'avoir économisé 6 semaines de mission terrain.`,
           },
           { role: 'user', content: prompt },
         ],
-        temperature: 0.35,
-        max_tokens: 4500,
+        temperature: 0.3,
+        max_tokens: 8000,
         response_format: { type: 'json_object' },
       }),
     });

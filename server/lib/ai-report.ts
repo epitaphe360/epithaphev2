@@ -1,6 +1,8 @@
 /**
  * BMI 360™ — Générateur de rapports IA Intelligence (TIER-1 CONSULTING GRADE)
- * Modèle : OpenAI gpt-4o, max_tokens 8000, temperature 0.3
+ * Modèle principal  : Anthropic Claude Sonnet 4.5 (raisonnement business supérieur)
+ * Modèle fallback   : OpenAI gpt-4o (si Anthropic indisponible)
+ * max_tokens 8000, temperature 0.3
  * Schéma de livrable : niveau McKinsey/BCG/Bain — quantification financière, business case,
  * RACI, scénarios, change management, cas références.
  */
@@ -1079,37 +1081,9 @@ function buildFallbackReport(params: {
   };
 }
 
-export async function generateAIReport(params: {
-  toolId: string;
-  companyName?: string;
-  sector?: string;
-  companySize?: string;
-  globalScore: number;
-  maturityLevel: number;
-  pillarScores: Record<string, number>;
-}): Promise<AIReport> {
-  const apiKey = process.env.OPENAI_API_KEY;
+// ─── System prompt commun (Anthropic + OpenAI) ──────────────────────────────
 
-  if (!apiKey) {
-    console.warn('[AI Report] OPENAI_API_KEY not set — using fallback report');
-    return buildFallbackReport(params);
-  }
-
-  const prompt = buildPrompt(params);
-
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: `Tu es Senior Partner & Practice Leader chez Epitaphe360, cabinet de conseil stratégique tier-1 en MENA (équivalent McKinsey/BCG/Bain). Tu produis des rapports Intelligence™ vendus 10,000 USD minimum.
+const SYSTEM_PROMPT = `Tu es Senior Partner & Practice Leader chez Epitaphe360, cabinet de conseil stratégique tier-1 en MENA (équivalent McKinsey/BCG/Bain). Tu produis des rapports Intelligence™ vendus 10,000 USD minimum.
 
 EXIGENCES ABSOLUES :
 1. Niveau de qualité indiscernable d'un livrable McKinsey/BCG/Bain
@@ -1121,36 +1095,156 @@ EXIGENCES ABSOLUES :
 7. Méthodologies nommées (Hoshin Kanri, OKR, Kotter, ADKAR, RACI, etc.)
 8. Aucune généralité, aucune phrase copiable-collable à un autre client
 9. Style direct, factuel, sans formules creuses
-10. JSON valide UNIQUEMENT — aucun texte hors du JSON, aucun markdown, aucune explication
+10. JSON valide UNIQUEMENT — aucun texte hors du JSON, aucun markdown, aucune explication, aucun préambule, aucune balise de code. La réponse DOIT commencer par { et finir par }.
 
-Le client doit avoir l'impression d'avoir économisé 6 semaines de mission terrain.`,
-          },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 8000,
-        response_format: { type: 'json_object' },
-      }),
-    });
+Le client doit avoir l'impression d'avoir économisé 6 semaines de mission terrain.`;
 
-    if (!response.ok) {
-      const err = await response.text();
-      console.error('[AI Report] OpenAI error:', err);
-      return buildFallbackReport(params);
-    }
+// ─── Provider Anthropic Claude (PRIORITAIRE) ─────────────────────────────────
 
-    const data = await response.json() as {
-      choices: Array<{ message: { content: string } }>;
-    };
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) return buildFallbackReport(params);
+async function callAnthropic(prompt: string): Promise<{ json: string; model: string } | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
 
-    const parsed = JSON.parse(content) as AIReport;
-    parsed.generatedAt = new Date().toISOString();
-    parsed.model = 'gpt-4o';
-    return parsed;
-  } catch (err) {
-    console.error('[AI Report] Generation failed:', err);
+  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5-20250929';
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 8000,
+      temperature: 0.3,
+      system: SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: prompt + '\n\nIMPORTANT : Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ni après, sans bloc markdown ```json. Commence directement par { et termine par }.',
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    console.error('[AI Report] Anthropic error:', response.status, err);
+    return null;
+  }
+
+  const data = await response.json() as {
+    content: Array<{ type: string; text?: string }>;
+    stop_reason?: string;
+  };
+
+  const text = data.content?.find(c => c.type === 'text')?.text;
+  if (!text) {
+    console.error('[AI Report] Anthropic: empty content');
+    return null;
+  }
+
+  // Nettoyage défensif si Claude entoure quand même de markdown
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .trim();
+
+  return { json: cleaned, model };
+}
+
+// ─── Provider OpenAI (FALLBACK) ──────────────────────────────────────────────
+
+async function callOpenAI(prompt: string): Promise<{ json: string; model: string } | null> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+
+  const model = process.env.OPENAI_MODEL || 'gpt-4o';
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user',   content: prompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 8000,
+      response_format: { type: 'json_object' },
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    console.error('[AI Report] OpenAI error:', response.status, err);
+    return null;
+  }
+
+  const data = await response.json() as {
+    choices: Array<{ message: { content: string } }>;
+  };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) return null;
+
+  return { json: content, model };
+}
+
+// ─── Dispatcher principal ────────────────────────────────────────────────────
+
+export async function generateAIReport(params: {
+  toolId: string;
+  companyName?: string;
+  sector?: string;
+  companySize?: string;
+  globalScore: number;
+  maturityLevel: number;
+  pillarScores: Record<string, number>;
+}): Promise<AIReport> {
+  const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
+  const hasOpenAI    = !!process.env.OPENAI_API_KEY;
+
+  if (!hasAnthropic && !hasOpenAI) {
+    console.warn('[AI Report] No AI provider configured (ANTHROPIC_API_KEY or OPENAI_API_KEY) — using fallback report');
     return buildFallbackReport(params);
   }
+
+  const prompt = buildPrompt(params);
+
+  // Ordre des providers selon AI_PROVIDER (anthropic|openai|auto)
+  const preferred = (process.env.AI_PROVIDER || 'anthropic').toLowerCase();
+  const providers: Array<{ name: string; call: () => Promise<{ json: string; model: string } | null> }> = [];
+
+  if (preferred === 'openai') {
+    if (hasOpenAI)    providers.push({ name: 'openai',    call: () => callOpenAI(prompt) });
+    if (hasAnthropic) providers.push({ name: 'anthropic', call: () => callAnthropic(prompt) });
+  } else {
+    if (hasAnthropic) providers.push({ name: 'anthropic', call: () => callAnthropic(prompt) });
+    if (hasOpenAI)    providers.push({ name: 'openai',    call: () => callOpenAI(prompt) });
+  }
+
+  for (const provider of providers) {
+    try {
+      console.log(`[AI Report] Trying provider: ${provider.name}`);
+      const result = await provider.call();
+      if (!result) continue;
+
+      const parsed = JSON.parse(result.json) as AIReport;
+      parsed.generatedAt = new Date().toISOString();
+      parsed.model = result.model;
+      console.log(`[AI Report] ✓ Generated with ${provider.name} (${result.model})`);
+      return parsed;
+    } catch (err) {
+      console.error(`[AI Report] Provider ${provider.name} failed:`, err instanceof Error ? err.message : err);
+    }
+  }
+
+  console.warn('[AI Report] All providers failed — using fallback report');
+  return buildFallbackReport(params);
 }

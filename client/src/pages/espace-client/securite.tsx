@@ -18,7 +18,7 @@ const PUSH_CATEGORIES = [
   { id: "new_case_study",    label: "Nouvelles études de cas",           desc: "Publication d'un nouveau cas client" },
   { id: "event_invitation",  label: "Invitations événements",            desc: "Webinaires, conférences, portes ouvertes" },
   { id: "report_ready",      label: "Rapports disponibles",              desc: "Rapport mensuel ou bilan de campagne prêt" },
-  { id: "newsletter",        label: "Newsletter Epitaphe360",            desc: "Actualités RSE & funéraire" },
+  { id: "newsletter",        label: "Newsletter Epitaphe360",            desc: "Actualités marketing & tendances digitales" },
 ];
 
 // ── Changement de mot de passe ────────────────────────────────────────────────

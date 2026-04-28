@@ -120,7 +120,7 @@ function buildPDFBuffer(data: InvoiceData & {
 
     doc.fontSize(10)
       .font('Helvetica')
-      .text('Conseil & Gestion Funéraire Digitale', 50, 55)
+      .text('Agence Marketing & Communication Digitale', 50, 55)
       .text(`${data.companyInfo.companyCity} — ${data.companyInfo.companyEmail}`, 50, 68);
 
     doc.fillColor(COLOR_ACCENT)

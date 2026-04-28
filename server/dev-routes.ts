@@ -6,6 +6,17 @@ import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import { generateToken } from "./lib/auth";
 
+/** Retourne true pour toute erreur qui indique que la DB est inaccessible/bloquée */
+function isDbUnreachable(error: any): boolean {
+  const msg: string = error?.message ?? String(error);
+  const code: string = error?.code ?? '';
+  return (
+    code === 'ENOTFOUND' || code === 'ECONNREFUSED' || code === 'ECIRCUITBREAKER' ||
+    msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED') || msg.includes('ECIRCUITBREAKER') ||
+    msg.includes('too many authentication failures') || msg.includes('temporarily blocked')
+  );
+}
+
 export function registerDevRoutes(app: Express) {
   // Guard: routes dev désactivées sauf en development ou si ENABLE_DEV_ROUTES=true
   if (process.env.NODE_ENV !== 'development' && !process.env.ENABLE_DEV_ROUTES) return;
@@ -67,8 +78,7 @@ export function registerDevRoutes(app: Express) {
       res.json({ message: "Base de donnees peuplee avec succes ! Les utilisateurs tests et donnees d'audit sont prets." });
     } catch (error: any) {
       const msg = error?.message ?? String(error);
-      const code = error?.code ?? '';
-      if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED')) {
+      if (isDbUnreachable(error)) {
         return res.json({ 
           message: "[DEV] Seed données test (DB inaccessible — fallback mode)",
           _dev: true,
@@ -111,8 +121,7 @@ export function registerDevRoutes(app: Express) {
       res.json({ message: "Compte client test créé : client@test.com / client123" });
     } catch (error: any) {
       const msg = error?.message ?? String(error);
-      const code = error?.code ?? '';
-      if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED')) {
+      if (isDbUnreachable(error)) {
         return res.json({ 
           message: "[DEV] Compte client test créé (DB inaccessible — fallback) : client@test.com / client123",
           _dev: true,
@@ -174,9 +183,8 @@ export function registerDevRoutes(app: Express) {
       });
     } catch (error: any) {
       const msg = error?.message ?? String(error);
-      const code = error?.code ?? '';
       // DB inaccessible en dev → retourner un token de dev fictif
-      if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED')) {
+      if (isDbUnreachable(error)) {
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) return res.status(503).json({ error: 'JWT_SECRET non configuré' });
         const devToken = jwt.sign(
@@ -221,9 +229,8 @@ export function registerDevRoutes(app: Express) {
       res.json({ token, user: userData });
     } catch (error: any) {
       const msg = error?.message ?? String(error);
-      const code = error?.code ?? '';
       // DB inaccessible en dev → retourner un token de dev fictif
-      if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED')) {
+      if (isDbUnreachable(error)) {
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) return res.status(503).json({ error: 'JWT_SECRET non configuré' });
         const devToken = jwt.sign(

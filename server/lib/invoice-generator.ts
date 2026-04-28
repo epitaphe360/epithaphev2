@@ -14,9 +14,38 @@
 
 import PDFDocument from 'pdfkit';
 import { db } from '../db';
-import { invoices, payments } from '../../shared/schema';
+import { invoices, payments, settings } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
 import { sendMail } from './email';
+
+/** Infos société lues depuis la table settings (group: 'invoice') */
+interface CompanyInfo {
+  companyName:   string;
+  companyCity:   string;
+  companyEmail:  string;
+  rc:            string;
+  ice:           string;
+  if_number:     string;
+  payment_terms: string;
+}
+
+/** Charger les paramètres société depuis la DB */
+async function loadCompanyInfo(): Promise<CompanyInfo> {
+  const rows = await db.select().from(settings).where(eq(settings.group, 'invoice'));
+  const d: Record<string, string> = {};
+  for (const row of rows) {
+    d[row.key] = row.value ?? '';
+  }
+  return {
+    companyName:   d.companyName   || 'Epitaphe 360',
+    companyCity:   d.companyCity   || 'Casablanca, Maroc',
+    companyEmail:  d.companyEmail  || 'contact@epitaphe360.com',
+    rc:            d.rc            || '',
+    ice:           d.ice           || '',
+    if_number:     d.if_number     || '',
+    payment_terms: d.payment_terms || 'Paiement immédiat',
+  };
+}
 
 // Couleurs Epitaphe 360
 const COLOR_PRIMARY  = '#1a1a2e';  // Bleu nuit
@@ -66,9 +95,10 @@ export async function generateInvoiceNumber(): Promise<string> {
 
 /** Générer le PDF de la facture en Buffer */
 function buildPDFBuffer(data: InvoiceData & {
-  amountTVA: number;
-  amountTTC: number;
-  issuedAt:  Date;
+  amountTVA:   number;
+  amountTTC:   number;
+  issuedAt:    Date;
+  companyInfo: CompanyInfo;
 }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
@@ -86,12 +116,12 @@ function buildPDFBuffer(data: InvoiceData & {
     doc.fillColor('#ffffff')
       .fontSize(24)
       .font('Helvetica-Bold')
-      .text('Epitaphe 360', 50, 25);
+      .text(data.companyInfo.companyName, 50, 25);
 
     doc.fontSize(10)
       .font('Helvetica')
       .text('Conseil & Gestion Funéraire Digitale', 50, 55)
-      .text('Casablanca, Maroc — contact@epitaphe360.com', 50, 68);
+      .text(`${data.companyInfo.companyCity} — ${data.companyInfo.companyEmail}`, 50, 68);
 
     doc.fillColor(COLOR_ACCENT)
       .fontSize(28)
@@ -117,7 +147,7 @@ function buildPDFBuffer(data: InvoiceData & {
     doc.font('Helvetica-Bold')
       .text('Condition de paiement :', 50, startY + 35);
     doc.font('Helvetica')
-      .text('Paiement immédiat', 50, startY + 50);
+      .text(data.companyInfo.payment_terms, 50, startY + 50);
 
     // Bloc droit : infos client
     doc.rect(doc.page.width - 250, startY - 10, 200, 95)
@@ -186,10 +216,12 @@ function buildPDFBuffer(data: InvoiceData & {
     doc.rect(0, footerY, doc.page.width, 60).fill(COLOR_LIGHT);
 
     doc.fillColor(COLOR_MUTED).fontSize(8).font('Helvetica');
-    doc.text(
-      'Epitaphe 360 SARL — RC : xxxxxxxxx — ICE : xxxxxxxxxxxxxxxxx — IF : xxxxxxxx',
-      50, footerY + 10, { align: 'center', width: W },
-    );
+    const legalLine = [data.companyInfo.companyName,
+      data.companyInfo.rc  ? `RC : ${data.companyInfo.rc}`   : null,
+      data.companyInfo.ice ? `ICE : ${data.companyInfo.ice}` : null,
+      data.companyInfo.if_number ? `IF : ${data.companyInfo.if_number}` : null,
+    ].filter(Boolean).join(' — ');
+    doc.text(legalLine, 50, footerY + 10, { align: 'center', width: W });
     doc.text(
       `Cette facture est générée automatiquement. TVA à 20% conformément à la législation marocaine.`,
       50, footerY + 25, { align: 'center', width: W },
@@ -213,12 +245,16 @@ export async function createAndSendInvoice(data: InvoiceData): Promise<InvoiceRe
   const issuedAt  = new Date();
   const currency  = data.currency ?? 'MAD';
 
+  // Charger la configuration société depuis la DB
+  const companyInfo = await loadCompanyInfo();
+
   // Générer le PDF
   const pdfBuffer = await buildPDFBuffer({
     ...data,
     amountTVA,
     amountTTC,
     issuedAt,
+    companyInfo,
   });
   const pdfBase64 = pdfBuffer.toString('base64');
 

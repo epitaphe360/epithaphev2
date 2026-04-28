@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { ContextualCta } from "@/components/contextual-cta";
 import { RevealSection } from "@/components/reveal-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { useCmsPage } from "@/hooks/useCmsPage";
 
 const services = [
   {
@@ -44,6 +45,7 @@ const differentiators = [
 ];
 
 export default function ArchitectureDeMarqueHub() {
+  const cmsContent = useCmsPage('architecture-de-marque');
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
@@ -52,44 +54,23 @@ export default function ArchitectureDeMarqueHub() {
         canonicalPath="/architecture-de-marque"
       />
       <Navigation />
-      <Breadcrumbs />
       <main>
+        {cmsContent ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+        ) : (<>
         {/* Hero */}
-        <section className="relative py-20 md:py-28 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-                <span className="inline-block bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-5">
-                  Architecture de Marque
-                </span>
-                <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-5 leading-tight">
-                  Construisez une marque qui <span className="text-primary">inspire la confiance</span>
-                </h1>
-                <p className="text-muted-foreground text-lg mb-8">
-                  De votre identité employeur à vos espaces client, Epitaphe 360 déploie votre marque avec cohérence, impact et authenticité.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link href="/contact/brief">
-                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                      className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
-                      Déposer un brief <ArrowRight className="w-4 h-4" />
-                    </motion.button>
-                  </Link>
-                  <Link href="/outils/vigilance-score">
-                    <button className="px-6 py-3 rounded-xl border border-border text-foreground font-semibold text-sm hover:border-primary hover:text-primary transition-colors">
-                      Tester mon score QHSE
-                    </button>
-                  </Link>
-                </div>
-              </motion.div>
-              <RevealSection direction="left" className="hidden md:block">
-                <div className="grid grid-cols-2 gap-3">
-                  <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80" alt="Espace de travail moderne" className="rounded-2xl object-cover h-48 w-full" />
-                  <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&q=80" alt="Bureau collaboratif" className="rounded-2xl object-cover h-48 w-full mt-6" />
-                </div>
-              </RevealSection>
-            </div>
+        <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1600&q=80')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+          <div className="relative z-10 text-center px-4">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+              <span className="inline-block bg-primary px-4 py-2">Architecture</span>
+              <br />
+              <span className="inline-block bg-primary px-4 py-2 mt-2">de Marque</span>
+            </motion.h1>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">
+              Marque employeur, QHSE & expérience client — construisez une marque qui inspire la confiance
+            </motion.p>
           </div>
         </section>
 
@@ -165,6 +146,7 @@ export default function ArchitectureDeMarqueHub() {
             </RevealSection>
           </div>
         </section>
+        </>)}
       </main>
       <ContextualCta pageKey="architecture-de-marque" />
       <Footer />

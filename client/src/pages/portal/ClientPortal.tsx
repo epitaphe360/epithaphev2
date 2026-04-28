@@ -5,6 +5,7 @@ import { FileText, Receipt, User, LogOut, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { PageMeta } from "@/components/seo/page-meta";
 
 export default function ClientPortal() {
   const [reports, setReports] = useState<any[]>([]);
@@ -33,6 +34,12 @@ export default function ClientPortal() {
 
   return (
     <>
+      <PageMeta
+        title="Portail Client"
+        description="Accédez à vos rapports BMI 360™ et vos factures depuis votre espace client Epitaphe 360."
+        canonicalPath="/portal"
+        noIndex
+      />
       <Navigation />
       <div className="min-h-screen bg-zinc-50 pt-24 pb-12">
       {/* Header Portail */}

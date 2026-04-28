@@ -63,13 +63,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function Impression() {
-  const { data } = useServicePage("la-fabrique/impression", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("la-fabrique/impression", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Impression Grand Format — La Fabrique | Epitaphe 360"
-        description="Bâches, adhésifs, kakemonos, toiles rétroclaireées. Impression haute définition 1440 dpi jusqu'à 5m de large, délai express 24h."
+        title={seoTitle || "Impression Grand Format — La Fabrique | Epitaphe 360"}
+        description={seoDescription || "Bâches, adhésifs, kakemonos, toiles rétroclaireées. Impression haute définition 1440 dpi jusqu'à 5m de large, délai express 24h."}
         canonicalPath="/la-fabrique/impression"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

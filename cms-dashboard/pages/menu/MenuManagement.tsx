@@ -25,9 +25,10 @@ export const MenuManagement: React.FC = () => {
   const loadNavigations = async () => {
     try {
       const data = await get('/admin/navigations');
-      setNavigations(data);
+      setNavigations(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erreur chargement navigations:', error);
+      setNavigations([]);
     }
   };
 
@@ -151,7 +152,7 @@ export const MenuManagement: React.FC = () => {
       key: 'links',
       header: 'Liens',
       render: (nav: NavigationStructure) => (
-        <Badge variant="secondary">{nav.links.length} liens</Badge>
+        <Badge variant="secondary">{(nav.links ?? []).length} liens</Badge>
       )
     },
     {

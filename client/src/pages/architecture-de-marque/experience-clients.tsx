@@ -78,13 +78,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function ExperienceClients() {
-  const { data } = useServicePage("architecture-de-marque/experience-clients", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("architecture-de-marque/experience-clients", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Expérience Clients — Architecture de Marque | Epitaphe 360"
-        description="Concevez chaque point de contact pour une expérience de marque cohérente et mémorable. Journey mapping, design sensoriel, digitalisation."
+        title={seoTitle || "Expérience Clients — Architecture de Marque | Epitaphe 360"}
+        description={seoDescription || "Concevez chaque point de contact pour une expérience de marque cohérente et mémorable. Journey mapping, design sensoriel, digitalisation."}
         canonicalPath="/architecture-de-marque/experience-clients"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

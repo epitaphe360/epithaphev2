@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
+import { PageMeta } from '@/components/seo/page-meta';
 
 const DEFAULT_QUESTIONS = [
   { id: 'q1', text: "Les collaborateurs sont informes des decisions strategiques en temps reel." },
@@ -27,6 +28,12 @@ export default function CommPulsePage() {
 
   return (
     <>
+      <PageMeta
+        title="CommPulse™ — Scoring Communication Interne"
+        description="Évaluez la maturité de votre communication interne en 2 minutes. Outil de diagnostic Epitaphe 360."
+        canonicalPath="/tools/commpulse"
+        noIndex
+      />
       <Navigation />
       <ScoringForm
         toolId="commpulse"

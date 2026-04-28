@@ -15,9 +15,10 @@ import { MediaLibrary } from './pages/MediaLibrary';
 import { ArticlesList, ArticleForm } from './pages/articles';
 import { EventsList, EventForm } from './pages/events';
 import { PagesList, PageForm } from './pages/pages';
+import HomeSectionsEditor from './pages/pages/HomeSectionsEditor';
 import { CategoriesList } from './pages/categories';
 import { UsersList, UserForm } from './pages/users';
-import { GeneralSettings, SEOSettings, IntegrationSettings } from './pages/settings';
+import { GeneralSettings, SEOSettings, IntegrationSettings, InvoiceSettings } from './pages/settings';
 import { VisualEditorManagement } from './pages/plasmic';
 import GrapesJSEditor from './pages/plasmic/GrapesJSEditor';
 import { ServicesList, ServiceForm } from './pages/services';
@@ -35,6 +36,24 @@ import MenuManagement from './pages/menu/MenuManagement';
 import { ClientAccountsPage } from './pages/client-accounts/ClientAccountsPage';
 import { AuditLogsPage } from './pages/audit-logs/AuditLogsPage';
 import { FacturationPage } from './pages/facturation/FacturationPage';
+
+// Pages additionnelles (modules métier)
+import DevisList from './pages/devis/DevisList';
+import HomepageSettings from './pages/homepage/HomepageSettings';
+import PaymentsList from './pages/payments/PaymentsList';
+import PlansList from './pages/plans/PlansList';
+import ScoringResultsList from './pages/scoring/ScoringResultsList';
+import FunnelPage from './pages/scoring/FunnelPage';
+import ConsultationsPage from './pages/scoring/ConsultationsPage';
+import ScoringPromptSettings from './pages/scoring/ScoringPromptSettings';
+import SolutionManagement from './pages/solutions/SolutionManagement';
+import PageManagement from './pages/website/PageManagement';
+import ClientsList from './pages/clients/ClientsList';
+import ClientProjectsAdmin from './pages/clients/ClientProjectsAdmin';
+import BriefFormEditor from './pages/forms/BriefFormEditor';
+import ScoringQuestionsEditor from './pages/forms/ScoringQuestionsEditor';
+import AppearanceSettings from './pages/appearance/AppearanceSettings';
+import BlogManagement from './pages/blog/BlogManagement';
 
 // Auth guard component
 interface ProtectedRouteProps {
@@ -86,6 +105,8 @@ export const getDashboardRoutes = (
         { path: 'events/:id/edit',     element: <EventForm /> },
 
         { path: 'pages',               element: <PagesList /> },
+        { path: 'pages/home/sections', element: <HomeSectionsEditor /> },
+        { path: 'pages/:pageSlug/sections', element: <HomeSectionsEditor /> },
         { path: 'pages/new',           element: <PageForm /> },
         { path: 'pages/:id/edit',      element: <PageForm /> },
 
@@ -125,8 +146,31 @@ export const getDashboardRoutes = (
 
         // ── Espace Client ──────────────────────────────
         { path: 'client-accounts',     element: <ClientAccountsPage /> },
-        // ── Facturation ────────────────────────────────────────
+        { path: 'clients',             element: <ClientsList /> },
+        { path: 'clients/projects',    element: <ClientProjectsAdmin /> },
+        // ── Facturation & Commerce ─────────────────────────────
         { path: 'facturation',         element: <FacturationPage /> },
+        { path: 'devis',               element: <DevisList /> },
+        { path: 'payments',            element: <PaymentsList /> },
+        { path: 'plans',               element: <PlansList /> },
+        // ── Scoring / Funnel / Consultations ───────────────────
+        { path: 'scoring',                element: <ScoringResultsList /> },
+        { path: 'scoring/results',        element: <ScoringResultsList /> },
+        { path: 'scoring/funnel',         element: <FunnelPage /> },
+        { path: 'scoring/consultations',  element: <ConsultationsPage /> },
+        { path: 'scoring/prompts',        element: <ScoringPromptSettings /> },
+        { path: 'bmi360/funnel',          element: <FunnelPage /> },
+        { path: 'bmi360/consultations',   element: <ConsultationsPage /> },
+        { path: 'bmi360/prompts',         element: <ScoringPromptSettings /> },
+        // ── Site / Contenu ─────────────────────────────────────
+        { path: 'homepage',            element: <HomepageSettings /> },
+        { path: 'website',             element: <PageManagement /> },
+        { path: 'solutions',           element: <SolutionManagement /> },
+        { path: 'blog',                element: <BlogManagement /> },
+        { path: 'appearance',          element: <AppearanceSettings /> },
+        // ── Formulaires (éditeurs) ────────────────────────────
+        { path: 'forms/brief',         element: <BriefFormEditor /> },
+        { path: 'forms/scoring',       element: <ScoringQuestionsEditor /> },
         // ── Administration ─────────────────────────────
         { path: 'audit-logs',          element: <AuditLogsPage /> },
         { path: 'categories',          element: <CategoriesList /> },
@@ -139,6 +183,7 @@ export const getDashboardRoutes = (
         { path: 'settings/general',       element: <GeneralSettings /> },
         { path: 'settings/seo',           element: <SEOSettings /> },
         { path: 'settings/integrations',  element: <IntegrationSettings /> },
+        { path: 'settings/invoice',       element: <InvoiceSettings /> },
       ],
     },
   ];

@@ -11,7 +11,7 @@ const fallbackData: ServicePageData = {
   heroTitle: "Branding de Siège",
   heroSubtitle: "Transformez votre siège social en manifeste de marque — un espace qui inspire, engage et reflète votre identité à chaque coin de couloir.",
   heroTag: "La Fabrique 360",
-  heroImage: "https://epitaphe.ma/wp-content/uploads/2020/05/menuiserie.jpg",
+  heroImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&q=80",
   heroCta: { label: "Transformer mon siège", href: "/contact/brief" },
 
   pitchTitle: "Votre siège social est votre première publicité",
@@ -78,13 +78,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function BrandingSiege() {
-  const { data } = useServicePage("la-fabrique/branding-siege", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("la-fabrique/branding-siege", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Branding de Siège — La Fabrique 360 | Epitaphe 360"
-        description="Transformez votre siège social en manifeste de marque. Habillage entrée, murs identitaires, signalétique, salles de réunion brandées — fabriqué à Casablanca."
+        title={seoTitle || "Branding de Siège — La Fabrique 360 | Epitaphe 360"}
+        description={seoDescription || "Transformez votre siège social en manifeste de marque. Habillage entrée, murs identitaires, signalétique, salles de réunion brandées — fabriqué à Casablanca."}
         canonicalPath="/la-fabrique/branding-siege"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

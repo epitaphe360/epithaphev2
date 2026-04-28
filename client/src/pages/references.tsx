@@ -11,9 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PageMeta } from "@/components/seo/page-meta";
+import { BreadcrumbSchema } from "@/components/seo/schema-org";
 import { StatsSection } from "@/components/stats-section";
 import { RevealSection } from "@/components/reveal-section";
 import { ContextualCta } from "@/components/contextual-cta";
+import { useCmsPage } from "@/hooks/useCmsPage";
 import { ArrowRight, Filter, Building2, TrendingUp, Calendar } from "lucide-react";
 
 interface CaseStudy {
@@ -117,6 +119,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
 
 export default function ReferencesPage() {
   const [activeSector, setActiveSector] = useState("Tous");
+  const cmsContent = useCmsPage('nos-references');
   const ALL_SECTORS = ["Tous", ...clientCategories.map(c => c.sector)];
 
   const { data: caseStudiesData } = useQuery<{ data: CaseStudy[] }>({
@@ -134,11 +137,19 @@ export default function ReferencesPage() {
     <div className="min-h-screen bg-background">
       <PageMeta
         title="Nos Références Clients — Epitaphe 360"
-        description="Plus de 500 entreprises nous font confiance. Découvrez nos références et Études de cas par secteur."
+        description="Plus de 500 entreprises nous font confiance. Découvrez nos références et études de cas par secteur d'activité au Maroc."
         canonicalPath="/nos-references"
+        keywords="références clients Maroc, études de cas communication, portfolio agence Casablanca"
       />
+      <BreadcrumbSchema items={[
+        { name: "Accueil", url: "/" },
+        { name: "Nos Références", url: "/nos-references" },
+      ]} />
       <Navigation />
 
+      {cmsContent ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+      ) : (<>
       <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://epitaphe.ma/wp-content/uploads/2020/05/nos-references-clients.jpg')" }} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-background" />
@@ -210,6 +221,7 @@ export default function ReferencesPage() {
           </AnimatePresence>
         </div>
       </section>
+      </>)}
 
       <StatsSection />
       <ContextualCta pageKey="evenements" />

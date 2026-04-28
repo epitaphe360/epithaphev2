@@ -63,13 +63,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function Signaletique() {
-  const { data } = useServicePage("la-fabrique/signaletique", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("la-fabrique/signaletique", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Signalétique Professionnelle — La Fabrique | Epitaphe 360"
-        description="Totéms lumineux, enseignes, wayfinding et signalétique directionnelle. Déployez votre identité de marque dans tous vos espaces."
+        title={seoTitle || "Signalétique Professionnelle — La Fabrique | Epitaphe 360"}
+        description={seoDescription || "Totéms lumineux, enseignes, wayfinding et signalétique directionnelle. Déployez votre identité de marque dans tous vos espaces."}
         canonicalPath="/la-fabrique/signaletique"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

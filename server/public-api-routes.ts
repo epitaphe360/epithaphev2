@@ -555,14 +555,34 @@ export function registerPublicApiRoutes(app: Express): void {
         { loc: "/architecture-de-marque/experience-clients", priority: "0.8", changefreq: "monthly" },
         // La Fabrique
         { loc: "/la-fabrique",               priority: "0.9", changefreq: "monthly" },
+        { loc: "/la-fabrique/branding-siege",  priority: "0.8", changefreq: "monthly" },
         { loc: "/la-fabrique/impression",    priority: "0.8", changefreq: "monthly" },
         { loc: "/la-fabrique/menuiserie",    priority: "0.8", changefreq: "monthly" },
         { loc: "/la-fabrique/signaletique",  priority: "0.8", changefreq: "monthly" },
         { loc: "/la-fabrique/amenagement",   priority: "0.8", changefreq: "monthly" },
-        // Outils
-        { loc: "/outils/vigilance-score",       priority: "0.9", changefreq: "monthly" },
-        { loc: "/outils/calculateur-fabrique",  priority: "0.8", changefreq: "monthly" },
+        // Pages institutionnelles
+        { loc: "/a-propos",              priority: "0.8", changefreq: "monthly" },
+        { loc: "/faq",                   priority: "0.8", changefreq: "monthly" },
+        { loc: "/solution",              priority: "0.7", changefreq: "monthly" },
+        { loc: "/mentions-legales",      priority: "0.3", changefreq: "yearly"  },
+        { loc: "/politique-confidentialite", priority: "0.3", changefreq: "yearly" },
+        // Nos Pôles
+        { loc: "/nos-poles",             priority: "0.9", changefreq: "monthly" },
+        { loc: "/nos-poles/com-interne", priority: "0.8", changefreq: "monthly" },
+        { loc: "/nos-poles/com-rse",     priority: "0.8", changefreq: "monthly" },
+        // Outils BMI 360™
+        { loc: "/outils",                        priority: "0.9", changefreq: "monthly" },
+        { loc: "/outils/vigilance-score",        priority: "0.9", changefreq: "monthly" },
+        { loc: "/outils/calculateur-fabrique",   priority: "0.8", changefreq: "monthly" },
         { loc: "/outils/stand-viewer",           priority: "0.7", changefreq: "monthly" },
+        { loc: "/outils/bmi360",                 priority: "0.9", changefreq: "monthly" },
+        { loc: "/outils/commpulse",              priority: "0.9", changefreq: "monthly" },
+        { loc: "/outils/talentprint",            priority: "0.9", changefreq: "monthly" },
+        { loc: "/outils/impacttrace",            priority: "0.8", changefreq: "monthly" },
+        { loc: "/outils/safesignal",             priority: "0.8", changefreq: "monthly" },
+        { loc: "/outils/eventimpact",            priority: "0.8", changefreq: "monthly" },
+        { loc: "/outils/spacescore",             priority: "0.8", changefreq: "monthly" },
+        { loc: "/outils/finnarrative",           priority: "0.8", changefreq: "monthly" },
       ];
 
       for (const page of staticPages) {
@@ -638,32 +658,100 @@ export function registerPublicApiRoutes(app: Express): void {
       if (isProduction) {
         // Production: Allow crawling with some restrictions
         content = `# Epitaphe 360 - Robots.txt
-# https://epitaphe360.com
+# https://www.epitaphe360.ma
 
+# ── Moteurs de recherche classiques ──────────────────────────
 User-agent: *
 Allow: /
-
-# Disallow admin and API routes
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
 Disallow: /api/admin/
-
-# Disallow private pages
 Disallow: /dashboard
 Disallow: /login
 Disallow: /register
-Disallow: /profile
-
-# Disallow search and filter pages to avoid duplicate content
+Disallow: /espace-client/projets/
+Disallow: /espace-client/documents
+Disallow: /espace-client/securite
 Disallow: /*?*sort=
 Disallow: /*?*filter=
-Disallow: /*?*page=
 
-# Sitemap location
+# ── OpenAI / ChatGPT Search (GPTBot, OAI-SearchBot) ──────────
+User-agent: GPTBot
+Allow: /
+Allow: /blog/
+Allow: /outils/
+Allow: /evenements/
+Allow: /architecture-de-marque/
+Allow: /la-fabrique/
+Allow: /nos-references
+Allow: /a-propos
+Allow: /faq
+Disallow: /admin/
+Disallow: /api/
+Disallow: /espace-client/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /espace-client/
+
+# ── Perplexity ───────────────────────────────────────────────
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /espace-client/
+
+# ── Anthropic / Claude ───────────────────────────────────────
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /espace-client/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /espace-client/
+
+# ── Google (AI Overviews + Search) ───────────────────────────
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+# ── Bing / Copilot ───────────────────────────────────────────
+User-agent: Bingbot
+Allow: /
+
+# ── Meta AI ──────────────────────────────────────────────────
+User-agent: FacebookBot
+Allow: /
+
+# ── Apple ────────────────────────────────────────────────────
+User-agent: Applebot
+Allow: /
+
+# ── Cohere AI ────────────────────────────────────────────────
+User-agent: cohere-ai
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# ── You.com ──────────────────────────────────────────────────
+User-agent: YouBot
+Allow: /
+Disallow: /admin/
+
+# ── Sitemap et ressources LLM ────────────────────────────────
 Sitemap: ${baseUrl}/sitemap.xml
+# LLMs: ${baseUrl}/llms.txt
 
-# Crawl-delay (optional, some crawlers respect this)
+# Crawl-delay poli
 Crawl-delay: 1
 `;
       } else {
@@ -685,6 +773,125 @@ Disallow: /
     } catch (error) {
       console.error("Robots.txt generation error:", error);
       res.status(500).send("Error generating robots.txt");
+    }
+  });
+
+  // ========================================
+  // LLMS.TXT — AI Search Engine Discovery
+  // ========================================
+
+  /**
+   * GET /llms.txt
+   * Standard llms.txt pour ChatGPT Search, Perplexity, Claude, Gemini, Bing Copilot, etc.
+   * Référence: https://llmstxt.org/
+   */
+  app.get("/llms.txt", async (_req: Request, res: Response) => {
+    const baseUrl = process.env.SITE_URL || "https://www.epitaphe360.ma";
+
+    const content = `# Epitaphe 360
+
+> Agence de communication stratégique 360° basée à Casablanca, Maroc. Fondée en 2004, Epitaphe 360 accompagne les organisations dans leurs projets d'événementiel corporate, d'architecture de marque, de signalétique et de communication QHSE / RSE à travers les 12 régions du Maroc.
+
+## Identité & Positionnement
+
+- **Nom** : Epitaphe 360 (Epitaphe360)
+- **Type** : Agence de communication full-service (360°)
+- **Fondation** : 2004
+- **Siège** : Rez de chaussée, Immeuble 7-9, Rue Bussang, Maarif, Casablanca, Maroc
+- **Contact** : contact@epitaphe360.ma | +212 662 744 741
+- **Géolocalisation** : 33.5731°N, 7.5898°W (Grand Casablanca, MA-06)
+- **Tagline** : Structuring influence. Securing growth.
+
+## Expertises principales
+
+1. **Événementiel corporate** — conventions, kick-offs, roadshows, salons, soirées de gala
+2. **Architecture de marque** — marque employeur, communication QHSE, expérience client
+3. **La Fabrique 360** — production in-house : signalétique, impression, menuiserie, aménagement d'espaces, branding siège
+4. **BMI 360™ Scoring Intelligence** — 8 outils d'évaluation communicationnelle propriétaires
+5. **Communication RSE / QHSE** — conseil et production pour les obligations réglementaires
+
+## Outils BMI 360™ (Suite de scoring propriétaire)
+
+| Outil | Description |
+|---|---|
+| CommPulse™ | Score communication interne (0–100) |
+| TalentPrint™ | Score marque employeur |
+| SafeSignal™ | Score communication QHSE |
+| ImpactTrace™ | Score impact RSE |
+| EventImpact™ | Score impact événementiel |
+| SpaceScore™ | Score architecture & signalétique |
+| FinNarrative™ | Score communication financière |
+| BMI 360™ | Score global Brand Marketing Intelligence |
+
+## Pages clés
+
+- [Accueil](${baseUrl}/)
+- [Nos Références](${baseUrl}/nos-references)
+- [Événements](${baseUrl}/evenements)
+- [Architecture de Marque](${baseUrl}/architecture-de-marque)
+- [La Fabrique 360](${baseUrl}/la-fabrique)
+- [Nos Pôles](${baseUrl}/nos-poles)
+- [Outils BMI 360™](${baseUrl}/outils/bmi360)
+- [Blog & Ressources](${baseUrl}/blog)
+- [Contact](${baseUrl}/contact)
+- [FAQ](${baseUrl}/faq)
+- [À Propos](${baseUrl}/a-propos)
+
+## Ressources structurées
+
+- [Sitemap XML](${baseUrl}/sitemap.xml)
+- [RSS Blog](${baseUrl}/rss.xml)
+- [Demande de brief](${baseUrl}/contact/brief)
+- [Espace Client](${baseUrl}/espace-client)
+
+## Références clients (secteurs)
+
+Banque & Finance (Attijariwafa, CIH, BCP), Industrie & Énergie (OCP Group, ONEE, TotalEnergies), Télécommunications (Maroc Telecom, Orange), Grande Distribution (Label'Vie, Carrefour Maroc), Immobilier (Alliances, ADDOHA), Pharma, Institutions publiques (ministères, régions).
+
+## Réseaux sociaux
+
+- LinkedIn : https://www.linkedin.com/company/epitaphe360
+- Instagram : https://www.instagram.com/epitaphe360
+- Facebook : https://www.facebook.com/epitaphe360
+`;
+
+    res.set("Content-Type", "text/plain; charset=utf-8");
+    res.set("Cache-Control", "public, max-age=86400");
+    res.send(content);
+  });
+
+  /**
+   * GET /llms-full.txt
+   * Version étendue avec contenu complet du blog pour les LLMs
+   */
+  app.get("/llms-full.txt", async (_req: Request, res: Response) => {
+    const baseUrl = process.env.SITE_URL || "https://www.epitaphe360.ma";
+
+    try {
+      // Récupère les 20 derniers articles publiés
+      const recentArticles = await db
+        .select({ title: articles.title, slug: articles.slug, excerpt: articles.excerpt })
+        .from(articles)
+        .where(eq(articles.status, "PUBLISHED"))
+        .orderBy(desc(articles.createdAt))
+        .limit(20);
+
+      let content = `# Epitaphe 360 — Contenu complet pour LLMs\n\n`;
+      content += `Source principale: ${baseUrl}/llms.txt\n\n`;
+      content += `## Articles de blog récents\n\n`;
+
+      for (const art of recentArticles) {
+        content += `### ${art.title}\n`;
+        content += `URL: ${baseUrl}/blog/${art.slug}\n`;
+        if (art.excerpt) content += `${art.excerpt}\n`;
+        content += "\n";
+      }
+
+      res.set("Content-Type", "text/plain; charset=utf-8");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(content);
+    } catch {
+      res.status(500).send("Error generating llms-full.txt");
     }
   });
 
@@ -964,7 +1171,7 @@ Disallow: /
    * POST /api/client/change-password
    * Changer son propre mot de passe (client authentifié)
    */
-  app.post("/api/client/change-password", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.post("/api/client/change-password", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const { currentPassword, newPassword } = req.body as { currentPassword?: string; newPassword?: string };
@@ -1044,7 +1251,7 @@ Disallow: /
    * GET /api/client/me
    * Retourne les infos du client connecté
    */
-  app.get("/api/client/me", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.get("/api/client/me", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const [account] = await db
@@ -1072,7 +1279,7 @@ Disallow: /
    * GET /api/client/projects
    * Liste les projets du client avec jalons + documents
    */
-  app.get("/api/client/projects", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.get("/api/client/projects", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
 
@@ -1126,7 +1333,7 @@ Disallow: /
    * GET /api/client/projects/:id
    * Détail d'un projet avec tous ses messages
    */
-  app.get("/api/client/projects/:id", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.get("/api/client/projects/:id", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const projectId = parseInt(req.params.id, 10);
@@ -1184,7 +1391,7 @@ Disallow: /
    * POST /api/client/messages
    * Envoyer un message sur un projet
    */
-  app.post("/api/client/messages", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.post("/api/client/messages", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const { projectId, content } = req.body as { projectId?: number; content?: string };
@@ -1249,7 +1456,7 @@ Disallow: /
     },
   });
 
-  app.post("/api/client/messages/upload", requireClientAuth as any, clientUpload.single("file"), (req: Request, res: Response) => {
+  app.post("/api/client/messages/upload", requireClientAuth, clientUpload.single("file"), (req: Request, res: Response) => {
     if (!req.file) return res.status(400).json({ error: "Aucun fichier valide" });
     const url = `/uploads/client-messages/${req.file.filename}`;
     return res.json({ url, name: req.file.originalname, size: req.file.size, mime: req.file.mimetype });
@@ -1259,7 +1466,7 @@ Disallow: /
    * PUT /api/client/messages/read
    * Marquer les messages agence d'un projet comme lus par le client
    */
-  app.put("/api/client/messages/read", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.put("/api/client/messages/read", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const { projectId } = req.body as { projectId?: number };
@@ -1461,7 +1668,7 @@ Disallow: /
    * Générer un challenge pour l'enregistrement biométrique
    * (nécessite JWT client)
    */
-  app.post("/api/client/webauthn/register-challenge", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.post("/api/client/webauthn/register-challenge", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const [account] = await db
@@ -1507,7 +1714,7 @@ Disallow: /
    * POST /api/client/webauthn/register-verify
    * Vérifier et stocker le credential biométrique
    */
-  app.post("/api/client/webauthn/register-verify", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.post("/api/client/webauthn/register-verify", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const response = req.body;
@@ -1678,7 +1885,7 @@ Disallow: /
    * GET /api/client/webauthn/credentials
    * Liste les appareils biométriques du client connecté
    */
-  app.get("/api/client/webauthn/credentials", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.get("/api/client/webauthn/credentials", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const creds = await db
@@ -1702,7 +1909,7 @@ Disallow: /
    * DELETE /api/client/webauthn/credentials/:id
    * Supprimer un appareil biométrique
    */
-  app.delete("/api/client/webauthn/credentials/:id", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.delete("/api/client/webauthn/credentials/:id", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const clientId = (req as any).clientId as number;
       const credId = parseInt(req.params.id, 10);
@@ -1946,7 +2153,7 @@ Disallow: /
    * Ressources client (access_level IN ['public', 'lead', 'client'])
    * Requiert JWT client
    */
-  app.get("/api/client/resources", requireClientAuth as any, async (_req: Request, res: Response) => {
+  app.get("/api/client/resources", requireClientAuth, async (_req: Request, res: Response) => {
     try {
       const rows = await db
         .select()
@@ -1965,7 +2172,7 @@ Disallow: /
    * POST /api/client/resources/:id/download
    * Incrémenter le compteur de téléchargement
    */
-  app.post("/api/client/resources/:id/download", requireClientAuth as any, async (req: Request, res: Response) => {
+  app.post("/api/client/resources/:id/download", requireClientAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10);
       const [resource] = await db.select().from(resources).where(eq(resources.id, id)).limit(1);

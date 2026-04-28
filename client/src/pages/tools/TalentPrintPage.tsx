@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
+import { PageMeta } from '@/components/seo/page-meta';
 
 const DEFAULT_QUESTIONS = [
   { id: 'q1', text: "Notre promesse employeur (EVP) correspond a la realite vecue par les employes." },
@@ -26,6 +27,12 @@ export default function TalentPrintPage() {
 
   return (
     <>
+      <PageMeta
+        title="TalentPrint™ — Scoring Marque Employeur"
+        description="Mesurez l'attractivité de votre marque employeur et votre capacité à attirer et retenir les talents."
+        canonicalPath="/tools/talentprint"
+        noIndex
+      />
       <Navigation />
       <ScoringForm
         toolId="talentprint"

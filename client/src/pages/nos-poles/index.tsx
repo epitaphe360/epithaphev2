@@ -1,9 +1,13 @@
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PageMeta } from "@/components/seo/page-meta";
-import { Breadcrumbs } from "@/components/breadcrumbs";
+import { StatsSection } from "@/components/stats-section";
+import { RevealSection } from "@/components/reveal-section";
+import { ContextualCta } from "@/components/contextual-cta";
 import { Link } from "wouter";
 import { MessageSquare, Briefcase, ShieldCheck, Leaf, Calendar, ArrowRight } from "lucide-react";
+import { useCmsPage } from "@/hooks/useCmsPage";
 
 const poles = [
   {
@@ -44,6 +48,7 @@ const poles = [
 ];
 
 export default function NosPolesHub() {
+  const cmsContent = useCmsPage('nos-poles');
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
@@ -52,49 +57,77 @@ export default function NosPolesHub() {
         canonicalPath="/nos-poles"
       />
       <Navigation />
-      <Breadcrumbs />
 
-      <main className="pt-24 pb-20">
-        <section className="max-w-5xl mx-auto px-6 sm:px-8 mb-16">
-          <div className="inline-block px-3 py-1 rounded-full border border-[#C8A96E]/30 text-[#C8A96E] text-xs font-semibold tracking-widest uppercase mb-6">
-            Expertise
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold mb-6">
-            Nos pôles d'expertise
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            5 pôles spécialisés pour répondre à tous vos enjeux de communication B2B — de l'engagement
-            collaborateur à la responsabilité sociétale, en passant par l'événementiel et la sécurité.
-          </p>
-        </section>
+      {cmsContent ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+      ) : (<>
+      {/* ─── Hero ─────────────────────────────────────────────────────────────── */}
+      <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://version2.epitaphe.ma/wp-content/uploads/2025/11/Communication-interne-Industrie-Maroc-700x876.webp')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+        <div className="relative z-10 text-center px-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+          >
+            <span className="inline-block bg-primary px-4 py-2">Nos pôles</span>
+            <br />
+            <span className="inline-block bg-primary px-4 py-2 mt-2">d'expertise</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-white/80 text-lg"
+          >
+            5 pôles spécialisés pour tous vos enjeux de communication B2B
+          </motion.p>
+        </div>
+      </section>
 
-        <section className="max-w-5xl mx-auto px-6 sm:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {poles.map((pole) => (
-              <Link
-                key={pole.href}
-                href={pole.href}
-                className="group relative flex flex-col p-7 rounded-2xl border border-border hover:border-[#C8A96E]/50 bg-background hover:bg-[#C8A96E]/5 transition-all duration-200"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#C8A96E]/10 flex items-center justify-center text-[#C8A96E] mb-5">
-                  {pole.icon}
-                </div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-[#C8A96E]/70 mb-2">
-                  {pole.tag}
-                </div>
-                <h2 className="text-lg font-bold mb-3 group-hover:text-[#C8A96E] transition-colors">
-                  {pole.title}
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed flex-1">{pole.desc}</p>
-                <div className="mt-5 flex items-center gap-2 text-sm font-medium text-[#C8A96E] opacity-0 group-hover:opacity-100 transition-opacity">
-                  Découvrir <ArrowRight className="w-4 h-4" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      </main>
+      {/* ─── Pôles cards ───────────────────────────────────────────────────────── */}
+      <section className="py-16 md:py-24 px-4">
+        <div className="max-w-7xl mx-auto">
+          <RevealSection>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Nos expertises</h2>
+              <p className="text-muted-foreground text-sm">De l'engagement collaborateur à la responsabilité sociétale.</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {poles.map((pole) => (
+                <Link key={pole.href} href={pole.href}>
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    className="bg-card border border-border rounded-2xl overflow-hidden cursor-pointer group p-7 h-full flex flex-col"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-5">
+                      {pole.icon}
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-2">
+                      {pole.tag}
+                    </div>
+                    <h2 className="text-lg font-bold mb-3 group-hover:text-primary transition-colors">
+                      {pole.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed flex-1">{pole.desc}</p>
+                    <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-5">
+                      Découvrir <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </RevealSection>
+        </div>
+      </section>
+      </>)}
 
+      <StatsSection />
+      <ContextualCta pageKey="evenements" />
       <Footer />
     </div>
   );

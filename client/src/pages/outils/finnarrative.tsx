@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
-import { Helmet } from 'react-helmet-async';
+import { PageMeta } from '@/components/seo/page-meta';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
@@ -164,14 +164,11 @@ export default function FinNarrativePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <Helmet>
-        <title>FinNarrative™ — Scoring Communication Financière | Epitaphe 360</title>
-        <meta name="description" content="Évaluez la qualité de votre communication financière avec FinNarrative™ (modèle CAPITAL™). Narrative Doctor™ : 4 pathologies narratives détectées, conformité AMMC 2025." />
-        <link rel="canonical" href="https://www.epitaphe360.ma/outils/finnarrative" />
-        <meta property="og:title" content="FinNarrative™ — Scoring Communication Financière" />
-        <meta property="og:url" content="https://www.epitaphe360.ma/outils/finnarrative" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="FinNarrative™ — Scoring Communication Financière"
+        description="Évaluez la qualité de votre communication financière avec FinNarrative™ (modèle CAPITAL™). Narrative Doctor™ : 4 pathologies narratives détectées, conformité AMMC 2025."
+        canonicalPath="/outils/finnarrative"
+      />
       <SoftwareApplicationSchema name="FinNarrative™" description="Évaluez la qualité et la clarté de votre communication financière auprès des investisseurs." url="/outils/finnarrative" priceMad={9900} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"FinNarrative™",url:"/outils/finnarrative"}]} />
       <Navigation />

@@ -9,6 +9,7 @@ import { Card, CardContent } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Input, Textarea } from '../../components/Input';
 import { useToast } from '../../components/Toast';
+import { ImageUploadField } from '../../components/ImageUploadField';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface StatItem  { val: number; suf: string; label: string }
@@ -201,8 +202,8 @@ export const HomepageSettings: React.FC = () => {
         <Field label="Sous-titre">
           <Textarea value={cfg.hero.subtitle} onChange={e => set('hero.subtitle', e.target.value)} rows={2} />
         </Field>
-        <Field label="Image de fond (URL)">
-          <Input value={cfg.hero.image} onChange={e => set('hero.image', e.target.value)} placeholder="https://..." />
+        <Field label="Image de fond (URL ou fichier PC)">
+          <ImageUploadField value={cfg.hero.image} onChange={v => set('hero.image', v)} />
         </Field>
         <div className="grid grid-cols-3 gap-4">
           <Field label="Bouton 1 — Label">
@@ -285,11 +286,11 @@ export const HomepageSettings: React.FC = () => {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Image 1 (URL)">
-            <Input value={cfg.about.img1} onChange={e => set('about.img1', e.target.value)} />
+          <Field label="Image 1 (URL ou fichier PC)">
+            <ImageUploadField value={cfg.about.img1} onChange={v => set('about.img1', v)} />
           </Field>
-          <Field label="Image 2 (URL)">
-            <Input value={cfg.about.img2} onChange={e => set('about.img2', e.target.value)} />
+          <Field label="Image 2 (URL ou fichier PC)">
+            <ImageUploadField value={cfg.about.img2} onChange={v => set('about.img2', v)} />
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -307,9 +308,9 @@ export const HomepageSettings: React.FC = () => {
         <div className="space-y-3">
           {cfg.services.map((s, i) => (
             <div key={i} className="border border-gray-200 rounded-lg p-3 grid grid-cols-3 gap-3 items-end">
-              <Field label="Image (URL)">
-                <Input value={s.img} onChange={e => {
-                  const sv = [...cfg.services]; sv[i] = { ...sv[i], img: e.target.value };
+              <Field label="Image (URL ou fichier PC)">
+                <ImageUploadField value={s.img} onChange={v => {
+                  const sv = [...cfg.services]; sv[i] = { ...sv[i], img: v };
                   setCfg(p => ({ ...p, services: sv }));
                 }} />
               </Field>
@@ -371,14 +372,16 @@ export const HomepageSettings: React.FC = () => {
                   setCfg(pr => ({ ...pr, portfolio: po }));
                 }} />
               </Field>
-              <Field label="Image miniature (URL)">
-                <div className="flex gap-2">
-                  <Input value={p.thumb} onChange={e => {
-                    const po = [...cfg.portfolio]; po[i] = { ...po[i], thumb: e.target.value };
-                    setCfg(pr => ({ ...pr, portfolio: po }));
-                  }} />
+              <Field label="Image miniature (URL ou fichier PC)">
+                <div className="flex gap-2 items-start">
+                  <div className="flex-1">
+                    <ImageUploadField value={p.thumb} onChange={v => {
+                      const po = [...cfg.portfolio]; po[i] = { ...po[i], thumb: v };
+                      setCfg(pr => ({ ...pr, portfolio: po }));
+                    }} />
+                  </div>
                   <button onClick={() => setCfg(pr => ({ ...pr, portfolio: pr.portfolio.filter((_, j) => j !== i) }))}
-                    className="text-red-400 hover:text-red-300 p-2"><Trash2 className="w-4 h-4" /></button>
+                    className="text-red-400 hover:text-red-300 p-2 mt-6"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </Field>
             </div>

@@ -13,6 +13,7 @@ interface GrapesPage {
   css: string;
   status: "draft" | "published";
   lastModified: string;
+  template: string;
 }
 
 /**
@@ -29,6 +30,7 @@ function pageToGrapes(page: any): GrapesPage {
     css: grapesData.css || "",
     status: page.status === 'PUBLISHED' ? 'published' : 'draft',
     lastModified: page.updatedAt?.toISOString() || new Date().toISOString(),
+    template: page.template || 'DEFAULT',
   };
 }
 
@@ -60,19 +62,46 @@ function grapesToPage(grapesPage: Partial<GrapesPage>, existingSections?: any) {
 export function registerGrapesRoutes(app: Express) {
   const router = Router();
 
-  // Lister toutes les pages GrapesJS
+  // Lister toutes les pages (tous templates)
   router.get("/pages", requireAuth, async (req, res) => {
     try {
       const allPages = await db
         .select()
         .from(pages)
-        .where(eq(pages.template, 'GRAPES_JS'));
+        .orderBy(pages.title);
 
       const grapesPages = allPages.map(pageToGrapes);
       res.json(grapesPages);
     } catch (error) {
       console.error("Error loading GrapesJS pages:", error);
       res.status(500).json({ error: "Erreur lors du chargement des pages" });
+    }
+  });
+
+  // Obtenir une page par son chemin (pour affichage public) — DOIT être avant /pages/:id
+  router.get("/pages/by-path", async (req, res) => {
+    try {
+      const { path } = req.query;
+
+      if (!path) {
+        return res.status(400).json({ error: "Le paramètre path est requis" });
+      }
+
+      const [page] = await db
+        .select()
+        .from(pages)
+        .where(eq(pages.slug, path as string))
+        .limit(1);
+
+      if (!page || page.status !== 'PUBLISHED') {
+        return res.status(404).json({ error: "Page non trouvée" });
+      }
+
+      const grapesPage = pageToGrapes(page);
+      res.json(grapesPage);
+    } catch (error) {
+      console.error("Error loading page by path:", error);
+      res.status(500).json({ error: "Erreur lors du chargement de la page" });
     }
   });
 
@@ -186,32 +215,6 @@ export function registerGrapesRoutes(app: Express) {
     }
   });
 
-  // Obtenir une page par son chemin (pour affichage public)
-  router.get("/pages/by-path", async (req, res) => {
-    try {
-      const { path } = req.query;
-
-      if (!path) {
-        return res.status(400).json({ error: "Le paramètre path est requis" });
-      }
-
-      const [page] = await db
-        .select()
-        .from(pages)
-        .where(eq(pages.slug, path as string))
-        .limit(1);
-
-      if (!page || page.status !== 'PUBLISHED') {
-        return res.status(404).json({ error: "Page non trouvée" });
-      }
-
-      const grapesPage = pageToGrapes(page);
-      res.json(grapesPage);
-    } catch (error) {
-      console.error("Error loading page by path:", error);
-      res.status(500).json({ error: "Erreur lors du chargement de la page" });
-    }
-  });
 
   app.use("/api/grapes", router);
 }

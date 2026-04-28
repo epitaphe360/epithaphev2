@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
-import { Helmet } from 'react-helmet-async';
+import { PageMeta } from '@/components/seo/page-meta';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
@@ -151,14 +151,11 @@ export default function SpaceScorePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <Helmet>
-        <title>SpaceScore™ — Scoring Signalétique & Espaces | Epitaphe 360</title>
-        <meta name="description" content="Auditez la performance de votre signalétique et vos espaces de travail avec SpaceScore™ (modèle SPACE). 42 indicateurs." />
-        <link rel="canonical" href="https://www.epitaphe360.ma/outils/spacescore" />
-        <meta property="og:title" content="SpaceScore™ — Scoring Signalétique" />
-        <meta property="og:url" content="https://www.epitaphe360.ma/outils/spacescore" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="SpaceScore™ — Scoring Signalétique &amp; Espaces"
+        description="Auditez la performance de votre signalétique et vos espaces de travail avec SpaceScore™ (modèle SPACE). 42 indicateurs."
+        canonicalPath="/outils/spacescore"
+      />
       <SoftwareApplicationSchema name="SpaceScore™" description="Auditez la performance de votre signalétique et vos espaces de travail." url="/outils/spacescore" priceMad={6500} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"SpaceScore™",url:"/outils/spacescore"}]} />
       <Navigation />

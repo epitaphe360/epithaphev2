@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { ContactSection } from "@/components/contact-section";
@@ -6,6 +7,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { useState, useEffect } from "react";
+import { PageMeta } from "@/components/seo/page-meta";
+import { ArticleSchema, BreadcrumbSchema } from "@/components/seo/schema-org";
 
 const blogArticles: Record<string, {
   title: string;
@@ -356,34 +359,50 @@ export default function BlogArticlePage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title={article.title}
+        description={article.excerpt || "Article de blog — Epitaphe 360"}
+        canonicalPath={`/blog/${slug}`}
+        ogImage={article.image || undefined}
+        ogImageAlt={article.title}
+        type="article"
+        schemaType="Article"
+      />
+      <ArticleSchema
+        title={article.title}
+        description={article.excerpt || ""}
+        url={`/blog/${slug}`}
+        publishedAt={new Date().toISOString()}
+        image={article.image}
+      />
+      <BreadcrumbSchema items={[
+        { name: "Accueil", url: "/" },
+        { name: "Blog", url: "/blog" },
+        { name: article.title, url: `/blog/${slug}` },
+      ]} />
       <Navigation />
       
-      <article className="pt-24">
-        <div className="relative h-[50vh] min-h-[400px]">
-          <img
-            src={article.image}
-            alt={article.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="max-w-4xl mx-auto px-4 text-center text-white">
-              <div className="flex flex-wrap justify-center gap-2 mb-6">
-                {article.categories.map((cat) => (
-                  <span 
-                    key={cat}
-                    className="text-sm font-medium bg-primary px-3 py-1 rounded-full"
-                  >
-                    {cat}
-                  </span>
-                ))}
-              </div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold" data-testid="text-article-title">
-                {article.title}
-              </h1>
+      <article>
+        <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${article.image}')` }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {article.categories.map((cat) => (
+                <span key={cat} className="text-sm font-medium bg-primary px-3 py-1 rounded-full text-white">
+                  {cat}
+                </span>
+              ))}
             </div>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              className="text-3xl md:text-5xl lg:text-6xl font-bold text-white"
+              data-testid="text-article-title"
+            >
+              <span className="inline-block bg-primary px-4 py-2">{article.title}</span>
+            </motion.h1>
           </div>
-        </div>
+        </section>
 
         <div className="max-w-3xl mx-auto px-4 py-16">
           <Link href="/blog">

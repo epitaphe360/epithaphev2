@@ -11,7 +11,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { MagentaCursor } from "@/components/custom-cursor";
 import { useLocation } from "wouter";
 import { HelmetProvider } from "react-helmet-async";
-import { OrganizationSchema } from "@/components/seo/schema-org";
+import { OrganizationSchema, WebSiteSchema, LocalBusinessSchema } from "@/components/seo/schema-org";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { PushPermissionBanner } from "@/components/push-permission-banner";
 import { PwaInstallPrompt }     from "@/components/pwa-install-prompt";
@@ -26,19 +26,12 @@ import ClientResetPasswordPage from "@/pages/espace-client/reset-password";
 import { AdminRoutes } from "@/routes/admin-routes";
 
 // ── Pages critiques — restent statiques (LCP) ────────────────────────────────
+import HomeV6 from "@/pages/home-v6";
 import HomeV5 from "@/pages/home-v5";
 import NotFound from "@/pages/not-found";
 
 // ── Toutes les autres pages — lazy-loaded (code splitting) ───────────────────
 const HomeV4                 = lazy(() => import("@/pages/home-v4"));
-
-// ── Pages SEO (nouvelles) ─────────────────────────────────────────────────────
-const APropos                = lazy(() => import("@/pages/a-propos"));
-const FaqPage                = lazy(() => import("@/pages/faq"));
-const NosPolesHub            = lazy(() => import("@/pages/nos-poles/index"));
-const ComInterne             = lazy(() => import("@/pages/nos-poles/com-interne"));
-const ComRse                 = lazy(() => import("@/pages/nos-poles/com-rse"));
-const BrandingSiege          = lazy(() => import("@/pages/la-fabrique/branding-siege"));
 const DesignPreview          = lazy(() => import("@/pages/design-preview"));
 const DynamicPage            = lazy(() => import("@/pages/dynamic-page"));
 const ReferencesPage         = lazy(() => import("@/pages/references"));
@@ -47,28 +40,9 @@ const BlogPage               = lazy(() => import("@/pages/blog"));
 const BlogArticlePage        = lazy(() => import("@/pages/blog-article"));
 const SolutionPage           = lazy(() => import("@/pages/solution"));
 
-// ── Événements ────────────────────────────────────────────────────────────────
-const EvenementsHub          = lazy(() => import("@/pages/evenements/index"));
-const ConventionsKickoffs    = lazy(() => import("@/pages/evenements/conventions-kickoffs"));
-const SoireesDeGala          = lazy(() => import("@/pages/evenements/soirees-de-gala"));
-const Roadshows              = lazy(() => import("@/pages/evenements/roadshows"));
-const Salons                 = lazy(() => import("@/pages/evenements/salons"));
-
-// ── Architecture de Marque ────────────────────────────────────────────────────
-const ArchitectureDeMarqueHub = lazy(() => import("@/pages/architecture-de-marque/index"));
-const MarqueEmployeur         = lazy(() => import("@/pages/architecture-de-marque/marque-employeur"));
-const CommunicationQhse       = lazy(() => import("@/pages/architecture-de-marque/communication-qhse"));
-const ExperienceClients       = lazy(() => import("@/pages/architecture-de-marque/experience-clients"));
-
-// ── La Fabrique ───────────────────────────────────────────────────────────────
-const LaFabriqueHub   = lazy(() => import("@/pages/la-fabrique/index"));
-const Impression      = lazy(() => import("@/pages/la-fabrique/impression"));
-const Menuiserie      = lazy(() => import("@/pages/la-fabrique/menuiserie"));
-const Signaletique    = lazy(() => import("@/pages/la-fabrique/signaletique"));
-const Amenagement     = lazy(() => import("@/pages/la-fabrique/amenagement"));
-
-// ── Contact & Lead Gen ────────────────────────────────────────────────────────
-const ContactPage  = lazy(() => import("@/pages/contact/index"));
+// ── Contact ─────────────────────────────────────────────────────────────────
+// /contact est géré par DynamicPage (sections en DB)
+// /contact/brief reste statique (formulaire interactif)
 const BriefPage    = lazy(() => import("@/pages/contact/brief"));
 
 // ── Outils ────────────────────────────────────────────────────────────────────
@@ -87,8 +61,6 @@ const SpaceScorePage  = lazy(() => import("@/pages/outils/spacescore"));
 const FinNarrativePage = lazy(() => import("@/pages/outils/finnarrative"));
 const BMI360Page      = lazy(() => import("@/pages/outils/bmi360"));
 
-// ── Ressources ────────────────────────────────────────────────────────────────
-const RessourcesPage = lazy(() => import("@/pages/ressources/index"));
 
 // ── Espace Client ─────────────────────────────────────────────────────────────
 const EspaceClientPage = lazy(() => import("@/pages/espace-client/index"));
@@ -106,13 +78,13 @@ const DevisPage = lazy(() => import("@/pages/devis/index"));
 const PaiementSucces = lazy(() => import("@/pages/paiement-succes"));
 const PaiementEchec  = lazy(() => import("@/pages/paiement-echec"));
 
-// ── Analytics ─────────────────────────────────────────────────────────────────
-const AnalyticsPage = lazy(() => import("@/pages/analytics/index"));
-
 // ── Pages légales ─────────────────────────────────────────────────────────────
 const MentionsLegales          = lazy(() => import("@/pages/mentions-legales"));
 const PolitiqueConfidentialite = lazy(() => import("@/pages/politique-confidentialite"));
+
 // ─────────────────────────────────────────────────────────────────────────────
+// a-propos, faq, nos-poles, evenements, architecture-de-marque, la-fabrique,
+// ressources → tous gérés par DynamicPage (sections JSON en DB)
 
 function Router() {
   const [location] = useLocation();
@@ -129,18 +101,10 @@ function Router() {
       >
         <Switch>
           {/* ── Home & Design variants ──────────────────────────── */}
-          <Route path="/" component={HomeV5} />
+          <Route path="/" component={HomeV6} />
+          <Route path="/design-v5" component={HomeV5} />
           <Route path="/design-v4" component={HomeV4} />
           <Route path="/design-preview" component={DesignPreview} />
-
-          {/* ── Pages SEO ───────────────────────────────────────── */}
-          <Route path="/a-propos" component={APropos} />
-          <Route path="/faq" component={FaqPage} />
-
-          {/* ── Nos pôles d'expertise ───────────────────────────── */}
-          <Route path="/nos-poles" component={NosPolesHub} />
-          <Route path="/nos-poles/com-interne" component={ComInterne} />
-          <Route path="/nos-poles/com-rse" component={ComRse} />
           
           
           
@@ -151,31 +115,8 @@ function Router() {
           <Route path="/blog" component={BlogPage} />
           <Route path="/blog/:slug" component={BlogArticlePage} />
           <Route path="/solutions/:slug" component={SolutionPage} />
-          <Route path="/page/:slug" component={DynamicPage} />
 
-          {/* ── Événements ──────────────────────────────────────── */}
-          <Route path="/evenements" component={EvenementsHub} />
-          <Route path="/evenements/conventions-kickoffs" component={ConventionsKickoffs} />
-          <Route path="/evenements/soirees-de-gala" component={SoireesDeGala} />
-          <Route path="/evenements/roadshows" component={Roadshows} />
-          <Route path="/evenements/salons" component={Salons} />
-
-          {/* ── Architecture de Marque ───────────────────────────── */}
-          <Route path="/architecture-de-marque" component={ArchitectureDeMarqueHub} />
-          <Route path="/architecture-de-marque/marque-employeur" component={MarqueEmployeur} />
-          <Route path="/architecture-de-marque/communication-qhse" component={CommunicationQhse} />
-          <Route path="/architecture-de-marque/experience-clients" component={ExperienceClients} />
-
-          {/* ── La Fabrique ─────────────────────────────────────── */}
-          <Route path="/la-fabrique" component={LaFabriqueHub} />
-          <Route path="/la-fabrique/branding-siege" component={BrandingSiege} />
-          <Route path="/la-fabrique/impression" component={Impression} />
-          <Route path="/la-fabrique/menuiserie" component={Menuiserie} />
-          <Route path="/la-fabrique/signaletique" component={Signaletique} />
-          <Route path="/la-fabrique/amenagement" component={Amenagement} />
-
-          {/* ── Contact & Lead Gen ──────────────────────────────── */}
-          <Route path="/contact" component={ContactPage} />
+          {/* ── Contact brief (statique, formulaire interactif) ─── */}
           <Route path="/contact/brief" component={BriefPage} />
 
           {/* ── Outils ──────────────────────────────────────────── */}
@@ -202,8 +143,7 @@ function Router() {
           <Route path="/tools/spacescore">{() => { window.location.replace('/outils/spacescore'); return null; }}</Route>
           <Route path="/tools/finnarrative">{() => { window.location.replace('/outils/finnarrative'); return null; }}</Route>
 
-          {/* ── Ressources ──────────────────────────────────────── */}
-          <Route path="/ressources" component={RessourcesPage} />
+          {/* Ressources / a-propos / faq / nos-poles → DynamicPage (DB) */}
 
           {/* ── Espace Client ───────────────────────────────────── */}
           <Route path="/espace-client" component={EspaceClientPage} />
@@ -223,17 +163,19 @@ function Router() {
           <Route path="/paiement/echec"  component={PaiementEchec} />
           <Route path="/paiement/annule" component={PaiementEchec} />
 
-          {/* ── Analytics ───────────────────────────────────────── */}
-          <Route path="/analytics" component={AnalyticsPage} />
-
           {/* ── Pages légales ───────────────────────────────────── */}
           <Route path="/mentions-legales" component={MentionsLegales} />
           <Route path="/politique-confidentialite" component={PolitiqueConfidentialite} />
 
           {/* ── Admin CMS (lazy-loaded) ──────────────────────────── */}
-          <AdminRoutes />
+          {/* IMPORTANT: invoquer comme fonction pour que les <Route> deviennent enfants directs du Switch.
+              Sinon wouter v3 traite <AdminRoutes /> sans prop `path` comme un match par défaut qui avale tout. */}
+          {AdminRoutes()}
 
-          <Route component={NotFound} />
+          {/* ── Catch-all: pages pilotées par sections JSON en DB ─── */}
+          {/* Pas de prop `path` → match toute URL non capturée précédemment.
+              DynamicPage gère lui-même son 404 si la page n'existe pas en DB. */}
+          <Route component={DynamicPage} />
         </Switch>
       </motion.div>
     </AnimatePresence>
@@ -246,6 +188,8 @@ function AppInner() {
     <>
       <EmbedResizeReporter />
       {!isEmbed && <OrganizationSchema />}
+      {!isEmbed && <WebSiteSchema />}
+      {!isEmbed && <LocalBusinessSchema />}
       <Toaster />
       {!isEmbed && <DevShortcuts />}
       {!isEmbed && <MagentaCursor />}

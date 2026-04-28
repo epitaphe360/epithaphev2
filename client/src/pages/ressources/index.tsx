@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useCmsPage } from "@/hooks/useCmsPage";
 import { motion } from "framer-motion";
 import {
   FileText, Download, Search, Filter, BookOpen,
@@ -242,8 +243,7 @@ export default function RessourcesPage() {
   const [search, setSearch] = useState("");
   const [gatedResource, setGatedResource] = useState<Resource | null>(null);
   const [apiResources, setApiResources] = useState<Resource[] | null>(null);
-  const [loadingRes, setLoadingRes] = useState(true);
-
+  const [loadingRes, setLoadingRes] = useState(true);  const cmsContent = useCmsPage('ressources');
   useEffect(() => {
     fetch("/api/resources/public")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -289,27 +289,34 @@ export default function RessourcesPage() {
       />
       <Navigation />
       <main>
+        {cmsContent ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+        ) : (<>
         {/* Hero */}
-        <section className="py-20 bg-gradient-to-b from-muted/40 to-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <RevealSection>
-              <span className="inline-block bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">
-                Ressources gratuites
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-                Bibliothèque Epitaphe360
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                Guides pratiques, études de cas, templates et outils pour piloter vos projets de communication avec efficacité.
-              </p>
-              {/* Barre de recherche */}
-              <div className="max-w-md mx-auto relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Rechercher une ressource…"
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl border border-border bg-card text-foreground text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
-              </div>
-            </RevealSection>
+        <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1600&q=80')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+          <div className="relative z-10 text-center px-4">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+            >
+              <span className="inline-block bg-primary px-4 py-2">Bibliothèque</span>
+              <br />
+              <span className="inline-block bg-primary px-4 py-2 mt-2">de ressources</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+              className="text-white/80 text-lg max-w-2xl mx-auto mb-8"
+            >
+              Guides pratiques, études de cas, templates et outils pour piloter vos projets de communication.
+            </motion.p>
+            <div className="max-w-md mx-auto relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher une ressource…"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder:text-white/50 text-sm focus:outline-none focus:border-white/50" />
+            </div>
           </div>
         </section>
 
@@ -393,6 +400,7 @@ export default function RessourcesPage() {
             </RevealSection>
           </div>
         </section>
+        </>)}
       </main>
 
       {gatedResource && <GatedModal resource={gatedResource} onClose={() => setGatedResource(null)} />}

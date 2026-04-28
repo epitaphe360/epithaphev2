@@ -68,13 +68,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function Roadshows() {
-  const { data } = useServicePage("evenements/roadshows", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("evenements/roadshows", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Roadshows & Tournées Nationales — Epitaphe 360"
-        description="Portez votre message dans toutes les villes du Maroc. Logistique maîtrisée, impact uniforme sur chaque site, coordination complète."
+        title={seoTitle || "Roadshows & Tournées Nationales — Epitaphe 360"}
+        description={seoDescription || "Portez votre message dans toutes les villes du Maroc. Logistique maîtrisée, impact uniforme sur chaque site, coordination complète."}
         canonicalPath="/evenements/roadshows"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

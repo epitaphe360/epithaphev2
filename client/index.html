@@ -54,7 +54,58 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" /></noscript>
     <!-- RSS Blog Feed -->
     <link rel="alternate" type="application/rss+xml" title="Epitaphe 360 — Blog" href="/blog/rss.xml" />
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+    <!-- hreflang pour SEO multilingue -->
+    <link rel="alternate" hreflang="fr-MA" href="https://www.epitaphe360.ma/" />
+    <link rel="alternate" hreflang="x-default" href="https://www.epitaphe360.ma/" />
     <!-- ── Analytics — GA4 + Clarity chargés via analytics.ts après consentement cookie ── -->
+    <!-- Schema.org Organisation + WebSite (fallback statique) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.epitaphe360.ma/#organization",
+          "name": "Epitaphe 360",
+          "alternateName": "Epitaphe360",
+          "url": "https://www.epitaphe360.ma",
+          "logo": "https://www.epitaphe360.ma/logo.png",
+          "description": "Agence de communication 360° au Maroc. Événements corporate, architecture de marque, signalétique, BMI 360™ Scoring Intelligence.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rez de chaussée, Immeuble 7-9, Rue Bussang",
+            "addressLocality": "Casablanca",
+            "postalCode": "20000",
+            "addressCountry": "MA"
+          },
+          "geo": { "@type": "GeoCoordinates", "latitude": "33.5731", "longitude": "-7.5898" },
+          "telephone": "+212662744741",
+          "email": "contact@epitaphe360.ma",
+          "sameAs": [
+            "https://www.linkedin.com/company/epitaphe360",
+            "https://www.instagram.com/epitaphe360",
+            "https://www.facebook.com/epitaphe360"
+          ],
+          "foundingDate": "2004"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.epitaphe360.ma/#website",
+          "url": "https://www.epitaphe360.ma",
+          "name": "Epitaphe 360",
+          "inLanguage": "fr-MA",
+          "publisher": { "@id": "https://www.epitaphe360.ma/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": { "@type": "EntryPoint", "urlTemplate": "https://www.epitaphe360.ma/blog?q={search_term_string}" },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
     <!-- Consent Mode v2 — deny by default (RGPD) -->
     <script>
       window.dataLayer = window.dataLayer || [];

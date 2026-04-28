@@ -28,11 +28,18 @@ export function startRelanceScheduler() {
   console.log('[Relance] Scheduler démarré — tick horaire (J+1, J+3, J+7)');
 
   // Premier tick immédiat (utile en dev / au déploiement)
-  relanceTick().catch(err => console.error('[Relance] Tick initial échoué:', err));
+  // setTimeout récursif pour éviter le drift de setInterval
+  const scheduleNext = () => {
+    setTimeout(() => {
+      relanceTick()
+        .catch(err => console.error('[Relance] Tick échoué:', err))
+        .finally(() => scheduleNext());
+    }, HOUR_MS);
+  };
 
-  setInterval(() => {
-    relanceTick().catch(err => console.error('[Relance] Tick échoué:', err));
-  }, HOUR_MS);
+  relanceTick()
+    .catch(err => console.error('[Relance] Tick initial échoué:', err))
+    .finally(() => scheduleNext());
 }
 
 async function relanceTick() {

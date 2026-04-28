@@ -74,7 +74,7 @@ export function verifyToken(token: string): JWTPayload | null {
 /**
  * Middleware to require authentication
  */
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -88,7 +88,7 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
       return res.status(401).json({ error: 'Token invalide ou expiré' });
     }
 
-    req.user = payload;
+    (req as AuthRequest).user = payload;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
@@ -100,12 +100,13 @@ export function requireAuth(req: AuthRequest, res: Response, next: NextFunction)
  * Middleware to require specific role
  */
 export function requireRole(...roles: string[]) {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as AuthRequest).user;
+    if (!user) {
       return res.status(401).json({ error: 'Non authentifié' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(user.role)) {
       return res.status(403).json({ error: 'Permissions insuffisantes' });
     }
 
@@ -116,7 +117,7 @@ export function requireRole(...roles: string[]) {
 /**
  * Middleware to require admin role
  */
-export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   return requireRole('ADMIN')(req, res, next);
 }
 

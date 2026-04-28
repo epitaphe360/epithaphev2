@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from '../../hooks/useRouterParams';
 import { Link } from 'wouter';
-import { Plus, Edit, Trash2, Eye, GripVertical, Paintbrush } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, GripVertical, Paintbrush, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { SearchInput } from '../../components/Input';
@@ -28,7 +28,7 @@ export const PagesList: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const debouncedSearch = useDebounce(search, 300);
-  const { page, setPage, limit, totalPages } = useSimplePagination(total);
+  const { page, setPage, limit, totalPages } = useSimplePagination(total, 50);
 
   useEffect(() => {
     loadPages();
@@ -119,7 +119,8 @@ export const PagesList: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              window.open(`/${pageItem.slug}`, '_blank');
+              const url = pageItem.slug === 'home' ? '/' : `/${pageItem.slug}`;
+              window.open(url, '_blank');
             }}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg"
             title="Voir"
@@ -129,20 +130,10 @@ export const PagesList: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/admin/visual-editor/edit/${pageItem.id}`);
-            }}
-            className="p-2 text-gray-500 hover:text-purple-400 hover:bg-purple-500/100/10 rounded-lg"
-            title="Éditeur visuel GrapesJS"
-          >
-            <Paintbrush className="w-4 h-4" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/admin/pages/${pageItem.id}/edit`);
+              navigate(`/admin/pages/${pageItem.slug}/sections`);
             }}
             className="p-2 text-gray-500 hover:text-[#EC4899] hover:bg-[#EC4899]/10 rounded-lg"
-            title="Modifier"
+            title="Éditer les sections"
           >
             <Edit className="w-4 h-4" />
           </button>
@@ -169,12 +160,18 @@ export const PagesList: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Pages</h1>
           <p className="text-gray-500">Gérez les pages de votre site</p>
         </div>
-        <Link to="/admin/pages/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvelle page
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={() => navigate('/admin/pages/home/sections')}>
+            <Sparkles className="w-4 h-4 mr-2" />
+            Éditer la page d'accueil
           </Button>
-        </Link>
+          <Link to="/admin/pages/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvelle page
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -199,7 +196,11 @@ export const PagesList: React.FC = () => {
           data={pages}
           loading={loading}
           emptyMessage="Aucune page trouvée"
-          onRowClick={(pageItem) => navigate(`/admin/pages/${pageItem.id}/edit`)}
+          onRowClick={(pageItem) =>
+            pageItem.slug === 'home'
+              ? navigate('/admin/pages/home/sections')
+              : navigate(`/admin/pages/${pageItem.id}/edit`)
+          }
         />
         {total > limit && (
           <Pagination

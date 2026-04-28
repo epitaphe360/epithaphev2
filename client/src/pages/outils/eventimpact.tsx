@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
-import { Helmet } from 'react-helmet-async';
+import { PageMeta } from '@/components/seo/page-meta';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
@@ -147,14 +147,11 @@ export default function EventImpactPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <Helmet>
-        <title>EventImpact™ — Scoring Événementiel Corporate | Epitaphe 360</title>
-        <meta name="description" content="Mesurez le ROI et l'impact de vos événements corporate avec EventImpact™ (modèle STAGE™). Brand Coherence Score™ : alignement stratégie × expérience événementielle." />
-        <link rel="canonical" href="https://www.epitaphe360.ma/outils/eventimpact" />
-        <meta property="og:title" content="EventImpact™ — Scoring Événementiel Corporate" />
-        <meta property="og:url" content="https://www.epitaphe360.ma/outils/eventimpact" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="EventImpact™ — Scoring Événementiel Corporate"
+        description="Mesurez le ROI et l'impact de vos événements corporate avec EventImpact™ (modèle STAGE™). Brand Coherence Score™ : alignement stratégie × expérience événementielle."
+        canonicalPath="/outils/eventimpact"
+      />
       <SoftwareApplicationSchema name="EventImpact™" description="Mesurez le ROI et l'impact réel de vos événements corporate sur l'engagement." url="/outils/eventimpact" priceMad={7900} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"EventImpact™",url:"/outils/eventimpact"}]} />
       <Navigation />

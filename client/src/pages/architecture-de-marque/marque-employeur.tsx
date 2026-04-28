@@ -78,13 +78,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function MarqueEmployeur() {
-  const { data } = useServicePage("architecture-de-marque/marque-employeur", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("architecture-de-marque/marque-employeur", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Marque Employeur — Architecture de Marque | Epitaphe 360"
-        description="Positionnez votre entreprise comme l'employeur de référence. Stratégie, contenus, outils de recrutement et onboarding personnalisé."
+        title={seoTitle || "Marque Employeur — Architecture de Marque | Epitaphe 360"}
+        description={seoDescription || "Positionnez votre entreprise comme l'employeur de référence. Stratégie, contenus, outils de recrutement et onboarding personnalisé."}
         canonicalPath="/architecture-de-marque/marque-employeur"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

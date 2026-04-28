@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from '../../hooks/useRouterParams';
-import { ArrowLeft, Save, Eye, Plus, Trash2, GripVertical, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Plus, Trash2, GripVertical, FileText, AlertTriangle, Sparkles } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -19,6 +19,7 @@ import ServicePageEditor, { type ServicePageSections } from './ServicePageEditor
 interface PageFormData {
   title: string;
   slug: string;
+  featuredImage: string;
   metaTitle: string;
   metaDescription: string;
   template: string;
@@ -61,6 +62,7 @@ export const PageForm: React.FC = () => {
   const [formData, setFormData] = useState<PageFormData>({
     title: '',
     slug: '',
+    featuredImage: '',
     metaTitle: '',
     metaDescription: '',
     template: 'default',
@@ -74,6 +76,34 @@ export const PageForm: React.FC = () => {
     }
   }, [id]);
 
+  // Détecte si les sections ont été créées/éditées avec l'éditeur visuel Puck
+  // (les sections Puck ont des champs propres comme backgroundImage, ctaHref, subtitle
+  // mais PAS de champ 'content' utilisé par l'éditeur legacy)
+  const detectPuckSections = (sections: any[]): boolean => {
+    if (!sections || sections.length === 0) return false;
+    const PUCK_ONLY_FIELDS = ['backgroundImage', 'ctaHref', 'ctaLabel', 'backgroundType',
+      'backgroundGradient', 'pretitle', 'bgColor', 'bgImage', 'align', 'emoji'];
+    return sections.some((s) =>
+      // Format Puck imbriqué (from-template)
+      (s.props && typeof s.props === 'object') ||
+      // Format Puck aplati (sauvegarde PuckSectionsEditor)
+      PUCK_ONLY_FIELDS.some((f) => s[f] !== undefined)
+    );
+  };
+  const isPuckPage = isEditing && detectPuckSections(formData.sections);
+
+  // Liste des slugs dont le contenu est rendu par des composants React (pas en BDD)
+  const REACT_RENDERED_SLUGS = new Set<string>([
+    'a-propos', 'about', 'architecture-de-marque', 'evenements', 'la-fabrique',
+    'nos-poles', 'nos-references', 'blog', 'contact', 'outils', 'ressources', 'services',
+  ]);
+  const isReactRendered = REACT_RENDERED_SLUGS.has(formData.slug)
+    || formData.slug.startsWith('architecture-de-marque/')
+    || formData.slug.startsWith('evenements/')
+    || formData.slug.startsWith('la-fabrique/')
+    || formData.slug.startsWith('nos-poles/');
+  const isHome = formData.slug === 'home';
+
   const loadPage = async () => {
     setLoading(true);
     try {
@@ -83,6 +113,7 @@ export const PageForm: React.FC = () => {
       setFormData({
         title: page.title,
         slug: page.slug,
+        featuredImage: page.featuredImage || '',
         metaTitle: page.metaTitle || '',
         metaDescription: page.metaDescription || '',
         template: tpl,
@@ -246,6 +277,68 @@ export const PageForm: React.FC = () => {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {isHome && (
+            <Card>
+              <CardContent className="p-4 flex items-start gap-3 bg-pink-50 border border-pink-200 rounded-lg">
+                <Sparkles className="w-5 h-5 text-pink-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold text-pink-900">Page d'accueil — éditeur dédié</p>
+                  <p className="text-sm text-pink-800 mt-1">
+                    La page d'accueil utilise un éditeur de sections structuré (Hero, Pôles, Stats, etc.).
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    type="button"
+                    className="mt-2"
+                    onClick={() => navigate('/admin/pages/home/sections')}
+                  >
+                    Ouvrir l'éditeur de sections
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {isPuckPage && (
+            <Card>
+              <CardContent className="p-4 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold text-amber-900">Contenu géré par des composants Puck</p>
+                  <p className="text-sm text-amber-800 mt-1">
+                    Cette page utilise le <strong>constructeur visuel</strong>. Les sections et leur contenu
+                    sont stockés au format Puck — ils n'apparaissent pas dans les champs "Contenu" ci-dessous.
+                    Pour modifier le texte, les images et les blocs de cette page, utilisez l'éditeur visuel.
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    type="button"
+                    className="mt-2"
+                    onClick={() => navigate(`/admin/pages/${formData.slug}/sections`)}
+                  >
+                    Ouvrir l'éditeur visuel Puck
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {!isHome && !isPuckPage && isReactRendered && (
+            <Card>
+              <CardContent className="p-4 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold text-amber-900">Contenu géré par des composants React</p>
+                  <p className="text-sm text-amber-800 mt-1">
+                    Cette page (<code className="px-1 bg-amber-100 rounded">/{formData.slug}</code>) est affichée par un composant React du site,
+                    pas par le CMS. Le contenu visible publiquement est codé dans <code className="px-1 bg-amber-100 rounded">client/src/pages/</code> et
+                    n'est pas modifiable depuis ce formulaire. Vous pouvez tout de même modifier ici les méta-données
+                    (titre, slug, SEO) et le statut.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent className="p-6 space-y-6">
               <Input
@@ -386,6 +479,25 @@ export const PageForm: React.FC = () => {
                 placeholder="Description pour les moteurs de recherche..."
                 rows={2}
               />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Image principale (Hero / Open Graph)
+                </label>
+                <Input
+                  value={formData.featuredImage}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, featuredImage: e.target.value }))}
+                  placeholder="https://... URL de l'image hero"
+                />
+                {formData.featuredImage && (
+                  <img
+                    src={formData.featuredImage}
+                    alt="Aperçu"
+                    className="mt-2 w-full h-32 object-cover rounded-lg border border-gray-200"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

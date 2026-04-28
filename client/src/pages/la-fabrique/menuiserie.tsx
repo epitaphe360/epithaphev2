@@ -63,13 +63,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function Menuiserie() {
-  const { data } = useServicePage("la-fabrique/menuiserie", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("la-fabrique/menuiserie", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Menuiserie & Décor — La Fabrique | Epitaphe 360"
-        description="Stands sur mesure, mobilier d'ambiance, podiums et structures architecturales temporaires. Fabrication atelier propre, délai express."
+        title={seoTitle || "Menuiserie & Décor — La Fabrique | Epitaphe 360"}
+        description={seoDescription || "Stands sur mesure, mobilier d'ambiance, podiums et structures architecturales temporaires. Fabrication atelier propre, délai express."}
         canonicalPath="/la-fabrique/menuiserie"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

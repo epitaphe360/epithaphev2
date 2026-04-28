@@ -3,6 +3,7 @@ import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
+import { PageMeta } from '@/components/seo/page-meta';
 import { loadBMI360Scores, calculateBMI360Global, MATURITY_LEVELS, type ScoringResult, type ToolId } from '@/lib/scoring-engine';
 
 const TOOL_META: Record<ToolId, { name: string; model: string; color: string; href: string; icon: string; tagline: string; price: string }> = {
@@ -99,6 +100,11 @@ export default function BMI360Page() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <PageMeta
+        title="BMI 360™ — Tableau de Bord Intelligence d'Entreprise"
+        description="Visualisez l'ensemble de vos scores BMI 360™ sur les 7 dimensions clés : CommPulse, TalentPrint, ImpactTrace, SafeSignal, EventImpact, SpaceScore, FinNarrative."
+        canonicalPath="/outils/bmi360"
+      />
       <Navigation />
       <main className="pt-24 pb-20">
         <div className="max-w-5xl mx-auto px-6">

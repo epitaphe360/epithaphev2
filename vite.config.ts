@@ -62,9 +62,15 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
     fs: {
       strict: true,
-      allow: ['..'], // âœ… Allow access to parent directory (cms-dashboard)
+      allow: ['..'], // ✅ Allow access to parent directory (cms-dashboard)
       deny: ["**/.*"],
     },
   },

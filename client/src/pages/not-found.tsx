@@ -1,15 +1,17 @@
 import { Link } from "wouter";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
-import { Helmet } from "react-helmet-async";
+import { PageMeta } from "@/components/seo/page-meta";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Helmet>
-        <title>Page introuvable — Epitaphe 360</title>
-        <meta name="robots" content="noindex" />
-      </Helmet>
+      <PageMeta
+        title="Page introuvable"
+        description="La page que vous recherchez n'existe pas ou a été déplacée."
+        canonicalPath="/404"
+        noIndex
+      />
       <Navigation />
       <main className="flex-1 flex flex-col items-center justify-center px-4 text-center">
         <p className="text-8xl font-bold text-[#C8A96E] mb-4 select-none">404</p>

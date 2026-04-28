@@ -44,6 +44,7 @@ import {
   BarChart2,
   CalendarCheck,
   TrendingUp,
+  Bot,
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -78,7 +79,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Articles',      href: '/admin/articles',           icon: FileText,        group: 'content' },
     { name: 'Événements',    href: '/admin/events',             icon: Calendar,        group: 'content' },
     { name: 'Pages',         href: '/admin/pages',              icon: FileEdit,        group: 'content' },
-    { name: 'Éditeur Visuel',href: '/admin/visual-editor',      icon: Paintbrush,      group: 'content' },
     { name: 'Services',      href: '/admin/services',           icon: Briefcase,       group: 'content' },
     { name: 'Solutions',     href: '/admin/solutions',          icon: Layers,          group: 'content' },
     { name: 'Références',    href: '/admin/references',         icon: Building2,       group: 'content' },
@@ -95,6 +95,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ config, childr
     { name: 'Scoring',       href: '/admin/scoring',            icon: BarChart2,       group: 'bmi360' },
     { name: 'Consultations', href: '/admin/bmi360/consultations', icon: CalendarCheck,  group: 'bmi360' },
     { name: 'Funnel',        href: '/admin/bmi360/funnel',      icon: TrendingUp,      group: 'bmi360' },
+    { name: 'Prompts IA',    href: '/admin/scoring/prompts',    icon: Bot,             group: 'bmi360' },
     { name: 'Clients',       href: '/admin/client-accounts',    icon: FolderKanban,    group: 'clients' },
     { name: 'Facturation',   href: '/admin/facturation',        icon: Receipt,         group: 'clients' },
     { name: 'Audit Logs',    href: '/admin/audit-logs',         icon: ClipboardList,   group: 'settings' },

@@ -1152,3 +1152,29 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({
 });
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoices.$inferSelect;
+
+// ============================================================
+// PAGE TEMPLATES — Reusable design templates for Puck pages
+// ============================================================
+
+export const pageTemplates = pgTable("page_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }).default("general"),
+  thumbnailUrl: text("thumbnail_url"),
+  sections: json("sections").$type<Array<Record<string, unknown>>>().default([]),
+  previewUrl: text("preview_url"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertPageTemplateSchema = createInsertSchema(pageTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPageTemplate = z.infer<typeof insertPageTemplateSchema>;
+export type PageTemplate = typeof pageTemplates.$inferSelect;

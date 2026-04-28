@@ -68,13 +68,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function Salons() {
-  const { data } = useServicePage("evenements/salons", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("evenements/salons", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Salons & Expositions Professionnelles — Epitaphe 360"
-        description="Maximisez votre visibilité et générez des leads qualifiés lors des salons B2B. Stands sur mesure, signalétique, animation commerciale."
+        title={seoTitle || "Salons & Expositions Professionnelles — Epitaphe 360"}
+        description={seoDescription || "Maximisez votre visibilité et générez des leads qualifiés lors des salons B2B. Stands sur mesure, signalétique, animation commerciale."}
         canonicalPath="/evenements/salons"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

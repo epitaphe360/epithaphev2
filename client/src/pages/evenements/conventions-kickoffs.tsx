@@ -79,13 +79,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function ConventionsKickoffs() {
-  const { data } = useServicePage("evenements/conventions-kickoffs", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("evenements/conventions-kickoffs", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Conventions & Kickoffs — Epitaphe 360"
-        description="Fédérez vos équipes autour de vos ambitions stratégiques. Conférences plénières, ateliers participatifs, team-building à fort impact."
+        title={seoTitle || "Conventions & Kickoffs — Epitaphe 360"}
+        description={seoDescription || "Fédérez vos équipes autour de vos ambitions stratégiques. Conférences plénières, ateliers participatifs, team-building à fort impact."}
         canonicalPath="/evenements/conventions-kickoffs"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

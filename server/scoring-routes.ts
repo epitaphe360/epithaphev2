@@ -5,11 +5,11 @@
 import { Express, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import { db } from "./db";
-import { scoringResults, payments, expertConsultations, funnelEvents } from "../shared/schema";
+import { scoringResults, payments, expertConsultations, funnelEvents, settings } from "../shared/schema";
 import { processAssessment as _processAssessment, calculateMaturityLevel } from "./lib/scoring-engine";
 void _processAssessment;
 import { generateAIReport } from "./lib/ai-report";
-import { requireAdmin } from "./lib/auth";
+import { requireAuth, requireAdmin } from "./lib/auth";
 import { z } from "zod";
 import { desc, eq, gte } from "drizzle-orm";
 import {
@@ -93,6 +93,22 @@ const TOOL_PILLAR_WEIGHTS: Record<string, Record<string, number>> = {
 // ============================================================
 // HELPERS
 // ============================================================
+
+/** Charge le prompt IA personnalisé depuis la table settings (group ai_prompts) */
+async function loadCustomPrompt(toolId: string): Promise<string | undefined> {
+  try {
+    const row = await db.query.settings.findFirst({
+      where: (t, { and, eq }) => and(eq(t.group, 'ai_prompts'), eq(t.key, `prompt_${toolId}`)),
+    });
+    const val = row?.value;
+    // La valeur est stockée en JSON string ou en string directe
+    if (!val) return undefined;
+    const str = typeof val === 'string' ? val : JSON.stringify(val);
+    return str.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 async function trackEvent(opts: {
   scoringResultId?: string | null;
@@ -186,59 +202,56 @@ export function registerScoringRoutes(app: Express) {
 
   // POST /api/scoring/:toolId/discover — Tier Discover (GRATUIT)
   app.post("/api/scoring/:toolId/discover", scoringLimiter, async (req: Request, res: Response) => {
-    // Variables hors try pour que le catch externe puisse retourner un fallback local
-    let _toolId = '';
-    let _computed: { globalScore: number; maturityLevel: number; pillarScores: Record<string, number> } | null = null;
-    let _localId = '';
-    let _intelligencePrice = 0;
     try {
-      _toolId = req.params.toolId.toLowerCase();
-      if (!ALLOWED_TOOL_IDS.includes(_toolId)) return res.status(400).json({ error: "Outil non reconnu." });
+      const toolId = req.params.toolId.toLowerCase();
+      if (!ALLOWED_TOOL_IDS.includes(toolId)) return res.status(400).json({ error: "Outil non reconnu." });
 
       const parsed = discoverBodySchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
 
       const { answers, companyName, sector, companySize, voiceType, email, respondentName } = parsed.data;
-      _computed = computeScoreFromAnswers(_toolId, answers, 4);
-      _intelligencePrice = INTELLIGENCE_PRICES[_toolId];
-      _localId = `local-${_toolId}-${Date.now()}`;
+      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers, 4);
 
-      const { globalScore, maturityLevel, pillarScores } = _computed;
+      const [result] = await db.insert(scoringResults).values({
+        toolId, tier: 'discover', voiceType, companyName, sector, companySize,
+        email, respondentName, globalScore, pillarScores, maturityLevel,
+        sessionId: Math.random().toString(36).substring(7),
+        userAgent: req.headers['user-agent'] ?? null,
+      } as any).returning();
 
-      // Sauvegarde DB non bloquante — les scores sont retournés même si la DB échoue
-      let resultId: string = _localId;
-      try {
-        const [result] = await db.insert(scoringResults).values({
-          toolId: _toolId, tier: 'discover', voiceType, companyName, sector, companySize,
-          email, respondentName, globalScore, pillarScores, maturityLevel,
-          sessionId: Math.random().toString(36).substring(7),
-          userAgent: req.headers['user-agent'] ?? null,
-        } as any).returning();
-        resultId = result.id;
+      const intelligencePrice = INTELLIGENCE_PRICES[toolId];
 
-        // Funnel event & email (non bloquants)
-        trackEvent({ scoringResultId: result.id, toolId: _toolId, eventType: 'discover_completed', email, metadata: { globalScore, maturityLevel } }).catch(() => {});
-        if (email) {
-          sendDiscoverScoreEmail({ to: email, name: respondentName, toolId: _toolId, globalScore, maturityLevel, resultId: result.id, intelligencePriceMad: _intelligencePrice })
-            .then(() => trackEvent({ scoringResultId: result.id, toolId: _toolId, eventType: 'discover_email_sent', email }))
-            .catch(e => console.error('[Discover] Email failed:', e));
-        }
-      } catch (dbErr) {
-        console.error('[Scoring/Discover] DB save failed (scores still returned):', dbErr);
+      // Funnel event
+      await trackEvent({
+        scoringResultId: result.id,
+        toolId, eventType: 'discover_completed',
+        email,
+        metadata: { globalScore, maturityLevel },
+      });
+
+      // Email Discover automatique avec upsell (non bloquant)
+      if (email) {
+        sendDiscoverScoreEmail({
+          to: email,
+          name: respondentName,
+          toolId,
+          globalScore,
+          maturityLevel,
+          resultId: result.id,
+          intelligencePriceMad: intelligencePrice,
+        })
+          .then(() => trackEvent({
+            scoringResultId: result.id, toolId,
+            eventType: 'discover_email_sent', email,
+          }))
+          .catch(e => console.error('[Discover] Email failed:', e));
       }
 
       return res.status(201).json({
-        id: resultId, tier: 'discover', globalScore, maturityLevel, pillarScores,
-        intelligencePrice: _intelligencePrice,
+        id: result.id, tier: 'discover', globalScore, maturityLevel, pillarScores,
+        intelligencePrice,
       });
     } catch (error) {
-      // Fallback : si les scores sont calculés mais une erreur DB inattendue a échappé au catch interne
-      if (_computed && _localId) {
-        console.warn('[Scoring/Discover] Erreur inattendue catchée — fallback local:', (error as Error).message);
-        return res.status(201).json({
-          id: _localId, tier: 'discover', ..._computed, intelligencePrice: _intelligencePrice,
-        });
-      }
       console.error("[Scoring/Discover]", error);
       return res.status(500).json({ error: "Erreur serveur." });
     }
@@ -294,6 +307,7 @@ export function registerScoringRoutes(app: Express) {
 
       const toolId = existing.toolId;
       const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers);
+      const customPrompt = await loadCustomPrompt(toolId);
 
       const aiReport = await generateAIReport({
         toolId,
@@ -301,6 +315,7 @@ export function registerScoringRoutes(app: Express) {
         sector: sector ?? existing.sector ?? undefined,
         companySize: companySize ?? existing.companySize ?? undefined,
         globalScore, maturityLevel, pillarScores,
+        customPrompt,
       });
 
       const [updated] = await db.update(scoringResults).set({
@@ -339,15 +354,20 @@ export function registerScoringRoutes(app: Express) {
     }
   });
 
-  // POST /api/scoring/:id/simulate-payment — Paiement simulé (TEST)
+  // POST /api/scoring/:id/simulate-payment — Paiement simulé (TEST uniquement)
+  // Activé en development uniquement (NODE_ENV === 'development') ou si PAYMENT_SIMULATION_ENABLED=true
   app.post("/api/scoring/:id/simulate-payment", scoringLimiter, async (req: Request, res: Response) => {
+    const simulationEnabled =
+      process.env.PAYMENT_SIMULATION_ENABLED === 'true' ||
+      process.env.NODE_ENV === 'development';
+
+    if (!simulationEnabled) {
+      return res.status(403).json({ error: "Simulation désactivée en production." });
+    }
+
     try {
       const { id } = req.params;
-      const isLocalId = id.startsWith('local-');
-
-      if (!isLocalId && !/^[0-9a-f-]{36}$/i.test(id)) {
-        return res.status(400).json({ error: "ID invalide." });
-      }
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: "ID invalide." });
 
       const bodySchema = z.object({
         answers:      answersSchema,
@@ -356,99 +376,83 @@ export function registerScoringRoutes(app: Express) {
         companyName:  z.string().max(200).optional(),
         sector:       z.string().max(100).optional(),
         companySize:  z.string().max(50).optional(),
-        toolId:       z.string().optional(), // fallback si ID local
       });
       const parsed = bodySchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: "Données invalides.", details: parsed.error.errors });
 
       const { answers, email, respondentName, companyName, sector, companySize } = parsed.data;
 
-      // Récupérer l'enregistrement DB — peut être absent si la sauvegarde discover a échoué
-      let existing: typeof scoringResults.$inferSelect | undefined;
-      if (!isLocalId) {
-        existing = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
-      }
+      const existing = await db.query.scoringResults.findFirst({ where: (t, { eq }) => eq(t.id, id) });
+      if (!existing) return res.status(404).json({ error: "Résultat introuvable." });
 
-      // toolId : depuis DB, depuis le body, ou depuis l'ID local (format local-{toolId}-{ts})
-      const toolId = existing?.toolId
-        ?? parsed.data.toolId
-        ?? (isLocalId ? id.split('-')[1] : undefined)
-        ?? 'commpulse';
-
-      if (!ALLOWED_TOOL_IDS.includes(toolId)) return res.status(400).json({ error: "Outil non reconnu." });
-
+      const toolId   = existing.toolId;
       const priceHT  = INTELLIGENCE_PRICES[toolId];
       if (!priceHT) return res.status(400).json({ error: "Outil non facturé." });
       const priceTTC = Math.round(priceHT * (1 + TVA_RATE));
       const toolName = toolId.charAt(0).toUpperCase() + toolId.slice(1);
 
-      // Calcul du score complet (tous les piliers)
-      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers);
+      // 1. Créer enregistrement paiement simulé
+      const [payment] = await db.insert(payments).values({
+        scoringResultId: id,
+        type:          'intelligence',
+        amount:        priceTTC,
+        currency:      'MAD',
+        status:        'paid',
+        paymentMethod: 'simulation',
+        metadata:      { toolId, email, companyName, simulation: 'true' },
+      }).returning();
 
-      // Générer rapport IA
-      const aiReport = await generateAIReport({
+      // 2. Générer la facture PDF + envoyer par email
+      const invoiceNumber = await generateInvoiceNumber();
+      const invoiceResult = await createAndSendInvoice({
+        invoiceNumber,
+        paymentId:       payment.id,
+        scoringResultId: id,
+        clientEmail:     email,
+        clientName:      respondentName,
+        clientCompany:   companyName,
         toolId,
-        companyName: companyName ?? existing?.companyName ?? undefined,
-        sector:      sector      ?? existing?.sector      ?? undefined,
-        companySize: companySize ?? existing?.companySize ?? undefined,
-        globalScore, maturityLevel, pillarScores,
+        description:     `[TEST] Rapport Intelligence BMI 360™ — ${toolName}`,
+        amountHT:        priceHT,
+        currency:        'MAD',
       });
 
-      // DB ops non bloquantes — simulation réussit même si DB indisponible
-      let paymentId = `sim-local-${Date.now()}`;
-      let invoiceNumber = `INV-SIM-${Date.now()}`;
-      try {
-        // Upsert scoring result
-        let targetId = id;
-        if (isLocalId || !existing) {
-          const [inserted] = await db.insert(scoringResults).values({
-            toolId, tier: 'intelligence', voiceType: 'direction',
-            companyName, sector, companySize, email, respondentName,
-            globalScore, pillarScores, maturityLevel,
-            aiReport: aiReport as any,
-            intelligencePaymentRef: `SIM-pending`,
-            intelligenceUnlockedAt: new Date(),
-            sessionId: Math.random().toString(36).substring(7),
-          } as any).returning();
-          targetId = inserted.id;
-        } else {
-          await db.update(scoringResults).set({
-            tier: 'intelligence', globalScore, pillarScores, maturityLevel,
-            aiReport: aiReport as any,
-            intelligenceUnlockedAt: new Date(),
-            companyName: companyName ?? existing.companyName,
-            sector:      sector      ?? existing.sector,
-            companySize: companySize ?? existing.companySize,
-            email:       email       ?? existing.email,
-            respondentName: respondentName ?? existing.respondentName,
-          }).where(eq(scoringResults.id, id));
-        }
+      // 3. Générer le rapport IA
+      const { globalScore, maturityLevel, pillarScores } = computeScoreFromAnswers(toolId, answers);
+      const customPromptSim = await loadCustomPrompt(toolId);
+      const aiReport = await generateAIReport({
+        toolId,
+        companyName: companyName ?? existing.companyName ?? undefined,
+        sector:      sector      ?? existing.sector      ?? undefined,
+        companySize: companySize ?? existing.companySize ?? undefined,
+        globalScore, maturityLevel, pillarScores,
+        customPrompt: customPromptSim,
+      });
 
-        const [payment] = await db.insert(payments).values({
-          scoringResultId: targetId,
-          type: 'intelligence', amount: priceTTC, currency: 'MAD',
-          status: 'paid', paymentMethod: 'simulation',
-          metadata: { toolId, email, companyName, simulation: 'true' },
-        }).returning();
-        paymentId = payment.id;
-
-        const invNum = await generateInvoiceNumber();
-        const invoiceResult = await createAndSendInvoice({
-          invoiceNumber: invNum, paymentId: payment.id, scoringResultId: targetId,
-          clientEmail: email, clientName: respondentName, clientCompany: companyName,
-          toolId, description: `[TEST] Rapport Intelligence BMI 360™ — ${toolName}`,
-          amountHT: priceHT, currency: 'MAD',
-        });
-        invoiceNumber = invoiceResult.invoiceNumber;
-
-        await db.update(scoringResults).set({ intelligencePaymentRef: `SIM-${payment.id}` }).where(eq(scoringResults.id, targetId));
-      } catch (dbErr) {
-        console.error('[Scoring/SimulatePayment] DB ops failed (report still returned):', dbErr);
-      }
+      // 4. Mettre à jour le scoring result en intelligence tier
+      const [updated] = await db.update(scoringResults).set({
+        tier: 'intelligence', globalScore, pillarScores, maturityLevel,
+        aiReport: aiReport as any,
+        intelligencePaymentRef: `SIM-${payment.id}`,
+        intelligenceUnlockedAt: new Date(),
+        companyName: companyName ?? existing.companyName,
+        sector:      sector      ?? existing.sector,
+        companySize: companySize ?? existing.companySize,
+        email:       email       ?? existing.email,
+        respondentName: respondentName ?? existing.respondentName,
+      }).where(eq(scoringResults.id, id)).returning();
 
       return res.json({
-        id, tier: 'intelligence', globalScore, maturityLevel, pillarScores,
-        aiReport, simulation: true, paymentId, invoiceNumber, amountTTC: priceTTC,
+        id:            updated.id,
+        tier:          'intelligence',
+        globalScore,
+        maturityLevel,
+        pillarScores,
+        aiReport,
+        simulation:    true,
+        paymentId:     payment.id,
+        invoiceNumber: invoiceResult.invoiceNumber,
+        amountTTC:     priceTTC,
       });
     } catch (error) {
       console.error("[Scoring/SimulatePayment]", error);
@@ -776,7 +780,7 @@ export function registerScoringRoutes(app: Express) {
   // ADMIN — Consultations Transform
   // ========================================================
 
-  app.get("/api/admin/consultations", requireAdmin, async (_req: Request, res: Response) => {
+  app.get("/api/admin/consultations", requireAuth, requireAdmin, async (_req: Request, res: Response) => {
     try {
       const list = await db.select().from(expertConsultations).orderBy(desc(expertConsultations.createdAt));
       return res.json(list);
@@ -786,7 +790,7 @@ export function registerScoringRoutes(app: Express) {
     }
   });
 
-  app.patch("/api/admin/consultations/:id", requireAdmin, async (req: Request, res: Response) => {
+  app.patch("/api/admin/consultations/:id", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const schema = z.object({
@@ -819,7 +823,7 @@ export function registerScoringRoutes(app: Express) {
   // ADMIN — Funnel analytics (entonnoir de conversion)
   // ========================================================
 
-  app.get("/api/admin/funnel", requireAdmin, async (req: Request, res: Response) => {
+  app.get("/api/admin/funnel", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const days = Math.min(parseInt(String(req.query.days ?? '30'), 10) || 30, 365);
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -854,7 +858,7 @@ export function registerScoringRoutes(app: Express) {
   });
 
   // GET /api/admin/scoring — Admin: liste des résultats
-  app.get("/api/admin/scoring", requireAdmin, async (_req: Request, res: Response) => {
+  app.get("/api/admin/scoring", requireAuth, requireAdmin, async (_req: Request, res: Response) => {
     try {
       const results = await db.select({
         id: scoringResults.id, toolId: scoringResults.toolId, tier: scoringResults.tier,

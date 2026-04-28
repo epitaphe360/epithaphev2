@@ -7,6 +7,7 @@ import { Modal } from '../../components/Modal';
 import { Table } from '../../components/Table';
 import { Badge } from '../../components/Badge';
 import { RichTextEditor } from '../../components/RichTextEditor';
+import { ImageUploadField } from '../../components/ImageUploadField';
 import { BlogPost, SEOData } from '../../types/website-types';
 import { useApi } from '../../hooks/useApi';
 
@@ -327,10 +328,10 @@ const BlogPostForm: React.FC<{
             />
           </div>
 
-          <Input
-            label="Image à la une (URL)"
+          <ImageUploadField
+            label="Image à la une (URL ou fichier PC)"
             value={formData.featuredImage || ''}
-            onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
+            onChange={(url) => setFormData({ ...formData, featuredImage: url })}
           />
 
           <div>
@@ -404,12 +405,12 @@ const BlogPostForm: React.FC<{
             })}
           />
 
-          <Input
-            label="Image Open Graph (URL)"
+          <ImageUploadField
+            label="Image Open Graph (URL ou fichier PC)"
             value={formData.seo.ogImage || ''}
-            onChange={(e) => setFormData({ 
+            onChange={(url) => setFormData({ 
               ...formData, 
-              seo: { ...formData.seo, ogImage: e.target.value }
+              seo: { ...formData.seo, ogImage: url }
             })}
           />
 

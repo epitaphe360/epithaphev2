@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, Plus, Trash2 } from 'lucide-react';
 import { getApi } from '../../lib/api';
 import { toast } from '../../lib/toast';
+import { ImageUploadField } from '../../components/ImageUploadField';
 
 interface KPI { label: string; value: string; }
 interface CaseStudy {
@@ -103,9 +104,11 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
               className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1.5">Image principale (URL)</label>
-            <input type="text" value={form.featuredImage} onChange={(e) => set('featuredImage', e.target.value)}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
+            <ImageUploadField
+              label="Image principale (URL ou fichier PC)"
+              value={form.featuredImage}
+              onChange={(url) => set('featuredImage', url)}
+            />
           </div>
 
           {/* Contenu */}
@@ -135,16 +138,21 @@ export function CaseStudyForm({ caseStudy, onClose }: { caseStudy: Partial<CaseS
           {/* Gallery */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-600">Galerie d'images (URLs)</label>
+              <label className="text-sm font-medium text-gray-600">Galerie d'images</label>
               <button type="button" onClick={addGalleryUrl} className="text-xs flex items-center gap-1 text-[#C8A96E] hover:text-[#DFC28F]">
-                <Plus className="w-3 h-3" /> Ajouter URL
+                <Plus className="w-3 h-3" /> Ajouter
               </button>
             </div>
             {form.gallery.map((url, i) => (
-              <div key={i} className="flex gap-2 mb-2">
-                <input placeholder="https://..." value={url} onChange={(e) => setGallery(i, e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-[#C8A96E]" />
-                <button type="button" onClick={() => removeGallery(i)} className="p-2 text-gray-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+              <div key={i} className="flex gap-2 mb-2 items-start">
+                <div className="flex-1">
+                  <ImageUploadField
+                    value={url}
+                    onChange={(v) => setGallery(i, v)}
+                    placeholder="https://..."
+                  />
+                </div>
+                <button type="button" onClick={() => removeGallery(i)} className="p-2 text-gray-500 hover:text-red-400 mt-1"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
           </div>

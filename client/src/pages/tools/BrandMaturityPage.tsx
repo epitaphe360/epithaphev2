@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
+import { PageMeta } from '@/components/seo/page-meta';
 
 const DEFAULT_QUESTIONS = [
   { id: 'q1', text: "L'identite visuelle de la marque est deployee de maniere coherente partout." },
@@ -25,6 +26,12 @@ export default function BrandMaturityPage() {
 
   return (
     <>
+      <PageMeta
+        title="BMI 360™ — Brand Maturity Index"
+        description="Diagnostic de la maturité de votre marque. Le Brand Maturity Index pour la C-Suite par Epitaphe 360."
+        canonicalPath="/tools/brandmaturity"
+        noIndex
+      />
       <Navigation />
       <ScoringForm
         toolId="brandmaturity"

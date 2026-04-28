@@ -1,27 +1,63 @@
 /**
  * Composants Schema.org JSON-LD pour le SEO structuré
  * Usage: <OrganizationSchema /> dans App.tsx (une fois)
+ *        <WebSiteSchema /> dans App.tsx (une fois, active le SearchBox Google)
  *        <ServiceSchema name="..." description="..." url="..." /> dans chaque page service
  */
 
 const BASE_URL = "https://www.epitaphe360.ma";
+
+/** WebSite — active le SearchBox Google (Sitelinks Search Box) */
+export function WebSiteSchema() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Epitaphe 360",
+    alternateName: "Epitaphe360",
+    url: BASE_URL,
+    description: "Agence de communication 360° à Casablanca — événementiel, marque employeur, BMI 360™ Scoring Intelligence.",
+    inLanguage: "fr-MA",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/blog?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
 
 /** Organisation — à inclure une fois dans App.tsx */
 export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${BASE_URL}/#organization`,
     name: "Epitaphe360",
     alternateName: "Epitaphe 360",
     url: BASE_URL,
-    logo: `${BASE_URL}/logo.png`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${BASE_URL}/logo.png`,
+      width: 280,
+      height: 60,
+    },
     description:
       "Agence de communication événementielle 360° au Maroc — Événements corporate, architecture de marque, signalétique & La Fabrique.",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "123 Boulevard Mohammed V",
+      streetAddress: "Rez de chaussée, Immeuble 7-9, Rue Bussang, Maarif",
       addressLocality: "Casablanca",
-      postalCode: "20000",
+      postalCode: "20100",
+      addressRegion: "Grand Casablanca",
       addressCountry: "MA",
     },
     geo: {
@@ -32,7 +68,8 @@ export function OrganizationSchema() {
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: "+212-5-22-xx-xx-xx",
+        telephone: "+212-662-744-741",
+        email: "contact@epitaphe360.ma",
         contactType: "customer service",
         availableLanguage: ["French", "Arabic"],
         areaServed: "MA",
@@ -45,6 +82,55 @@ export function OrganizationSchema() {
     ],
     foundingDate: "2004",
     numberOfEmployees: { "@type": "QuantitativeValue", value: 80 },
+    areaServed: { "@type": "Country", name: "Maroc", "@id": "https://www.wikidata.org/wiki/Q1028" },
+    /** knowsAbout: signaux d'expertise pour AI Overviews et moteurs IA */
+    knowsAbout: [
+      "Communication événementielle",
+      "Événementiel corporate au Maroc",
+      "Architecture de marque",
+      "Marque employeur",
+      "Communication QHSE",
+      "Communication RSE",
+      "Signalétique d'entreprise",
+      "Aménagement d'espaces corporate",
+      "BMI 360 Scoring Intelligence",
+      "Communication interne",
+      "Organisation de conventions",
+      "Roadshows Maroc",
+      "Expérience collaborateur",
+    ],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Services Epitaphe 360",
+      itemListElement: [
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Événementiel corporate", url: `${BASE_URL}/evenements` } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Architecture de marque", url: `${BASE_URL}/architecture-de-marque` } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "La Fabrique 360", url: `${BASE_URL}/la-fabrique` } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "BMI 360™ Scoring Intelligence", url: `${BASE_URL}/outils/bmi360` } },
+      ],
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+/**
+ * SpeakableSchema — Balisage pour Google Assistant, AI Overviews et assistants vocaux.
+ * Indique les sections cssSelector à lire en priorité.
+ */
+export function SpeakableSchema({ cssSelectors }: { cssSelectors?: string[] }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: cssSelectors ?? ["h1", ".hero-title", ".hero-description", ".page-description", "main p:first-of-type"],
+    },
   };
 
   return (

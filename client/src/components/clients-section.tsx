@@ -10,9 +10,8 @@ const FALLBACK_CLIENTS: ClientRef[] = [
   { name: "XCOM", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-xcom.png" },
   { name: "Vinci Energies", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/LOGO_VINCI_ENERGIES.png" },
   { name: "Schneider Electric", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/Logo_Schneider_Electric.png" },
-  { name: "Dell", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/dell-logo.png" },
-  { name: "SNEP", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-snep.png" },
-  { name: "Ajial", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/logo-ajial.png" },
+  { name: "Dell", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/dell.jpg" },
+  { name: "SNEP", logo: "https://epitaphe.ma/wp-content/uploads/2020/05/SNEP.jpg" },
 ];
 
 export function ClientsSection() {

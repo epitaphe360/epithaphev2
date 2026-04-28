@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { ContactSection } from "@/components/contact-section";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useSolutionsData } from "@/hooks/useSolutionsData";
 import { useService } from "@/hooks/useService";
+import { PageMeta } from "@/components/seo/page-meta";
 
 export default function SolutionPage() {
   const { slug } = useParams();
@@ -42,27 +44,34 @@ export default function SolutionPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title={solution.heroTitle || solution.label || 'Solution Epitaphe 360'}
+        description={solution.heroSubtitle || solution.description || "Découvrez cette solution Epitaphe 360"}
+        canonicalPath={`/solutions/${slug ?? ''}`}
+      />
       <Navigation />
       
-      <section className="relative pt-20 min-h-[50vh] flex items-center justify-center overflow-hidden">
-        <div 
+      <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+        <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('${solution.heroImage}')`
-          }}
+          style={{ backgroundImage: `url('${solution.heroImage}')` }}
         />
-        <div className="absolute inset-0 bg-black/50" />
-        
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <p className="text-white/80 font-medium mb-4 text-lg" data-testid="text-solution-subtitle">
-            {solution.label}
-          </p>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6" data-testid="text-solution-title">
-            {solution.heroTitle}
-          </h1>
-          <p className="text-lg text-white/90 leading-relaxed mb-8 max-w-3xl mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+        <div className="relative z-10 text-center px-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+            data-testid="text-solution-title"
+          >
+            <span className="inline-block bg-primary px-4 py-2">{solution.heroTitle}</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+            className="text-white/80 text-lg max-w-2xl mx-auto"
+            data-testid="text-solution-subtitle"
+          >
             {solution.heroSubtitle}
-          </p>
+          </motion.p>
         </div>
       </section>
 

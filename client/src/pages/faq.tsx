@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PageMeta } from "@/components/seo/page-meta";
-import { Breadcrumbs } from "@/components/breadcrumbs";
+import { StatsSection } from "@/components/stats-section";
+import { RevealSection } from "@/components/reveal-section";
+import { ContextualCta } from "@/components/contextual-cta";
 import { ChevronDown } from "lucide-react";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 const faqItems = [
   {
@@ -83,7 +87,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       >
         <span className="font-medium leading-snug">{q}</span>
         <ChevronDown
-          className={`w-5 h-5 flex-shrink-0 text-[#C8A96E] mt-0.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`w-5 h-5 flex-shrink-0 text-primary mt-0.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
@@ -96,6 +100,15 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function FaqPage() {
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/pages/slug/faq')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.content) setHtmlContent(d.content); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
@@ -104,37 +117,65 @@ export default function FaqPage() {
         canonicalPath="/faq"
       />
       <Navigation />
-      <Breadcrumbs />
 
-      <main className="pt-24 pb-20 max-w-3xl mx-auto px-6 sm:px-8">
-        <div className="mb-12">
-          <div className="inline-block px-3 py-1 rounded-full border border-[#C8A96E]/30 text-[#C8A96E] text-xs font-semibold tracking-widest uppercase mb-6">
-            Aide
-          </div>
-          <h1 className="text-4xl font-bold mb-4">Questions fréquentes</h1>
-          <p className="text-muted-foreground text-lg">
-            Vous avez une question ? Trouvez la réponse ici. Sinon,{" "}
-            <a href="/contact" className="text-[#C8A96E] hover:underline">
-              contactez-nous directement
-            </a>
-            .
-          </p>
+      {/* ─── Hero ─────────────────────────────────────────────────────────────── */}
+      <section className="relative pt-20 min-h-[45vh] flex items-center justify-center overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1600&q=80')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+        <div className="relative z-10 text-center px-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+          >
+            <span className="inline-block bg-primary px-4 py-2">Questions</span>
+            <br />
+            <span className="inline-block bg-primary px-4 py-2 mt-2">fréquentes</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-white/80 text-lg"
+          >
+            Vous avez une question ? Trouvez la réponse ici.
+          </motion.p>
         </div>
+      </section>
 
-        {faqItems.map((cat) => (
-          <section key={cat.category} className="mb-10">
-            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[#C8A96E] mb-4">
-              {cat.category}
-            </h2>
-            <div className="rounded-xl border border-border px-6">
-              {cat.questions.map((item) => (
-                <FaqItem key={item.q} q={item.q} a={item.a} />
+      {/* ─── FAQ content : CMS ou fallback hardcodé ────────────────────────── */}
+      {htmlContent ? (
+        <section className="py-16 md:py-24 px-4">
+          <div className="max-w-3xl mx-auto prose prose-lg max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }} />
+          </div>
+        </section>
+      ) : (
+        <section className="py-16 md:py-24 px-4">
+          <div className="max-w-3xl mx-auto">
+            <RevealSection>
+              {faqItems.map((cat) => (
+                <section key={cat.category} className="mb-10">
+                  <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-primary mb-4">
+                    {cat.category}
+                  </h2>
+                  <div className="rounded-2xl border border-border px-6 bg-card">
+                    {cat.questions.map((item) => (
+                      <FaqItem key={item.q} q={item.q} a={item.a} />
+                    ))}
+                  </div>
+                </section>
               ))}
-            </div>
-          </section>
-        ))}
-      </main>
+            </RevealSection>
+          </div>
+        </section>
+      )}
 
+      <StatsSection />
+      <ContextualCta pageKey="evenements" />
       <Footer />
     </div>
   );

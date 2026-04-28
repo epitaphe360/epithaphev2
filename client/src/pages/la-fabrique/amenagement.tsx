@@ -72,13 +72,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function Amenagement() {
-  const { data } = useServicePage("la-fabrique/amenagement", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("la-fabrique/amenagement", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Aménagement d'Espace — La Fabrique | Epitaphe 360"
-        description="Scénographie événementielle, architecture éphémère et design d'intérieur. Transformez chaque espace en une expérience de marque."
+        title={seoTitle || "Aménagement d'Espace — La Fabrique | Epitaphe 360"}
+        description={seoDescription || "Scénographie événementielle, architecture éphémère et design d'intérieur. Transformez chaque espace en une expérience de marque."}
         canonicalPath="/la-fabrique/amenagement"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

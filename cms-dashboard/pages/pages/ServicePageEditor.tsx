@@ -7,6 +7,7 @@ import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Input, Textarea } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
+import { ImageUploadField } from '../../components/ImageUploadField';
 
 // ─── Types ────────────────────────────────────────────────────────
 interface PitchStat { value: string; label: string; }
@@ -125,8 +126,11 @@ export const ServicePageEditor: React.FC<Props> = ({ value, onChange }) => {
             <input className={fieldClass()} value={value.heroTag ?? ''} onChange={e => set('heroTag', e.target.value)} placeholder="Ex: Événements Internes" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Image (URL)</label>
-            <input className={fieldClass()} value={value.heroImage ?? ''} onChange={e => set('heroImage', e.target.value)} placeholder="https://..." />
+            <ImageUploadField
+              label="Image (URL ou fichier PC)"
+              value={value.heroImage ?? ''}
+              onChange={v => set('heroImage', v)}
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Bouton CTA — Label</label>

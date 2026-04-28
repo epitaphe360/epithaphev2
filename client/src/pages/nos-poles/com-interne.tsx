@@ -11,7 +11,7 @@ const fallbackData: ServicePageData = {
   heroTitle: "Communication Interne",
   heroSubtitle: "Fédérez vos collaborateurs autour d'une vision commune et transformez votre culture d'entreprise en levier de performance.",
   heroTag: "COM' Interne",
-  heroImage: "https://epitaphe.ma/wp-content/uploads/2020/05/conventions.jpg",
+  heroImage: "https://version2.epitaphe.ma/wp-content/uploads/2025/11/Communication-interne-Industrie-Maroc-700x876.webp",
   heroCta: { label: "Booster ma com' interne", href: "/contact/brief" },
 
   pitchTitle: "87% des collaborateurs se sentent désengagés faute d'une communication interne efficace",
@@ -78,13 +78,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function ComInterne() {
-  const { data } = useServicePage("nos-poles/com-interne", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("nos-poles/com-interne", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Communication Interne — COM' Interne | Epitaphe 360"
-        description="Fédérez vos collaborateurs avec une stratégie de communication interne sur mesure. Supports, événements, scoring CommPulse™ et plan de communication annuel."
+        title={seoTitle || "Communication Interne — COM' Interne | Epitaphe 360"}
+        description={seoDescription || "Fédérez vos collaborateurs avec une stratégie de communication interne sur mesure. Supports, événements, scoring CommPulse™ et plan de communication annuel."}
         canonicalPath="/nos-poles/com-interne"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

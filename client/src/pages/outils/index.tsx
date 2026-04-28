@@ -1,14 +1,13 @@
-import { Helmet } from "react-helmet-async";
+import { PageMeta } from "@/components/seo/page-meta";
 import { Link } from "wouter";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { useCmsPage } from "@/hooks/useCmsPage";
 import {
   SoftwareApplicationSchema,
   BreadcrumbSchema,
   WebPageSchema,
 } from "@/components/seo/schema-org";
-
-const BASE_URL = "https://www.epitaphe360.ma";
 
 // Plan annuel BMI 360™ Full — aligné sur server/scoring-routes.ts FULL_ANNUAL_PRICE_MAD
 const FULL_ANNUAL_PRICE_MAD = 39000;
@@ -115,24 +114,14 @@ const TOOLS = [
 ];
 
 export default function OutilsHub() {
+  const cmsContent = useCmsPage('outils');
   return (
     <>
-      <Helmet>
-        <title>BMI 360™ — Outils de Scoring Intelligence d'Entreprise | Epitaphe 360</title>
-        <meta
-          name="description"
-          content="8 outils de scoring BMI 360™ pour mesurer la maturité de votre communication : interne, marque employeur, RSE, QHSE, événementiel, signalétique et financière."
-        />
-        <link rel="canonical" href={`${BASE_URL}/outils`} />
-        <meta property="og:title" content="BMI 360™ — Scoring Intelligence d'Entreprise" />
-        <meta
-          property="og:description"
-          content="8 outils de scoring pour mesurer et piloter votre communication avec précision."
-        />
-        <meta property="og:url" content={`${BASE_URL}/outils`} />
-        <meta property="og:image" content={`${BASE_URL}/og-image.png`} />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="BMI 360™ — Outils de Scoring Intelligence d'Entreprise"
+        description="8 outils de scoring BMI 360™ pour mesurer la maturité de votre communication : interne, marque employeur, RSE, QHSE, événementiel, signalétique et financière."
+        canonicalPath="/outils"
+      />
 
       {/* JSON-LD structuré */}
       <WebPageSchema
@@ -164,6 +153,9 @@ export default function OutilsHub() {
       <Navigation />
 
       <main className="min-h-screen bg-white dark:bg-zinc-950">
+        {cmsContent ? (
+          <div className="max-w-7xl mx-auto px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+        ) : (<>
         {/* ── Hero ───────────────────────────────────────────────────────── */}
         <section className="relative py-24 px-6 text-center overflow-hidden bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950">
           <div className="absolute inset-0 opacity-10"
@@ -305,6 +297,7 @@ export default function OutilsHub() {
             </div>
           </div>
         </section>
+        </>)}
       </main>
 
       <Footer />

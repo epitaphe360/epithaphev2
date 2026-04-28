@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
-import { Helmet } from 'react-helmet-async';
+import { PageMeta } from '@/components/seo/page-meta';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
@@ -138,14 +138,11 @@ export default function ImpactTracePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <Helmet>
-        <title>ImpactTrace™ — Scoring RSE & Communication Responsable | Epitaphe 360</title>
-        <meta name="description" content="Diagnostiquez la maturité RSE de votre communication avec ImpactTrace™ (modèle PROOF™). Walk vs Talk Score™ : mesurez l'écart entre vos déclarations RSE et vos actions réelles." />
-        <link rel="canonical" href="https://www.epitaphe360.ma/outils/impacttrace" />
-        <meta property="og:title" content="ImpactTrace™ — Scoring RSE" />
-        <meta property="og:url" content="https://www.epitaphe360.ma/outils/impacttrace" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="ImpactTrace™ — Scoring RSE &amp; Communication Responsable"
+        description="Diagnostiquez la maturité RSE de votre communication avec ImpactTrace™ (modèle PROOF™). Walk vs Talk Score™ : mesurez l'écart entre vos déclarations RSE et vos actions réelles."
+        canonicalPath="/outils/impacttrace"
+      />
       <SoftwareApplicationSchema name="ImpactTrace™" description="Diagnostiquez la maturité RSE de votre communication et son impact sur vos parties prenantes." url="/outils/impacttrace" priceMad={8400} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"ImpactTrace™",url:"/outils/impacttrace"}]} />
       <Navigation />

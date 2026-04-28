@@ -8,6 +8,7 @@ import { ContextualCta } from "@/components/contextual-cta";
 import { RevealSection } from "@/components/reveal-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { useSettings } from "@/hooks/useSettings";
+import { useCmsPage } from "@/hooks/useCmsPage";
 
 // Map icône par slug de pôle (non sérialisable en JSON/DB → hardcodé)
 const POLE_ICONS: Record<string, React.ReactNode> = {
@@ -61,6 +62,7 @@ const FALLBACK_ATELIER = [
 
 export default function LaFabriqueHub() {
   const { settings } = useSettings("fabrique", {});
+  const cmsContent = useCmsPage('la-fabrique');
 
   type PoleItem = { icon: string; label: string; description: string; href: string; image: string; specs: string[] };
   type AtelierItem = { value: string; label: string };
@@ -97,39 +99,23 @@ export default function LaFabriqueHub() {
         canonicalPath="/la-fabrique"
       />
       <Navigation />
-      <Breadcrumbs />
       <main>
+        {cmsContent ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+        ) : (<>
         {/* Hero */}
-        <section className="relative py-20 md:py-28 bg-foreground text-background overflow-hidden">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1400&q=60')", backgroundSize: "cover", backgroundPosition: "center" }} />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <div className="flex items-center justify-center gap-2 mb-5">
-                <Factory className="w-6 h-6 text-primary" />
-                <span className="bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
-                  100% Made in Epitaphe
-                </span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5 max-w-3xl mx-auto leading-tight">
-                La Fabrique — <span className="text-primary">votre production, notre atelier</span>
-              </h1>
-              <p className="text-background/70 text-lg max-w-2xl mx-auto mb-8">
-                3 000 m² d'ateliers spécialisés à Casablanca pour concevoir, produire et livrer tous vos éléments visuels avec précision et dans les délais.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <Link href="/contact/brief">
-                  <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
-                    Demander un devis <ArrowRight className="w-4 h-4" />
-                  </motion.button>
-                </Link>
-                <Link href="/outils/calculateur-fabrique">
-                  <button className="px-6 py-3 rounded-xl border border-background/30 text-background font-semibold text-sm hover:border-primary hover:text-primary transition-colors">
-                    Calculer mes économies
-                  </button>
-                </Link>
-              </div>
-            </motion.div>
+        <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1600&q=80')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+          <div className="relative z-10 text-center px-4">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+              <span className="inline-block bg-primary px-4 py-2">La Fabrique —</span>
+              <br />
+              <span className="inline-block bg-primary px-4 py-2 mt-2">votre production</span>
+            </motion.h1>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">
+              3 000 m² d'ateliers spécialisés — 100% Made in Epitaphe
+            </motion.p>
           </div>
         </section>
 
@@ -233,6 +219,7 @@ export default function LaFabriqueHub() {
             </RevealSection>
           </div>
         </section>
+        </>)}
       </main>
       <ContextualCta pageKey="la-fabrique" />
       <Footer />

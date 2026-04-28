@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { ContextualCta } from "@/components/contextual-cta";
 import { RevealSection } from "@/components/reveal-section";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { useCmsPage } from "@/hooks/useCmsPage";
 
 const eventTypes = [
   {
@@ -51,6 +52,7 @@ const keyFigures = [
 ];
 
 export default function EvenementsHub() {
+  const cmsContent = useCmsPage('evenements');
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
@@ -59,36 +61,23 @@ export default function EvenementsHub() {
         canonicalPath="/evenements"
       />
       <Navigation />
-      <Breadcrumbs />
       <main>
+        {cmsContent ? (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dangerouslySetInnerHTML={{ __html: cmsContent }} />
+        ) : (<>
         {/* Hero */}
-        <section className="relative py-20 md:py-28 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <span className="inline-block bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-5">
-                Événements Corporate
-              </span>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground mb-5 max-w-3xl mx-auto leading-tight">
-                Des événements qui <span className="text-primary">marquent les esprits</span>
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-                Epitaphe 360 conçoit et orchestre vos événements d'entreprise de A à Z — de la conception créative jusqu'à la production sur le terrain.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <Link href="/contact/brief">
-                  <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
-                    Déposer un brief <ArrowRight className="w-4 h-4" />
-                  </motion.button>
-                </Link>
-                <Link href="/nos-references">
-                  <button className="px-6 py-3 rounded-xl border border-border text-foreground font-semibold text-sm hover:border-primary hover:text-primary transition-colors">
-                    Voir nos références
-                  </button>
-                </Link>
-              </div>
-            </motion.div>
+        <section className="relative pt-20 min-h-[55vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600&q=80')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+          <div className="relative z-10 text-center px-4">
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+              <span className="inline-block bg-primary px-4 py-2">Événements qui</span>
+              <br />
+              <span className="inline-block bg-primary px-4 py-2 mt-2">marquent les esprits</span>
+            </motion.h1>
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-white/80 text-lg">
+              Conventions, galas, roadshows et salons — de A à Z
+            </motion.p>
           </div>
         </section>
 
@@ -162,6 +151,7 @@ export default function EvenementsHub() {
             </RevealSection>
           </div>
         </section>
+        </>)}
       </main>
       <ContextualCta pageKey="evenements" />
       <Footer />

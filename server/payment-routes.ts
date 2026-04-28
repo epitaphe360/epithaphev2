@@ -359,7 +359,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * GET /api/admin/devis
    */
-  app.get("/api/admin/devis", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.get("/api/admin/devis", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { status, limit = "50", offset = "0" } = req.query as Record<string, string>;
       let query = db.select().from(devis).orderBy(desc(devis.createdAt)).$dynamic();
@@ -379,7 +379,7 @@ export function registerPaymentRoutes(app: Express) {
    * POST /api/admin/devis
    * Créer un devis depuis le CMS admin
    */
-  app.post("/api/admin/devis", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.post("/api/admin/devis", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const devisSchema = z.object({
         clientName: z.string().min(1).max(200),
@@ -423,7 +423,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * PUT /api/admin/devis/:id
    */
-  app.put("/api/admin/devis/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.put("/api/admin/devis/:id", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { id: _id, reference: _ref, createdAt: _c, ...updateData } = req.body;
 
@@ -450,7 +450,7 @@ export function registerPaymentRoutes(app: Express) {
    * POST /api/admin/devis/:id/send
    * Envoyer le devis au client par email
    */
-  app.post("/api/admin/devis/:id/send", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.post("/api/admin/devis/:id/send", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const [d] = await db.select().from(devis).where(eq(devis.id, Number(req.params.id))).limit(1);
       if (!d) return res.status(404).json({ error: "Devis introuvable" });
@@ -483,7 +483,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * DELETE /api/admin/devis/:id
    */
-  app.delete("/api/admin/devis/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.delete("/api/admin/devis/:id", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       await db.delete(devis).where(eq(devis.id, Number(req.params.id)));
       res.json({ success: true });
@@ -496,7 +496,7 @@ export function registerPaymentRoutes(app: Express) {
   // ADMIN — Plans d'abonnement (CRUD)
   // ================================================================
 
-  app.get("/api/admin/plans", requireAuth as any, requireAdmin as any, async (_req: Request, res: Response) => {
+  app.get("/api/admin/plans", requireAuth, requireAdmin, async (_req: Request, res: Response) => {
     try {
       const plans = await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.sortOrder);
       res.json({ data: plans, total: plans.length });
@@ -505,7 +505,7 @@ export function registerPaymentRoutes(app: Express) {
     }
   });
 
-  app.post("/api/admin/plans", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.post("/api/admin/plans", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const planSchema = z.object({
         name: z.string().min(1).max(100),
@@ -527,7 +527,7 @@ export function registerPaymentRoutes(app: Express) {
     }
   });
 
-  app.put("/api/admin/plans/:id", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.put("/api/admin/plans/:id", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { id: _id, createdAt: _c, ...rawData } = req.body;
       const updatePlanSchema = z.object({
@@ -555,7 +555,7 @@ export function registerPaymentRoutes(app: Express) {
   // ADMIN — Paiements (lecture seule)
   // ================================================================
 
-  app.get("/api/admin/payments", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.get("/api/admin/payments", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { type, status, limit = "50", offset = "0" } = req.query as Record<string, string>;
       let q = db.select().from(payments).orderBy(desc(payments.createdAt)).$dynamic();
@@ -635,10 +635,18 @@ export function registerPaymentRoutes(app: Express) {
           const [result] = await db.select().from(scoringResults)
             .where(eq(scoringResults.id, payment.scoringResultId)).limit(1);
           if (result && result.tier !== 'intelligence') {
-            const aiReport = await generateAIReport(result);
+            const aiReport = await generateAIReport({
+              toolId: result.toolId,
+              companyName: result.companyName ?? undefined,
+              sector: result.sector ?? undefined,
+              companySize: result.companySize ?? undefined,
+              globalScore: result.globalScore,
+              maturityLevel: result.maturityLevel,
+              pillarScores: result.pillarScores as Record<string, number>,
+            });
             await db.update(scoringResults)
-              .set({ tier: 'intelligence', aiReport, intelligenceUnlockedAt: new Date(), updatedAt: new Date() })
-              .where(eq(scoringResults.id, payment.scoringResultId));
+              .set({ tier: 'intelligence', aiReport, intelligenceUnlockedAt: new Date() })
+              .where(eq(scoringResults.id, payment.scoringResultId!));
           }
         } catch (aiError) {
           console.error('[PayPal/Success] Rapport IA échoué:', aiError);
@@ -744,10 +752,18 @@ export function registerPaymentRoutes(app: Express) {
           const [result] = await db.select().from(scoringResults)
             .where(eq(scoringResults.id, payment.scoringResultId)).limit(1);
           if (result && result.tier !== 'intelligence') {
-            const aiReport = await generateAIReport(result);
+            const aiReport = await generateAIReport({
+              toolId: result.toolId,
+              companyName: result.companyName ?? undefined,
+              sector: result.sector ?? undefined,
+              companySize: result.companySize ?? undefined,
+              globalScore: result.globalScore,
+              maturityLevel: result.maturityLevel,
+              pillarScores: result.pillarScores as Record<string, number>,
+            });
             await db.update(scoringResults)
-              .set({ tier: 'intelligence', aiReport, intelligenceUnlockedAt: new Date(), updatedAt: new Date() })
-              .where(eq(scoringResults.id, payment.scoringResultId));
+              .set({ tier: 'intelligence', aiReport, intelligenceUnlockedAt: new Date() })
+              .where(eq(scoringResults.id, payment.scoringResultId!));
           }
         } catch (aiError) {
           console.error('[CMI/Callback] Rapport IA échoué:', aiError);
@@ -776,7 +792,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * GET /api/admin/invoices — Liste toutes les factures
    */
-  app.get("/api/admin/invoices", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.get("/api/admin/invoices", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const { status, toolId, limit = "50", offset = "0" } = req.query as Record<string, string>;
       let q = db.select({
@@ -814,7 +830,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * GET /api/admin/invoices/:id/pdf — Télécharger le PDF d'une facture
    */
-  app.get("/api/admin/invoices/:id/pdf", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.get("/api/admin/invoices/:id/pdf", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) return res.status(400).json({ error: "ID invalide" });
@@ -839,7 +855,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * PATCH /api/admin/invoices/:id/status — Mettre à jour le statut d'une facture
    */
-  app.patch("/api/admin/invoices/:id/status", requireAuth as any, requireAdmin as any, async (req: Request, res: Response) => {
+  app.patch("/api/admin/invoices/:id/status", requireAuth, requireAdmin, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) return res.status(400).json({ error: "ID invalide" });
@@ -863,7 +879,7 @@ export function registerPaymentRoutes(app: Express) {
   /**
    * GET /api/admin/invoices/stats — Statistiques de facturation
    */
-  app.get("/api/admin/invoices/stats", requireAuth as any, requireAdmin as any, async (_req: Request, res: Response) => {
+  app.get("/api/admin/invoices/stats", requireAuth, requireAdmin, async (_req: Request, res: Response) => {
     try {
       const allInvoices = await db.select({
         amountHT:  invoices.amountHT,

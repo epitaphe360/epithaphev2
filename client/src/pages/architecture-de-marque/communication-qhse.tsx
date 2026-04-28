@@ -78,13 +78,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function CommunicationQhse() {
-  const { data } = useServicePage("architecture-de-marque/communication-qhse", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("architecture-de-marque/communication-qhse", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Communication QHSE — Architecture de Marque | Epitaphe 360"
-        description="Transformez vos obligations sécurité en culture positive. Affichage réglementaire, procédures d'urgence, formation visuelle QHSE."
+        title={seoTitle || "Communication QHSE — Architecture de Marque | Epitaphe 360"}
+        description={seoDescription || "Transformez vos obligations sécurité en culture positive. Affichage réglementaire, procédures d'urgence, formation visuelle QHSE."}
         canonicalPath="/architecture-de-marque/communication-qhse"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

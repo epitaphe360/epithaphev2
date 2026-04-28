@@ -15,7 +15,7 @@ export function sanitizeHtml(dirty: string): string {
       'table', 'thead', 'tbody', 'tr', 'th', 'td',
       'div', 'span', 'section', 'article', 'header', 'footer', 'nav',
       'b', 'i', 's', 'del', 'ins', 'sub', 'sup', 'mark',
-      'hr', 'video', 'audio', 'source', 'iframe'
+      'hr', 'video', 'audio', 'source',
     ],
     ALLOWED_ATTR: [
       'href', 'target', 'rel', 'src', 'alt', 'title', 'class', 'id',

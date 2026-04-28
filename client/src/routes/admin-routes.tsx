@@ -31,10 +31,15 @@ const IntegrationSettings   = lazy(() => import("../../../cms-dashboard/pages/se
 const VisualEditorMgmt      = lazy(() => import("../../../cms-dashboard/pages/plasmic").then(m => ({ default: m.VisualEditorManagement })));
 const GrapesJSEditor        = lazy(() => import("../../../cms-dashboard/pages/plasmic/GrapesJSEditor"));
 const ServicesList          = lazy(() => import("../../../cms-dashboard/pages/services").then(m => ({ default: m.ServicesList })));
+const ServiceForm           = lazy(() => import("../../../cms-dashboard/pages/services").then(m => ({ default: m.ServiceForm })));
 const ReferencesList        = lazy(() => import("../../../cms-dashboard/pages/references").then(m => ({ default: m.ReferencesList })));
+const ReferenceForm         = lazy(() => import("../../../cms-dashboard/pages/references").then(m => ({ default: m.ReferenceForm })));
 const CaseStudiesList       = lazy(() => import("../../../cms-dashboard/pages/case-studies").then(m => ({ default: m.CaseStudiesList })));
+const CaseStudyForm         = lazy(() => import("../../../cms-dashboard/pages/case-studies").then(m => ({ default: m.CaseStudyForm })));
 const TestimonialsList      = lazy(() => import("../../../cms-dashboard/pages/testimonials").then(m => ({ default: m.TestimonialsList })));
+const TestimonialForm       = lazy(() => import("../../../cms-dashboard/pages/testimonials").then(m => ({ default: m.TestimonialForm })));
 const TeamList              = lazy(() => import("../../../cms-dashboard/pages/team").then(m => ({ default: m.TeamList })));
+const TeamForm              = lazy(() => import("../../../cms-dashboard/pages/team").then(m => ({ default: m.TeamForm })));
 const LeadsList             = lazy(() => import("../../../cms-dashboard/pages/leads").then(m => ({ default: m.LeadsList })));
 const NewsletterList        = lazy(() => import("../../../cms-dashboard/pages/newsletter").then(m => ({ default: m.NewsletterList })));
 const ContactsList          = lazy(() => import("../../../cms-dashboard/pages/contacts").then(m => ({ default: m.ContactsList })));
@@ -54,10 +59,15 @@ const HomepageSettings      = lazy(() => import("../../../cms-dashboard/pages/ho
 const AppearanceSettings    = lazy(() => import("../../../cms-dashboard/pages/appearance/AppearanceSettings").then(m => ({ default: m.AppearanceSettings })));
 const BriefFormEditor       = lazy(() => import("../../../cms-dashboard/pages/forms/BriefFormEditor").then(m => ({ default: m.BriefFormEditor })));
 const ScoringQuestionsEditor = lazy(() => import("../../../cms-dashboard/pages/forms/ScoringQuestionsEditor").then(m => ({ default: m.ScoringQuestionsEditor })));
+const ScoringPromptSettings  = lazy(() => import("../../../cms-dashboard/pages/scoring/ScoringPromptSettings"));
 const ClientAccountsPage    = lazy(() => import("../../../cms-dashboard/pages/client-accounts/ClientAccountsPage").then(m => ({ default: m.ClientAccountsPage })));
 const AuditLogsPage         = lazy(() => import("../../../cms-dashboard/pages/audit-logs/AuditLogsPage").then(m => ({ default: m.AuditLogsPage })));
+const FacturationPage       = lazy(() => import("../../../cms-dashboard/pages/facturation/FacturationPage").then(m => ({ default: m.FacturationPage })));
+const UserForm              = lazy(() => import("../../../cms-dashboard/pages/users").then(m => ({ default: m.UserForm })));
 const ForgotPasswordPage    = lazy(() => import("../../../cms-dashboard/pages/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage })));
 const ResetPasswordPage     = lazy(() => import("../../../cms-dashboard/pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
+const HomeSectionsEditor    = lazy(() => import("../../../cms-dashboard/pages/pages/PuckSectionsEditor"));
+const NewPageWithTemplate   = lazy(() => import("../../../cms-dashboard/pages/pages/NewPageWithTemplate").then(m => ({ default: m.NewPageWithTemplate })));
 
 // ─── ProtectedRoute ───────────────────────────────────────────────────────────
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -130,10 +140,24 @@ export function AdminRoutes() {
         {() => <AdminPage><PagesList /></AdminPage>}
       </Route>
       <Route path="/admin/pages/new">
-        {() => <AdminPage><PageForm /></AdminPage>}
+        {() => <AdminPage><NewPageWithTemplate /></AdminPage>}
       </Route>
       <Route path="/admin/pages/:id/edit">
         {() => <AdminPage><PageForm /></AdminPage>}
+      </Route>
+
+      {/* Sections editor (legacy /home, slug simple, slug imbriqué 2 ou 3 niveaux) */}
+      <Route path="/admin/pages/home/sections">
+        {() => <AdminPage><HomeSectionsEditor /></AdminPage>}
+      </Route>
+      <Route path="/admin/pages/:pageSlug/sections">
+        {() => <AdminPage><HomeSectionsEditor /></AdminPage>}
+      </Route>
+      <Route path="/admin/pages/:parentSlug/:childSlug/sections">
+        {() => <AdminPage><HomeSectionsEditor /></AdminPage>}
+      </Route>
+      <Route path="/admin/pages/:parentSlug/:childSlug/:grandChildSlug/sections">
+        {() => <AdminPage><HomeSectionsEditor /></AdminPage>}
       </Route>
 
       {/* Visual Editor */}
@@ -158,6 +182,12 @@ export function AdminRoutes() {
       <Route path="/admin/users">
         {() => <AdminPage><UsersList /></AdminPage>}
       </Route>
+      <Route path="/admin/users/new">
+        {() => <AdminPage><UserForm /></AdminPage>}
+      </Route>
+      <Route path="/admin/users/:id/edit">
+        {() => <AdminPage><UserForm /></AdminPage>}
+      </Route>
 
       {/* Settings */}
       <Route path="/admin/settings/general">
@@ -174,25 +204,55 @@ export function AdminRoutes() {
       <Route path="/admin/services">
         {() => <AdminPage><ServicesList /></AdminPage>}
       </Route>
+      <Route path="/admin/services/new">
+        {() => <AdminPage><ServiceForm /></AdminPage>}
+      </Route>
+      <Route path="/admin/services/:id/edit">
+        {() => <AdminPage><ServiceForm /></AdminPage>}
+      </Route>
 
       {/* Références */}
       <Route path="/admin/references">
         {() => <AdminPage><ReferencesList /></AdminPage>}
+      </Route>
+      <Route path="/admin/references/new">
+        {() => <AdminPage><ReferenceForm /></AdminPage>}
+      </Route>
+      <Route path="/admin/references/:id/edit">
+        {() => <AdminPage><ReferenceForm /></AdminPage>}
       </Route>
 
       {/* Études de cas */}
       <Route path="/admin/case-studies">
         {() => <AdminPage><CaseStudiesList /></AdminPage>}
       </Route>
+      <Route path="/admin/case-studies/new">
+        {() => <AdminPage><CaseStudyForm /></AdminPage>}
+      </Route>
+      <Route path="/admin/case-studies/:id/edit">
+        {() => <AdminPage><CaseStudyForm /></AdminPage>}
+      </Route>
 
       {/* Témoignages */}
       <Route path="/admin/testimonials">
         {() => <AdminPage><TestimonialsList /></AdminPage>}
       </Route>
+      <Route path="/admin/testimonials/new">
+        {() => <AdminPage><TestimonialForm /></AdminPage>}
+      </Route>
+      <Route path="/admin/testimonials/:id/edit">
+        {() => <AdminPage><TestimonialForm /></AdminPage>}
+      </Route>
 
       {/* Équipe */}
       <Route path="/admin/team">
         {() => <AdminPage><TeamList /></AdminPage>}
+      </Route>
+      <Route path="/admin/team/new">
+        {() => <AdminPage><TeamForm /></AdminPage>}
+      </Route>
+      <Route path="/admin/team/:id/edit">
+        {() => <AdminPage><TeamForm /></AdminPage>}
       </Route>
 
       {/* Leads */}
@@ -233,6 +293,15 @@ export function AdminRoutes() {
       {/* Scoring — résultats des outils */}
       <Route path="/admin/scoring">
         {() => <AdminPage><ScoringResultsList /></AdminPage>}
+      </Route>
+      <Route path="/admin/scoring/results">
+        {() => <AdminPage><ScoringResultsList /></AdminPage>}
+      </Route>
+      <Route path="/admin/scoring/funnel">
+        {() => <AdminPage><FunnelPage /></AdminPage>}
+      </Route>
+      <Route path="/admin/scoring/consultations">
+        {() => <AdminPage><ConsultationsPage /></AdminPage>}
       </Route>
 
       {/* BMI 360™ — Consultations expert */}
@@ -299,6 +368,19 @@ export function AdminRoutes() {
       </Route>
       <Route path="/admin/forms/scoring">
         {() => <AdminPage><ScoringQuestionsEditor /></AdminPage>}
+      </Route>
+
+      {/* Scoring — prompts IA */}
+      <Route path="/admin/scoring/prompts">
+        {() => <AdminPage><ScoringPromptSettings /></AdminPage>}
+      </Route>
+      <Route path="/admin/bmi360/prompts">
+        {() => <AdminPage><ScoringPromptSettings /></AdminPage>}
+      </Route>
+
+      {/* Facturation */}
+      <Route path="/admin/facturation">
+        {() => <AdminPage><FacturationPage /></AdminPage>}
       </Route>
 
       {/* Legacy routes */}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
-import { Helmet } from 'react-helmet-async';
+import { PageMeta } from '@/components/seo/page-meta';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
@@ -156,14 +156,11 @@ export default function TalentPrintPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <Helmet>
-        <title>TalentPrint™ — Scoring Marque Employeur | Epitaphe 360</title>
-        <meta name="description" content="Mesurez l'attractivité de votre marque employeur avec TalentPrint™ (modèle ATTRACT). Score RH sur 100." />
-        <link rel="canonical" href="https://www.epitaphe360.ma/outils/talentprint" />
-        <meta property="og:title" content="TalentPrint™ — Scoring Marque Employeur" />
-        <meta property="og:url" content="https://www.epitaphe360.ma/outils/talentprint" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="TalentPrint™ — Scoring Marque Employeur"
+        description="Mesurez l'attractivité de votre marque employeur avec TalentPrint™ (modèle ATTRACT). Score RH sur 100."
+        canonicalPath="/outils/talentprint"
+      />
       <SoftwareApplicationSchema name="TalentPrint™" description="Mesurez l'attractivité de votre marque employeur et votre capacité à retenir les talents." url="/outils/talentprint" priceMad={7500} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"TalentPrint™",url:"/outils/talentprint"}]} />
       <Navigation />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ScoringForm from '../../components/tools/ScoringForm';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
+import { PageMeta } from '@/components/seo/page-meta';
 
 const DEFAULT_QUESTIONS = [
   { id: 'q1', text: "Nous avons un protocole de gestion de crise teste ces 12 derniers mois." },
@@ -25,6 +26,12 @@ export default function SafeSignalPage() {
 
   return (
     <>
+      <PageMeta
+        title="SafeSignal™ — Scoring QHSE & Communication de Crise"
+        description="Évaluez votre niveau de préparation à la crise et l'efficacité de votre communication sécurité QHSE."
+        canonicalPath="/tools/safesignal"
+        noIndex
+      />
       <Navigation />
       <ScoringForm
         toolId="safesignal"

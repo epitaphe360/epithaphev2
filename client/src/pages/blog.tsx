@@ -1,10 +1,14 @@
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { Link } from "wouter";
-import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { AnimatedSection, AnimatedGrid, AnimatedItem } from "@/components/animated-section";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Filter } from "lucide-react";
+import { StatsSection } from "@/components/stats-section";
+import { RevealSection } from "@/components/reveal-section";
+import { ContextualCta } from "@/components/contextual-cta";
+import { PageMeta } from "@/components/seo/page-meta";
+import { BreadcrumbSchema } from "@/components/seo/schema-org";
 
 interface ArticleItem {
   slug: string;
@@ -123,155 +127,175 @@ export default function BlogPage() {
   const restArticles = filteredArticles.slice(1);
 
   return (
-    <div className="min-h-screen" style={{ background: 'radial-gradient(ellipse at top, #0d0120 0%, #000005 60%)' }}>
+    <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Blog & Ressources — Epitaphe 360"
+        description="Insights, stratégies et tendances du monde de la communication globale. Articles et guides Epitaphe 360."
+        canonicalPath="/blog"
+        keywords="communication Maroc, stratégie communication, événementiel, marque employeur, blog agence"
+      />
+      <BreadcrumbSchema items={[
+        { name: "Accueil", url: "/" },
+        { name: "Blog & Ressources", url: "/blog" },
+      ]} />
       <Navigation />
-      
-      {/* ─── Hero Magazine ─── */}
-      <section className="pt-28 pb-16 px-4 relative overflow-hidden">
-        {/* Glow background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60rem] h-[20rem] rounded-full opacity-20"
-            style={{ background: 'radial-gradient(ellipse, #C8A96E 0%, transparent 70%)', filter: 'blur(80px)' }} />
-        </div>
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <AnimatedSection variant="fadeUp">
-            <div className="text-center mb-14">
-              <span className="inline-block text-xs font-bold uppercase tracking-[0.3em] mb-4"
-                style={{ color: '#C8A96E', background: 'rgba(200,169,110,0.1)', padding: '6px 18px', borderRadius: '100px', border: '1px solid rgba(200,169,110,0.25)' }}>
-                Magazine
-              </span>
-              <h1 className="font-cormorant text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6"
-                data-testid="text-blog-title">
-                Nos <em style={{ color: '#C8A96E', fontStyle: 'italic' }}>articles</em>
-              </h1>
-              <p className="text-white/50 text-lg max-w-xl mx-auto font-montserrat">
-                Insights, stratégies et tendances du monde de la communication globale
+      {/* ─── Hero ─────────────────────────────────────────────────────────────── */}
+      <section className="relative pt-20 min-h-[50vh] flex items-center justify-center overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://epitaphe.ma/wp-content/uploads/2025/03/Pourquoi-les-equipes-interfonctionnelles-en-marketing-echouent.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+        <div className="relative z-10 text-center px-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+            data-testid="text-blog-title"
+          >
+            <span className="inline-block bg-primary px-4 py-2">Nos</span>
+            <br />
+            <span className="inline-block bg-primary px-4 py-2 mt-2">articles</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-white/80 text-lg"
+          >
+            Insights, stratégies et tendances du monde de la communication globale
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ─── Filtres + grille articles ─────────────────────────────────────────── */}
+      <section className="py-16 md:py-24 px-4">
+        <div className="max-w-7xl mx-auto">
+          <RevealSection>
+            {/* Filtres */}
+            <div className="text-center mb-10">
+              <div className="flex flex-wrap justify-center gap-2 mb-4">
+                <Filter className="w-4 h-4 text-muted-foreground self-center mr-1" />
+                {allCategories.map((category) => (
+                  <motion.button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCategory === category
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-card border border-border text-foreground/70 hover:border-primary/40 hover:text-primary"
+                    }`}
+                  >
+                    {category}
+                  </motion.button>
+                ))}
+              </div>
+              <p className="text-muted-foreground text-sm">
+                {filteredArticles.length} article{filteredArticles.length !== 1 ? "s" : ""}
               </p>
             </div>
-          </AnimatedSection>
+          </RevealSection>
 
-          {/* Filtres catégories */}
-          <AnimatedSection variant="fadeIn" delay={0.15}>
-            <div className="flex flex-wrap justify-center gap-3 mb-5">
-              {allCategories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 font-montserrat"
-                  style={selectedCategory === category
-                    ? { background: '#C8A96E', color: '#fff', boxShadow: '0 0 20px rgba(200,169,110,0.4)' }
-                    : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.12)' }
-                  }
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-            <p className="text-center text-white/30 text-sm font-montserrat mb-10">
-              {filteredArticles.length} article{filteredArticles.length !== 1 ? 's' : ''}
-            </p>
-          </AnimatedSection>
-
-          {/* Article en vedette (hero card) */}
+          {/* Article en vedette */}
           {featuredArticle && (
-            <AnimatedSection variant="fadeUp" delay={0.25}>
+            <RevealSection>
               <Link href={`/blog/${featuredArticle.slug}`} className="group block mb-12" data-testid={`link-article-${featuredArticle.slug}`}>
-                <div className="relative rounded-3xl overflow-hidden"
-                  style={{ border: '1px solid rgba(200,169,110,0.2)', boxShadow: '0 0 60px rgba(200,169,110,0.08)' }}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="relative rounded-2xl overflow-hidden border border-border bg-card"
+                >
                   <div className="aspect-[21/9] relative overflow-hidden">
                     <img
                       src={featuredArticle.image}
                       alt={featuredArticle.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,5,0.92) 0%, rgba(0,0,5,0.3) 50%, transparent 100%)' }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
                     <div className="flex flex-wrap gap-2 mb-4">
                       {featuredArticle.categories.map((cat) => (
-                        <span key={cat} className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full font-montserrat"
-                          style={{ color: '#C8A96E', background: 'rgba(200,169,110,0.15)', border: '1px solid rgba(200,169,110,0.3)' }}>
+                        <span key={cat} className="bg-primary text-white text-xs font-bold px-2.5 py-1 rounded-full">
                           {cat}
                         </span>
                       ))}
                     </div>
-                    <h2 className="font-cormorant text-3xl md:text-5xl font-bold text-white mb-3 group-hover:text-[#C8A96E] transition-colors duration-300 line-clamp-2">
+                    <h2 className="text-2xl md:text-4xl font-bold text-white mb-3 group-hover:text-primary transition-colors line-clamp-2">
                       {featuredArticle.title}
                     </h2>
-                    <p className="text-white/60 text-sm md:text-base font-montserrat line-clamp-2 max-w-2xl">
+                    <p className="text-white/70 text-sm md:text-base line-clamp-2 max-w-2xl">
                       {featuredArticle.excerpt}
                     </p>
+                    <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-4">
+                      Lire l'article <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
-                  {/* Badge "À la une" */}
-                  <span className="absolute top-6 left-6 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full font-montserrat"
-                    style={{ background: '#C8A96E', color: '#fff', boxShadow: '0 0 20px rgba(200,169,110,0.5)' }}>
+                  <span className="absolute top-6 left-6 bg-amber-400 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                     À la une
                   </span>
-                </div>
+                </motion.div>
               </Link>
-            </AnimatedSection>
+            </RevealSection>
           )}
 
           {/* Grille articles */}
-          <AnimatedGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {restArticles.map((article) => (
-              <AnimatedItem key={article.slug}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedCategory}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {restArticles.map((article) => (
                 <Link
+                  key={article.slug}
                   href={`/blog/${article.slug}`}
                   className="group block h-full"
                   data-testid={`link-article-${article.slug}`}
                 >
-                  <article className="h-full flex flex-col rounded-2xl overflow-hidden transition-all duration-500 group-hover:-translate-y-1"
-                    style={{
-                      background: 'rgba(13,15,30,0.8)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                      boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.border = '1px solid rgba(200,169,110,0.3)';
-                      (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 40px rgba(200,169,110,0.12)';
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.border = '1px solid rgba(255,255,255,0.07)';
-                      (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
-                    }}
+                  <motion.article
+                    whileHover={{ y: -4 }}
+                    className="bg-card border border-border rounded-2xl overflow-hidden cursor-pointer h-full flex flex-col"
                   >
-                    <div className="aspect-[4/3] overflow-hidden">
+                    <div className="relative h-48 bg-muted overflow-hidden">
                       <img
                         src={article.image}
                         alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
                     </div>
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {article.categories.map((cat) => (
-                          <span key={cat} className="text-xs font-semibold uppercase tracking-wide font-montserrat"
-                            style={{ color: '#C8A96E' }}>
+                    <div className="p-5 flex flex-col flex-1">
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {article.categories.slice(0, 2).map((cat) => (
+                          <span key={cat} className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
                             {cat}
                           </span>
                         ))}
                       </div>
-                      <h2 className="font-cormorant text-xl font-bold text-white mb-3 group-hover:text-[#C8A96E] transition-colors duration-300 line-clamp-3 flex-1">
+                      <h2 className="font-bold text-foreground text-base leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2 flex-1">
                         {article.title}
                       </h2>
-                      <p className="text-white/45 text-sm font-montserrat line-clamp-2">
-                        {article.excerpt}
-                      </p>
-                      <div className="mt-4 flex items-center gap-2 text-[#C8A96E] text-xs font-bold uppercase tracking-widest font-montserrat opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        Lire l'article <span>→</span>
+                      <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{article.excerpt}</p>
+                      <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-auto">
+                        Lire l'article <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
-                  </article>
+                  </motion.article>
                 </Link>
-              </AnimatedItem>
-            ))}
-          </AnimatedGrid>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </section>
 
+      <StatsSection />
+      <ContextualCta pageKey="evenements" />
       <Footer />
     </div>
   );

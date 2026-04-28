@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
-import { Helmet } from "react-helmet-async";
+import { PageMeta } from "@/components/seo/page-meta";
 import { sanitizeHtml } from "@/lib/sanitize";
 
 export default function MentionsLegales() {
@@ -16,13 +17,27 @@ export default function MentionsLegales() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Helmet>
-        <title>Mentions Légales — Epitaphe 360</title>
-        <meta name="description" content="Mentions légales du site Epitaphe 360, agence de communication 360° à Casablanca." />
-      </Helmet>
+      <PageMeta
+        title="Mentions légales"
+        description="Mentions légales du site Epitaphe 360, agence de communication 360° à Casablanca."
+        canonicalPath="/mentions-legales"
+      />
       <Navigation />
-      <main className="flex-1 pt-24 pb-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="relative pt-20 min-h-[40vh] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1600&q=80')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-background" />
+          <div className="relative z-10 text-center px-4">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-6xl font-bold text-white mb-4"
+            >
+              <span className="inline-block bg-primary px-4 py-2">Mentions Légales</span>
+            </motion.h1>
+          </div>
+        </section>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
           {htmlContent ? (
             <div
               className="prose prose-lg max-w-none"

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearch } from 'wouter';
 import { motion } from 'framer-motion';
+import { PageMeta } from '@/components/seo/page-meta';
 
 interface ScoringResult {
   id: string;
@@ -50,6 +51,12 @@ export default function PaiementSucces() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6 py-20">
+      <PageMeta
+        title="Paiement confirmé"
+        description="Votre paiement a été confirmé. Votre rapport BMI 360™ est en cours de génération."
+        canonicalPath="/paiement-succes"
+        noIndex
+      />
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

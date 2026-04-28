@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useToolQuestions } from '@/hooks/useToolQuestions';
 import { useEmbed } from '@/contexts/embed-context';
-import { Helmet } from 'react-helmet-async';
+import { PageMeta } from '@/components/seo/page-meta';
 import { SoftwareApplicationSchema, BreadcrumbSchema } from '@/components/seo/schema-org';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation } from '@/components/navigation';
@@ -13,9 +13,6 @@ import { IntelligencePricing } from '@/components/intelligence-pricing';
 import { IntelligenceResults } from '@/components/intelligence-results';
 import {
   calculateRoiEstimate,
-  calculateScore,
-  calculatePillarScores,
-  getMaturityLevel,
   type ScoringQuestion, type ScoringAnswer,
   type SectorType, type CompanySizeType,
 } from '@/lib/scoring-engine';
@@ -116,11 +113,9 @@ export default function CommPulsePage() {
   const [resultId, setResultId] = useState('');
   const [partialScores, setPartialScores] = useState<Record<string, number>>({});
   const [intelligencePrice, setIntelligencePrice] = useState(4900);
-  const [respondentEmail, setRespondentEmail] = useState('');
-  const [respondentName, setRespondentName] = useState('');
   const [discoverGlobalScore, setDiscoverGlobalScore] = useState(0);
   const [discoverMaturityLevel, setDiscoverMaturityLevel] = useState(1);
-  const [intelligenceData, setIntelligenceData] = useState<{ globalScore: number; maturityLevel: number; pillarScores: Record<string, number>; aiReport: unknown } | null>(null);
+  const [intelligenceData, setIntelligenceData] = useState<{ id?: string; globalScore: number; maturityLevel: number; pillarScores: Record<string, number>; aiReport: unknown } | null>(null);
 
   const roiEstimate = calculateRoiEstimate(effectif, salaireMoyen, 0.18);
 
@@ -131,25 +126,11 @@ export default function CommPulsePage() {
       if (q) enriched[a.questionId] = { value: a.value, pillar: q.pillar, weight: q.weight, reverseScored: q.reverseScored };
     }
     setEnrichedAnswers(enriched);
-
-    // Calcul immédiat côté client — affiché même si le serveur échoue
-    const clientScore = calculateScore(answers, questions);
-    const clientPillarScores = calculatePillarScores(answers, questions, Object.fromEntries(
-      Array.from(new Set(questions.map(q => q.pillar))).map(p => [p, '#6366F1'])
-    ));
-    const clientPartial: Record<string, number> = {};
-    clientPillarScores.forEach(ps => { clientPartial[ps.pillarId] = ps.score; });
-    setDiscoverGlobalScore(clientScore);
-    setDiscoverMaturityLevel(getMaturityLevel(clientScore));
-    setPartialScores(clientPartial);
-
     setStep('gate');
   };
 
   const [isUnlocking, setIsUnlocking] = useState(false);
   const handleUnlock = async (data: { email: string; name: string }) => {
-    setRespondentEmail(data.email);
-    setRespondentName(data.name);
     setIsUnlocking(true);
     try {
       const response = await fetch(`/api/scoring/${TOOL_ID}/discover`, {
@@ -166,12 +147,9 @@ export default function CommPulsePage() {
       if (response.ok) {
         const res = await response.json();
         setResultId(res.id);
-        // Mise à jour avec les scores serveur seulement si cohérents
-        if (res.globalScore > 0) {
-          setPartialScores(res.pillarScores);
-          setDiscoverGlobalScore(res.globalScore);
-          setDiscoverMaturityLevel(res.maturityLevel);
-        }
+        setPartialScores(res.pillarScores);
+        setDiscoverGlobalScore(res.globalScore);
+        setDiscoverMaturityLevel(res.maturityLevel);
         setIntelligencePrice(res.intelligencePrice ?? 4900);
         // Notify WordPress parent iframe of lead capture
         if (isEmbed) {
@@ -186,15 +164,9 @@ export default function CommPulsePage() {
             },
           }, '*');
         }
-      } else {
-        // DB down (500) — continuer avec ID local, scores client déjà calculés
-        console.warn('Discover 500 — fallback ID local');
-        if (!resultId) setResultId(`local-${TOOL_ID}-${Date.now()}`);
       }
     } catch (err) {
       console.error('Erreur discover scoring', err);
-      // Générer un ID local pour que la simulation de paiement fonctionne même sans DB
-      if (!resultId) setResultId(`local-commpulse-${Date.now()}`);
     } finally {
       setIsUnlocking(false);
       setStep('discover');
@@ -203,14 +175,11 @@ export default function CommPulsePage() {
 
   return (
     <div className={`${isEmbed ? '' : 'min-h-screen'} bg-[#0A0A0A] text-white`}>
-      <Helmet>
-        <title>CommPulse™ — Scoring Communication Interne | Epitaphe 360</title>
-        <meta name="description" content="Évaluez la santé de votre communication interne avec CommPulse™ (modèle CLARITY). 42 indicateurs, score sur 100, recommandations expert." />
-        <link rel="canonical" href="https://www.epitaphe360.ma/outils/commpulse" />
-        <meta property="og:title" content="CommPulse™ — Scoring Communication Interne" />
-        <meta property="og:url" content="https://www.epitaphe360.ma/outils/commpulse" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      <PageMeta
+        title="CommPulse™ — Scoring Communication Interne"
+        description="Évaluez la santé de votre communication interne avec CommPulse™ (modèle CLARITY). 42 indicateurs, score sur 100, recommandations expert."
+        canonicalPath="/outils/commpulse"
+      />
       <SoftwareApplicationSchema name="CommPulse™" description="Évaluez la santé de votre communication interne : cohérence, écoute, transparence et impact RH." url="/outils/commpulse" priceMad={4900} />
       <BreadcrumbSchema items={[{name:"Accueil",url:"/"},{name:"Outils BMI 360™",url:"/outils"},{name:"CommPulse™",url:"/outils/commpulse"}]} />
       <Navigation />
@@ -667,8 +636,6 @@ export default function CommPulsePage() {
                   companyName={companyName}
                   sector={sector}
                   companySize={companySize}
-                  respondentEmail={respondentEmail}
-                  respondentName={respondentName}
                   onSuccess={(data) => { setIntelligenceData(data); setStep('intelligence'); }}
                   onBack={() => setStep('discover')}
                 />

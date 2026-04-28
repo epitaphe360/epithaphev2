@@ -3,13 +3,13 @@
 // ========================================
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from '../../hooks/useRouterParams';
 import { ArrowLeft, Save, Eye, Calendar, MapPin, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Input, Textarea, Select } from '../../components/Input';
 import { RichTextEditor } from '../../components/RichTextEditor';
-import { FileUpload } from '../../components/FileUpload';
+import { ImageUploadField } from '../../components/ImageUploadField';
 import { useToast } from '../../components/Toast';
 import { getApi } from '../../lib/api';
 import { Event, EventFormData } from '../../types';
@@ -655,27 +655,11 @@ export const EventForm: React.FC = () => {
               <CardTitle>Image</CardTitle>
             </CardHeader>
             <CardContent>
-              {formData.featuredImage ? (
-                <div className="space-y-4">
-                  <img
-                    src={formData.featuredImage}
-                    alt="Event"
-                    className="w-full h-40 object-cover rounded-lg"
-                  />
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => setFormData((prev) => ({ ...prev, featuredImage: '' }))}
-                  >
-                    Supprimer l'image
-                  </Button>
-                </div>
-              ) : (
-                <FileUpload
-                  onUpload={handleImageUpload}
-                  accept="image/*"
-                />
-              )}
+              <ImageUploadField
+                value={formData.featuredImage}
+                onChange={(url) => setFormData((prev) => ({ ...prev, featuredImage: url }))}
+                placeholder="https://..."
+              />
             </CardContent>
           </Card>
         </div>

@@ -9,15 +9,16 @@ import {
   users, articles, events, pages, categories, media, navigationMenus, settings, auditLogs,
   services, clientReferences, caseStudies, testimonials, teamMembers,
   projectBriefs, newsletterSubscriptions, contactMessages, resources,
-  passwordResetTokens, qrCodes,
+  passwordResetTokens, qrCodes, pageTemplates,
   clientAccounts, clientProjects, clientMilestones, clientDocuments,
   clientMessages as clientMessagesTable, scoringResults,
+  devis, payments, invoices, subscriptionPlans, expertConsultations, funnelEvents,
   insertArticleSchema, insertEventSchema, insertPageSchema,
   insertServiceSchema, insertClientReferenceSchema, insertCaseStudySchema,
   insertTestimonialSchema, insertTeamMemberSchema, insertResourceSchema,
   insertClientProjectSchema, insertClientMilestoneSchema, insertClientDocumentSchema,
 } from "@shared/schema";
-import { eq, desc, and, or, like, sql } from "drizzle-orm";
+import { eq, desc, and, or, like, sql, type SQL } from "drizzle-orm";
 import { requireAuth, requireAdmin, generateToken, hashPassword, verifyPassword, validatePassword, type AuthRequest } from "./lib/auth";
 import { sendAdminPasswordReset, sendAgencyMessageNotification } from "./lib/email";
 import { z } from "zod";
@@ -292,7 +293,7 @@ export function registerAdminRoutes(app: Express) {
         return res.status(400).json({ error: pagination.error });
       }
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') {
         conditions.push(eq(articles.status, status as string));
       }
@@ -465,7 +466,7 @@ export function registerAdminRoutes(app: Express) {
         return res.status(400).json({ error: pagination.error });
       }
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') {
         conditions.push(eq(events.status, status as string));
       }
@@ -616,7 +617,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (search) {
         const s = sanitizeLikePattern(search as string);
         conditions.push(or(like(categories.name, `%${s}%`), like(categories.slug, `%${s}%`)));
@@ -702,7 +703,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (role && role !== 'all') conditions.push(eq(users.role, role as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -827,7 +828,7 @@ export function registerAdminRoutes(app: Express) {
         return res.status(400).json({ error: pagination.error });
       }
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (folder) {
         conditions.push(eq(media.folder, folder as string));
       }
@@ -946,7 +947,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(pages.status, status as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -1079,7 +1080,7 @@ export function registerAdminRoutes(app: Express) {
         return res.status(400).json({ error: pagination.error });
       }
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (entityType) conditions.push(eq(auditLogs.entityType, entityType as string));
       if (entityId)   conditions.push(eq(auditLogs.entityId, entityId as string));
       if (userId)     conditions.push(eq(auditLogs.userId, userId as string));
@@ -1164,7 +1165,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(services.status, status as string));
       if (hub) conditions.push(eq(services.hub, hub as string));
       if (search) {
@@ -1237,7 +1238,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (search) {
         const s = sanitizeLikePattern(search as string);
         conditions.push(or(like(clientReferences.name, `%${s}%`), like(clientReferences.description, `%${s}%`)));
@@ -1309,7 +1310,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(caseStudies.status, status as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -1382,7 +1383,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (published !== undefined) conditions.push(eq(testimonials.isPublished, published === 'true'));
       if (featured === 'true') conditions.push(eq(testimonials.isFeatured, true));
       if (search) {
@@ -1455,7 +1456,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (department) conditions.push(eq(teamMembers.department, department as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -1606,7 +1607,7 @@ export function registerAdminRoutes(app: Express) {
       const { status, search, limit, offset } = req.query;
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(services.status, status as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -1618,8 +1619,34 @@ export function registerAdminRoutes(app: Express) {
         query.orderBy(services.order, desc(services.createdAt)).limit(pagination.limit).offset(pagination.offset),
         db.select({ count: sql`count(*)` }).from(services),
       ]);
-      res.json({ data: result, total: Number(count) });
+      // Mappe services → forme attendue par SolutionManagement.tsx
+      const mapped = result.map((svc: any) => ({
+        id: svc.id,
+        slug: svc.slug,
+        label: svc.title,
+        title: svc.title,
+        category: svc.hub,
+        description: svc.accroche ?? '',
+        heroTitle: svc.title,
+        heroSubtitle: svc.accroche ?? '',
+        heroImage: svc.heroImage ?? '',
+        needs: Array.isArray(svc.serviceBlocks)
+          ? svc.serviceBlocks.map((b: any) => b?.title).filter(Boolean)
+          : [],
+        content: svc.body ?? '',
+        isActive: svc.status === 'PUBLISHED',
+        order: svc.order ?? 0,
+        createdAt: svc.createdAt,
+        updatedAt: svc.updatedAt,
+        seo: {
+          title: svc.metaTitle ?? '',
+          description: svc.metaDescription ?? '',
+          keywords: svc.metaKeywords ? String(svc.metaKeywords).split(',').map((k: string) => k.trim()).filter(Boolean) : [],
+        },
+      }));
+      res.json({ data: mapped, total: Number(count) });
     } catch (error) {
+      console.error('[GET /api/admin/solutions]', error);
       res.status(500).json({ error: 'Erreur solutions' });
     }
   });
@@ -1627,9 +1654,12 @@ export function registerAdminRoutes(app: Express) {
   app.get('/api/admin/solutions/categories', requireAuth, async (req, res) => {
     try {
       const result = await db.selectDistinctOn([services.hub], { hub: services.hub }).from(services);
-      const cats = result.map(r => ({ slug: r.hub, label: r.hub }));
+      const cats = result
+        .filter(r => !!r.hub)
+        .map(r => ({ slug: r.hub, label: r.hub }));
       res.json({ data: cats });
     } catch (error) {
+      console.error('[GET /api/admin/solutions/categories]', error);
       res.status(500).json({ error: 'Erreur catégories solutions' });
     }
   });
@@ -1786,7 +1816,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(projectBriefs.status, status as string));
       if (priority) conditions.push(eq(projectBriefs.priority, priority as string));
       if (search) {
@@ -1854,7 +1884,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(newsletterSubscriptions.status, status as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -1910,7 +1940,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (status && status !== 'all') conditions.push(eq(contactMessages.status, status as string));
       if (search) {
         const s = sanitizeLikePattern(search as string);
@@ -2062,7 +2092,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (search) {
         const s = sanitizeLikePattern(search as string);
         conditions.push(or(
@@ -2176,6 +2206,125 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  // ========================================
+  // PAGE TEMPLATES — Reusable design templates
+  // ========================================
+
+  // List all active templates (public)
+  app.get('/api/page-templates', async (req, res) => {
+    try {
+      const { category } = req.query;
+      const catConditions = category
+        ? and(eq(pageTemplates.isActive, true), eq(pageTemplates.category, category as string))
+        : eq(pageTemplates.isActive, true);
+      const query = db.select().from(pageTemplates).where(catConditions);
+      
+      const result = await query.orderBy(pageTemplates.category);
+      res.json({ data: result });
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      res.status(500).json({ error: 'Erreur récupération templates' });
+    }
+  });
+
+  // Get single template
+  app.get('/api/page-templates/:slug', async (req, res) => {
+    try {
+      const [template] = await db.select().from(pageTemplates).where(eq(pageTemplates.slug, req.params.slug)).limit(1);
+      if (!template) return res.status(404).json({ error: 'Template introuvable' });
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération template' });
+    }
+  });
+
+  // Create new page from template
+  app.post('/api/pages/from-template', requireAuth, async (req, res) => {
+    try {
+      const { templateSlug, title, slug } = req.body;
+
+      if (!templateSlug || !title || !slug) {
+        return res.status(400).json({ error: 'Template slug, title, et slug requis' });
+      }
+
+      // Get template
+      const [template] = await db.select().from(pageTemplates).where(eq(pageTemplates.slug, templateSlug)).limit(1);
+      if (!template) return res.status(404).json({ error: 'Template introuvable' });
+
+      // Create new page with template sections
+      const newPage = await db.insert(pages).values({
+        title,
+        slug,
+        content: '',
+        sections: template.sections,
+        status: 'DRAFT',
+      }).returning();
+
+      res.json(newPage[0]);
+    } catch (error) {
+      console.error('Error creating page from template:', error);
+      res.status(500).json({ error: 'Erreur création page' });
+    }
+  });
+
+  // Admin: List all templates (including inactive)
+  app.get('/api/admin/page-templates', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const result = await db.select().from(pageTemplates).orderBy(pageTemplates.category);
+      res.json({ data: result });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération templates admin' });
+    }
+  });
+
+  // Admin: Create template
+  app.post('/api/admin/page-templates', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { name, slug, description, category, sections, thumbnailUrl } = req.body;
+
+      const newTemplate = await db.insert(pageTemplates).values({
+        name,
+        slug,
+        description,
+        category: category || 'general',
+        sections: sections || [],
+        thumbnailUrl: thumbnailUrl || null,
+        isActive: true,
+      }).returning();
+
+      res.json(newTemplate[0]);
+    } catch (error) {
+      console.error('Error creating template:', error);
+      res.status(500).json({ error: 'Erreur création template' });
+    }
+  });
+
+  // Admin: Update template
+  app.put('/api/admin/page-templates/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { name, description, category, sections, isActive, thumbnailUrl } = req.body;
+      const [updated] = await db.update(pageTemplates)
+        .set({ name, description, category, sections, isActive, thumbnailUrl, updatedAt: new Date() })
+        .where(eq(pageTemplates.id, req.params.id))
+        .returning();
+      
+      if (!updated) return res.status(404).json({ error: 'Template introuvable' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour template' });
+    }
+  });
+
+  // Admin: Delete template
+  app.delete('/api/admin/page-templates/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      await db.delete(pageTemplates).where(eq(pageTemplates.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression template' });
+    }
+  });
+
   app.get('/api/admin/scoring/stats', requireAuth, async (req, res) => {
     try {
       const stats = await db.select({
@@ -2212,7 +2361,7 @@ export function registerAdminRoutes(app: Express) {
       const pagination = validatePagination(limit as string, offset as string);
       if ('error' in pagination) return res.status(400).json({ error: pagination.error });
 
-      const conditions: any[] = [];
+      const conditions: SQL<unknown>[] = [];
       if (clientId) conditions.push(eq(clientProjects.clientId, parseInt(clientId as string, 10)));
       if (status && status !== 'all') conditions.push(eq(clientProjects.status, status as string));
 
@@ -2497,5 +2646,570 @@ export function registerAdminRoutes(app: Express) {
       res.status(500).json({ error: 'Erreur suppression QR code' });
     }
   });
+
+  // ========================================
+  // FACTURATION — Factures avec TVA 20% Maroc
+  // ========================================
+
+  // Stats globales factures
+  app.get('/api/admin/invoices/stats', requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const [all] = await db.select({
+        total:    sql<number>`count(*)::int`,
+        paid:     sql<number>`count(*) filter (where status = 'paid')::int`,
+        pending:  sql<number>`count(*) filter (where status in ('draft','sent'))::int`,
+        totalHT:  sql<number>`coalesce(sum(amount_ht), 0)::bigint`,
+        totalTVA: sql<number>`coalesce(sum(amount_tva), 0)::bigint`,
+        totalTTC: sql<number>`coalesce(sum(amount_ttc), 0)::bigint`,
+        monthHT:  sql<number>`coalesce(sum(amount_ht) filter (where created_at >= ${startOfMonth}), 0)::bigint`,
+        monthTVA: sql<number>`coalesce(sum(amount_tva) filter (where created_at >= ${startOfMonth}), 0)::bigint`,
+        monthTTC: sql<number>`coalesce(sum(amount_ttc) filter (where created_at >= ${startOfMonth}), 0)::bigint`,
+      }).from(invoices);
+
+      res.json({ ...all, currency: 'MAD' });
+    } catch (error) {
+      console.error('Invoice stats error:', error);
+      res.status(500).json({ error: 'Erreur stats factures' });
+    }
+  });
+
+  // Liste des factures paginée
+  app.get('/api/admin/invoices', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { status, toolId, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: SQL<unknown>[] = [];
+      if (status && status !== 'all') conditions.push(eq(invoices.status, status as string));
+      if (toolId) conditions.push(eq(invoices.toolId, toolId as string));
+      if (search) {
+        const pattern = `%${sanitizeLikePattern(search as string)}%`;
+        conditions.push(or(
+          like(invoices.clientEmail, pattern),
+          like(invoices.clientName, pattern),
+          like(invoices.invoiceNumber, pattern),
+        ) as SQL<unknown>);
+      }
+
+      let q = db.select().from(invoices);
+      if (conditions.length > 0) q = q.where(and(...conditions)) as typeof q;
+      const data = await q.orderBy(desc(invoices.createdAt)).limit(pagination.limit).offset(pagination.offset);
+
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(invoices)
+        .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+      res.json({ data, total: count });
+    } catch (error) {
+      console.error('Invoices list error:', error);
+      res.status(500).json({ error: 'Erreur liste factures' });
+    }
+  });
+
+  // Détail d'une facture
+  app.get('/api/admin/invoices/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const [inv] = await db.select().from(invoices).where(eq(invoices.id, id)).limit(1);
+      if (!inv) return res.status(404).json({ error: 'Facture introuvable' });
+      res.json(inv);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération facture' });
+    }
+  });
+
+  // Créer une facture
+  app.post('/api/admin/invoices', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { clientEmail, clientName, clientCompany, toolId, description,
+              amountHT, tvaRate = 20 } = req.body;
+
+      if (!clientEmail || !clientName || amountHT == null) {
+        return res.status(400).json({ error: 'clientEmail, clientName et amountHT requis' });
+      }
+
+      const ht = Math.round(Number(amountHT));
+      const rate = Math.min(100, Math.max(0, Number(tvaRate)));
+      const tva = Math.round(ht * rate / 100);
+      const ttc = ht + tva;
+
+      // Générer numéro de facture séquentiel
+      const year = new Date().getFullYear();
+      const [{ maxNum }] = await db.select({
+        maxNum: sql<number>`coalesce(max(cast(split_part(invoice_number, '-', 3) as integer)), 0)`,
+      }).from(invoices).where(like(invoices.invoiceNumber, `FAC-${year}-%`));
+      const invoiceNumber = `FAC-${year}-${String((maxNum ?? 0) + 1).padStart(4, '0')}`;
+
+      const [created] = await db.insert(invoices).values({
+        invoiceNumber, clientEmail, clientName, clientCompany: clientCompany ?? null,
+        toolId: toolId ?? null, description: description ?? null,
+        amountHT: ht, tvaRate: rate, amountTVA: tva, amountTTC: ttc,
+        status: 'draft',
+      }).returning();
+
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('Invoice create error:', error);
+      res.status(500).json({ error: 'Erreur création facture' });
+    }
+  });
+
+  // Changer le statut d'une facture
+  app.patch('/api/admin/invoices/:id/status', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { status } = req.body;
+      const allowed = ['draft', 'sent', 'paid', 'cancelled'];
+      if (!allowed.includes(status)) {
+        return res.status(400).json({ error: `Statut invalide. Valeurs : ${allowed.join(', ')}` });
+      }
+
+      const update: Record<string, unknown> = { status };
+      if (status === 'paid') update.paidAt = new Date();
+      if (status === 'sent') update.sentAt = new Date();
+
+      const [updated] = await db.update(invoices).set(update).where(eq(invoices.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Facture introuvable' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour statut' });
+    }
+  });
+
+  // ========================================
+  // DEVIS — Gestion des propositions commerciales
+  // ========================================
+
+  app.get('/api/admin/devis', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { status, search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: SQL<unknown>[] = [];
+      if (status && status !== 'all') conditions.push(eq(devis.status, status as string));
+      if (search) {
+        const pattern = `%${sanitizeLikePattern(search as string)}%`;
+        conditions.push(or(
+          like(devis.clientEmail, pattern),
+          like(devis.clientName, pattern),
+          like(devis.reference, pattern),
+        ) as SQL<unknown>);
+      }
+
+      let q = db.select().from(devis);
+      if (conditions.length > 0) q = q.where(and(...conditions)) as typeof q;
+      const data = await q.orderBy(desc(devis.createdAt)).limit(pagination.limit).offset(pagination.offset);
+
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(devis)
+        .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+      res.json({ data, total: count });
+    } catch (error) {
+      console.error('Devis list error:', error);
+      res.status(500).json({ error: 'Erreur liste devis' });
+    }
+  });
+
+  app.get('/api/admin/devis/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const [d] = await db.select().from(devis).where(eq(devis.id, id)).limit(1);
+      if (!d) return res.status(404).json({ error: 'Devis introuvable' });
+      res.json(d);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération devis' });
+    }
+  });
+
+  app.post('/api/admin/devis', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { clientName, clientEmail, clientCompany, clientPhone, title,
+              description, items = [], sourceTool, adminNotes, validUntil } = req.body;
+
+      if (!clientName || !clientEmail || !title) {
+        return res.status(400).json({ error: 'clientName, clientEmail et title requis' });
+      }
+
+      const year = new Date().getFullYear();
+      const [{ maxNum }] = await db.select({
+        maxNum: sql<number>`coalesce(max(cast(split_part(reference, '-', 3) as integer)), 0)`,
+      }).from(devis).where(like(devis.reference, `DEV-${year}-%`));
+      const reference = `DEV-${year}-${String((maxNum ?? 0) + 1).padStart(4, '0')}`;
+
+      const subtotal = (items as Array<{ total: number }>).reduce((s, i) => s + (i.total ?? 0), 0);
+      const taxRate = 20;
+      const taxAmount = Math.round(subtotal * taxRate / 100);
+      const total = subtotal + taxAmount;
+
+      const [created] = await db.insert(devis).values({
+        reference, clientName, clientEmail,
+        clientCompany: clientCompany ?? null,
+        clientPhone: clientPhone ?? null,
+        title, description: description ?? null,
+        items, subtotal, taxRate, taxAmount, total,
+        sourceTool: sourceTool ?? null,
+        adminNotes: adminNotes ?? null,
+        validUntil: validUntil ? new Date(validUntil) : null,
+        status: 'draft',
+      }).returning();
+
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('Devis create error:', error);
+      res.status(500).json({ error: 'Erreur création devis' });
+    }
+  });
+
+  app.put('/api/admin/devis/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { status, adminNotes, validUntil } = req.body;
+      const [updated] = await db.update(devis)
+        .set({ status, adminNotes, validUntil: validUntil ? new Date(validUntil) : undefined, updatedAt: new Date() })
+        .where(eq(devis.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Devis introuvable' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour devis' });
+    }
+  });
+
+  // Envoyer un devis par email (marque comme "sent")
+  app.post('/api/admin/devis/:id/send', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const [d] = await db.select().from(devis).where(eq(devis.id, id)).limit(1);
+      if (!d) return res.status(404).json({ error: 'Devis introuvable' });
+
+      const [updated] = await db.update(devis)
+        .set({ status: 'sent', updatedAt: new Date() })
+        .where(eq(devis.id, id)).returning();
+
+      // Notification email simple (non-bloquant)
+      const { sendMail: _sendMail } = await import('./lib/email');
+      _sendMail({
+        to: d.clientEmail,
+        subject: `Votre devis ${d.reference} — Epitaphe 360`,
+        html: `<p>Bonjour ${d.clientName},</p>
+               <p>Veuillez trouver ci-joint votre devis <strong>${d.reference}</strong> — <em>${d.title}</em>.</p>
+               <p>Montant total : <strong>${(d.total / 100).toLocaleString('fr-MA', { minimumFractionDigits: 2 })} MAD TTC</strong></p>
+               <p>Validité : ${d.validUntil ? new Date(d.validUntil).toLocaleDateString('fr-FR') : 'Sur demande'}</p>
+               <p>Cordialement,<br/>L'équipe Epitaphe 360</p>`,
+      }).catch(e => console.error('[EMAIL] Devis send error:', e));
+
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Erreur envoi devis" });
+    }
+  });
+
+  app.delete('/api/admin/devis/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await db.delete(devis).where(eq(devis.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression devis' });
+    }
+  });
+
+  // ========================================
+  // PAIEMENTS — Historique des transactions
+  // ========================================
+
+  app.get('/api/admin/payments', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { status, method, type, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: SQL<unknown>[] = [];
+      if (status && status !== 'all') conditions.push(eq(payments.status, status as string));
+      if (method) conditions.push(eq(payments.paymentMethod, method as string));
+      if (type) conditions.push(eq(payments.type, type as string));
+
+      let q = db.select().from(payments);
+      if (conditions.length > 0) q = q.where(and(...conditions)) as typeof q;
+      const data = await q.orderBy(desc(payments.createdAt)).limit(pagination.limit).offset(pagination.offset);
+
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(payments)
+        .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+      res.json({ data, total: count });
+    } catch (error) {
+      console.error('Payments list error:', error);
+      res.status(500).json({ error: 'Erreur liste paiements' });
+    }
+  });
+
+  app.get('/api/admin/payments/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const [p] = await db.select().from(payments).where(eq(payments.id, id)).limit(1);
+      if (!p) return res.status(404).json({ error: 'Paiement introuvable' });
+      res.json(p);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur récupération paiement' });
+    }
+  });
+
+  // ========================================
+  // PLANS D'ABONNEMENT
+  // ========================================
+
+  app.get('/api/admin/plans', requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const data = await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.sortOrder);
+      res.json(data);
+    } catch (error) {
+      console.error('Plans list error:', error);
+      res.status(500).json({ error: 'Erreur liste plans' });
+    }
+  });
+
+  app.post('/api/admin/plans', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { name, slug, description, priceMonthly, priceAnnual, features, isActive } = req.body;
+      if (!name || !slug) return res.status(400).json({ error: 'name et slug requis' });
+
+      const [created] = await db.insert(subscriptionPlans).values({
+        name, slug, description: description ?? null,
+        priceMonthly: Math.round(Number(priceMonthly ?? 0)),
+        priceAnnual: Math.round(Number(priceAnnual ?? 0)),
+        features: Array.isArray(features) ? features : [],
+        isActive: isActive !== false,
+      }).returning();
+
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('Plan create error:', error);
+      res.status(500).json({ error: 'Erreur création plan' });
+    }
+  });
+
+  app.put('/api/admin/plans/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { name, description, priceMonthly, priceAnnual, features, isActive, sortOrder } = req.body;
+
+      const update: Record<string, unknown> = {};
+      if (name !== undefined) update.name = name;
+      if (description !== undefined) update.description = description;
+      if (priceMonthly !== undefined) update.priceMonthly = Math.round(Number(priceMonthly));
+      if (priceAnnual !== undefined) update.priceAnnual = Math.round(Number(priceAnnual));
+      if (features !== undefined) update.features = Array.isArray(features) ? features : [];
+      if (isActive !== undefined) update.isActive = Boolean(isActive);
+      if (sortOrder !== undefined) update.sortOrder = Number(sortOrder);
+
+      const [updated] = await db.update(subscriptionPlans)
+        .set(update).where(eq(subscriptionPlans.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Plan introuvable' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour plan' });
+    }
+  });
+
+  app.delete('/api/admin/plans/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression plan' });
+    }
+  });
+
+  // ========================================
+  // FUNNEL BMI 360™ — Analytics entonnoir
+  // ========================================
+
+  app.get('/api/admin/funnel', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const days = Math.min(365, Math.max(1, parseInt(req.query.days as string ?? '30', 10)));
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      const events = await db.select({
+        toolId:    funnelEvents.toolId,
+        eventType: funnelEvents.eventType,
+        count:     sql<number>`count(*)::int`,
+      }).from(funnelEvents)
+        .where(sql`${funnelEvents.createdAt} >= ${since}`)
+        .groupBy(funnelEvents.toolId, funnelEvents.eventType);
+
+      const [{ totalEvents }] = await db.select({
+        totalEvents: sql<number>`count(*)::int`,
+      }).from(funnelEvents).where(sql`${funnelEvents.createdAt} >= ${since}`);
+
+      // Agréger par eventType global
+      const counts: Record<string, number> = {};
+      const byTool: Record<string, Record<string, number>> = {};
+
+      for (const ev of events) {
+        counts[ev.eventType] = (counts[ev.eventType] ?? 0) + ev.count;
+        if (ev.toolId) {
+          byTool[ev.toolId] ??= {};
+          byTool[ev.toolId][ev.eventType] = (byTool[ev.toolId][ev.eventType] ?? 0) + ev.count;
+        }
+      }
+
+      res.json({ sinceDays: days, totalEvents, counts, byTool });
+    } catch (error) {
+      console.error('Funnel error:', error);
+      res.status(500).json({ error: 'Erreur analytics funnel' });
+    }
+  });
+
+  // ========================================
+  // CONSULTATIONS EXPERT — RDV BMI 360™
+  // ========================================
+
+  app.get('/api/admin/consultations', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { status, toolId, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: SQL<unknown>[] = [];
+      if (status && status !== 'all') conditions.push(eq(expertConsultations.status, status as string));
+      if (toolId) conditions.push(eq(expertConsultations.toolId, toolId as string));
+
+      let q = db.select().from(expertConsultations);
+      if (conditions.length > 0) q = q.where(and(...conditions)) as typeof q;
+      const data = await q.orderBy(desc(expertConsultations.createdAt)).limit(pagination.limit).offset(pagination.offset);
+
+      res.json(data);
+    } catch (error) {
+      console.error('Consultations list error:', error);
+      res.status(500).json({ error: 'Erreur liste consultations' });
+    }
+  });
+
+  app.patch('/api/admin/consultations/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, expertNotes, scheduledAt } = req.body;
+
+      const allowed = ['new', 'contacted', 'scheduled', 'done', 'cancelled'];
+      if (status && !allowed.includes(status)) {
+        return res.status(400).json({ error: `Statut invalide. Valeurs : ${allowed.join(', ')}` });
+      }
+
+      const update: Record<string, unknown> = { updatedAt: new Date() };
+      if (status !== undefined) update.status = status;
+      if (expertNotes !== undefined) update.expertNotes = expertNotes;
+      if (scheduledAt !== undefined) update.scheduledAt = scheduledAt ? new Date(scheduledAt) : null;
+
+      const [updated] = await db.update(expertConsultations)
+        .set(update).where(eq(expertConsultations.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Consultation introuvable' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour consultation' });
+    }
+  });
+
+  // ========================================
+  // CLIENTS — Alias de client-accounts (compatibilité)
+  // ========================================
+
+  app.get('/api/admin/clients', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { search, limit, offset } = req.query;
+      const pagination = validatePagination(limit as string, offset as string);
+      if ('error' in pagination) return res.status(400).json({ error: pagination.error });
+
+      const conditions: SQL<unknown>[] = [];
+      if (search) {
+        const pattern = `%${sanitizeLikePattern(search as string)}%`;
+        conditions.push(or(
+          like(clientAccounts.email, pattern),
+          like(clientAccounts.name, pattern),
+        ) as SQL<unknown>);
+      }
+
+      let q = db.select().from(clientAccounts);
+      if (conditions.length > 0) q = q.where(and(...conditions)) as typeof q;
+      const data = await q.orderBy(desc(clientAccounts.createdAt)).limit(pagination.limit).offset(pagination.offset);
+
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(clientAccounts)
+        .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+      res.json({ data, total: count });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur liste clients' });
+    }
+  });
+
+  app.post('/api/admin/clients', requireAuth, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { email, name, company, phone, password } = req.body;
+      if (!email || !name || !password) {
+        return res.status(400).json({ error: 'email, name et password requis' });
+      }
+      const validation = validatePassword(password);
+      if (!validation.valid) return res.status(400).json({ error: validation.error ?? 'Mot de passe invalide' });
+
+      const [existing] = await db.select({ id: clientAccounts.id }).from(clientAccounts)
+        .where(eq(clientAccounts.email, email.toLowerCase())).limit(1);
+      if (existing) return res.status(409).json({ error: 'Un compte avec cet email existe déjà' });
+
+      const hashed = await hashPassword(password);
+      const [created] = await db.insert(clientAccounts).values({
+        email: email.toLowerCase().trim(), name: name.trim(),
+        company: company?.trim() ?? null, phone: phone?.trim() ?? null,
+        password: hashed, isActive: true,
+      }).returning({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name,
+                    company: clientAccounts.company, isActive: clientAccounts.isActive,
+                    createdAt: clientAccounts.createdAt });
+
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('Client create error:', error);
+      res.status(500).json({ error: 'Erreur création client' });
+    }
+  });
+
+  app.put('/api/admin/clients/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { name, company, phone, isActive, password } = req.body;
+
+      const update: Record<string, unknown> = {};
+      if (name !== undefined) update.name = name.trim();
+      if (company !== undefined) update.company = company?.trim() ?? null;
+      if (phone !== undefined) update.phone = phone?.trim() ?? null;
+      if (isActive !== undefined) update.isActive = Boolean(isActive);
+      if (password) {
+        const validation = validatePassword(password);
+        if (!validation.valid) return res.status(400).json({ error: validation.error ?? 'Mot de passe invalide' });
+        update.password = await hashPassword(password);
+      }
+
+      const [updated] = await db.update(clientAccounts)
+        .set(update).where(eq(clientAccounts.id, id))
+        .returning({ id: clientAccounts.id, email: clientAccounts.email, name: clientAccounts.name,
+                    company: clientAccounts.company, isActive: clientAccounts.isActive });
+      if (!updated) return res.status(404).json({ error: 'Client introuvable' });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur mise à jour client' });
+    }
+  });
+
+  app.delete('/api/admin/clients/:id', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await db.delete(clientAccounts).where(eq(clientAccounts.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur suppression client' });
+    }
+  });
 }
+
 

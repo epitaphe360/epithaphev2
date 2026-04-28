@@ -77,13 +77,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function SoireesDeGala() {
-  const { data } = useServicePage("evenements/soirees-de-gala", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("evenements/soirees-de-gala", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Soirées de Gala & Événements Prestige — Epitaphe 360"
-        description="Organisez des soirées d'exception qui célèbrent vos succès. Décors luxueux, scénographie sur mesure, hospitalité 3 étoiles."
+        title={seoTitle || "Soirées de Gala & Événements Prestige — Epitaphe 360"}
+        description={seoDescription || "Organisez des soirées d'exception qui célèbrent vos succès. Décors luxueux, scénographie sur mesure, hospitalité 3 étoiles."}
         canonicalPath="/evenements/soirees-de-gala"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

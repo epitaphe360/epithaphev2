@@ -1,5 +1,6 @@
 import { useSearch } from 'wouter';
 import { motion } from 'framer-motion';
+import { PageMeta } from '@/components/seo/page-meta';
 
 export default function PaiementEchec() {
   const search = useSearch();
@@ -17,6 +18,12 @@ export default function PaiementEchec() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6 py-20">
+      <PageMeta
+        title="Paiement non abouti"
+        description="Votre paiement n'a pas pu être finalisé. Aucun montant n'a été débité. Contactez notre équipe pour assistance."
+        canonicalPath="/paiement-echec"
+        noIndex
+      />
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

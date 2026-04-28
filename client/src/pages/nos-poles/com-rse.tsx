@@ -11,7 +11,7 @@ const fallbackData: ServicePageData = {
   heroTitle: "Communication RSE",
   heroSubtitle: "Transformez vos engagements sociétaux en avantage compétitif et renforcez la confiance de vos parties prenantes.",
   heroTag: "COM'RSE",
-  heroImage: "https://epitaphe.ma/wp-content/uploads/2020/05/marque-employeur.jpg",
+  heroImage: "https://version2.epitaphe.ma/wp-content/uploads/2025/11/marque-employeur-maroc-700x1012.jpg",
   heroCta: { label: "Valoriser ma démarche RSE", href: "/contact/brief" },
 
   pitchTitle: "76% des consommateurs préfèrent les marques engagées dans une démarche RSE",
@@ -78,13 +78,14 @@ const fallbackData: ServicePageData = {
 };
 
 export default function ComRse() {
-  const { data } = useServicePage("nos-poles/com-rse", fallbackData);
+  const { data, seoTitle, seoDescription, seoImage } = useServicePage("nos-poles/com-rse", fallbackData);
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
-        title="Communication RSE — COM'RSE | Epitaphe 360"
-        description="Valorisez vos engagements RSE avec des rapports d'impact, campagnes de sensibilisation et supports visuels sur mesure. Scoring ImpactTrace™ inclus."
+        title={seoTitle || "Communication RSE — COM'RSE | Epitaphe 360"}
+        description={seoDescription || "Valorisez vos engagements RSE avec des rapports d'impact, campagnes de sensibilisation et supports visuels sur mesure. Scoring ImpactTrace™ inclus."}
         canonicalPath="/nos-poles/com-rse"
+        ogImage={seoImage}
       />
       <Navigation />
       <Breadcrumbs />

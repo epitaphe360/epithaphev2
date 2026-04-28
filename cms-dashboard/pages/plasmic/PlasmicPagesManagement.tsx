@@ -6,6 +6,7 @@ import { Input } from "../../components/Input";
 import { Modal } from "../../components/Modal";
 import { Badge } from "../../components/Badge";
 import { Plus, Edit2, Trash2, Eye, Save, Code } from "lucide-react";
+import { useAuthStore } from "../../store/authStore";
 
 interface GrapesPageData {
   id: string;
@@ -15,6 +16,7 @@ interface GrapesPageData {
   css: string;
   status: "draft" | "published";
   lastModified: string;
+  template: string;
 }
 
 export default function VisualEditorManagement() {
@@ -22,25 +24,43 @@ export default function VisualEditorManagement() {
   const [pages, setPages] = useState<GrapesPageData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<GrapesPageData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     path: "",
     status: "draft" as "draft" | "published",
   });
+  const token = useAuthStore((s) => s.token);
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
 
   useEffect(() => {
     loadPages();
   }, []);
 
   const loadPages = async () => {
+    setIsLoading(true);
+    setLoadError(null);
     try {
-      const response = await fetch("/api/grapes/pages");
+      const response = await fetch("/api/grapes/pages", {
+        headers: { ...authHeader },
+      });
       if (response.ok) {
         const data = await response.json();
         setPages(data);
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        const message = (errData as { error?: string }).error
+          ?? `Erreur ${response.status}`;
+        setLoadError(message);
+        console.error("Erreur chargement pages:", response.status, message);
       }
     } catch (error) {
-      console.error("Erreur lors du chargement des pages:", error);
+      const message = "Erreur réseau lors du chargement des pages";
+      setLoadError(message);
+      console.error(message, error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,6 +78,7 @@ export default function VisualEditorManagement() {
         method,
         headers: {
           "Content-Type": "application/json",
+          ...authHeader,
         },
         body: JSON.stringify(formData),
       });
@@ -82,6 +103,7 @@ export default function VisualEditorManagement() {
     try {
       const response = await fetch(`/api/grapes/pages/${id}`, {
         method: "DELETE",
+        headers: { ...authHeader },
       });
 
       if (response.ok) {
@@ -157,14 +179,38 @@ export default function VisualEditorManagement() {
         </div>
       </Card>
 
+      {/* Erreur de chargement */}
+      {loadError && (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <span className="flex-1">⚠️ {loadError}</span>
+          <button
+            onClick={loadPages}
+            className="rounded bg-red-100 px-3 py-1 text-xs font-medium hover:bg-red-200 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
+
       {/* Liste des pages */}
       <Card>
         <div className="overflow-x-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
+              <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+              Chargement des pages…
+            </div>
+          ) : (
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Nom
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Type
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Chemin
@@ -183,7 +229,7 @@ export default function VisualEditorManagement() {
             <tbody className="bg-white divide-y divide-gray-200">
               {pages.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     Aucune page créée. Commencez par créer votre première page !
                   </td>
                 </tr>
@@ -192,6 +238,11 @@ export default function VisualEditorManagement() {
                   <tr key={page.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{page.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant={page.template === 'GRAPES_JS' ? 'purple' : page.template === 'SERVICE_PAGE' ? 'blue' : 'default'}>
+                        {page.template?.replace(/_/g, ' ') || 'DEFAULT'}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <code className="text-sm bg-gray-100 px-2 py-1 rounded">
@@ -221,7 +272,7 @@ export default function VisualEditorManagement() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open(page.path, "_blank")}
+                          onClick={() => window.open(`/${page.path}`, "_blank")}
                           title="Prévisualiser"
                         >
                           <Eye className="w-4 h-4" />
@@ -249,6 +300,7 @@ export default function VisualEditorManagement() {
               )}
             </tbody>
           </table>
+          )}
         </div>
       </Card>
 

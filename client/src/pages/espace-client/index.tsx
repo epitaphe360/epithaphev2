@@ -253,12 +253,11 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
               <button
                 type="button"
                 onClick={() => {
-                  // Redirection directe vers la page de login admin (évite le circuit-breaker DB)
-                  window.location.href = "/admin/login";
+                  window.location.href = "/admin";
                 }}
                 className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
               >
-                <Shield className="w-3.5 h-3.5" /> Connexion Admin
+                <Shield className="w-3.5 h-3.5" /> Dashboard Admin
               </button>
             </div>
           </div>}

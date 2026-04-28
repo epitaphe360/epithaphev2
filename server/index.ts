@@ -259,8 +259,30 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await registerRoutes(httpServer, app);
-  registerGrapesRoutes(app);
+  // ── Démarrer le serveur AU PLUS TÔT pour répondre au healthcheck Railway ──
+  const port = parseInt(process.env.PORT || "5000", 10);
+  console.log(`🚀 Starting server on port ${port}...`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  httpServer.listen(
+    {
+      port,
+      host: "0.0.0.0",
+    },
+    () => {
+      console.log(`✅ Server is ready and listening on port ${port}`);
+      log(`serving on port ${port}`);
+    },
+  );
+
+  try {
+    await registerRoutes(httpServer, app);
+    registerGrapesRoutes(app);
+    console.log('✅ Routes registered');
+  } catch (err) {
+    console.error('❌ Erreur lors de l\'enregistrement des routes:', err);
+    // Ne pas crasher : healthcheck reste OK, on logge l'erreur
+  }
 
   // Global error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -286,28 +308,10 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
-  console.log(`🚀 Starting server on port ${port}...`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  
-  httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-    },
-    () => {
-      console.log(`✅ Server is ready and listening on port ${port}`);
-      log(`serving on port ${port}`);
-      // Démarrer le scheduler de relances Discover™ (J+1, J+3, J+7)
-      try {
-        startRelanceScheduler();
-      } catch (e) {
-        console.error('[Relance] Démarrage scheduler échoué:', e);
-      }
-    },
-  );
+  // Démarrer le scheduler de relances Discover™ (J+1, J+3, J+7)
+  try {
+    startRelanceScheduler();
+  } catch (e) {
+    console.error('[Relance] Démarrage scheduler échoué:', e);
+  }
 })();

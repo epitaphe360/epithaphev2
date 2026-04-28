@@ -48,9 +48,14 @@ export function PushPermissionBanner() {
 
     // Récupérer la clé VAPID
     fetch("/api/push/vapid-public-key")
-      .then((r) => r.json())
-      .then((d) => {
-        setVapidKey(d.publicKey ?? null);
+      .then(async (r) => {
+        if (!r.ok) return null; // 503 → push non configuré
+        const d = await r.json();
+        return d?.publicKey ?? null;
+      })
+      .then((key) => {
+        if (!key) return; // pas de clé → on n'affiche pas le banner
+        setVapidKey(key);
         setShow(true);
       })
       .catch(() => {}); // Push non configuré, on ignore

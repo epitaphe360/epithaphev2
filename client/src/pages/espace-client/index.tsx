@@ -11,6 +11,7 @@ import {
   Fingerprint, BookOpen, Shield
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useAuthStore } from "../../../cms-dashboard/store/authStore";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -105,21 +106,38 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, getValues } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
   const [biometricLoading, setBiometricLoading] = useState(false);
   const [biometricError, setBiometricError] = useState("");
+  const adminLogin = useAuthStore((state) => state.login);
 
   const submit = handleSubmit(async (data) => {
     try {
+      // 1. Essai login client
       const res = await fetch("/api/client/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!res.ok) {
-        setError("password", { message: json.error ?? "Identifiants incorrects" });
+      if (res.ok) {
+        localStorage.setItem(TOKEN_KEY, json.token);
+        onLogin(json.token, json.client);
         return;
       }
-      localStorage.setItem(TOKEN_KEY, json.token);
-      onLogin(json.token, json.client);
+
+      // 2. Si échec, essai login admin → redirection dashboard
+      const adminRes = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const adminJson = await adminRes.json();
+      if (adminRes.ok && adminJson.token) {
+        // Connecter via le store Zustand CMS puis rediriger
+        adminLogin(adminJson.token, adminJson.user);
+        window.location.href = "/admin";
+        return;
+      }
+
+      setError("password", { message: json.error ?? "Identifiants incorrects" });
     } catch {
       setError("password", { message: "Erreur de connexion, réessayez" });
     }

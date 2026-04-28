@@ -2256,4 +2256,43 @@ Banque & Finance (Attijariwafa, CIH, BCP), Industrie & Énergie (OCP Group, ONEE
       return res.status(500).json({ error: "Erreur serveur" });
     }
   });
+
+  // ── Connexion rapide (dev + prod) — premier compte client actif ────────────
+  /**
+   * POST /api/dev/auto-login-client
+   * Connecte automatiquement le premier compte client actif trouvé en base.
+   * Utile pour les tests rapides sans avoir à saisir un mot de passe.
+   */
+  app.post("/api/dev/auto-login-client", async (req: Request, res: Response) => {
+    try {
+      const [account] = await db
+        .select()
+        .from(clientAccounts)
+        .where(eq(clientAccounts.isActive, true))
+        .limit(1);
+
+      if (!account) {
+        return res.status(404).json({ error: "Aucun compte client actif trouvé" });
+      }
+
+      const token = jwt.sign(
+        { clientId: account.id, email: account.email },
+        CLIENT_JWT_SECRET,
+        { expiresIn: CLIENT_JWT_EXPIRES }
+      );
+
+      return res.json({
+        token,
+        client: {
+          id: account.id,
+          name: account.name,
+          company: account.company,
+          email: account.email,
+        },
+      });
+    } catch (error) {
+      console.error("Auto login client error:", error);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  });
 }

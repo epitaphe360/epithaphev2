@@ -243,9 +243,9 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
           Pas encore de compte ? Contactez votre chargé de compte.
         </p>
 
-        {/* Boutons de test — connexion rapide (dev uniquement) */}
-        {import.meta.env.DEV && <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center mb-3 font-medium">🔧 Accès test (dev)</p>
+        {/* Boutons connexion rapide */}
+        <div className="mt-6 pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground text-center mb-3 font-medium">Accès rapide</p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -278,7 +278,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
                 <Shield className="w-3.5 h-3.5" /> Dashboard Admin
               </button>
             </div>
-          </div>}
+          </div>
       </motion.div>
     </div>
   );

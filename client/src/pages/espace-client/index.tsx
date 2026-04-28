@@ -252,25 +252,13 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  try {
-                    console.log("[dev] POST /api/dev/auto-login-admin");
-                    const res = await fetch("/api/dev/auto-login-admin", { method: "POST" });
-                    console.log("[dev] status:", res.status, res.statusText);
-                    const text = await res.text();
-                    console.log("[dev] body:", text);
-                    if (!res.ok) throw new Error(`HTTP ${res.status} — ${text}`);
-                    const json = JSON.parse(text);
-                    const authData = { state: { user: json.user, token: json.token, isAuthenticated: true, isLoading: false }, version: 0 };
-                    localStorage.setItem("cms-auth-storage", JSON.stringify(authData));
-                    window.location.href = "/admin";
-                  } catch (e: any) {
-                    console.error("[dev] auto-login-admin ERREUR:", e.message);
-                  }
+                onClick={() => {
+                  // Redirection directe vers la page de login admin (évite le circuit-breaker DB)
+                  window.location.href = "/admin/login";
                 }}
                 className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5"
               >
-                <Shield className="w-3.5 h-3.5" /> Admin Test
+                <Shield className="w-3.5 h-3.5" /> Connexion Admin
               </button>
             </div>
           </div>}

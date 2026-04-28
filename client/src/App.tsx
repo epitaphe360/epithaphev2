@@ -40,6 +40,38 @@ const BlogPage               = lazy(() => import("@/pages/blog"));
 const BlogArticlePage        = lazy(() => import("@/pages/blog-article"));
 const SolutionPage           = lazy(() => import("@/pages/solution"));
 
+// ── Pages statiques — toujours disponibles sans backend ─────────────────────
+const AProposPage            = lazy(() => import("@/pages/a-propos"));
+const FaqPage                = lazy(() => import("@/pages/faq"));
+const ContactPage            = lazy(() => import("@/pages/contact/index"));
+const RessourcesPage         = lazy(() => import("@/pages/ressources/index"));
+
+// Événements
+const EvenementsIndex        = lazy(() => import("@/pages/evenements/index"));
+const ConventionsKickoffs    = lazy(() => import("@/pages/evenements/conventions-kickoffs"));
+const Roadshows              = lazy(() => import("@/pages/evenements/roadshows"));
+const Salons                 = lazy(() => import("@/pages/evenements/salons"));
+const SoireesDeGala          = lazy(() => import("@/pages/evenements/soirees-de-gala"));
+
+// Architecture de Marque
+const ArchitectureDeMarque   = lazy(() => import("@/pages/architecture-de-marque/index"));
+const CommunicationQhse      = lazy(() => import("@/pages/architecture-de-marque/communication-qhse"));
+const ExperienceClients      = lazy(() => import("@/pages/architecture-de-marque/experience-clients"));
+const MarqueEmployeur        = lazy(() => import("@/pages/architecture-de-marque/marque-employeur"));
+
+// La Fabrique
+const LaFabriqueIndex        = lazy(() => import("@/pages/la-fabrique/index"));
+const Signaletique           = lazy(() => import("@/pages/la-fabrique/signaletique"));
+const Menuiserie             = lazy(() => import("@/pages/la-fabrique/menuiserie"));
+const Impression             = lazy(() => import("@/pages/la-fabrique/impression"));
+const BrandingSiege          = lazy(() => import("@/pages/la-fabrique/branding-siege"));
+const Amenagement            = lazy(() => import("@/pages/la-fabrique/amenagement"));
+
+// Nos Pôles
+const NosPolesIndex          = lazy(() => import("@/pages/nos-poles/index"));
+const ComInterne             = lazy(() => import("@/pages/nos-poles/com-interne"));
+const ComRse                 = lazy(() => import("@/pages/nos-poles/com-rse"));
+
 // ── Contact ─────────────────────────────────────────────────────────────────
 // /contact est géré par DynamicPage (sections en DB)
 // /contact/brief reste statique (formulaire interactif)
@@ -115,6 +147,38 @@ function Router() {
           <Route path="/blog" component={BlogPage} />
           <Route path="/blog/:slug" component={BlogArticlePage} />
           <Route path="/solutions/:slug" component={SolutionPage} />
+
+          {/* ── Pages statiques (toujours disponibles) ───────────── */}
+          <Route path="/a-propos" component={AProposPage} />
+          <Route path="/faq" component={FaqPage} />
+          <Route path="/contact" component={ContactPage} />
+          <Route path="/ressources" component={RessourcesPage} />
+
+          {/* ── Événements ────────────────────────────────────────── */}
+          <Route path="/evenements" component={EvenementsIndex} />
+          <Route path="/evenements/conventions-kickoffs" component={ConventionsKickoffs} />
+          <Route path="/evenements/roadshows" component={Roadshows} />
+          <Route path="/evenements/salons" component={Salons} />
+          <Route path="/evenements/soirees-de-gala" component={SoireesDeGala} />
+
+          {/* ── Architecture de Marque ────────────────────────────── */}
+          <Route path="/architecture-de-marque" component={ArchitectureDeMarque} />
+          <Route path="/architecture-de-marque/communication-qhse" component={CommunicationQhse} />
+          <Route path="/architecture-de-marque/experience-clients" component={ExperienceClients} />
+          <Route path="/architecture-de-marque/marque-employeur" component={MarqueEmployeur} />
+
+          {/* ── La Fabrique ───────────────────────────────────────── */}
+          <Route path="/la-fabrique" component={LaFabriqueIndex} />
+          <Route path="/la-fabrique/signaletique" component={Signaletique} />
+          <Route path="/la-fabrique/menuiserie" component={Menuiserie} />
+          <Route path="/la-fabrique/impression" component={Impression} />
+          <Route path="/la-fabrique/branding-siege" component={BrandingSiege} />
+          <Route path="/la-fabrique/amenagement" component={Amenagement} />
+
+          {/* ── Nos Pôles ─────────────────────────────────────────── */}
+          <Route path="/nos-poles" component={NosPolesIndex} />
+          <Route path="/nos-poles/com-interne" component={ComInterne} />
+          <Route path="/nos-poles/com-rse" component={ComRse} />
 
           {/* ── Contact brief (statique, formulaire interactif) ─── */}
           <Route path="/contact/brief" component={BriefPage} />

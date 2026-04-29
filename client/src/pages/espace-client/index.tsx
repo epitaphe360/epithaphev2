@@ -11,8 +11,15 @@ import {
   Fingerprint, BookOpen, Shield
 } from "lucide-react";
 import { useLocation } from "wouter";
-import { useAuthStore } from "../../../cms-dashboard/store/authStore";
 import { startAuthentication } from "@simplewebauthn/browser";
+
+/** Stocke le token admin dans le localStorage (format Zustand persist du CMS) */
+function setAdminAuthInStore(token: string, user: unknown) {
+  const raw = localStorage.getItem('cms-auth-storage');
+  const existing = raw ? JSON.parse(raw) : { state: {}, version: 0 };
+  existing.state = { token, user, isAuthenticated: true, isLoading: false };
+  localStorage.setItem('cms-auth-storage', JSON.stringify(existing));
+}
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { PageMeta } from "@/components/seo/page-meta";
@@ -106,7 +113,6 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, getValues } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
   const [biometricLoading, setBiometricLoading] = useState(false);
   const [biometricError, setBiometricError] = useState("");
-  const adminLogin = useAuthStore((state) => state.login);
 
   const submit = handleSubmit(async (data) => {
     try {
@@ -132,7 +138,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string, client: ClientInfo)
       const adminJson = await adminRes.json();
       if (adminRes.ok && adminJson.token) {
         // Connecter via le store Zustand CMS puis rediriger
-        adminLogin(adminJson.token, adminJson.user);
+        setAdminAuthInStore(adminJson.token, adminJson.user);
         window.location.href = "/admin";
         return;
       }
